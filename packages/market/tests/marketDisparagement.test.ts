@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
+  checkGuardedTexts,
+  createDisparagementGuard,
+  normalizeForFilter as coreNormalizeForFilter,
+  NAME_TOKEN_MIN,
+} from '../../core/shared/disparagementGuard'
+import {
   MARKET_NAME_TOKEN_MIN,
   checkMarketTexts,
   createMarketDisparagementGuard,
@@ -7,217 +13,55 @@ import {
 } from '../shared/marketDisparagement'
 
 /**
- * DER § 6 UWG-RIEGEL (Plan §2.9 Nr. 5) — mit GEGENPROBE an jeder Stelle.
+ * DIE HÜLLE ÜBER DEM § 6 UWG-RIEGEL (BI1 I1a).
  *
- * Ein Filter, der nur zeigt, dass er etwas fängt, sagt nichts: er könnte
- * ALLES fangen und wäre dann kein Filter, sondern ein Aus-Schalter. Jede
- * Prüfung hier hat deshalb ein Paar — ein Satz, der fällt, und einer, der
- * stehen bleiben MUSS.
+ * Die REGEL selbst wird in `core/tests/disparagementGuard.test.ts` geprüft —
+ * dort stehen alle Gegenproben, unverändert mitgezogen. Hier steht die andere
+ * Frage: reicht `shared/marketDisparagement.ts` sie unter den MARKT-Namen
+ * wirklich weiter? Ohne diesen Beweis wäre ein Tippfehler im Re-Export eine
+ * Datei, die zwar baut, aber einen zweiten (leeren) Riegel anbietet.
+ *
+ * Geprüft wird deshalb die IDENTITÄT der Bindungen und dass der Riegel unter
+ * den alten Namen beisst — mit Gegenprobe, sonst wäre auch ein Aus-Schalter
+ * grün.
  */
 
 const KANDIDATEN = [
   { name: 'Pacific Bean Supply', url: 'https://pacificbean.example/' },
   { name: 'Upcountry Roast Co.', url: 'https://www.upcountry-roast.example/' },
-  { name: 'Müller Rösterei GmbH', url: 'https://mueller-roesterei.de/' },
 ]
 
-const guard = createMarketDisparagementGuard(KANDIDATEN)
-
-describe('normalizeForFilter', () => {
-  it('zieht Umlaut und Umschreibung auf DIESELBE Form', () => {
-    expect(normalizeForFilter('Müller')).toBe(normalizeForFilter('Mueller'))
-    expect(normalizeForFilter('Grösse')).toBe(normalizeForFilter('Groesse'))
-    expect(normalizeForFilter('Café')).toBe('cafe')
+describe('marketDisparagement reicht den core-Riegel weiter', () => {
+  it('exportiert DIESELBEN Bindungen, nicht Kopien', () => {
+    expect(createMarketDisparagementGuard).toBe(createDisparagementGuard)
+    expect(checkMarketTexts).toBe(checkGuardedTexts)
+    expect(normalizeForFilter).toBe(coreNormalizeForFilter)
+    expect(MARKET_NAME_TOKEN_MIN).toBe(NAME_TOKEN_MIN)
   })
 
-  it('macht aus Satzzeichen Trenner, nicht Buchstaben', () => {
-    expect(normalizeForFilter('Upcountry-Roast, Co.')).toBe('upcountry roast co')
-  })
-})
-
-describe('Wettbewerber-Namen', () => {
-  /**
-   * WELCHER GRUND gemeldet wird, ist zweitrangig — verworfen ist verworfen.
-   * Ein Name, der auch als Domain-Label vorkommt (`pacificbean.example`),
-   * schlägt zuerst dort an; der Zähler im Log trennt die beiden Wege, das
-   * Ergebnis für den Kunden ist dasselbe. Nur wo GENAU EIN Weg feuern kann,
-   * steht hier ein exakter Grund.
-   */
-  it('fängt den vollen Namen', () => {
-    expect(guard.check('Schreibt es anders als Pacific Bean Supply.')).not.toBeNull()
-  })
-
-  it('fängt ein Namens-TEIL ab vier Zeichen', () => {
-    // „Pacific" allein macht den Dritten erkennbar.
+  it('beisst unter den alten Namen — Name, Domain, Herabsetzung', () => {
+    const guard = createMarketDisparagementGuard(KANDIDATEN)
     expect(guard.check('Anders als Pacific klingt eure Zeile konkreter.')).toBe('competitor_name')
-    expect(guard.check('Upcountry sagt dasselbe.')).toBe('competitor_name')
-  })
-
-  it('fängt einen Namen mit Umlaut auch in der Umschreibung', () => {
-    // Beides muss fallen — sonst wäre der Filter mit einer Tastatur-
-    // Umschreibung zu umgehen.
-    expect(guard.check('Anders als Mueller Roesterei.')).not.toBeNull()
-    expect(guard.check('Anders als Müller Rösterei.')).not.toBeNull()
-    // Der reine NAME ohne Domain-Entsprechung: hier kann nur der Namensweg
-    // feuern, also steht der Grund exakt da.
-    expect(guard.check('Anders als Rösterei Müller.')).not.toBeNull()
-  })
-
-  it('fängt den zusammengezogenen Namen (Hashtag, Adresszeile)', () => {
-    expect(guard.check('Nicht wie PacificBean.')).not.toBeNull()
-    // Ein Name OHNE Domain-Entsprechung, zusammengezogen — nur der Namensweg.
-    const nurName = createMarketDisparagementGuard([{ name: 'Kailua Coffee' }])
-    expect(nurName.check('Nicht wie KailuaCoffee klingen.')).toBe('competitor_name')
-  })
-
-  it('GEGENPROBE: kurze Teile unter der Schwelle sperren nichts', () => {
-    // `Co.` ist zwei Zeichen und steht in KEINER Sperrliste-Position; ein Satz
-    // mit „Co" muss durchgehen, sonst fiele jede Firmenbezeichnung.
-    expect(MARKET_NAME_TOKEN_MIN).toBe(4)
-    expect(guard.check('Sagt, was ihr Co Working besonders macht.')).toBeNull()
-  })
-
-  it('GEGENPROBE: Rechtsformen identifizieren niemanden', () => {
-    expect(guard.check('Nennt eure GmbH nicht in der ersten Zeile.')).toBeNull()
-  })
-
-  /**
-   * DIE NACHSCHÄRFUNG AUS MV1 M4 (Befund aus M3, Plan Anhang D).
-   *
-   * Bis M3 sperrte JEDES Namens-Token ab vier Zeichen. Für „Pacific Bean
-   * Supply" hiess das: `supply` war in jedem Vorschlag verboten, und in der
-   * Kaffee-Welt `coffee` — also ausgerechnet das Wort, um das es geht. Der
-   * Riegel verwarf damit systematisch die brauchbarsten Befunde.
-   *
-   * Neue Regel: gesperrt sind der volle Name, die Domain und die
-   * UNTERSCHEIDENDEN Tokens. Generische Kategorie- und Branchenwörter sind es
-   * nicht — und die eigenen bestätigten Texte des Kunden auch nicht.
-   */
-  it('lässt generische Branchenwörter aus einem Namen durch (M4)', () => {
-    // `supply` steht in der generischen Liste; der Name selbst bleibt gesperrt.
-    expect(guard.check('Die Supply chain ist nicht euer Thema.')).toBeNull()
-    expect(guard.check('Schreibt es anders als Pacific Bean Supply.')).not.toBeNull()
-  })
-
-  it('sperrt „Kailua", lässt „coffee" (M4, der Anlass-Fall)', () => {
-    const kaffee = createMarketDisparagementGuard([{ name: 'Kailua Coffee' }])
-    expect(kaffee.check('Sagt, wie euer coffee geröstet wird.')).toBeNull()
-    expect(kaffee.check('Anders als Kailua klingt eure Zeile konkreter.')).toBe('competitor_name')
-    expect(kaffee.check('Nicht wie Kailua Coffee klingen.')).toBe('competitor_name')
-  })
-
-  it('ein EIN-WORT-Name bleibt gesperrt, auch wenn er kurz ist (M4)', () => {
-    const nike = createMarketDisparagementGuard([{ name: 'Nike' }])
-    expect(nike.check('Sagt es klarer als Nike.')).toBe('competitor_name')
-  })
-
-  it('die eigenen bestätigten Texte entschärfen die Sperre (M4)', () => {
-    const ohne = createMarketDisparagementGuard([{ name: 'Bergwerk Studio' }])
-    // Ohne eigene Texte ist `bergwerk` unterscheidend — und gesperrt.
-    expect(ohne.check('Euer Bergwerk-Vergleich trägt nicht.')).toBe('competitor_name')
-
-    // GEGENPROBE: sagt der Kunde selbst „Bergwerk" über seine Kategorie, ist
-    // das Wort keine Kennzeichnung eines Dritten mehr.
-    const mit = createMarketDisparagementGuard([{ name: 'Bergwerk Studio' }], {
-      ownTexts: ['Wir bauen Marken für das Bergwerk von morgen.'],
-    })
-    expect(mit.check('Euer Bergwerk-Vergleich trägt nicht.')).toBeNull()
-    // Der volle Name bleibt trotzdem gesperrt.
-    expect(mit.check('Anders als Bergwerk Studio.')).toBe('competitor_name')
-  })
-
-  it('GEGENPROBE: ein harmloser Vorschlag bleibt stehen', () => {
-    expect(guard.check(
-      'Setzt die Wochentags-Lieferung in den ersten Satz der Startseite.',
-    )).toBeNull()
-  })
-})
-
-describe('Domains', () => {
-  it('fängt die volle Domain', () => {
     expect(guard.check('Siehe pacificbean.example für den Vergleich.')).toBe('competitor_domain')
-  })
-
-  it('fängt ein Domain-LABEL ohne Endung', () => {
-    expect(guard.check('Der Auftritt von upcountry-roast ist anders gebaut.'))
-      .toBe('competitor_domain')
-  })
-
-  it('fängt die Domain trotz www davor', () => {
-    expect(guard.check('www.upcountry-roast.example zeigt es.')).toBe('competitor_domain')
-  })
-
-  it('GEGENPROBE: die Endung allein sperrt nicht', () => {
-    // Wäre `example` gesperrt, fiele jeder Satz mit „zum Beispiel" im
-    // englischen Text — und `.de` sperrte die halbe Sprache.
-    expect(guard.check('For example, name the weekday in your first line.')).toBeNull()
-  })
-})
-
-describe('Herabsetzung', () => {
-  it('fängt deutsche Ausdrücke', () => {
     expect(guard.check('Die anderen wirken veraltet.')).toBe('disparagement')
-    expect(guard.check('Das ist reine Abzocke.')).toBe('disparagement')
   })
 
-  it('fängt englische Ausdrücke', () => {
-    expect(guard.check('Their sites are cheap and outdated.')).toBe('disparagement')
-    expect(guard.check('Anything beats these inferior offers.')).toBe('disparagement')
-  })
-
-  it('schlägt den Namens-Treffer, wenn ein Satz beides ist', () => {
-    // Die schärfere Meldung gewinnt — sie ist der schwerere Vorwurf.
-    expect(guard.check('Pacific ist schlecht gemacht.')).toBe('disparagement')
-  })
-
-  it('GEGENPROBE: eine sachliche Beschreibung bleibt stehen', () => {
-    expect(guard.check(
-      'Zwei andere im Feld sagen dasselbe mit eigenen Worten.',
-    )).toBeNull()
-    expect(guard.check(
-      'Two other sites in the field make the same promise.',
-    )).toBeNull()
-  })
-})
-
-describe('checkMarketTexts', () => {
-  it('nimmt den GANZEN Befund, wenn EIN Teil fällt', () => {
-    // Der Vorschlag ist der Satz, den der Kunde am Ende verwendet — ein Befund
-    // mit gestrichenem Vorschlag wäre ein halber Befund.
-    expect(checkMarketTexts(guard, [
-      'Euer Satz klingt wie zwei andere im Feld.',
-      'Grenzt euch von Pacific ab.',
-    ])).toBe('competitor_name')
-  })
-
-  it('lässt einen sauberen Befund durch — beide Teile', () => {
+  it('GEGENPROBE: ein sauberer Befund bleibt stehen — beide Teile', () => {
+    const guard = createMarketDisparagementGuard(KANDIDATEN)
     expect(checkMarketTexts(guard, [
       'Euer Satz klingt wie zwei andere im Feld.',
       'Schärft ihn mit dem Teil, den nur ihr macht.',
     ])).toBeNull()
   })
 
-  it('überspringt leere Teile, statt an ihnen zu scheitern', () => {
-    expect(checkMarketTexts(guard, ['', undefined, 'Alles in Ordnung hier.'])).toBeNull()
-  })
-})
-
-describe('die Sperrliste selbst', () => {
-  it('enthält keine Endungen und keine Rechtsformen', () => {
-    expect(guard.nameTokens.has('gmbh')).toBe(false)
-    expect(guard.domainTokens.has('example')).toBe(false)
-    expect(guard.domainTokens.has('de')).toBe(false)
-  })
-
-  it('enthält die Namen und Domains, die es geben soll', () => {
-    expect(guard.nameTokens.has('pacific')).toBe(true)
-    expect(guard.domainTokens.has('pacificbean example')).toBe(true)
-  })
-
-  it('ist LEER ohne Kandidaten — dann fängt nur die Wortliste', () => {
-    const leer = createMarketDisparagementGuard([])
-    expect(leer.nameTokens.size).toBe(0)
-    expect(leer.check('Pacific Bean Supply sagt das auch.')).toBeNull()
-    expect(leer.check('Das ist billig gemacht.')).toBe('disparagement')
+  it('die eigenen bestätigten Foundation-Texte entschärfen die Sperre (M4)', () => {
+    // Der Layer entscheidet, WELCHE Felder das sind — das Fundament kennt nur
+    // Zeichenketten. Dass die Ausnahme durch die Hülle reicht, gehört hierher.
+    const ohne = createMarketDisparagementGuard([{ name: 'Bergwerk Studio' }])
+    expect(ohne.check('Euer Bergwerk-Vergleich trägt nicht.')).toBe('competitor_name')
+    const mit = createMarketDisparagementGuard([{ name: 'Bergwerk Studio' }], {
+      ownTexts: ['Wir bauen Marken für das Bergwerk von morgen.'],
+    })
+    expect(mit.check('Euer Bergwerk-Vergleich trägt nicht.')).toBeNull()
   })
 })
