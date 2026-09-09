@@ -1,7 +1,7 @@
 /**
  * Migration brand-022: DIE FREISCHALTUNG VON BRAND DESIGN —
  * `brand_profiles.designUnlockedAt` + `designUnlockedBy`
- * (docs/plans/BRAND-DESIGN.md §2.10/§2.11, Paket D1).
+ * (docs/archiv/BRAND-DESIGN.md §2.10/§2.11, Paket D1).
  *
  * NUMMER: 021 (`brand-intro-requests`) war der letzte Stand auf `origin/main`
  * und in jedem Arbeitsbaum (2026-09-08 geprüft); 022 ist die nächste freie.

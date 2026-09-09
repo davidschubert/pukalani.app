@@ -20,7 +20,7 @@ import {
 } from '../../../../utils/demoDesign'
 
 /**
- * KAPITEL „MOODBOARD" (Konzept docs/plans/BRAND-DESIGN.md §2.2, Prototyp-
+ * KAPITEL „MOODBOARD" (Konzept docs/archiv/BRAND-DESIGN.md §2.2, Prototyp-
  * Screen 1) — Visual DNA, drei Boards nebeneinander, Mix & Match.
  *
  * DIE DREI SESSIONS STEHEN UNTEREINANDER auf EINER Bühne und nicht als

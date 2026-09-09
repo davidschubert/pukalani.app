@@ -1105,7 +1105,7 @@ export interface BrandWaitlistNoteResponse {
   ok: true
 }
 
-// ── Brand Design: das Preset (docs/plans/BRAND-DESIGN.md §2.8, Paket D0) ────
+// ── Brand Design: das Preset (docs/archiv/BRAND-DESIGN.md §2.8, Paket D0) ────
 
 /**
  * DIE ELF STUFEN EINER RAMPE — dieselben wie in der Themes-Engine.

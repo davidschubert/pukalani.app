@@ -215,7 +215,7 @@ export const BRAND_FOUNDATION_STEP_KEYS = [
 
 /**
  * SCHICHT 2 — die sechs Kapitel von Brand Design (Konzept
- * docs/plans/BRAND-DESIGN.md §2.1, Paket D0), ADDITIV hinter der Foundation.
+ * docs/archiv/BRAND-DESIGN.md §2.1, Paket D0), ADDITIV hinter der Foundation.
  *
  * Die Ids sind so unveränderlich wie die der Foundation: sie stehen in
  * `brand_steps.stepKey` und in der Adresse der Werkstatt (`/brand/:id/dna`).

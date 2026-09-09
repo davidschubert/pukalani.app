@@ -11,7 +11,7 @@ import { brandSlotValueView, formatBrandSlotList, formatBrandSlotStructured } fr
 
 /**
  * DIE BEWEGUNG — die REGELN von Kapitel 6, pur (Konzept
- * docs/plans/BRAND-DESIGN.md §2.7, Paket D7).
+ * docs/archiv/BRAND-DESIGN.md §2.7, Paket D7).
  *
  * ── VIER SESSIONS, EINE DATEI, WEIL SIE EINE KETTE SIND ───────────────────
  * `l.tempo` ist die EINE Entscheidung; `l.transitions` rechnet daraus den

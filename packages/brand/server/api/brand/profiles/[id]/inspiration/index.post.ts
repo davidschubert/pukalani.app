@@ -16,7 +16,7 @@ import {
 } from '../../../../../utils/brandInspirationStore'
 
 /**
- * EIN VORBILD HOCHLADEN (Konzept docs/plans/BRAND-DESIGN.md §2.2 Schritt 2,
+ * EIN VORBILD HOCHLADEN (Konzept docs/archiv/BRAND-DESIGN.md §2.2 Schritt 2,
  * Paket D2a) — multipart, EIN Bild je Aufruf.
  *
  * ── EIN BILD JE AUFRUF, OBWOHL DER WÄHLER MEHRERE NIMMT ───────────────────

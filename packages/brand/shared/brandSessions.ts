@@ -6,6 +6,7 @@ import {
   BRAND_STEP_KEYS,
   type BrandInvariant,
   type BrandSessionConfig,
+  type BrandSessionKind,
   type BrandSessionSubstance,
   type BrandSlotStateFacts,
   type BrandStepKey,
@@ -569,6 +570,30 @@ export function nextCollectPart(
   collected: Readonly<Record<string, string | undefined>> = {},
 ): string | null {
   return config.parts.find(part => !collected[part]?.trim()) ?? null
+}
+
+/**
+ * DARF DER BROWSER DIESE ANTWORT ALS FELDWERT SCHREIBEN? (Kailua-Befund 4,
+ * 2026-09-08)
+ *
+ * Für jede Session heisst die Antwort ja: der getippte Text IST der Entwurf,
+ * der Autosave schreibt ihn, und George reagiert darauf. Für die SAMMEL-Session
+ * heisst sie nein — und das ist keine Ausnahme dieser Regel, sondern die
+ * Kehrseite der einen Ausnahme, die die Konversations-Route ohnehin schon hat:
+ * dort und nur dort entsteht der Wert im SERVER, aus allen Teilen zusammen
+ * (`nextCollectPart` oben, `formatBrandSlotStructured` in `converse.post.ts`).
+ *
+ * ── WAS OHNE DIESE REGEL PASSIERT (gemessen, erster Kailua-Lauf) ──────────
+ * Die Antwort auf den ERSTEN Teil („wie gross ist das Team") landete als
+ * `latestDraft` von `a.facts`. Damit galt das Feld als gefüllt, die Bühne
+ * verliess das Sammel-Modul, und die Antworten auf Teil zwei und drei waren
+ * für den Browser „freie Fragen" ohne Feld. Der Server sammelte sie brav
+ * weiter, legte am Ende den vollständigen Wert ab — und der nächste Autosave
+ * überschrieb ihn wieder mit dem Rohtext von Teil eins. Auf der Karte stand
+ * genau ein Fakt von dreien.
+ */
+export function brandAnswerWritesSlot(session: { kind: BrandSessionKind } | null | undefined): boolean {
+  return Boolean(session) && session!.kind !== 'collect'
 }
 
 /**

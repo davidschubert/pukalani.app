@@ -11,7 +11,7 @@ import {
 
 /**
  * DAS PRESET EINER MARKE — AUS DER WAHRHEIT, NICHT AUS EINEM SPIEGEL (Konzept
- * docs/plans/BRAND-DESIGN.md §2.8, Paket D8).
+ * docs/archiv/BRAND-DESIGN.md §2.8, Paket D8).
  *
  * ── ES WIRD NIRGENDS GESPEICHERT ──────────────────────────────────────────
  * Dieselbe Regel wie bei `buildBrandFoundation`: das Preset entsteht bei jedem

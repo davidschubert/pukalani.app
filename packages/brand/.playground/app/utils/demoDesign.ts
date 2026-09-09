@@ -1,6 +1,6 @@
 /**
  * KLICKDUMMY „BRAND DESIGN" (Produkt 02, Phase 3 zum Konzept
- * docs/plans/BRAND-DESIGN.md §2.15) — statische Demo-Daten für die sechs
+ * docs/archiv/BRAND-DESIGN.md §2.15) — statische Demo-Daten für die sechs
  * Werkstatt-Kapitel Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache
  * · Bewegung (Kapitel-Namen nach §2.19 Frage 3).
  *

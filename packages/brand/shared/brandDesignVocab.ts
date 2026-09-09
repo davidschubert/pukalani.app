@@ -1,6 +1,6 @@
 /**
  * DIE VOKABULARE VON BRAND DESIGN — die kontrollierten Mengen, aus denen
- * Schicht 2 ihre Werte nimmt (Konzept docs/plans/BRAND-DESIGN.md §2.2–§2.7,
+ * Schicht 2 ihre Werte nimmt (Konzept docs/archiv/BRAND-DESIGN.md §2.2–§2.7,
  * Paket D0).
  *
  * ── WARUM ES SIE GIBT ─────────────────────────────────────────────────────

@@ -14,6 +14,7 @@ import {
   brandStepCompletion,
   canEnterBrandStep,
   conditionalInputCounts,
+  firstOpenBrandStep,
   includedBrandSteps,
   pickNextSession,
   resolveBrandJourney,
@@ -967,6 +968,39 @@ describe('resolveSessionStates (§5)', () => {
     expect(slotById('g.dna')!.inputs.slots).toContain('g.reading')
   })
 
+  /**
+   * DIESELBE WIRKUNG EIN KAPITEL FRÜHER (Audit-Befund 2026-09-09, Test-Lücke):
+   * `d.primary`/`d.secondary` hängen an `d.pairs`, und das ist ein
+   * `special`-Slot — das Paarvergleichs-Instrument gibt es nicht, also wird
+   * `d.pairs` nie bestätigt (Davids Interim-Entscheidung 2026-09-04). Ohne die
+   * Regel „warte nicht auf eine Quelle, die nie bestätigt werden kann" stünde
+   * der halbe Archetyp-Baustein für immer zu.
+   *
+   * Sie greift hier NICHT als Freibrief: die Kette geht durch das Instrument
+   * HINDURCH auf dessen eigene Quelle `d.hypothesis` — die Gegenprobe unten
+   * hält genau das fest.
+   */
+  it('das Instrument reicht durch: mit `d.hypothesis` sind `d.primary` und `d.secondary` offen', () => {
+    const confirmed = { hasValue: true, confirmed: true, value: 'x' }
+    const states = resolveSessionStates(BASE_PROFILE, stepFacts({ 'd.hypothesis': confirmed }))
+    expect(states['d.primary']).toBe('open')
+    expect(states['d.secondary']).toBe('open')
+    // Das Instrument selbst bleibt in der Kette — sonst verlöre der
+    // Impact-Hinweis seinen Weg.
+    expect(slotById('d.primary')!.inputs.slots).toEqual(['d.pairs'])
+    expect(slotById('d.pairs')!.type).toBe('special')
+  })
+
+  it('GEGENPROBE: ohne `d.hypothesis` bleiben beide `locked`', () => {
+    const states = resolveSessionStates(BASE_PROFILE, stepFacts({}))
+    expect(states['d.primary']).toBe('locked')
+    expect(states['d.secondary']).toBe('locked')
+    // Auch ein blosser ENTWURF der Hypothese reicht nicht — bestätigt muss sie
+    // sein, sonst leitete der Archetyp aus einem Vorschlag ab.
+    const draftOnly = stepFacts({ 'd.hypothesis': { hasValue: true } })
+    expect(resolveSessionStates(BASE_PROFILE, draftOnly)['d.primary']).toBe('locked')
+  })
+
   it('die bedingte Quelle ist eine EIGENE Regel, prüfbar ohne die Zustandsmaschine', () => {
     expect(conditionalInputCounts('g.reading', {})).toBe(true)
     expect(conditionalInputCounts('g.reading', {
@@ -1460,5 +1494,50 @@ describe('brandRestartImpact — was ein Neustart kostet', () => {
       && BRAND_STEP_KEYS.indexOf(slotById(id)!.stepId) > BRAND_STEP_KEYS.indexOf('values'))
     expect([...brandRestartImpact('values', allConfirmed).sessions].sort())
       .toEqual(expected.sort())
+  })
+})
+
+/**
+ * WOHIN NACH DER ANLAGE (Kailua-Befund 6, 2026-09-08).
+ *
+ * Zwei Oberflächen legen an (Modal und Seite) und müssen an derselben Stelle
+ * landen — die Regel ist deshalb pur und wird von beiden gelesen.
+ */
+describe('firstOpenBrandStep', () => {
+  function step(stepKey: BrandStepKey, state: BrandJourneyStep['state']): BrandJourneyStep {
+    return {
+      stepKey,
+      state,
+      reason: null,
+      optional: false,
+      progress: { requiredTotal: 0, requiredFilled: 0, pct: 0 },
+      missingRequired: [],
+      confidence: null,
+    }
+  }
+
+  it('nimmt den ersten offenen Baustein', () => {
+    expect(firstOpenBrandStep([
+      step('context', 'open'),
+      step('pvm', 'locked'),
+    ])).toBe('context')
+  })
+
+  it('ein bereits begonnener (`active`) zählt genauso', () => {
+    expect(firstOpenBrandStep([
+      step('context', 'done'),
+      step('pvm', 'active'),
+    ])).toBe('pvm')
+  })
+
+  it('ÜBERSPRUNGENE sind keine Adresse — die Route antwortet dort 403', () => {
+    expect(firstOpenBrandStep([
+      step('architecture', 'skipped'),
+      step('context', 'locked'),
+    ])).toBe('context')
+  })
+
+  it('ohne Journey bleibt der erste Baustein — er ist nie übersprungen', () => {
+    expect(firstOpenBrandStep([])).toBe('context')
   })
 })

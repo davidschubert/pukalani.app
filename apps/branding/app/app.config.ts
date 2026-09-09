@@ -2,7 +2,7 @@ export default defineAppConfig({
   // App-spezifische Overrides (tiefer Merge, App > Layer > Core).
   pukalani: {
     /**
-     * BILDER LESEN (Brand Design, Vorbilder-Lesung — docs/plans/BRAND-DESIGN.md
+     * BILDER LESEN (Brand Design, Vorbilder-Lesung — docs/archiv/BRAND-DESIGN.md
      * §2.2/§2.12): das Vision-Modell ist Davids Entscheidung vom 2026-09-08
      * (DECISION-LOG). Nur hier gesetzt, weil branding.supply der einzige
      * Konsument ist; der Core-Default bleibt leer (= aus). Der ZDR-Filter

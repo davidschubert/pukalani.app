@@ -4,7 +4,7 @@ import { DS_BRAND, DS_CHAPTERS, dsChapterPath } from '../../../../utils/demoDesi
 import { demoRailWithDesign } from '../../../../utils/demoRail'
 
 /**
- * DAS ERGEBNIS-BOARD ALS EIGENE ANSICHT (Konzept docs/plans/BRAND-DESIGN.md
+ * DAS ERGEBNIS-BOARD ALS EIGENE ANSICHT (Konzept docs/archiv/BRAND-DESIGN.md
  * §2.8, Davids Entscheidung 2026-09-08) — die künftige Route
  * `/brand/:id/design`: LESEN, nicht entscheiden.
  *

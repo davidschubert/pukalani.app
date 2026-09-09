@@ -1,5 +1,5 @@
 /**
- * DIE VERTRÄGE DER VORSCHAU-SZENE (Konzept docs/plans/BRAND-DESIGN.md §2.9,
+ * DIE VERTRÄGE DER VORSCHAU-SZENE (Konzept docs/archiv/BRAND-DESIGN.md §2.9,
  * Paket D2c) — die Props von `BwDesignScene` und die zwei Bauhelfer daneben.
  *
  * ── WARUM DIE PROPS-TYPEN NEBEN DER KOMPONENTE WOHNEN ─────────────────────

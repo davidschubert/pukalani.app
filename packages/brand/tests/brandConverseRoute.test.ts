@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { H3Event } from 'h3'
 import { confirmableRequiredSlotsForStep, slotById } from '../shared/slotRegistry'
+import { brandSlotPromptLabel } from '../server/utils/brandSlotPromptLabels'
 import {
   type BrandGenerationEvent,
   decodeBrandGenerationChunk,
@@ -73,6 +74,11 @@ let messageQueries: string[][]
 let sessionProbeRows: FakeRow[]
 /** Antwort der Existenz-Prüfung „hat dieses Kapitel schon eine Nachricht?". */
 let stepProbeRows: FakeRow[]
+/**
+ * Was die Kapitel-Antworten-Abfrage liefert (converse-12): die Antworten des
+ * MENSCHEN im ganzen Kapitel, ABSTEIGEND — wie die Route fragt.
+ */
+let chapterAnswerRows: FakeRow[]
 /** Was auf `brand_steps` geschrieben wurde (Sammel-Session, s. dort). */
 let stepWrites: Record<string, unknown>[]
 /** Welchen Baustein die Route sieht — `getRouterParam('stepKey')`. */
@@ -94,12 +100,15 @@ const tablesDB = {
   listRows: vi.fn(async ({ tableId, queries }: { tableId: string, queries?: unknown[] }) => {
     if (tableId === 'brand_steps') return { rows: stepRows }
     if (tableId === 'brand_messages') {
-      // Drei Abfragen teilen sich diese Tabelle, und sie sind an ihrer FORM zu
-      // unterscheiden: die Existenz-Prüfung der Session filtert auf `role`,
-      // die des Kapitels sortiert nicht, der Verlauf sortiert absteigend.
+      // VIER Abfragen teilen sich diese Tabelle, und sie sind an ihrer FORM zu
+      // unterscheiden: die Kapitel-Antworten (converse-12) filtern auf `role`
+      // UND sortieren absteigend, die Existenz-Prüfung der Session filtert nur
+      // auf `role`, die des Kapitels sortiert nicht, der Verlauf sortiert
+      // absteigend ohne Rollen-Filter.
       const asText = (queries ?? []).map(query => String(query))
       messageQueries.push(asText)
       const joined = asText.join(' ')
+      if (joined.includes('"role"') && joined.includes('orderDesc')) return { rows: chapterAnswerRows }
       if (joined.includes('"role"')) return { rows: sessionProbeRows }
       if (!joined.includes('orderDesc')) return { rows: stepProbeRows }
       return { rows: historyRows }
@@ -240,6 +249,7 @@ beforeEach(() => {
   messageQueries = []
   sessionProbeRows = []
   stepProbeRows = []
+  chapterAnswerRows = []
   stepWrites = []
   findingRows = []
   routeStepKey = 'context'
@@ -836,7 +846,10 @@ describe('Die Session eines Zuges', () => {
  */
 describe('Der Verlaufs-Filter', () => {
   function historyQuery(): string {
-    return (messageQueries.find(query => query.join(' ').includes('orderDesc')) ?? []).join(' ')
+    // Seit converse-12 sortiert auch die Kapitel-Antworten-Abfrage absteigend —
+    // sie ist am Rollen-Filter zu unterscheiden.
+    return (messageQueries.find(query =>
+      query.join(' ').includes('orderDesc') && !query.join(' ').includes('"role"')) ?? []).join(' ')
   }
 
   it('die ERSTE Session des Kapitels liest auch den Kapitel-Verlauf von vorher mit', async () => {
@@ -858,6 +871,149 @@ describe('Der Verlaufs-Filter', () => {
     // Der leere Schlüssel gehört NUR der ersten Session — sonst sähe jede
     // Session denselben alten Kapitel-Faden.
     expect(query).not.toMatch(/"values":\["",/)
+  })
+})
+
+/**
+ * DIE BEANTWORTETEN FRAGEN DES GANZEN KAPITELS (converse-12, Kailua-Befund 7 —
+ * Davids Entscheidung 2026-09-08).
+ *
+ * Der Verlaufs-Schnitt oben BLEIBT. Daneben liest die Route einmal je Zug, was
+ * die ANDEREN Sessions dieses Kapitels schon beantwortet haben — sonst stellte
+ * George deren Fragen ein zweites Mal, weil sie für ihn nie stattgefunden
+ * hatten.
+ */
+describe('Die Kapitel-Antworten im Prompt', () => {
+  function answersQuery(): string[] {
+    return messageQueries.find(query =>
+      query.join(' ').includes('orderDesc') && query.join(' ').includes('"role"')) ?? []
+  }
+
+  beforeEach(() => {
+    chapterAnswerRows = [
+      { $id: 'm9', sessionKey: 'a.complaints', role: 'user', body: 'Dass die Lieferung mal spät kommt.' },
+      { $id: 'm7', sessionKey: 'a.origin', role: 'user', body: 'Wir haben 2019 in einer Garage angefangen.' },
+    ]
+  })
+
+  it('liest EINMAL je Zug, gefiltert auf den Menschen und mit ausdrücklichem Limit', async () => {
+    const { event } = fakeEvent()
+    await handler(event)
+
+    const matches = messageQueries.filter(query =>
+      query.join(' ').includes('orderDesc') && query.join(' ').includes('"role"'))
+    expect(matches).toHaveLength(1)
+    const query = answersQuery().join(' ')
+    expect(query).toContain('"values":["user"]')
+    // „Immer explizites Query.limit()" — ohne ihn entschiede der Zufall der
+    // Sortierung, WELCHE fünfundzwanzig Zeilen der Zug sieht.
+    expect(query).toMatch(/"method":"limit"/)
+  })
+
+  it('stehen als eigener Block, mit der Beschriftung ihrer Frage', async () => {
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('[questions already answered in this chapter, in earlier sessions]')
+    // Beschriftet wie überall: die FRAGE aus dem Katalog, nie die interne Id
+    // (converse-2 — George sprach die Ids sonst wortwörtlich nach).
+    const label = brandSlotPromptLabel('a.complaints', 'de', 'new', 'solo')
+    expect(label).not.toBe('a.complaints')
+    expect(lastPrompt).toContain(`[${label}]`)
+    expect(lastPrompt).toContain('Wir haben 2019 in einer Garage angefangen.')
+    expect(lastPrompt).toContain('Dass die Lieferung mal spät kommt.')
+    expect(lastPrompt).not.toContain('[a.complaints]')
+  })
+
+  /**
+   * DIE EIGENE SESSION FÄLLT RAUS — sonst stünde derselbe Satz zweimal im
+   * Prompt: einmal als Verlauf, einmal als „schon beantwortet".
+   */
+  it('lässt die laufende Session weg', async () => {
+    chapterAnswerRows = [
+      { $id: 'm9', sessionKey: 'a.customerPraise', role: 'user', body: 'Dass wir jede Röstung erklären.' },
+      { $id: 'm7', sessionKey: 'a.origin', role: 'user', body: 'Wir haben 2019 angefangen — in einer Garage.' },
+    ]
+    body = { ...body, sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('Wir haben 2019 angefangen — in einer Garage.')
+    expect(lastPrompt).not.toContain('Dass wir jede Röstung erklären.')
+  })
+
+  /**
+   * DER ERÖFFNUNGSZUG BEKOMMT SIE EBENFALLS, und zwar mit Absicht: eine
+   * frische Session hat KEINEN eigenen Verlauf (er ist auf sie geschnitten),
+   * und ihr erster Satz ist damit der wahrscheinlichste Ort, an dem eine
+   * längst beantwortete Frage wieder aufgemacht wird.
+   */
+  it('reisen auch im ERÖFFNUNGSZUG mit', async () => {
+    body = { opening: true, sessionKey: 'a.complaints' }
+    chapterAnswerRows = [
+      { $id: 'm7', sessionKey: 'a.origin', role: 'user', body: 'Wir haben 2019 angefangen.' },
+    ]
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('TASK: OPEN the next session')
+    expect(lastPrompt).toContain('[questions already answered in this chapter, in earlier sessions]')
+    expect(lastPrompt).toContain('DO NOT RE-OPEN WHAT IS SETTLED')
+  })
+
+  it('LEER heisst KEIN BLOCK', async () => {
+    chapterAnswerRows = []
+    const { event } = fakeEvent()
+    await handler(event)
+    // Der BLOCK, nicht der Satz aus dem Auftrag — der nennt ihn ohnehin.
+    expect(lastPrompt).not.toContain('[questions already answered')
+  })
+
+  /**
+   * OHNE SESSION KEIN LESEZUGRIFF: dann liest der Verlauf ohnehin kapitelweit,
+   * und die Liste wäre dieselbe Auskunft ein zweites Mal.
+   */
+  it('GEGENPROBE: ohne laufende Session wird gar nicht gelesen', async () => {
+    // Alle Pflicht-Felder bestätigt ⇒ keine Session mehr dran (freie Frage).
+    stepRow.slots = JSON.stringify(Object.fromEntries(
+      confirmableRequiredSlotsForStep('context').map(slot => [slot.id, { confirmed: 'steht' }]),
+    ))
+    body = { text: 'Und was heißt eigentlich Positionierung?' }
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(answersQuery()).toEqual([])
+    expect(lastPrompt).not.toContain('[questions already answered')
+  })
+})
+
+/**
+ * EINE ENTWURFS-SESSION SCHLIESST AUF SICH SELBST (converse-12, Kailua-Befund
+ * 5 — Davids „Weg B", Nebenbefund).
+ *
+ * Gemessen war: Session `a.pitch` (Ableitung, keine Katalog-Frage), und der
+ * Zug schloss trotzdem mit der Frage von `a.origin` — dem Feld, auf dem
+ * niemand sass.
+ */
+describe('Der Abschluss einer Entwurfs-Session', () => {
+  it('nennt das eigene Feld und den Knopf — nie die Frage eines fremden', async () => {
+    body = { text: 'Wir rösten in kleinen Mengen.', sessionKey: 'a.pitch' }
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('THE FIELD THEY ARE SITTING ON IS NOT A QUESTION')
+    expect(lastPrompt).toContain('never close with a question that belongs to a different field')
+    expect(lastPrompt).toContain('George, entwirf das')
+    expect(lastPrompt).not.toContain('Ask it IN YOUR OWN WORDS')
+  })
+
+  it('GEGENPROBE: eine Frage-Session schliesst unverändert mit ihrer Frage', async () => {
+    body = { ...body, sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('Ask it IN YOUR OWN WORDS')
+    expect(lastPrompt).not.toContain('THE FIELD THEY ARE SITTING ON IS NOT A QUESTION')
   })
 })
 

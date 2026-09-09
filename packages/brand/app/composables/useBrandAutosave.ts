@@ -25,10 +25,17 @@ import type { BrandStepDetailResponse, BrandStepSaveResponse } from '../../share
  * Konflikt als 200 mit Sonder-Rumpf zu beantworten — dann wäre eine Ablehnung
  * keine Ablehnung mehr.
  *
- * ── EIN LAUF ZUR ZEIT ─────────────────────────────────────────────────────
+ * ── EIN LAUF ZUR ZEIT — UND `await flush()` HEISST „DRAUSSEN" ─────────────
  * Zwei gleichzeitige PATCH desselben Bausteins erzeugten einen 409 GEGEN SICH
  * SELBST (der zweite trägt die `revision` von vor dem ersten). Läuft schon
- * einer, wird der nächste gemerkt und danach nachgeholt.
+ * einer, wartet der nächste ihn AB und holt danach nach, was übrig ist.
+ *
+ * Bis zum Kailua-Lauf merkte er sich den zweiten nur (`rerun`) und kehrte
+ * SOFORT um — `await autosave.flush()` war damit an allen zwölf Aufrufstellen
+ * eine Lüge: „Bestätigen" (`setSlotConfirmed` + `flush`), „erst speichern, dann
+ * reden" und jeder Kapitelwechsel liefen weiter, während die Eingabe noch im
+ * Store lag. Der nachgeholte Lauf kam dann 750 ms später — mitten in einen
+ * Gesprächszug hinein, der inzwischen die `revision` gedreht hatte.
  */
 
 /** §3e: „Autosave ~750 ms nach letzter Änderung". */
@@ -38,8 +45,17 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
   const store = useBrandWorkspaceStore()
 
   let timer: ReturnType<typeof setTimeout> | undefined
-  let running = false
-  let rerun = false
+  /** Der LAUFENDE Speichervorgang — `flush()` wartet ihn ab (s. Kopf). */
+  let inflight: Promise<void> | null = null
+  /**
+   * WIE OFT EIN 409 SCHON STILL AUFGELÖST WURDE (Kailua-Befund 2).
+   *
+   * Ein stiller Konflikt endet mit „nochmal senden". Dreht die `revision` auf
+   * dem Server jedes Mal aufs Neue (zwei Tabs, ein hängender Gesprächszug),
+   * liefe das für immer — also gilt ab dem vierten Anlauf wieder der Dialog.
+   * Der Zähler fällt bei jedem geglückten Speichern.
+   */
+  let silentConflicts = 0
   /**
    * WIE OFT DER LETZTE VERSUCH SCHEITERTE (2026-09-03, Davids Live-Fund):
    * der `error`-Zustand SAGTE „wir versuchen es erneut", aber nichts
@@ -66,19 +82,28 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
     timer = setTimeout(() => { void flush() }, BRAND_AUTOSAVE_DELAY_MS)
   }
 
-  async function loadConflictVersion(id: string): Promise<void> {
-    if (!store.stepKey) return
+  /**
+   * @returns `true`, wenn der Konflikt still aufgelöst wurde und die eigene
+   * Eingabe erneut gesendet werden darf (s. `store.applyConflict`).
+   */
+  async function loadConflictVersion(id: string): Promise<boolean> {
+    if (!store.stepKey) return false
+    silentConflicts += 1
+    const force = silentConflicts > 3
     try {
       const detail = await $fetch<BrandStepDetailResponse>(
         `/api/brand/profiles/${id}/steps/${store.stepKey}`,
       )
-      store.applyConflict({ revision: detail.revision, slots: detail.slots })
+      return store.applyConflict({ revision: detail.revision, slots: detail.slots }, force)
     }
     catch {
       // Die Serverfassung ist nicht lesbar — der Konflikt gilt trotzdem, und
       // zwar mit dem, was wir haben. Alles andere hiesse: nach einem
-      // gescheiterten Nachschlag doch überschreiben.
-      store.applyConflict({ revision: store.revision, slots: store.serverSlots })
+      // gescheiterten Nachschlag doch überschreiben. Und weil wir hier nichts
+      // Neues wissen, ist ein stilles Wiedersenden ausgeschlossen: es liefe mit
+      // derselben `revision` in denselben 409.
+      store.applyConflict({ revision: store.revision, slots: store.serverSlots }, true)
+      return false
     }
   }
 
@@ -86,13 +111,36 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
     return typeof navigator !== 'undefined' && navigator.onLine === false
   }
 
-  /** Sofort speichern (Blur, Navigation, Bestätigen). */
+  /**
+   * Sofort speichern (Blur, Navigation, Bestätigen) — und ZURÜCKKEHREN, wenn
+   * wirklich nichts mehr offen ist (s. Kopf „ein Lauf zur Zeit").
+   */
   async function flush(): Promise<void> {
     cancel()
     if (import.meta.server) return
-    if (running) { rerun = true; return }
+
+    // Läuft schon einer: abwarten. Danach kann alles erledigt sein (der Lauf
+    // hat unsere Änderung mitgenommen) — sonst wird nachgelegt. Der Deckel
+    // schützt vor einem Ping-Pong zweier Aufrufer; was dann noch offen ist,
+    // holt der nächste Tick.
+    for (let waited = 0; inflight && waited < 3; waited += 1) {
+      await inflight.catch(() => {})
+      if (!store.hasPendingWork) return
+    }
+    if (inflight) return
     if (!store.stepKey || !store.autosaveAllowed || !store.hasPendingWork) return
 
+    const run = save()
+    inflight = run
+    try {
+      await run
+    }
+    finally {
+      if (inflight === run) inflight = null
+    }
+  }
+
+  async function save(): Promise<void> {
     const id = toValue(profileId)
     // Der ABGESCHICKTE Wert wird festgehalten: die Antwort trägt keine
     // Konfidenz, und nur wer weiss, was er gesendet hat, kann sie hinterher
@@ -109,7 +157,6 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
       ...(store.pendingImpactAck ? { impactAck: store.pendingImpactAck } : {}),
     }
 
-    running = true
     store.mark('start')
     try {
       const response = await $fetch<BrandStepSaveResponse>(
@@ -118,6 +165,7 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
       )
       store.applySaveResponse(response, sentConfidence)
       errorRetries = 0
+      silentConflicts = 0
     }
     catch (error) {
       const status = (error as { status?: number, statusCode?: number }).status
@@ -188,7 +236,10 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
         else store.mark('ok')
       }
       else if (status === 409 || reason === 'revision_conflict') {
-        await loadConflictVersion(id)
+        // STILL AUFGELÖST heisst: die neue Fassung ist übernommen, die eigene
+        // Eingabe steht noch — sie muss jetzt raus. Ohne dieses Nachlegen
+        // bliebe sie liegen, bis jemand wieder tippt (Kailua-Befund 2/3).
+        if (await loadConflictVersion(id)) schedule()
       }
       else if (status === null || isOffline()) {
         // Kein HTTP-Status heisst: die Anfrage hat den Server nie erreicht.
@@ -209,13 +260,19 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
           cancel()
           timer = setTimeout(() => { void flush() }, Math.min(4_000 * 2 ** (errorRetries - 1), 60_000))
         }
-      }
-    }
-    finally {
-      running = false
-      if (rerun) {
-        rerun = false
-        schedule()
+        else {
+          /**
+           * ENDGÜLTIG VERWORFEN (Kailua-Befund 3) — und deshalb wird es GESAGT.
+           *
+           * Hier landet jedes Nein, das nicht wiederkommt: ein 400 mit
+           * unbekanntem Grund, ein 403 (`step_locked`), ein 413. Bis hierher
+           * blieb die Bestätigungs-ABSICHT im Store stehen — der Zähler zeigte
+           * sie weiter als bestätigt, obwohl der Server nichts davon hatte
+           * (10/10 auf dem Schirm, 1/10 in der Datenbank). Jetzt fällt sie, und
+           * die SEITE macht aus dem Grund einen Satz.
+           */
+          store.rejectSave(reason ?? `http_${status}`)
+        }
       }
     }
   }

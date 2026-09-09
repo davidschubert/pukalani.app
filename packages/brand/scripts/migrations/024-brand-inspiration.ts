@@ -1,6 +1,6 @@
 /**
  * Migration brand-024: DIE VORBILDER — Tabelle `brand_inspiration` und Bucket
- * `brand-inspiration` (docs/plans/BRAND-DESIGN.md §2.2 Schritt 2 / §2.11,
+ * `brand-inspiration` (docs/archiv/BRAND-DESIGN.md §2.2 Schritt 2 / §2.11,
  * Paket D2a).
  *
  * NUMMER: 022 (`brand-design-unlock`) war der letzte Stand in diesem

@@ -462,7 +462,7 @@ export const demoRail: BwRailLayer[] = [
 ]
 
 /**
- * DIE RAIL DER SCHICHT 2 (Brand Design, Konzept docs/plans/BRAND-DESIGN.md
+ * DIE RAIL DER SCHICHT 2 (Brand Design, Konzept docs/archiv/BRAND-DESIGN.md
  * §2.1 und Screen 8 aus §2.15).
  *
  * Der Layer „Brand Design" oben in dieser Datei ist der GESPERRTE Zustand —

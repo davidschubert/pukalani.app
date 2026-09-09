@@ -98,6 +98,12 @@ export interface BrandAiQuotaRequest {
  * aus und wäre falsch — zwischen Zählung und Beleg liegen hier drei `await`,
  * und in dieser Lücke zählten drei gleichzeitige Anfragen alle dieselbe Null.
  * `countActiveBrandGenerations()` enthält deshalb den eigenen Lauf bereits.
+ *
+ * DIESER SATZ WAR EINE ZEIT LANG FALSCH (Audit-Befund 2026-09-09): er galt nur
+ * für den Entwurf und das Gespräch, während die vier Läufe von Brand Design
+ * (Vorbilder lesen, DNA vorschlagen, Zeichen-Briefing, Zeichen-Entwürfe)
+ * daneben standen — ausgerechnet die teuersten. Jetzt halten ihn alle sechs;
+ * eine neue Route, die hier bucht, gehört ebenfalls dazu.
  */
 export interface BrandAiQuotaRejection {
   code: BrandAiRejectionCode

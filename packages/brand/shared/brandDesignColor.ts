@@ -25,7 +25,7 @@ import { BRAND_RAMP_SHADES, type BrandColorRole, type BrandContrastPair, type Br
 
 /**
  * DIE FARBWELT — die REGELN von Kapitel 2, pur (Konzept
- * docs/plans/BRAND-DESIGN.md §2.3, Paket D3).
+ * docs/archiv/BRAND-DESIGN.md §2.3, Paket D3).
  *
  * ── SECHS SESSIONS, EINE DATEI, WEIL SIE EINE KETTE SIND ──────────────────
  * `h.base` ist die EINZIGE Entscheidung mit einer Farbe darin; `h.ramp`,

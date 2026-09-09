@@ -3,6 +3,7 @@ import {
   BRAND_SOURCES_HASH_SCOPE,
   BRAND_SUBSTANCE_MIN_WORDS,
   applyAffected,
+  brandAnswerWritesSlot,
   brandListEntries,
   computeSourcesHash,
   confirmedDependents,
@@ -795,5 +796,35 @@ describe('brandListEntries — jede Schreibweise derselben Aufzählung (§3a Nr.
         invariant: { kind: 'count', min: 3, max: 5 },
       })
     }
+  })
+})
+
+/**
+ * WER SCHREIBT DEN WERT (Kailua-Befund 4, 2026-09-08).
+ *
+ * Der Live-Lauf zeigte in „Zahlen & Fakten" genau EINEN von drei Fakten: der
+ * Browser hatte die Antwort auf den ersten Teil als Feldwert geschrieben, damit
+ * galt das Feld als gefüllt, und die Bühne verliess das Sammel-Modul.
+ */
+describe('brandAnswerWritesSlot', () => {
+  it('die SAMMEL-Session gehört dem Server — der Browser schreibt nicht', () => {
+    expect(brandAnswerWritesSlot({ kind: 'collect' })).toBe(false)
+  })
+
+  it('jede andere Session schreibt der Browser wie bisher', () => {
+    for (const kind of ['ask', 'choose', 'derive', 'draft', 'instrument'] as const) {
+      expect(brandAnswerWritesSlot({ kind })).toBe(true)
+    }
+  })
+
+  it('ohne Session gibt es nichts zu schreiben (freie Frage)', () => {
+    expect(brandAnswerWritesSlot(null)).toBe(false)
+    expect(brandAnswerWritesSlot(undefined)).toBe(false)
+  })
+
+  it('GEGENPROBE: `a.facts` IST die Sammel-Session der Registry', () => {
+    // Ohne diese Zeile wäre der Test grün, auch wenn `a.facts` je auf eine
+    // andere Arbeitsform kippte — und der Befund käme zurück.
+    expect(brandAnswerWritesSlot(slotById('a.facts'))).toBe(false)
   })
 })

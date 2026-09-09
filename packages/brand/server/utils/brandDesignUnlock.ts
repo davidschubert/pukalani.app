@@ -18,7 +18,7 @@ import {
 
 /**
  * DIE FREISCHALTUNG VON BRAND DESIGN — DIE BETREIBER-SEITE (Konzept
- * docs/plans/BRAND-DESIGN.md §2.10, Paket D1).
+ * docs/archiv/BRAND-DESIGN.md §2.10, Paket D1).
  *
  * ── WARUM DAS EINE BETREIBER-HANDLUNG IST ─────────────────────────────────
  * Das Geschäftsmodell der ersten Fassung ist STUDIO-BEGLEITET (§1.11 d): kein

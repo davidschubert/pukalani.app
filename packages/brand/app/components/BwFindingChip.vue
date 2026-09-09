@@ -233,20 +233,20 @@ async function confirmDismiss(): Promise<void> {
           :ui="{ content: 'bw-root bw-overlay' }"
         >
           <UButton
-            size="xs" color="neutral" variant="ghost" class="rounded-full"
+            size="sm" color="neutral" variant="ghost" class="bw-chip-action rounded-full"
             icon="i-ph-check" :label="t('brand.finding.accept')"
             :disabled="busy" :aria-label="t('brand.finding.acceptWhich')"
           />
         </UDropdownMenu>
         <UButton
           v-else
-          size="xs" color="neutral" variant="ghost" class="rounded-full"
+          size="sm" color="neutral" variant="ghost" class="bw-chip-action rounded-full"
           icon="i-ph-check" :label="t('brand.finding.accept')"
           :disabled="busy"
           @click="accept(targets[0]?.slotId ?? null)"
         />
         <UButton
-          size="xs" color="neutral" variant="ghost" class="rounded-full"
+          size="sm" color="neutral" variant="ghost" class="bw-chip-action rounded-full"
           icon="i-ph-x" :label="t('brand.finding.dismiss')"
           :disabled="busy"
           @click="openDismiss"

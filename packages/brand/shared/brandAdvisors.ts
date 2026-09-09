@@ -13,7 +13,7 @@ import type { BrandStepKey } from './slotRegistry'
  *
  * ── DIE ZWEITE STIMME: FRIDA, AB SCHICHT 2 (Brand Design D0) ──────────────
  * Die Eine-Stimme-Regel gilt INNERHALB der Foundation und bleibt unangetastet.
- * Brand Design (Konzept docs/plans/BRAND-DESIGN.md §2.1) ist aber keine Phase
+ * Brand Design (Konzept docs/archiv/BRAND-DESIGN.md §2.1) ist aber keine Phase
  * derselben Sitzung, sondern ein eigenes, extra freigeschaltetes Produkt mit
  * eigener Beraterin — `BRAND_DESIGN_VOICE`. `advisorIsVoice()` ist die eine
  * Stelle, die „spricht selbst" beantwortet; ein `key !== 'george'` an den

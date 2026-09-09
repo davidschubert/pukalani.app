@@ -4,7 +4,7 @@ import { loadOwnedProfile, loadStepRows, requireProfileIdParam } from '../../../
 
 /**
  * DAS ERGEBNIS-BOARD (`GET /api/brand/profiles/:id/design`, Konzept
- * docs/plans/BRAND-DESIGN.md §2.8, Paket D8).
+ * docs/archiv/BRAND-DESIGN.md §2.8, Paket D8).
  *
  * ── SIE LIEST EIN PRESET UND SONST NICHTS ────────────────────────────────
  * Zwei Abfragen (Profil, Kapitel-Zeilen) plus die behaltenen Entwürfe. Kein

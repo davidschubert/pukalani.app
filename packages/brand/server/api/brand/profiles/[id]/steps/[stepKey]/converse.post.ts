@@ -26,6 +26,7 @@ import {
   type BrandSlotStateFacts,
   isBrandDesignStep,
   slotById,
+  slotIsConfirmable,
   slotsForStep,
 } from '../../../../../../../shared/slotRegistry'
 import type {
@@ -58,6 +59,7 @@ import {
 import {
   hasBrandSessionAdvisorTurn,
   hasBrandStepMessage,
+  loadBrandChapterAnswers,
   loadBrandConversationHistory,
 } from '../../../../../../utils/brandConversationHistory'
 import {
@@ -390,6 +392,32 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
   const history = await loadBrandConversationHistory(event, profile.$id, stepKey, session?.id, stepRow.restartedAt)
 
   /**
+   * WAS DIE ANDEREN SESSIONS DIESES KAPITELS SCHON BEANTWORTET HABEN
+   * (converse-12, Kailua-Befund 7 — Davids Entscheidung 2026-09-08).
+   *
+   * EIN Lesezugriff je Zug, direkt neben dem Verlauf: der ist auf die Session
+   * geschnitten (brand-011, bleibt so), und ohne diesen zweiten Blick fragte
+   * George eine Frage aus einer früheren Session desselben Kapitels erneut.
+   * Beschriftet wird HIER — die Beschriftung braucht Inhaltssprache, Pfad und
+   * Team-Weiche, und die kennt nur die Route (`brandSlotPromptLabel`).
+   */
+  const chapterAnswers = (await loadBrandChapterAnswers(
+    event,
+    profile.$id,
+    stepKey,
+    session?.id,
+    stepRow.restartedAt,
+  )).map(entry => ({
+    label: brandSlotPromptLabel(
+      entry.sessionKey,
+      profile.contentLocale,
+      profileFacts(profile).pathKind,
+      profileFacts(profile).team,
+    ),
+    answer: entry.answer,
+  }))
+
+  /**
    * DIE SAMMEL-SESSION SCHREIBT (die eine Ausnahme, s. Kopf).
    *
    * Der Zwischenstand steht in `slots[id].collected` — Teil-Id → Antwort. Was
@@ -691,6 +719,26 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
      */
     const brief = await collectBrief()
 
+    /**
+     * DIE ENTWURFS-SESSION, auf die der Zug schliesst (converse-12) — die
+     * Beschriftung ist die der Bühne, in der Inhaltssprache wie jede andere
+     * Feld-Beschriftung im Prompt. `null` heisst „normaler Abschluss".
+     */
+    const sessionRecord = session ? currentRecords[session.id] : undefined
+    const draftFieldLabel = session
+      && session.type !== 'question'
+      && session.type !== 'choice'
+      && slotIsConfirmable(session)
+      && !brandSlotRecordConfirmed(sessionRecord)
+      && (brandSlotStoredValue(sessionRecord).length > 0 || session.generator !== 'none')
+      ? brandSlotPromptLabel(
+          session.id,
+          profile.contentLocale,
+          profileFacts(profile).pathKind,
+          profileFacts(profile).team,
+        )
+      : ''
+
     const prompt = brandConversePrompt(
       {
         hasNextQuestion: Boolean(next),
@@ -707,6 +755,19 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
           uiLocale,
           (isBrandDesignStep(stepKey) ? BRAND_DESIGN_VOICE : BRAND_VOICE).name,
         ),
+        /**
+         * SITZT DER MENSCH AUF EINER ENTWURFS-SESSION? (converse-12,
+         * Kailua-Befund 5 — Davids „Weg B").
+         *
+         * Dann schliesst der Zug auf DIESEM Feld und nicht mit der Katalog-
+         * Frage eines anderen. Die Bedingung ist wörtlich die der Bühne
+         * (`brandStageClaim`, shared/brandStageModule.ts): keine Katalog-
+         * Frage, bestätigbar, noch nicht bestätigt — und entweder steht schon
+         * ein Entwurf da oder es gibt einen Knopf, der einen erzeugt. Zwei
+         * verschiedene Antworten auf „was zeigt die Bühne gerade" wären genau
+         * der Nebenbefund, der diese Runde ausgelöst hat.
+         */
+        ...(draftFieldLabel ? { draftField: draftFieldLabel } : {}),
         session: sessionOptions,
         ...(brief ? { brief: brief.options } : {}),
         ...(body.opening ? { opening: true, chapterIntro } : {}),
@@ -741,6 +802,11 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
           profileFacts(profile).team,
         ),
         history,
+        // Leer heisst KEIN BLOCK (s. `formatBrandConverseInputs`) — die Liste
+        // reist auch beim ERÖFFNUNGSZUG mit: dort hat die frische Session
+        // keinen eigenen Verlauf, und genau dort wiederholt sich am ehesten
+        // eine längst beantwortete Frage.
+        ...(chapterAnswers.length ? { chapterAnswers } : {}),
         answeredQuestion: body.question ?? '',
         text,
         nextQuestion,

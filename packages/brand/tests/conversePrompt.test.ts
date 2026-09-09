@@ -4,6 +4,8 @@ import { GEORGE_TURN_MARKERS } from '../server/utils/georgeTurn'
 // Gespräch und Entwurf klemmen denselben Zug gleich.
 import { BRAND_CONVERSE_HISTORY_CHARS } from '../server/utils/georgePrompt'
 import {
+  BRAND_CHAPTER_ANSWER_CHARS,
+  BRAND_CHAPTER_ANSWERS_MAX,
   BRAND_CONVERSE_PROMPT_VERSION,
   BRAND_CONVERSE_QUESTION_MAX,
   BRAND_CONVERSE_TEXT_MAX,
@@ -51,6 +53,7 @@ function inputsFor(overrides: Partial<BrandConverseInputsOptions> = {}): BrandCo
     text: overrides.text ?? 'Weil uns der Kaffee hier zu langweilig war.',
     nextQuestion: overrides.nextQuestion ?? '',
     ...(overrides.collected ? { collected: overrides.collected } : {}),
+    ...(overrides.chapterAnswers ? { chapterAnswers: overrides.chapterAnswers } : {}),
   }
 }
 
@@ -126,15 +129,18 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     expect(instruction).not.toMatch(/press "/)
   })
 
-  it('die Fassung steigt mit — converse-11', () => {
+  it('die Fassung steigt mit — converse-12', () => {
     // Ohne den Anstieg behaupteten Züge aus converse-3, aus diesem Auftrag zu
     // stammen (dieselbe Regel wie bei GEORGE_PROMPT_VERSION). converse-6 war
     // der Session-Block (BW2 Paket 3a); converse-7 die Gegenlese-Runde
     // (Paket 2b); converse-8 ist der „hat mitgelesen"-Block (Paket 4);
     // converse-9 der Eröffnungszug einer VERALTETEN Session (Paket 6, §9);
     // converse-10 der Markt-Block (MV1 M3); converse-11 das Verbot der
-    // Eintrags-Behauptung samt Verweis auf den Entwurfs-Knopf (Befund 8).
-    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-11')
+    // Eintrags-Behauptung samt Verweis auf den Entwurfs-Knopf (Befund 8);
+    // converse-12 die Kapitel-Antworten im Rumpf, der Abschluss am
+    // Entwurfs-Knopf und die eigene Frage einer Entwurfs-Session
+    // (Kailua-Befunde 5 und 7).
+    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-12')
   })
 
   it('würdigt Substanz — aber verbietet das Lob ohne Deckung', () => {
@@ -214,7 +220,7 @@ describe('Die nächste Frage gehört der Registry', () => {
     expect(instruction).not.toMatch(/Ask it IN YOUR OWN WORDS/)
   })
 
-  it('OHNE Frage, ABER offene Felder (converse-3): nie „fertig" behaupten, erstes Feld vorantreiben', () => {
+  it('OHNE Frage, ABER offene Felder (converse-3): nie „fertig" behaupten', () => {
     // Davids Live-Fund (Krume-Archetyp): auf „was ist noch offen?" behauptete
     // George „nichts mehr", während vier Ableitungs-Felder unbestätigt waren —
     // der alte Zweig kannte nur Frage/keine Frage.
@@ -226,10 +232,76 @@ describe('Die nächste Frage gehört der Registry', () => {
     expect(instruction).toMatch(/THERE ARE NO MORE CATALOG QUESTIONS/)
     expect(instruction).toMatch(/Archetyp-Hypothese · Primärer Archetyp/)
     expect(instruction).toMatch(/Never claim the chapter is done/)
-    expect(instruction).toMatch(/moving the FIRST of those fields forward/)
     // Und keinesfalls die Abschluss-Einladung des leeren Zweigs.
     expect(instruction).not.toMatch(/THERE IS NO OPEN QUESTION LEFT/)
     expect(instruction).not.toMatch(/invite them\s+to confirm/)
+  })
+
+  /**
+   * DER ZWEIG ZEIGT AUF DEN KNOPF, NICHT INS GESPRÄCH (converse-12,
+   * Kailua-Befund 5).
+   *
+   * Bis converse-11 stand hier „bring das erste dieser Felder voran" — und
+   * genau das kann ein Gesprächszug nicht: er schreibt kein Feld (converse-11
+   * verbietet ihm sogar, es zu behaupten). Der Mensch bekam Zug um Zug einen
+   * Vorschlag und sah sein Feld leer bleiben. Die Zusage ist jetzt, dass der
+   * Zug den EINEN Ort benennt, an dem das Feld entsteht — mit dem Namen des
+   * Knopfes, wenn er vorliegt.
+   */
+  it('converse-12: der Zweig ohne Katalog-Frage nennt den Entwurfs-Knopf', () => {
+    const instruction = brandConverseInstruction({
+      hasNextQuestion: false,
+      nextQuestionKnown: false,
+      openFieldLabels: ['Archetyp-Hypothese', 'Primärer Archetyp'],
+      draftButton: 'Frida, entwirf das',
+    })
+    expect(instruction).toMatch(/Close your turn on the FIRST of those fields/)
+    expect(instruction).toMatch(/press "Frida, entwirf das" next to this conversation/)
+    // Die zweite Hälfte: das Hinweis-Feld daneben ist Teil desselben Moduls.
+    expect(instruction).toMatch(/line next to that button/)
+    // Und die Bremse gegen die alte Erwartung.
+    expect(instruction).toMatch(/never leave the impression that the field fills itself by talking/)
+    expect(instruction).not.toMatch(/moving the FIRST of those fields forward/)
+  })
+
+  it('converse-12: ohne Knopfnamen bleibt der Zweig stehen und umschreibt ihn', () => {
+    // Dieselbe Vorsicht wie bei converse-11: „das Feld entsteht am Knopf" ist
+    // die wichtigere Hälfte und darf nicht an einem optionalen Feld hängen.
+    const instruction = brandConverseInstruction({
+      hasNextQuestion: false,
+      nextQuestionKnown: false,
+      openFieldLabels: ['Archetyp-Hypothese'],
+    })
+    expect(instruction).toMatch(/Close your turn on the FIRST of those fields/)
+    expect(instruction).toMatch(/with the button next to this conversation/)
+    expect(instruction).not.toMatch(/press "/)
+  })
+
+  /**
+   * EINE ENTWURFS-SESSION SCHLIESST AUF SICH SELBST (converse-12,
+   * Kailua-Befund 5, Nebenbefund).
+   *
+   * Gemessen war: Session `a.pitch` (Ableitung), Frage `a.origin` — die Bühne
+   * zeigte die Frage eines FREMDEN Feldes, und der Zug stellte sie auch. Mit
+   * `draftField` gehört der Abschluss dem Feld, auf dem der Mensch sitzt.
+   */
+  it('converse-12: mit `draftField` schliesst der Zug auf DIESEM Feld, nicht auf der nächsten Frage', () => {
+    const instruction = brandConverseInstruction({
+      hasNextQuestion: true,
+      nextQuestionKnown: true,
+      openFieldLabels: [],
+      draftField: 'Elevator-Pitch',
+      draftButton: 'George, entwirf das',
+    })
+    expect(instruction).toMatch(/THE FIELD THEY ARE SITTING ON IS NOT A QUESTION/)
+    expect(instruction).toMatch(/"Elevator-Pitch" is something you draft/)
+    expect(instruction).toMatch(/press "George, entwirf das" next to this conversation/)
+    expect(instruction).toMatch(/never close with a question that belongs to a different field/)
+    // Die drei anderen Abschlüsse bleiben draussen — sie gehören anderen
+    // Feldern (der Nebenbefund war genau ihr Auftauchen).
+    expect(instruction).not.toMatch(/Ask it IN YOUR OWN WORDS/)
+    expect(instruction).not.toMatch(/THERE ARE NO MORE CATALOG QUESTIONS/)
+    expect(instruction).not.toMatch(/THERE IS NO OPEN QUESTION LEFT/)
   })
 
   it('die vier Zweige schliessen sich gegenseitig aus', () => {
@@ -654,5 +726,132 @@ describe('der Markt-Block', () => {
     })
     expect(alt).toMatch(/WHAT A COLLEAGUE NOTICED/)
     expect(alt).not.toMatch(/market comparison noticed/)
+  })
+})
+
+/**
+ * KEINE FRAGE ZWEIMAL (Kailua-Befund 5, 2026-09-08).
+ *
+ * `george-a-9` stand bis heute NUR im Entwurfs-Prompt („do NOT ask the same
+ * question again"). Im Gespräch — also genau dort, wo gefragt wird — fehlte
+ * sie: George fragte im ersten Kailua-Lauf im Kreis. Die Auskunft, was schon
+ * beantwortet ist, liegt im Rumpf (der Slot-Block schreibt leere Felder
+ * ausdrücklich als `(not answered yet)`); die Regel verweist darauf, statt eine
+ * zweite Quelle zu erfinden.
+ */
+describe('Beantwortete Fragen kommen nicht zurück (converse-Fassung von a-9)', () => {
+  it('der Auftrag verbietet die Wiederholung und nennt die Quelle', () => {
+    const instruction = brandConverseInstruction(BOTH)
+    expect(instruction).toContain('NEVER ASK AGAIN WHAT IS ALREADY ANSWERED')
+    expect(instruction).toContain('what has been captured in this chapter so far')
+    expect(instruction).toContain('(not answered yet)')
+  })
+
+  it('sie steht in JEDEM gewöhnlichen Zug, nicht nur wenn eine Frage folgt', () => {
+    // Der Kailua-Fall ist genau der ohne offene Katalog-Frage: dort treibt der
+    // Zug ein Ableitungs-Feld voran — und fragte bis heute dabei erneut.
+    const instruction = brandConverseInstruction({
+      hasNextQuestion: false,
+      nextQuestionKnown: false,
+      openFieldLabels: ['Pitch', 'Kategorie'],
+    })
+    expect(instruction).toContain('NEVER ASK AGAIN WHAT IS ALREADY ANSWERED')
+  })
+
+  it('GEGENPROBE: der Rumpf liefert die Auskunft, auf die sie sich beruft', () => {
+    const inputs = formatBrandConverseInputs(inputsFor({
+      slots: [
+        { slotId: 'a.origin', value: 'Wir haben 2019 angefangen.' },
+        { slotId: 'a.oneThing', value: '' },
+      ],
+    }))
+    expect(inputs).toContain('Wir haben 2019 angefangen.')
+    expect(inputs).toContain('(not answered yet)')
+  })
+
+  it('der ERÖFFNUNGSZUG trägt sie NICHT — er reagiert auf nichts', () => {
+    const instruction = brandConverseInstruction({ ...BOTH, opening: true, chapterIntro: false })
+    expect(instruction).not.toContain('NEVER ASK AGAIN WHAT IS ALREADY ANSWERED')
+    // ABER er hat seit converse-12 seine EIGENE Fassung: eine frische Session
+    // hat keinen eigenen Verlauf, und der Auftrag lädt zum Anknüpfen ein —
+    // der erste Satz ist damit der wahrscheinlichste Ort für eine
+    // Wiederholung.
+    expect(instruction).toContain('DO NOT RE-OPEN WHAT IS SETTLED')
+  })
+})
+
+/**
+ * DER ZUG SIEHT DAS GANZE KAPITEL (converse-12, Kailua-Befund 7 — Davids
+ * Entscheidung 2026-09-08).
+ *
+ * Der VERLAUF bleibt auf die Session geschnitten (brand-011). Daneben steht
+ * jetzt eine kompakte Liste der Fragen, die die ANDEREN Sessions dieses
+ * Kapitels schon beantwortet haben — ohne die konnte George eine Frage aus
+ * einer früheren Session erneut stellen, weil sie für ihn nie stattgefunden
+ * hatte.
+ */
+describe('Die beantworteten Fragen des Kapitels (converse-12)', () => {
+  it('stehen als eigener Block, mit Beschriftung und Antwort', () => {
+    const inputs = formatBrandConverseInputs(inputsFor({
+      chapterAnswers: [
+        { label: 'Herkunft', answer: 'Wir haben 2019 in einer Garage angefangen.' },
+        { label: 'Was Kunden loben', answer: 'Dass wir jede Röstung erklären können.' },
+      ],
+    }))
+    expect(inputs).toContain('[questions already answered in this chapter, in earlier sessions]')
+    expect(inputs).toContain('[Herkunft]\nWir haben 2019 in einer Garage angefangen.')
+    expect(inputs).toContain('[Was Kunden loben]\nDass wir jede Röstung erklären können.')
+  })
+
+  /**
+   * ZWISCHEN DEN WERTEN UND DEM VERLAUF: er sagt dasselbe wie die Werte („ist
+   * beantwortet"), nur für Antworten, die noch in keinem Feld stehen — und er
+   * ist ÄLTER als der Verlauf der laufenden Session.
+   */
+  it('stehen an ihrer Stelle in der Reihenfolge der Nähe', () => {
+    const inputs = formatBrandConverseInputs(inputsFor({
+      chapterAnswers: [{ label: 'Herkunft', answer: 'Seit 2019.' }],
+      history: [{ role: 'george', body: 'Erzähl mir mehr.' }],
+      nextQuestion: 'Was loben eure Kunden?',
+    }))
+    const order = [
+      '[what has been captured in this chapter so far]',
+      '[questions already answered in this chapter, in earlier sessions]',
+      '[earlier in this conversation, oldest first]',
+      '[the next question]',
+    ].map(label => inputs.indexOf(label))
+    expect(order.every(index => index >= 0)).toBe(true)
+    expect([...order]).toEqual([...order].sort((a, b) => a - b))
+  })
+
+  it('LEER heisst KEIN BLOCK — eine Überschrift ohne Inhalt füllt ein Modell selbst', () => {
+    expect(formatBrandConverseInputs(inputsFor())).not.toContain('questions already answered')
+    expect(formatBrandConverseInputs(inputsFor({ chapterAnswers: [] })))
+      .not.toContain('questions already answered')
+  })
+
+  it('der ZEICHEN-Deckel greift je Antwort', () => {
+    const long = 'x'.repeat(BRAND_CHAPTER_ANSWER_CHARS + 500)
+    const inputs = formatBrandConverseInputs(inputsFor({
+      chapterAnswers: [{ label: 'Herkunft', answer: long }],
+    }))
+    expect(inputs).toContain('x'.repeat(BRAND_CHAPTER_ANSWER_CHARS))
+    expect(inputs).not.toContain('x'.repeat(BRAND_CHAPTER_ANSWER_CHARS + 1))
+  })
+
+  it('der ZAHL-Deckel greift — ein Kapitel kann nicht den halben Wizard mitschicken', () => {
+    const many = Array.from({ length: BRAND_CHAPTER_ANSWERS_MAX + 4 }, (_, index) => ({
+      label: `Feld ${index}`,
+      answer: `Antwort ${index}`,
+    }))
+    const inputs = formatBrandConverseInputs(inputsFor({ chapterAnswers: many }))
+    expect(inputs).toContain(`[Feld ${BRAND_CHAPTER_ANSWERS_MAX - 1}]`)
+    expect(inputs).not.toContain(`[Feld ${BRAND_CHAPTER_ANSWERS_MAX}]`)
+  })
+
+  it('der Auftrag beruft sich ausdrücklich auf diesen Block', () => {
+    const instruction = brandConverseInstruction(BOTH)
+    expect(instruction).toContain('questions already answered in this chapter')
+    expect(instruction).toContain('which you cannot see in the history above')
   })
 })

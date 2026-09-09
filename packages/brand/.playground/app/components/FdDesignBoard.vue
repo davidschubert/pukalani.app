@@ -13,7 +13,7 @@ import {
 } from '../utils/demoDesign'
 
 /**
- * DAS ERGEBNIS-BOARD (Konzept docs/plans/BRAND-DESIGN.md §2.8, Davids
+ * DAS ERGEBNIS-BOARD (Konzept docs/archiv/BRAND-DESIGN.md §2.8, Davids
  * Entscheidung 2026-09-08): Farbwelt, Schriftpaar, Zeichen, Bild-Prinzipien
  * und Bewegung auf EINER Fläche.
  *

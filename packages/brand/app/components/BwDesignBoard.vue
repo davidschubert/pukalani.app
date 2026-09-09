@@ -6,7 +6,7 @@ import { isBrandMarkSvg } from '../../shared/brandMarkSvg'
 import { BRAND_RAMP_SHADES, type BrandDesignSnapshotPreset } from '../../shared/types/brand'
 
 /**
- * DAS ERGEBNIS-BOARD (Konzept docs/plans/BRAND-DESIGN.md §2.8, Davids
+ * DAS ERGEBNIS-BOARD (Konzept docs/archiv/BRAND-DESIGN.md §2.8, Davids
  * Entscheidung 2026-09-08; Form abgenommen am Klickdummy `FdDesignBoard`):
  * Farbwelt, Schriftpaar, Zeichen, Bild-Prinzipien und Bewegung auf EINER
  * Fläche.

@@ -2,7 +2,7 @@ import { formatBrandSlotStructured } from './brandSlotFormat'
 
 /**
  * DIE KI-ENTWÜRFE DES ZEICHENS — die REGELN, pur (Konzept
- * docs/plans/BRAND-DESIGN.md §2.5 Stufe 3, Davids Entscheidung §1.11 b,
+ * docs/archiv/BRAND-DESIGN.md §2.5 Stufe 3, Davids Entscheidung §1.11 b,
  * Paket D5c).
  *
  * ── WAS EIN ENTWURF IST UND WAS NICHT ─────────────────────────────────────

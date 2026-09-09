@@ -5,7 +5,7 @@ import { brandSlotValueView, formatBrandSlotList, formatBrandSlotStructured } fr
 
 /**
  * DIE BILDSPRACHE — die REGELN von Kapitel 5, pur (Konzept
- * docs/plans/BRAND-DESIGN.md §2.6, Paket D6).
+ * docs/archiv/BRAND-DESIGN.md §2.6, Paket D6).
  *
  * ── VIER SESSIONS, EINE DATEI, WEIL SIE EINE KETTE SIND ───────────────────
  * `k.photo` ist das Bild-Prinzip, `k.illustration` und `k.icons` sind die zwei

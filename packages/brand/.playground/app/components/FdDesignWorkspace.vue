@@ -5,7 +5,7 @@ import { demoRailWithDesign } from '../utils/demoRail'
 
 /**
  * DIE HÜLLE DER SECHS BRAND-DESIGN-KAPITEL (Konzept
- * docs/plans/BRAND-DESIGN.md §2.1: „Schicht 2 derselben Werkstatt").
+ * docs/archiv/BRAND-DESIGN.md §2.1: „Schicht 2 derselben Werkstatt").
  *
  * Das Chrome ist das der Werkstatt (`pages/brand/demo/gespraech.vue`): drei
  * Zonen, keine Topbar, Nav-Spalte links, Balken über der Bühne, rechte Spalte

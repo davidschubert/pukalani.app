@@ -225,31 +225,31 @@ function foundationPath(profile: BrandProfileSummary): string {
 }
 
 /**
- * Der Submit des Modals — seit P2.5 eine ÜBERGABE, keine Anlage mehr.
+ * Der Submit des Modals — seit dem Kailua-Lauf wieder eine ANLAGE (Befund 6,
+ * Davids Entscheidung 2026-09-08).
  *
- * Das Modal erhebt drei Dinge (Weiche, Titel, Sprache). Seit die STARTKARTE
- * Pflicht ist (Content-Spec §2.1: URL, Branche, „was ihr macht", „für wen"),
- * reichen die drei nicht mehr aus, um ein Branding anzulegen: die Anlage-Route
- * antwortete mit 400, und der Mensch läse „konnte nicht angelegt werden".
+ * ── WAS VORHER PASSIERTE ─────────────────────────────────────────────────
+ * P2.5 hatte den Submit zu einer ÜBERGABE gemacht: das Modal fragte Weiche,
+ * Titel und Sprache und schickte sie als Query an `/dashboard/brands/new` —
+ * wo dieselben drei Felder ein zweites Mal standen. Wer im Modal „Neue Marke"
+ * gewählt und einen Arbeitstitel getippt hatte, bestätigte beides sofort
+ * wieder. Der Grund dafür war echt (die Startkarte ist Pflicht), die Auflösung
+ * die falsche: sie machte aus einem Formular zwei Halbe.
  *
- * ZWEI WEGE WÄREN SCHLECHTER GEWESEN. Die Startkarte im Modal zu wiederholen
- * hiesse, dasselbe Formular an zwei Stellen zu pflegen (und das Modal ist
- * Davids abgenommener Klickdummy, dessen Copy bewusst fest deutsch ist). Sie
- * für diesen Weg optional zu machen hiesse, Brandings anzulegen, denen George
- * beim ersten Zug nichts entnehmen kann — genau die Lücke, die P2.5 schliesst.
- * Also: die drei Antworten reisen als Query mit, `/dashboard/brands/new`
- * übernimmt sie und fragt nur noch, was fehlt.
+ * ── DIE PFLEGE-SORGE VON DAMALS IST BEANTWORTET ──────────────────────────
+ * „Die Startkarte im Modal zu wiederholen hiesse, dasselbe Formular an zwei
+ * Stellen zu pflegen" — genau deshalb steht sie jetzt an EINER Stelle
+ * (`BwNewBrandDetails`), und der Anlage-Weg ebenfalls (`useBrandCreate`).
  */
+const {
+  contentLocales: newBrandLocales,
+  creating: newBrandCreating,
+  failed: newBrandFailed,
+  create: createBrand,
+} = useBrandCreate()
+
 async function createFromModal(payload: BwNewBrandSubmit): Promise<void> {
-  newBrandOpen.value = false
-  await navigateTo({
-    path: localePath('/dashboard/brands/new'),
-    query: {
-      path: payload.kind === 'rebrand' ? 'relaunch' : 'new',
-      ...(payload.title ? { title: payload.title } : {}),
-      lang: payload.lang,
-    },
-  })
+  if (await createBrand(payload)) newBrandOpen.value = false
 }
 
 useBrandTitle(() => t('brand.brands.title'))
@@ -362,6 +362,7 @@ useBrandTitle(() => t('brand.brands.title'))
 
     <BwNewBrandModal
       v-model:open="newBrandOpen" mode="live"
+      :content-locales="newBrandLocales" :loading="newBrandCreating" :failed="newBrandFailed"
       @submit="createFromModal"
     />
   </div>

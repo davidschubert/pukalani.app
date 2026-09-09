@@ -36,7 +36,7 @@ const route = useRoute()
  * Schranke. Im Echtbetrieb hängt das an `result.direction` (G4). */
 const directionChosen = computed(() => route.query.richtung === 'warm')
 
-/* Screen 7/8 des Brand-Design-Prototyps (docs/plans/BRAND-DESIGN.md §2.8,
+/* Screen 7/8 des Brand-Design-Prototyps (docs/archiv/BRAND-DESIGN.md §2.8,
  * §2.10): derselbe Ort, drei Zustände. Unbekannte Werte fallen auf `locked`
  * zurück — der heutige Stand ist die Vorgabe, nicht der Sonderfall. */
 const designState = computed<'locked' | 'unlocked' | 'done'>(() =>

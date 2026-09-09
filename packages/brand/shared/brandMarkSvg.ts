@@ -6,7 +6,7 @@ import {
 
 /**
  * DER SATZ DES ZEICHENS — Wortmarke und Monogramm als SVG, pur (Konzept
- * docs/plans/BRAND-DESIGN.md §2.5 Stufe 2, Paket D5b).
+ * docs/archiv/BRAND-DESIGN.md §2.5 Stufe 2, Paket D5b).
  *
  * ── ES IST SATZ, KEINE ERFINDUNG ──────────────────────────────────────────
  * Hier entsteht kein Logo. Hier wird der NAME der Marke in ihrer eigenen

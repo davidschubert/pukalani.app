@@ -33,7 +33,7 @@ import {
 } from './brandStore'
 
 /**
- * DER DNA-VORSCHLAG — DER LAUF (Konzept docs/plans/BRAND-DESIGN.md §2.2
+ * DER DNA-VORSCHLAG — DER LAUF (Konzept docs/archiv/BRAND-DESIGN.md §2.2
  * Schritt 4, Paket D2c).
  *
  * EIN Text-Lauf über die ganze Foundation, nicht einer je Dimension: die zehn

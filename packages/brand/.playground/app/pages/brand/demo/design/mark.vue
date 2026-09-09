@@ -14,7 +14,7 @@ import {
 } from '../../../../utils/demoDesign'
 
 /**
- * KAPITEL „ZEICHEN" (Konzept docs/plans/BRAND-DESIGN.md §2.5, Davids
+ * KAPITEL „ZEICHEN" (Konzept docs/archiv/BRAND-DESIGN.md §2.5, Davids
  * Entscheidung §1.11 b, Prototyp-Screen 4) — DREI STUFEN in dieser
  * Reihenfolge, untereinander auf einer Bühne:
  *

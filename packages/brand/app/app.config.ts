@@ -238,7 +238,7 @@ export default defineAppConfig({
         },
         /**
          * DIE FREISCHALTUNG VON BRAND DESIGN (Konzept
-         * docs/plans/BRAND-DESIGN.md §2.10, Paket D1) — der fünfte
+         * docs/archiv/BRAND-DESIGN.md §2.10, Paket D1) — der fünfte
          * Betreiber-Eintrag dieses Layers, unter den anderen (`order: 133`).
          * Alle sind Arbeitslisten desselben Menschen, und zwischen ihnen
          * gehört keine fremde Sache.

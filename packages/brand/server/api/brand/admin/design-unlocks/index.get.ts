@@ -9,7 +9,7 @@ import {
 
 /**
  * BETREIBER: DIE BRANDINGS MIT IHREM BRAND-DESIGN-ZUSTAND (`users.manage`,
- * Konzept docs/plans/BRAND-DESIGN.md §2.10, Paket D1).
+ * Konzept docs/archiv/BRAND-DESIGN.md §2.10, Paket D1).
  *
  * ── ALLE, NICHT NUR DIE FREIGESCHALTETEN ──────────────────────────────────
  * Die Liste ist eine ARBEITSLISTE: sie muss gerade die Marken finden, die noch

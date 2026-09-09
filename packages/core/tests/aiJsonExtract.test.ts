@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { extractJsonObject } from '../server/utils/aiComplete'
+import { aiProviderErrorTag, extractJsonObject } from '../server/utils/aiComplete'
 
 /**
  * DER ZUSCHNITT AUF DAS ÄUSSERE OBJEKT — die Sicherung gegen den Fehler vom
@@ -29,5 +29,38 @@ describe('extractJsonObject', () => {
     expect(extractJsonObject('  no json here  ')).toBe('no json here')
     expect(extractJsonObject('')).toBe('')
     expect(extractJsonObject('} {')).toBe('} {')
+  })
+})
+
+/**
+ * DIE FEHLER-KENNUNG STATT DES RUMPFES (Audit-Befund 2026-09-09). Der Rumpf
+ * einer Anbieter-Antwort zitiert die Anfrage zurück — bei Vision und Bild also
+ * Kunden-Inhalte. Diese Funktion darf deshalb NIE mehr durchlassen als kurze
+ * Kennungen aus dem Vokabular des Anbieters.
+ */
+describe('aiProviderErrorTag', () => {
+  it('nimmt `code` und `type`, sonst nichts', () => {
+    const body = JSON.stringify({
+      error: { code: 'rate_limit_exceeded', type: 'requests', message: 'prompt war: GEHEIM' },
+    })
+    expect(aiProviderErrorTag(body)).toBe(' (rate_limit_exceeded/requests)')
+    expect(aiProviderErrorTag(body)).not.toContain('GEHEIM')
+  })
+
+  it('nur eine der beiden Kennungen ⇒ nur sie', () => {
+    expect(aiProviderErrorTag(JSON.stringify({ error: { code: 'invalid_request_error' } })))
+      .toBe(' (invalid_request_error)')
+  })
+
+  it('GEGENPROBE: kein JSON, keine Kennung, eine lange Kennung ⇒ leer', () => {
+    expect(aiProviderErrorTag('<html>upstream connect error</html>')).toBe('')
+    expect(aiProviderErrorTag(JSON.stringify({ error: { message: 'GEHEIM' } }))).toBe('')
+    // Ein Anbieter, der einen ganzen Absatz in `code` legt, ist kein Grund,
+    // einen Absatz zu loggen.
+    expect(aiProviderErrorTag(JSON.stringify({ error: { code: 'x'.repeat(65) } }))).toBe('')
+  })
+
+  it('GEGENPROBE: eine Zahl in `code` zählt nicht als Kennung', () => {
+    expect(aiProviderErrorTag(JSON.stringify({ error: { code: 429 } }))).toBe('')
   })
 })

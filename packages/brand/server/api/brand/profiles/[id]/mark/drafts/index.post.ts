@@ -6,7 +6,7 @@ import {
 import type { BrandMarkDraftsRunResponse } from '../../../../../../../shared/types/brand'
 import { type BrandAiQuotaMeasurement, bookBrandAiQuota } from '../../../../../../utils/brandAiQuota'
 import { recordBrandEvent } from '../../../../../../utils/brandEvents'
-import { readBrandAiEnabled } from '../../../../../../utils/brandGenerators'
+import { readBrandAiEnabled, retainBrandGeneration } from '../../../../../../utils/brandGenerators'
 import { requireBrandMarkContext } from '../../../../../../utils/brandMarkBrief'
 import {
   brandMarkDraftTitleFor,
@@ -19,7 +19,7 @@ import {
 } from '../../../../../../utils/brandMarkDrafts'
 
 /**
- * DIE KI-ENTWÜRFE ERZEUGEN (Konzept docs/plans/BRAND-DESIGN.md §2.5 Stufe 3,
+ * DIE KI-ENTWÜRFE ERZEUGEN (Konzept docs/archiv/BRAND-DESIGN.md §2.5 Stufe 3,
  * Davids Entscheidung §1.11 b, Paket D5c) — EIN Lauf, vier Bilder.
  *
  * ── DIE PRÜFREIHENFOLGE: VON BILLIG NACH TEUER ───────────────────────────
@@ -88,97 +88,122 @@ export default defineEventHandler(async (event): Promise<BrandMarkDraftsRunRespo
     }
   }
 
-  const measurement: BrandAiQuotaMeasurement = { narrowCount: 0, narrowResetSec: 0 }
-  const rejection = await bookBrandAiQuota(
-    event,
-    { userId, profileId: profile.$id, kind: 'drafts' },
-    measurement,
-  )
-  if (rejection) {
-    logEvent('info', 'brand.mark_drafts_throttled', { profileId: profile.$id, code: rejection.code })
-    setHeader(event, 'Retry-After', rejection.retryAfterSec)
-    throw createError({
-      status: 429,
-      statusText: 'Draft limit reached',
-      data: { code: rejection.code },
-    })
-  }
-  const used = Math.min(measurement.narrowCount, BRAND_DESIGN_DRAFTS_DAILY_LIMIT)
-  const quota = {
-    used,
-    limit: BRAND_DESIGN_DRAFTS_DAILY_LIMIT,
-    remaining: Math.max(0, BRAND_DESIGN_DRAFTS_DAILY_LIMIT - used),
-  }
+  /**
+   * DER BURST-PLATZ (Audit-Befund 2026-09-09) — die Sicherung gegen den
+   * PARALLELEN Lauf, nicht gegen den häufigen.
+   *
+   * `brandAiQuota.ts` sagt in seinem Kopf zu, dass die Route
+   * `retainBrandGeneration()` VOR der Buchung ruft; bis zu diesem Befund taten
+   * das nur der Entwurf und das Gespräch — ausgerechnet die vier neuen Läufe
+   * dieses Kapitels standen daneben, obwohl sie die teuersten sind (ein
+   * Vision-Zug über zwölf Bilder, vier Bild-Aufrufe in einem Klick). Zwölf
+   * gleichzeitig geöffnete Tabs hätten zwölf Läufe bezahlt, während der
+   * Tages-Deckel erst hinterher zählt.
+   *
+   * VOR der Buchung und nicht danach: zwischen Zählen und Belegen lägen sonst
+   * mehrere `await`, und in dieser Lücke zählten drei gleichzeitige Anfragen
+   * alle dieselbe Null (Begründung im Kopf von `brandAiQuota.ts`).
+   *
+   * Freigegeben wird im `finally` und damit auf JEDEM Ausgang — Erfolg, 429,
+   * Anbieterfehler, Abbruch. Der Platz gehört dem Lauf, nicht seinem Ergebnis.
+   */
+  const burst = retainBrandGeneration(userId)
+  try {
+    const measurement: BrandAiQuotaMeasurement = { narrowCount: 0, narrowResetSec: 0 }
+    const rejection = await bookBrandAiQuota(
+      event,
+      { userId, profileId: profile.$id, kind: 'drafts' },
+      measurement,
+    )
+    if (rejection) {
+      logEvent('info', 'brand.mark_drafts_throttled', { profileId: profile.$id, code: rejection.code })
+      setHeader(event, 'Retry-After', rejection.retryAfterSec)
+      throw createError({
+        status: 429,
+        statusText: 'Draft limit reached',
+        data: { code: rejection.code },
+      })
+    }
+    const used = Math.min(measurement.narrowCount, BRAND_DESIGN_DRAFTS_DAILY_LIMIT)
+    const quota = {
+      used,
+      limit: BRAND_DESIGN_DRAFTS_DAILY_LIMIT,
+      remaining: Math.max(0, BRAND_DESIGN_DRAFTS_DAILY_LIMIT - used),
+    }
 
-  const locale = profile.contentLocale === 'en' ? 'en' : 'de'
-  const model = stub ? 'dev-stub' : (await getEffectiveAiImageConfig(event)).model
-  const result = await runBrandMarkDrafts(event, profile, stepRows, model)
+    const locale = profile.contentLocale === 'en' ? 'en' : 'de'
+    const model = stub ? 'dev-stub' : (await getEffectiveAiImageConfig(event)).model
+    const result = await runBrandMarkDrafts(event, profile, stepRows, model)
 
-  if (result.failure || !result.images?.length) {
+    if (result.failure || !result.images?.length) {
+      await recordBrandEvent(event, {
+        type: 'design.drafts.run',
+        profileId: profile.$id,
+        userId,
+        payload: { images: 0, failure: result.failure ?? 'empty_result', model },
+      })
+      if (result.failure === 'no_brief') {
+        throw createError({
+          status: 409,
+          statusText: 'No mark briefing to draft from',
+          data: { code: 'drafts_no_brief' },
+        })
+      }
+      throw createError({
+        status: 502,
+        statusText: 'Generating drafts failed',
+        data: { code: 'drafts_failed' },
+      })
+    }
+
+    /**
+     * NACHEINANDER ABLEGEN, nicht parallel: der Vorgabe-Name zählt vom Stand der
+     * Marke weiter („Entwurf 5"), und vier gleichzeitige Anlagen läsen alle
+     * denselben Stand. Es sind vier Dateien, keine vierhundert.
+     */
+    let created = 0
+    for (const [index, image] of result.images.entries()) {
+      await createBrandMarkDraft(event, {
+        profileId: profile.$id,
+        bytes: image.bytes,
+        extension: image.extension,
+        title: brandMarkDraftTitleFor(before, index, locale),
+        model: result.model ?? model,
+        promptHash: result.promptHash ?? '',
+      })
+      created += 1
+    }
+
+    // NEU GELESEN, damit die Antwort die Zeilen zeigt, die WIRKLICH stehen.
+    const items = await listBrandMarkDrafts(event, profile.$id)
+    // Der Slot-Wert nennt nur BEHALTENE Entwürfe — ein frischer Lauf ändert ihn
+    // deshalb nicht. Der Aufruf steht trotzdem hier: er zieht einen Slot nach,
+    // der aus einem früheren Stand hängengeblieben ist, und er ist ein No-op,
+    // wenn es nichts zu ändern gibt (s. `syncBrandMarkDraftsSlot`).
+    await syncBrandMarkDraftsSlot(event, profile, stepRows, items)
+
     await recordBrandEvent(event, {
       type: 'design.drafts.run',
       profileId: profile.$id,
       userId,
-      payload: { images: 0, failure: result.failure ?? 'empty_result', model },
+      payload: {
+        images: created,
+        promptHash: result.promptHash ?? '',
+        model: result.model ?? model,
+        ms: result.ms ?? 0,
+      },
     })
-    if (result.failure === 'no_brief') {
-      throw createError({
-        status: 409,
-        statusText: 'No mark briefing to draft from',
-        data: { code: 'drafts_no_brief' },
-      })
+
+    return {
+      ok: true,
+      items,
+      max: BRAND_MARK_DRAFTS_MAX,
+      created,
+      model: result.model ?? model,
+      quota,
     }
-    throw createError({
-      status: 502,
-      statusText: 'Generating drafts failed',
-      data: { code: 'drafts_failed' },
-    })
   }
-
-  /**
-   * NACHEINANDER ABLEGEN, nicht parallel: der Vorgabe-Name zählt vom Stand der
-   * Marke weiter („Entwurf 5"), und vier gleichzeitige Anlagen läsen alle
-   * denselben Stand. Es sind vier Dateien, keine vierhundert.
-   */
-  let created = 0
-  for (const [index, image] of result.images.entries()) {
-    await createBrandMarkDraft(event, {
-      profileId: profile.$id,
-      bytes: image.bytes,
-      extension: image.extension,
-      title: brandMarkDraftTitleFor(before, index, locale),
-      model: result.model ?? model,
-      promptHash: result.promptHash ?? '',
-    })
-    created += 1
-  }
-
-  // NEU GELESEN, damit die Antwort die Zeilen zeigt, die WIRKLICH stehen.
-  const items = await listBrandMarkDrafts(event, profile.$id)
-  // Der Slot-Wert nennt nur BEHALTENE Entwürfe — ein frischer Lauf ändert ihn
-  // deshalb nicht. Der Aufruf steht trotzdem hier: er zieht einen Slot nach,
-  // der aus einem früheren Stand hängengeblieben ist, und er ist ein No-op,
-  // wenn es nichts zu ändern gibt (s. `syncBrandMarkDraftsSlot`).
-  await syncBrandMarkDraftsSlot(event, profile, stepRows, items)
-
-  await recordBrandEvent(event, {
-    type: 'design.drafts.run',
-    profileId: profile.$id,
-    userId,
-    payload: {
-      images: created,
-      promptHash: result.promptHash ?? '',
-      model: result.model ?? model,
-      ms: result.ms ?? 0,
-    },
-  })
-
-  return {
-    ok: true,
-    items,
-    max: BRAND_MARK_DRAFTS_MAX,
-    created,
-    model: result.model ?? model,
-    quota,
+  finally {
+    burst.release()
   }
 })

@@ -9,7 +9,7 @@ import {
 } from '../../shared/brandReading'
 
 /**
- * DER AUFTRAG DER LESUNG (Brand Design D2b, docs/plans/BRAND-DESIGN.md §2.2
+ * DER AUFTRAG DER LESUNG (Brand Design D2b, docs/archiv/BRAND-DESIGN.md §2.2
  * Schritt 3).
  *
  * PUR: keine Fetches, kein H3Event, kein Appwrite, kein i18n. Dieselbe

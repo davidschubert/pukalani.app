@@ -44,7 +44,7 @@ import { BRAND_MARK_DRAFT_ANGLES, brandMarkDraftPrompt } from './markPrompt'
 
 /**
  * DIE KI-ENTWÜRFE DES ZEICHENS — DER SPEICHER UND DER LAUF (Konzept
- * docs/plans/BRAND-DESIGN.md §2.5 Stufe 3 / §2.13, Paket D5c).
+ * docs/archiv/BRAND-DESIGN.md §2.5 Stufe 3 / §2.13, Paket D5c).
  *
  * ── DIE DATEI IST DIE WAHRHEIT, DIE ZEILE BESCHREIBT SIE ──────────────────
  * Zeilen-Id = Datei-Id (Migration brand-023), wörtlich wie bei den Vorbildern.
@@ -266,11 +266,20 @@ export async function updateBrandMarkDraft(
  * GENAU ANDERSHERUM ALS BEIM ANLEGEN, und aus demselben Grund: was am Ende
  * liegen bleiben DARF, ist der Rest, den niemand mehr sieht. 404 auf die Datei
  * ist kein Fehler — „entfernen, was nicht da ist" ist ein No-op.
+ *
+ * ── ZWEI HÄRTEN FÜR ZWEI AUFRUFER (`strictFile`) ──────────────────────────
+ * BEIM KLICK („verwerfen") bleibt die Bucket-Löschung FAIL-SOFT: die Zeile ist
+ * weg, die Karte verschwindet, und an einem zickenden Speicher soll das nicht
+ * scheitern. DER GDPR-LAUF IST DER HARTE WEG (`strictFile: true`, s.
+ * `purgeBrandMarkDrafts` unten) — dort ist die Datei der Gegenstand der
+ * Zusage. Dieselbe Aufteilung wie bei den Vorbildern
+ * (`brandInspirationStore.ts`).
  */
 export async function deleteBrandMarkDraft(
   event: H3Event,
   profileId: string,
   draftId: string,
+  options: { strictFile?: boolean } = {},
 ): Promise<void> {
   const { tablesDB, databaseId } = brandDb(event)
   try {
@@ -291,6 +300,9 @@ export async function deleteBrandMarkDraft(
         draftId,
         message: error instanceof Error ? error.message : 'unknown',
       })
+      if (options.strictFile) {
+        throw brandMarkDraftsUnavailable(error, { profileId, draftId, stage: 'delete_file' })
+      }
     })
 }
 
@@ -301,12 +313,22 @@ export async function deleteBrandMarkDraft(
  *
  * IDEMPOTENT wie die Kaskade selbst: eine fehlende Tabelle ist eine Null, kein
  * Abbruch (Vertrag des GDPR-Contributors).
+ *
+ * ── EIN FEHLER WIRD GEWORFEN, NICHT GEZÄHLT (Audit-Befund 2026-09-09) ─────
+ * Hier stand `…catch(() => {}); removed += 1`: jeder Fehler war geschluckt und
+ * wurde trotzdem als „entfernt" gezählt — eine Löschzusage, die sich selbst
+ * bestätigt. Geschluckt wird nur noch das 404 (das erledigt
+ * `deleteBrandMarkDraft` selbst), alles andere fliegt, und `removed` zählt
+ * erst NACH dem Löschen. Dass `deleteUserCompletely` danach den Nutzer NICHT
+ * löscht, ist gewollt: ein sichtbar unfertiger Lauf lässt sich wiederholen,
+ * ein stiller Rest im Bucket nicht mehr finden. Wörtlich dieselbe Begründung
+ * wie bei `purgeBrandInspiration`.
  */
 export async function purgeBrandMarkDrafts(event: H3Event, profileId: string): Promise<number> {
   const entries = await listBrandMarkDrafts(event, profileId).catch(() => [])
   let removed = 0
   for (const entry of entries) {
-    await deleteBrandMarkDraft(event, profileId, entry.id).catch(() => {})
+    await deleteBrandMarkDraft(event, profileId, entry.id, { strictFile: true })
     removed += 1
   }
   return removed

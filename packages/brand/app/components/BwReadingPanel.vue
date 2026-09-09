@@ -7,7 +7,7 @@ import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
 
 /**
  * DIE LESUNG DER VORBILDER (`g.reading`, Konzept
- * docs/plans/BRAND-DESIGN.md §2.2 Schritt 3, Paket D2b).
+ * docs/archiv/BRAND-DESIGN.md §2.2 Schritt 3, Paket D2b).
  *
  * Gebaut nach dem freigegebenen Prototyp
  * (`.playground/app/pages/brand/demo/design/dna.vue`, Abschnitt `g.reading`):

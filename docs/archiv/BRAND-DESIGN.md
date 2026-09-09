@@ -1,10 +1,16 @@
 # Brand Design (Produkt 02) — Strategie und Konzept
 
+> **AUSGEFÜHRT — Archiv seit 2026-09-09.** Strategie freigegeben 2026-09-07, Konzept
+> freigegeben 2026-09-07, Prototyp freigegeben 2026-09-08, Pakete D0–D9 + Nachschnitt +
+> Audit-Paket A1 gebaut, geprüft und live (Build d4f17df6), **von David abgenommen
+> 2026-09-09** („ich vertraue dir erstmal hier" — Inhalts-Gates D1–D8 gelten als
+> abgenommen, Korrekturen laufen als gewöhnliche Befunde über OPEN-ITEMS). Eintrag mit
+> Gelernt: docs/OPEN-ITEMS-COMPLETE.md. Offene Reste gibt es hier keine.
+
 Phase 1 des Workflows (docs/referenz/WORKFLOW.md), Stand 2026-09-07 —
 FREIGEGEBEN mit Davids Entscheidungen in §1.11. Phase 2 (Konzeption, §2) ist
 seit 2026-09-07 FREIGEGEBEN (§2.19 nach Empfehlung); Phase 3 (Prototyp im
-Playground) ist gebaut (§3) und wartet auf Davids Abnahme.
-
+Playground) ist gebaut (§3) und seit 2026-09-08 freigegeben, eingefroren.
 ---
 
 ## 0. Was das hier ist
@@ -941,6 +947,26 @@ unverändert. Beweise: Share 51/51 (Gegenprobe 36/51), Design 130/130
 (Gegenprobe 108/130), Sessions 383/383, 2 664 Tests. (3) Prototyp
 eingefroren; (4) Ereignis bleibt `step.completed` mit `stepKey`.
 
+**Audit + A1 (2026-09-09):** Audit der Schicht ohne hohe Befunde
+(docs/archiv/audits/BRAND-DESIGN-AUDIT-2026-09-09.md). Paket A1 GEBAUT und
+geprüft (Core a3d83495: IP-Eimer `brand:brief`, Vision-Eingangsklemme
+`AI_VISION_MAX_IMAGES` 16 / `AI_VISION_MAX_BYTES` 64 MB vor jedem Netzaufruf,
+Gate = Aufruf über die effektive Config, Anbieter-Fehler nur als
+`code`/`type` im Log, Tests für den Laufzeit-Override; brand f22c7b0b:
+GDPR-Purges werfen bei Nicht-404 (`strictFile`, Klick bleibt fail-soft),
+Burst-Deckel `retainBrandGeneration` in Lesung/DNA/Briefing/Entwürfe,
+Archetyp-Test für die D2b-Wirkung, Kommentar am Karten-Button). Beweise
+danach: Design 130/130, Share 51/51, Sessions 383/383; 1 597 + 2 705 Tests.
+Nebenbefund, geparkt: `aiComplete` loggt weiter 300 Zeichen Anbieter-Rumpf
+(Text-Weg, nicht Teil des Audits); 413 `reading_too_large` hat keinen
+eigenen UI-Satz (unter den Produkt-Deckeln unerreichbar). **Es folgt
+Davids Abnahme** (Inhalts-Gates D1–D8), dann OPEN-ITEMS-COMPLETE und dieser
+Plan ins Archiv.
+
+**Abgenommen 2026-09-09 (David):** die Inhalts-Gates D1–D8 (Fundstellen-Liste in
+der Sitzung) gelten als abgenommen — „ich vertraue dir erstmal hier". Korrekturen am
+Wortlaut laufen ab jetzt als gewöhnliche Befunde. Vorhaben GESCHLOSSEN, Plan im Archiv.
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
@@ -964,7 +990,7 @@ eingefroren; (4) Ereignis bleibt `step.completed` mit `stepKey`.
 
 ---
 
-## 3. Prototyp (Phase 3) — gebaut 2026-09-08, Davids Abnahme offen
+## 3. Prototyp (Phase 3) — gebaut 2026-09-08, freigegeben 2026-09-08 (eingefroren, Davids Entscheidung 2026-09-09)
 
 Klickdummy im Playground (`packages/brand/.playground`, Port 3009), acht
 Screens nach §2.15: `/brand/demo/design/dna` (DNA mit Begründung, drei

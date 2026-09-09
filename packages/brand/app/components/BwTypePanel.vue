@@ -10,7 +10,7 @@ import { BRAND_TYPE_SCALES, brandTermLabel } from '../../shared/brandDesignVocab
 import { BRAND_FONT_PAIRS, BRAND_MONO_STACK } from '../../shared/brandFontPairs'
 
 /**
- * DIE TYPOGRAFIE (Kapitel `type`, Konzept docs/plans/BRAND-DESIGN.md §2.4,
+ * DIE TYPOGRAFIE (Kapitel `type`, Konzept docs/archiv/BRAND-DESIGN.md §2.4,
  * Paket D4) — gebaut nach dem freigegebenen Prototyp
  * (`.playground/app/pages/brand/demo/design/type.vue`): Paar-Karten mit
  * ECHTEN Schriften, Hierarchie, Regeln mit sofortiger Wirkung, Specimen,

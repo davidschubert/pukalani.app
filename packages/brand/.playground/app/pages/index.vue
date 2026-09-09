@@ -34,7 +34,7 @@ const newBrandOpen = ref(false)
             result-to="/brand/demo/ergebnis" :result-ready="false"
           />
         </NuxtLink>
-        <!-- Klickdummy Produkt 02 (docs/plans/BRAND-DESIGN.md §2.15): der
+        <!-- Klickdummy Produkt 02 (docs/archiv/BRAND-DESIGN.md §2.15): der
              Einstieg in Schicht 2 hängt an der FERTIGEN Marke — vorher gibt es
              nichts freizuschalten. Die zwei Links stehen NEBEN der Kachel und
              nicht darin: ein `<a>` in einem `<a>` ist kein gültiges HTML. -->

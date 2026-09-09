@@ -575,7 +575,7 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^(POST|DELETE) \/api\/brand\/profiles\/[^/]+\/publication$/, bucket: 'brand:publish', max: TOKEN_MAX },
   /**
-   * DIE VORBILDER — Hochladen, Ändern, Entfernen (docs/plans/BRAND-DESIGN.md
+   * DIE VORBILDER — Hochladen, Ändern, Entfernen (docs/archiv/BRAND-DESIGN.md
    * §2.2 Schritt 2, Paket D2a).
    *
    * DER TEUERSTE SCHREIBWEG DIESES LAYERS, DER KEIN MODELL RUFT: jeder Aufruf
@@ -637,6 +637,30 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    * `brand:reading` weiter oben).
    */
   { re: /^POST \/api\/brand\/profiles\/[^/]+\/dna\/propose$/, bucket: 'brand:dna', max: TOKEN_MAX },
+  /**
+   * DAS ZEICHEN-BRIEFING (§2.5 Stufe 1, Paket D5a) — der Text-Lauf, der aus
+   * Foundation und DNA die Vorgaben für das Zeichen schreibt.
+   *
+   * EIGENER EIMER, nicht `brand:dna` und nicht `brand:drafts`: drei
+   * verschiedene Rechnungen im selben Kapitel, und geteilt bremste das
+   * Briefing die Entwürfe, die unmittelbar danach kommen — dieselbe
+   * Begründung wie eine Zeile höher.
+   *
+   * DIE REIHENFOLGE STIMMT AUCH OHNE SORGFALT: `…/mark/brief` wird von KEINEM
+   * anderen Muster dieser Liste gedeckt — das Entwurfs-Muster endet auf
+   * `…/mark/drafts$`, das Handgriff-Muster verlangt PATCH/DELETE und ein
+   * weiteres Pfad-Glied. Ohne diese Zeile stand der Lauf ganz OHNE IP-Eimer da
+   * (Audit-Befund 2026-09-09): der fachliche Deckel greift erst NACH Zugang,
+   * Besitz und Kapitel-Prüfung, also nach drei Datenbank-Abfragen.
+   *
+   * DER EIGENTLICHE DECKEL IST FACHLICH und liegt in der Route: 10 Anläufe je
+   * Marke, Feld und Tag (`BRAND_AI_SLOT_DAILY_LIMIT` auf `j.brief`). Diese
+   * Zeile schützt nur den Server und muss deshalb WEITER sein als er — sonst
+   * bekäme der Mensch „zu schnell" zu hören, wo „heute genug" die richtige
+   * Auskunft wäre (dieselbe Begründung und dieselbe Zahl wie bei
+   * `brand:reading` weiter oben).
+   */
+  { re: /^POST \/api\/brand\/profiles\/[^/]+\/mark\/brief$/, bucket: 'brand:brief', max: TOKEN_MAX },
   /**
    * DIE KI-ENTWÜRFE DES ZEICHENS (§2.5 Stufe 3, Paket D5c) — der teuerste Lauf
    * dieses Layers: VIER Bild-Aufrufe an ein Bildmodell in einem Klick.

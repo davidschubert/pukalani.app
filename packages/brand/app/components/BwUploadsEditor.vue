@@ -11,7 +11,7 @@ import type { BrandInspirationWriteResponse } from '../../shared/types/brand'
 
 /**
  * DAS INSTRUMENT `uploads` — die Vorbilder des Kunden (`g.inspiration`,
- * Konzept docs/plans/BRAND-DESIGN.md §2.2 Schritt 2, Paket D2a).
+ * Konzept docs/archiv/BRAND-DESIGN.md §2.2 Schritt 2, Paket D2a).
  *
  * Es ist der erste Editor der Registry, der KEIN Textfeld ist
  * (`BrandSlotEditor: 'uploads'`, seit D0 deklariert). Gebaut ist es nach dem

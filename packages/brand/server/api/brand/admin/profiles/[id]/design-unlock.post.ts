@@ -13,7 +13,7 @@ import { recordBrandEvent } from '../../../../../utils/brandEvents'
 
 /**
  * BETREIBER: BRAND DESIGN FÜR EINE MARKE FREISCHALTEN (`users.manage`,
- * Konzept docs/plans/BRAND-DESIGN.md §2.10, Paket D1).
+ * Konzept docs/archiv/BRAND-DESIGN.md §2.10, Paket D1).
  *
  * ── DIE HÄLFTE, DIE HIER ENTSCHIEDEN WIRD ─────────────────────────────────
  * Schicht 2 öffnet, wenn (a) die Foundation ihr Ergebnis-Kapitel abgeschlossen

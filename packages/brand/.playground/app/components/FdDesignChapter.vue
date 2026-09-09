@@ -18,7 +18,7 @@ import {
 
 /**
  * KAPITEL 10 DER FOUNDATION, NACH BRAND DESIGN (Konzept
- * docs/plans/BRAND-DESIGN.md §2.8, Prototyp-Screen 7).
+ * docs/archiv/BRAND-DESIGN.md §2.8, Prototyp-Screen 7).
  *
  * Zwei Zustände, ein Renderer:
  *  · `unlocked` — die Marke ist freigeschaltet, aber noch nichts entschieden:

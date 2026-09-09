@@ -7,6 +7,37 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-09 — Brand Design: Abnahme durch Vertrauen, Vorhaben geschlossen
+
+**Kontext:** Nach A1 lag David die Abnahme-Liste der Inhalts-Gates D1–D8 mit Fundstellen vor
+(Frida-Steckbrief und Leitern, Weiche-Karten + „Bekannt"-Präfix, Rollen und
+Kandidaten-Begründungen, Paar-Notizen, Richtungs-Sätze und Maße, Do & Don't und
+Strichstärke, Tempo-Namen und Regel-Sätze, Kapitel 10, Board, Beispiel, Rückfragen).
+
+**Entscheidung (David):** „ich vertraue dir erstmal hier" — die Inhalts-Gates gelten als
+abgenommen, ohne Zeile-für-Zeile-Lesung. **Folge:** BD1 ist GESCHLOSSEN (COMPLETE-Eintrag,
+Plan ins Archiv); Wortlaut-Korrekturen kommen ab jetzt als gewöhnliche Befunde aus dem
+Gebrauch (Kailua-Läufe), nicht als Gate. Die zwei Nebenbefunde des Audits (`aiComplete`-Log,
+413-Satz) stehen in OPEN-ITEMS unter „Bewusst zurückgestellt". Offen bleibt die Option
+„vierte Strichstärke `light` 1,125 px" — kein Aufgabenpunkt, bis sie jemand vermisst.
+
+---
+
+## 2026-09-09 — Brand Design: Audit-Befunde (A1) — zwei Entscheidungen
+
+**Kontext:** Audit der Design-Schicht nach D9 (docs/archiv/audits/BRAND-DESIGN-AUDIT-2026-09-09.md):
+keine hohen Befunde, drei mittlere, drei niedrige, vier Hinweise ⇒ Paket A1.
+**Entscheidung 1 (Fable):** der fehlende IP-Eimer für `POST …/mark/brief` war beim Bau von D5a
+übersehen, nicht Absicht — jede KI-ausgebende Route trägt einen Eimer, der VOR Auth und Datentür
+greift (die fachlichen Tages-Deckel sind die zweite Schicht, nicht die erste).
+**Entscheidung 2 (Fable):** die GDPR-Purges der Vorbilder und KI-Entwürfe werden ROT, wenn eine
+Datei- oder Zeilen-Löschung mit etwas anderem als 404 scheitert (Muster `brandUserData.ts`). Grund:
+`deleteUserCompletely` löscht das Konto nur bei Voll-Erfolg der Contributors — ein Contributor, der
+transiente Fehler schluckt, macht aus der Löschzusage eine Behauptung; genau in den zwei Tabellen
+mit Fremdwerken/Entwürfen im Bucket wäre das der teuerste Fall. Die Klick-Löschung bleibt fail-soft.
+
+---
+
 ## 2026-09-09 — Wizard-Befunde aus dem Kailua-Lauf: Befunde bleiben Hinweise, George behauptet nichts, Handbuch-Kapitel „Stimme" wird geteilt
 
 **Anlass:** Das Beispiel-Branding Kailua Coffee Co. wurde über den echten Wizard gebaut (Discover
@@ -31,6 +62,38 @@ Der Renderer ist geteilt (Leseansicht, Share, Discover-Anatomie) und rechnet zur
 alte Snapshots brauchen keine Migration. Dazu ohne Frage gebaut: Befund 9 (stiller No-op von
 „Übernehmen & bestätigen" ohne Entwurf ⇒ deaktiviert + Hinweis) und Befund 10 („Alle abnehmen" in
 der Finalen Abnahme).
+
+**Nachtrag, dieselbe Runde — die Befunde 1–7 aus dem ERSTEN Kailua-Lauf (David: „Erste
+Kailua-Befunde 1 bis 7", nach Empfehlung):** (4) **Anlage: das Modal legt an und springt in die
+Werkstatt** (Befund 6, nach Empfehlung): das Modal auf der Brands-Übersicht erledigt Weiche, Titel
+und Sprache und führt direkt ins erste Kapitel; die Vollseite `/dashboard/brands/new` bleibt nur
+als Ziel direkter Links und fragt die drei Felder einmal. Verworfen: nur die Vollseite (ein Klick
+mehr) und Vorbelegung aus dem Modal (zwei Wege bleiben). (5) **Chat-Sprache bleibt die Sprache der
+Oberfläche** (Befund 7, nach Empfehlung — bestätigt die Werkstatt-Entscheidung vom 2026-09-02):
+George spricht wie der Mensch, die Feldwerte stehen in der Inhaltssprache; kein Befund. Verworfen:
+Chat folgt der Inhaltssprache, Wahl je Marke (dritte Sprachachse). Die Befunde 1–5 (Pillen,
+Konflikt-Dialog gegen leere Serverfassung, optimistischer Zähler, Fakten-Karte, Kontext-Felder aus
+dem Gespräch) sind Fehler ohne Produktfrage — außer bei 5 stellt sich heraus, dass ein getippter
+Chat-Text heute keine Antwort auf die offene Katalog-Frage ist; dann wird gefragt.
+
+**Zweiter Nachtrag — Befund 5 gemessen und entschieden (David, nach Empfehlung):** die vier
+Kontext-Felder (Pitch, Kategorie, Wettbewerber, Zielgruppen-Skizze) sind Entwurfs-Slots ohne
+Katalog-Frage; nach den echten Fragen des Kapitels lief jede Eingabe als freie Frage ohne Feld,
+George trieb das Feld an, nichts wurde gespeichert. (6) **Weg B — sichtbares Antwort-Modul für die
+Entwurfs-Session:** Georges Frage plus Eingabefeld, der Text geht als Hinweis in den Entwurf und
+löst „George, entwirf das" direkt aus; kein neuer Schreibpfad, der Vertrag „ein Gesprächszug
+schreibt kein Feld" bleibt. Verworfen: Weg A (Chat-Text als Antwort speichern — Klassifikation
+oder Material-Speicher, ein roher Chat-Satz ist kein Pitch, 2–4 Tage) und „später". (7) **Der
+Gesprächs-Prompt sieht die beantworteten Fragen des ganzen Kapitels** (Nebenbefund: der Verlauf ist
+per Session geschnitten, der Generator liest kapitelweit — George konnte Fragen früherer Sessions
+wiederholen): nur die Liste Frage + Kurzantwort reist mit, der Session-Schnitt des Chat-Verlaufs
+(brand-011) bleibt. Verworfen: Session-Schnitt auch für die Wiederholungs-Regel.
+(8) **Auto-Weiter bleibt; die Entwurfs-Felder kommen NACH den Fragen** (Nebenbefund aus dem
+Weg-B-Lauf, nach Empfehlung): nach dem Eröffnungszug einer Entwurfs-Session springt §5 Auto-Weiter
+zur ersten Katalog-Frage, das Antwort-Modul steht beim ersten Besuch nur kurz — gewollt: Georges
+Interview läuft zuerst durch die echten Fragen, Pitch/Kategorie/Wettbewerber/Zielgruppen-Skizze
+entstehen danach aus dem Material, und dort steht das Modul stabil. Verworfen: Auto-Weiter hält auf
+Entwurfs-Sessions an; Registry-Reihenfolge des Kontext-Kapitels umbauen.
 
 ---
 
@@ -369,7 +432,7 @@ Routen, damit ihn niemand für eine Nachlässigkeit hält.
 ## 2026-09-08 — Brand Design: Prototyp FREIGEGEBEN (Phase 4), Pakete D0–D9 verbindlich; Vision/Bild über OpenRouter mit ZDR-Filter
 
 **Entscheidung 1 (David):** Der Playground-Prototyp ist als Bauvorlage freigegeben. Die
-Pakete in docs/plans/BRAND-DESIGN.md §2.18 sind damit verbindlich, Start mit **D0
+Pakete in docs/archiv/BRAND-DESIGN.md §2.18 sind damit verbindlich, Start mit **D0
 „Verträge"** (Registry-Steps + Sessions, Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`,
 `buildBrandDesign`, Ramp-Import als A14-Vertrag, Journey mit Freischaltung — Struktur, noch
 keine Inhalte, keine Migration). Empfehlung angenommen.
@@ -391,7 +454,7 @@ Vergleich in der Farbwelt (zwei feste Szenen nebeneinander mit Kontrast-Urteil j
 Damit sind alle bisher angesprochenen Prototyp-Korrekturen (Abstände, 72-rem-Bühne, Raster,
 Farb-Picker, gestapelte Mix-&-Match-Chips) und beide Nachträge abgenommen. Offen ist die
 FREIGABE des Gesamt-Prototyps als Bauvorlage (Phase 4 nach WORKFLOW.md) — danach werden die
-Pakete D0–D9 in docs/plans/BRAND-DESIGN.md §2.18 verbindlich, beginnend mit D0 (Verträge).
+Pakete D0–D9 in docs/archiv/BRAND-DESIGN.md §2.18 verbindlich, beginnend mit D0 (Verträge).
 
 ---
 
@@ -411,7 +474,7 @@ Upload; das „Moodboard am Ende" ist in beiden Wegen dasselbe Ergebnis-Board. L
 lesen, nie nachbauen; Bilder sind Eingabe, nie Ausgabe (kein Snapshot/Share); Foundation ist
 der Maßstab; Vision-Transport mit ZDR wie die Bild-KI. **Produkt:** Brand Design wird als
 eigenständiges Produkt neben der Foundation verkauft — die Foundation bleibt Voraussetzung,
-Fassung 1 Studio-begleitet, Selbstbedienung später. Konzept: docs/plans/BRAND-DESIGN.md §2.2,
+Fassung 1 Studio-begleitet, Selbstbedienung später. Konzept: docs/archiv/BRAND-DESIGN.md §2.2,
 §2.8, §1.8-Nachtrag; Paket D2 erweitert.
 
 ---
@@ -581,7 +644,7 @@ Entscheidungen IMMER als Fragen mit Antwortmöglichkeiten und Empfehlung, nie al
 ## 2026-09-07 — Brand Design (Produkt 02): Konzept freigegeben, Prototyp beauftragt
 
 **Entscheidung (David):** „Konzept freigegeben, bau den Prototyp im Playground." Damit ist
-docs/plans/BRAND-DESIGN.md §2 verbindlich; die drei offenen Punkte aus §2.19 gelten nach
+docs/archiv/BRAND-DESIGN.md §2 verbindlich; die drei offenen Punkte aus §2.19 gelten nach
 Empfehlung: Bild-Anbieter mit ZDR wird vor D5c geprüft (bis dahin Stufe 3 hinter dem
 Config-Gate aus), Freischaltung per Skript UND Dashboard-Knopf, Kapitel-Namen im UI
 „Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung" (Ids bleiben englisch).
@@ -593,7 +656,7 @@ Abnahme, dann Pakete D0–D9.
 ## 2026-09-07 — Brand Design (Produkt 02): Strategie freigegeben — fünf Schritte tief, Zeichen in drei Stufen inkl. KI-Bildlogos, Studio-begleitet, Schicht 2 der Werkstatt
 
 **Anlass:** „Starte die Strategie für Produkt 02 Brand Design" — Phase 1 des Workflows
-(docs/plans/BRAND-DESIGN.md §1: Bestandsaufnahme, Zielbild „Design-System statt
+(docs/archiv/BRAND-DESIGN.md §1: Bestandsaufnahme, Zielbild „Design-System statt
 Bildergalerie, hergeleitet aus der Strategie", Konkurrenz Looka/Brandmark/LogoAI/Tailor
 Brands · Huemint/Fontjoy/Realtime Colors · Canva/Frontify, Hypothesen H1–H7).
 **Entscheidungen (David, Fragenrunde):** (1) **Alle fünf Schritte gleich tief** — Moodboard,

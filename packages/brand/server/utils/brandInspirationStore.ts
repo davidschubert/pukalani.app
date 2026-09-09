@@ -26,7 +26,7 @@ import {
 } from './brandStore'
 
 /**
- * DIE VORBILDER — DER SPEICHER (Konzept docs/plans/BRAND-DESIGN.md §2.2/§2.13,
+ * DIE VORBILDER — DER SPEICHER (Konzept docs/archiv/BRAND-DESIGN.md §2.2/§2.13,
  * Paket D2a).
  *
  * ── DIE DATEI IST DIE WAHRHEIT, DIE ZEILE BESCHREIBT SIE ──────────────────
@@ -419,11 +419,24 @@ export async function createBrandInspiration(
  *
  * 404 auf die Datei ist kein Fehler: „entfernen, was nicht da ist" ist ein
  * No-op, und das Ziel des Klicks ist erreicht.
+ *
+ * ── ZWEI HÄRTEN FÜR ZWEI AUFRUFER (`strictFile`) ──────────────────────────
+ * BEIM KLICK bleibt die Bucket-Löschung FAIL-SOFT: der Mensch hat „entfernen"
+ * gedrückt, die Zeile ist weg, die Karte verschwindet — an einem Speicher, der
+ * gerade zickt, soll das nicht scheitern. Der Rest ist unsichtbar und wird
+ * beim nächsten Anlauf mitgenommen.
+ *
+ * DER GDPR-LAUF IST DER HARTE WEG (`strictFile: true`, s. `purgeBrandInspiration`
+ * unten): dort ist die Datei selbst der Gegenstand der Zusage, und ein
+ * geschluckter Fehler wäre eine gemeldete Löschung, die nicht stattgefunden
+ * hat. Deshalb ist es ein ARGUMENT und keine zweite Funktion — es gibt genau
+ * eine Löschreihenfolge, aber zwei Versprechen darüber.
  */
 export async function deleteBrandInspiration(
   event: H3Event,
   profileId: string,
   fileId: string,
+  options: { strictFile?: boolean } = {},
 ): Promise<void> {
   const { tablesDB, databaseId } = brandDb(event)
   try {
@@ -444,6 +457,9 @@ export async function deleteBrandInspiration(
         fileId,
         message: error instanceof Error ? error.message : 'unknown',
       })
+      if (options.strictFile) {
+        throw brandInspirationUnavailable(error, { profileId, fileId, stage: 'delete_file' })
+      }
     })
 }
 
@@ -455,12 +471,31 @@ export async function deleteBrandInspiration(
  * IDEMPOTENT wie die Kaskade selbst: eine fehlende Tabelle ist eine Null, kein
  * Abbruch (Vertrag des GDPR-Contributors: „ein Re-Run nach Teilfehler findet
  * Rest-Daten oder nichts und terminiert erfolgreich").
+ *
+ * ── EIN FEHLER WIRD GEWORFEN, NICHT GEZÄHLT (Audit-Befund 2026-09-09) ─────
+ * Hier stand `…catch(() => {}); removed += 1`: JEDER Fehler war geschluckt und
+ * wurde trotzdem als „entfernt" gezählt. Das ist bei einer Löschzusage die
+ * teuerste denkbare Zeile — der GDPR-Lauf hätte einen vollen Bucket als
+ * vollständige Löschung gemeldet, und die Zahl im Log hätte es bestätigt.
+ *
+ * Geschluckt wird deshalb nur noch das 404 („war schon weg" ist das Ziel),
+ * alles andere fliegt. `deleteUserCompletely` löscht den Nutzer NUR bei
+ * Voll-Erfolg — dass ein Fehler hier den ganzen Lauf anhält, ist genau das
+ * gewollte Verhalten: lieber ein sichtbar unfertiger Lauf, der sich
+ * wiederholen lässt, als ein stiller Rest ohne Eigentümer. `removed` zählt
+ * erst NACH dem erfolgreichen Löschen.
+ *
+ * Die Bilder-LISTE bleibt fail-soft: eine (noch) nicht angelegte Tabelle ist
+ * eine Null, kein Abbruch — das ist der Idempotenz-Vertrag oben und keine
+ * verschwiegene Datei.
  */
 export async function purgeBrandInspiration(event: H3Event, profileId: string): Promise<number> {
   const entries = await listBrandInspiration(event, profileId).catch(() => [])
   let removed = 0
   for (const entry of entries) {
-    await deleteBrandInspiration(event, profileId, entry.id).catch(() => {})
+    // Kein `catch` mehr: `deleteBrandInspiration` schluckt das 404 schon
+    // selbst (Zeile wie Datei), und alles andere GEHÖRT nach oben.
+    await deleteBrandInspiration(event, profileId, entry.id, { strictFile: true })
     removed += 1
   }
   return removed
