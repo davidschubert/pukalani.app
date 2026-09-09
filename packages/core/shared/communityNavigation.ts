@@ -349,53 +349,13 @@ export function cmsPageNavId(slug: string): string {
 export const CMS_PAGE_NAV_ORDER = 60
 
 /**
- * WESSEN MENÜ IST DAS? — die rowId in `community_navigation` (U15 Teil 3, seit
- * 2026-09-08).
- *
- * Die Tabelle hat keine `communityId`-Spalte, ihre **rowId IST der Besitzer**
- * (Form von `community_branding`, system-028). Bis heute rechnete das jede
- * Route selbst als `useTenant(event)?.communityId` — und genau daran scheiterte
- * das Speichern in JEDER Silo-App: dort gibt es keinen Mandanten, also war die
- * Id leer, also antwortete `PATCH /api/pages/navigation` 404. Auf
- * branding.supply und comments.pukalani.app war der Reiter deshalb ein
- * Schalter ohne Draht.
- *
- * DREI FÄLLE, und der mittlere ist der neue:
- *
- *  1. **Pool-Mandant** ⇒ seine `communityId` (unverändert).
- *  2. **Kein Mandant und keine Mandantenfähigkeit** (Silo/Single-Tenant:
- *     branding, portfolio, comments, photos, Playground) ⇒ `'instance'`. Die
- *     Instanz IST hier der Besitzer, es gibt genau eine Website. Kollidieren
- *     kann der Name nicht: die Community-Zeilen liegen im POOL-Projekt, die
- *     `instance`-Zeile in einem SILO-Projekt — nie beide im selben —, und ein
- *     `unique()`-Schlüssel ist ohnehin 20 Hex-Zeichen. ERST WAR ES `_instance`
- *     nach dem Muster `_account` der Benachrichtigungen — aber das ist dort ein
- *     Spalten-WERT; als ROW-ID lehnt Appwrite einen führenden Unterstrich ab
- *     („Can't start with a leading underscore", Klickbeweis 2026-09-08:
- *     Speichern antwortete 500). Muster also nicht übertragbar.
- *  3. **Kontroll-Host der Pool-App** (kein Mandant, aber Mandantenfähigkeit an)
- *     ⇒ `null`. Dort gibt es keine Community, deren Menü jemand wählen dürfte;
- *     GET liefert leer, PATCH antwortet 404 — genau wie vorher. Ohne diese
- *     Unterscheidung schrieben alle Kontroll-Hosts in dieselbe `instance`-Zeile
- *     und legten damit ein Menü an, das nie jemand rendert.
- *
- * `onControlHost` kommt server-seitig aus `event.context.controlCenter` — die
- * Fahne, die `00.tenant.ts` genau in Fall 3 setzt. Sie ist ein eigenes
- * Argument und nicht aus dem Mandanten hergeleitet, weil sie es nicht sein
- * KANN: Fall 2 und Fall 3 haben beide `tenant === null`.
+ * WESSEN MENÜ? Die Row-Id-Regel ist seit dem 2026-09-08 GETEILT mit Sucheintrag
+ * und Weiterleitungen (`shared/communitySettingsRow.ts` — dort stehen die drei
+ * Fälle und die `_instance`-Falle). Hier bleiben nur die alten Namen, damit
+ * bestehende Aufrufer und Tests weiterlaufen.
  */
-export const INSTANCE_NAV_ROW_ID = 'instance'
-
-export function communityNavRowId(
-  tenant: { communityId?: string } | null | undefined,
-  onControlHost = false,
-): string | null {
-  if (onControlHost) return null
-  if (!tenant) return INSTANCE_NAV_ROW_ID
-  // Fail-closed: ein Mandant OHNE communityId ist ein Datenfehler (der Resolver
-  // setzt sie immer) — dann lieber kein Menü als das der ganzen Instanz.
-  return tenant.communityId || null
-}
+export { INSTANCE_SETTINGS_ROW_ID as INSTANCE_NAV_ROW_ID } from './communitySettingsRow'
+export { communitySettingsRowId as communityNavRowId } from './communitySettingsRow'
 
 /**
  * Ein INTERNER Pfad dieser Community — und zwar wirklich ein Pfad.

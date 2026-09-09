@@ -1,7 +1,7 @@
 import { Query } from 'node-appwrite'
 import type { H3Event } from 'h3'
 import { communityNavigationSchema } from '../../../schemas/navigation'
-import { communityNavRowId, isCustomNavLinkId } from '../../../../core/shared/communityNavigation'
+import { isCustomNavLinkId } from '../../../../core/shared/communityNavigation'
 import type { CommunityNavOverride } from '../../../../core/shared/communityNavigation'
 import { PAGES_TABLE, type PageRow } from '../../../shared/types/page'
 
@@ -57,7 +57,7 @@ export default defineEventHandler(async (event): Promise<CommunityNavOverride> =
    * der Pool-App: dort gibt es keine Community, deren Menü jemand wählen
    * dürfte, und die Antwort ist dieselbe wie bei `PATCH /api/community/branding`.
    */
-  const rowId = communityNavRowId(useTenant(event), event.context.controlCenter === true)
+  const rowId = communitySettingsRowIdFor(event)
   if (!rowId) throw createError({ status: 404, statusText: 'Not found' })
 
   const body = await readValidatedBody(event, communityNavigationSchema.parse)

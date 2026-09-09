@@ -1,5 +1,5 @@
 import type { CommunityNavOverride } from '../../../../core/shared/communityNavigation'
-import { communityNavRowId, emptyCommunityNavOverride } from '../../../../core/shared/communityNavigation'
+import { emptyCommunityNavOverride } from '../../../../core/shared/communityNavigation'
 
 /**
  * Öffentlich: die MENÜ-WAHL dieser Community (U15 Teil 1).
@@ -37,7 +37,7 @@ import { communityNavRowId, emptyCommunityNavOverride } from '../../../../core/s
 export default defineEventHandler(async (event): Promise<CommunityNavOverride> => {
   assertCommunityContentReadable(event, 'Navigation not found')
 
-  const rowId = communityNavRowId(useTenant(event), event.context.controlCenter === true)
+  const rowId = communitySettingsRowIdFor(event)
   if (!rowId) return emptyCommunityNavOverride()
 
   const override = await readCommunityNavOverride(event, rowId)
