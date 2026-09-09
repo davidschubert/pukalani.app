@@ -1,14 +1,21 @@
 import { describe, expect, it } from 'vitest'
 import {
   type CommunityNavCandidate,
+  type CommunityNavItem,
   type CommunityNavOverride,
+  INSTANCE_NAV_ROW_ID,
   MAX_NAV_CONFIG_CHARS,
   communityNavConfigFits,
+  communityNavRowId,
   filterChromeNavEntries,
   isCustomNavLinkId,
+  isGroupNavId,
   isSafeExternalNavTarget,
   isSafeInternalNavTarget,
+  navItemHasTarget,
+  navMenuChildren,
   nextCustomNavLinkId,
+  nextGroupNavId,
   parseCommunityNavOverride,
   resolveCommunityNav,
 } from '../shared/communityNavigation'
@@ -204,12 +211,285 @@ describe('Ziel-Prädikate', () => {
     expect(isCustomNavLinkId('page-link-1')).toBe(false)
   })
 
+  it('erkennt Gruppen-Ids, und die beiden Namensräume schneiden sich nicht', () => {
+    expect(isGroupNavId('group-1')).toBe(true)
+    expect(isGroupNavId('group-')).toBe(false)
+    expect(isGroupNavId('feed')).toBe(false)
+    // GEGENPROBE: eine Gruppe ist KEIN eigener Link und umgekehrt — davon hängt
+    // ab, welchen Zweig die Regel nimmt (Ziel prüfen vs. Ziel verbieten).
+    expect(isCustomNavLinkId('group-1')).toBe(false)
+    expect(isGroupNavId('link-1')).toBe(false)
+  })
+
   it('vergibt Link-Ids über das Maximum, nicht über die Anzahl', () => {
     expect(nextCustomNavLinkId([])).toBe('link-1')
     expect(nextCustomNavLinkId([{ id: 'link-1' }, { id: 'link-7' }])).toBe('link-8')
     // Der entfernte link-7 darf seine Id nicht an den nächsten weitergeben.
     expect(nextCustomNavLinkId([{ id: 'link-7' }])).toBe('link-8')
     expect(nextCustomNavLinkId([{ id: 'feed' }])).toBe('link-1')
+  })
+
+  it('zählt Gruppen GETRENNT von eigenen Links', () => {
+    expect(nextGroupNavId([])).toBe('group-1')
+    expect(nextGroupNavId([{ id: 'group-3' }])).toBe('group-4')
+    // GEGENPROBE: die Zähler sehen einander nicht.
+    expect(nextGroupNavId([{ id: 'link-9' }])).toBe('group-1')
+    expect(nextCustomNavLinkId([{ id: 'group-9' }])).toBe('link-1')
+  })
+})
+
+/**
+ * WESSEN MENÜ IST DAS? (U15 Teil 3 — die Frage, an der das Speichern in JEDER
+ * Silo-App gescheitert ist.)
+ */
+describe('communityNavRowId', () => {
+  it('Pool-Mandant: seine communityId (unverändert)', () => {
+    expect(communityNavRowId({ communityId: 'c-1' })).toBe('c-1')
+  })
+
+  it('Silo/Single-Tenant (kein Mandant): die Instanz ist der Besitzer', () => {
+    expect(communityNavRowId(null)).toBe(INSTANCE_NAV_ROW_ID)
+    expect(communityNavRowId(undefined)).toBe(INSTANCE_NAV_ROW_ID)
+    // Eine GÜLTIGE Appwrite-Row-Id: kein führender Unterstrich (Appwrite lehnt
+    // ihn ab — `_instance` starb am 2026-09-08 im Klickbeweis mit 500), nur
+    // [A-Za-z0-9_.-], höchstens 36 Zeichen.
+    expect(INSTANCE_NAV_ROW_ID).toMatch(/^[A-Za-z0-9][A-Za-z0-9_.-]{0,35}$/)
+  })
+
+  it('GEGENPROBE: Kontroll-Host der Pool-App hat gar keinen Besitzer', () => {
+    expect(communityNavRowId(null, true)).toBeNull()
+    // Auch mit Mandant — die Fahne schlägt alles (dort ist nichts gescopt).
+    expect(communityNavRowId({ communityId: 'c-1' }, true)).toBeNull()
+  })
+
+  it('GEGENPROBE: ein Mandant OHNE communityId ist fail-closed, nicht `instance`', () => {
+    expect(communityNavRowId({})).toBeNull()
+    expect(communityNavRowId({ communityId: '' })).toBeNull()
+  })
+})
+
+// ── Unterpunkte (U15 Teil 3, Zusagen 5–8) ─────────────────────────────────
+
+const child = (id: string, parent: string) => ({ id, parent })
+
+describe('resolveCommunityNav — Zusage 5: ein Kind folgt seinem Hauptpunkt', () => {
+  it('hängt das Kind unter den Hauptpunkt und nimmt es aus der obersten Reihe', () => {
+    const override: CommunityNavOverride = {
+      entries: [{ id: 'feed' }, child('events', 'feed'), { id: 'discussions' }],
+    }
+    const items = resolveCommunityNav(candidates, override)
+    expect(ids(items)).toEqual(['feed', 'discussions', 'page-about'])
+    expect(ids(items[0]!.children ?? [])).toEqual(['events'])
+  })
+
+  it('die Kinder-Reihenfolge ist die Array-Reihenfolge unter Geschwistern', () => {
+    const override: CommunityNavOverride = {
+      entries: [child('page-about', 'feed'), { id: 'feed' }, child('events', 'feed')],
+    }
+    const items = resolveCommunityNav(candidates, override)
+    // Das Kind steht VOR seinem Hauptpunkt im Array und landet trotzdem hinter
+    // ihm — aber vor dem zweiten Kind.
+    expect(ids(items[0]!.children ?? [])).toEqual(['page-about', 'events'])
+  })
+
+  it('GEGENPROBE: ohne `parent` bleibt derselbe Eintrag ein Hauptpunkt', () => {
+    const override: CommunityNavOverride = { entries: [{ id: 'feed' }, { id: 'events' }] }
+    const items = resolveCommunityNav(candidates, override)
+    expect(ids(items)).toContain('events')
+    expect(items[0]!.children).toBeUndefined()
+  })
+
+  it('GEGENPROBE: ein Kind erscheint NICHT zweimal (nicht auch im Anhang)', () => {
+    const override: CommunityNavOverride = { entries: [{ id: 'feed' }, child('events', 'feed')] }
+    const flat = JSON.stringify(resolveCommunityNav(candidates, override))
+    expect(flat.match(/"events"/g)).toHaveLength(1)
+  })
+
+  it('ein Kind mit eigenem Text und ein eigener Link als Kind', () => {
+    const override: CommunityNavOverride = {
+      entries: [
+        { id: 'feed' },
+        { id: 'events', label: 'Termine', parent: 'feed' },
+        { id: 'link-1', label: 'Shop', to: 'https://shop.example', external: true, parent: 'feed' },
+      ],
+    }
+    const children = resolveCommunityNav(candidates, override)[0]!.children ?? []
+    expect(children.map(item => item.label)).toEqual(['Termine', 'Shop'])
+    expect(children[1]!.external).toBe(true)
+  })
+})
+
+describe('resolveCommunityNav — Zusage 6: nichts verschwindet (fail-soft)', () => {
+  it('ausgeblendeter Hauptpunkt ⇒ das Kind steht an SEINER Array-Position', () => {
+    const override: CommunityNavOverride = {
+      entries: [{ id: 'feed', hidden: true }, child('events', 'feed'), { id: 'discussions' }],
+    }
+    const items = resolveCommunityNav(candidates, override)
+    expect(ids(items)).toEqual(['events', 'discussions', 'page-about'])
+  })
+
+  it('GEGENPROBE: das eigene `hidden` des Kindes gilt weiter', () => {
+    const override: CommunityNavOverride = {
+      entries: [{ id: 'feed', hidden: true }, { id: 'events', hidden: true, parent: 'feed' }],
+    }
+    expect(ids(resolveCommunityNav(candidates, override))).not.toContain('events')
+  })
+
+  it('unbekannter Hauptpunkt ⇒ Hauptpunkt', () => {
+    const override: CommunityNavOverride = { entries: [child('events', 'gibt-es-nicht')] }
+    expect(ids(resolveCommunityNav(candidates, override))[0]).toBe('events')
+  })
+
+  it('Hauptpunkt gar nicht im Dokument ⇒ Hauptpunkt (Anhang bleibt Anhang)', () => {
+    // `feed` steht nur im Anhang (Zusage 3) — es ist kein ERWÄHNTER Eintrag,
+    // trägt also auch keine Elternschaft.
+    const override: CommunityNavOverride = { entries: [child('events', 'feed')] }
+    const items = resolveCommunityNav(candidates, override)
+    expect(ids(items)[0]).toBe('events')
+    expect(items[0]!.children).toBeUndefined()
+  })
+
+  it('Hauptpunkt ist SELBST ein Kind ⇒ das Enkelkind wird Hauptpunkt (eine Ebene)', () => {
+    const override: CommunityNavOverride = {
+      entries: [{ id: 'feed' }, child('discussions', 'feed'), child('events', 'discussions')],
+    }
+    const items = resolveCommunityNav(candidates, override)
+    expect(ids(items)).toEqual(['feed', 'events', 'page-about'])
+    expect(ids(items[0]!.children ?? [])).toEqual(['discussions'])
+    // GEGENPROBE: das Kind trägt selbst keine Kinder.
+    expect(items[0]!.children![0]!.children).toBeUndefined()
+  })
+
+  it('ein Kreis (A→B, B→A) nimmt die Seite nicht mit', () => {
+    const override: CommunityNavOverride = {
+      entries: [child('feed', 'events'), child('events', 'feed')],
+    }
+    const items = resolveCommunityNav(candidates, override)
+    // Eine der beiden wird Hauptpunkt, keine verschwindet, nichts hängt.
+    expect(ids(items).length).toBeGreaterThan(0)
+    expect(JSON.stringify(items)).toContain('feed')
+    expect(JSON.stringify(items)).toContain('events')
+  })
+
+  it('ein Eintrag, der auf SICH SELBST zeigt, ist ein Hauptpunkt', () => {
+    const override: CommunityNavOverride = { entries: [child('feed', 'feed')] }
+    expect(ids(resolveCommunityNav(candidates, override))[0]).toBe('feed')
+  })
+})
+
+describe('resolveCommunityNav — Gruppen und Zusage 7', () => {
+  it('eine Gruppe mit Kindern erscheint als Hauptpunkt ohne Ziel', () => {
+    const override: CommunityNavOverride = {
+      entries: [{ id: 'group-1', label: 'Products' }, child('feed', 'group-1'), child('events', 'group-1')],
+    }
+    const items = resolveCommunityNav(candidates, override)
+    expect(items[0]).toMatchObject({ id: 'group-1', label: 'Products', to: '', external: false })
+    expect(ids(items[0]!.children ?? [])).toEqual(['feed', 'events'])
+    expect(navItemHasTarget(items[0]!)).toBe(false)
+  })
+
+  it('GEGENPROBE: eine Gruppe OHNE Kinder wird nicht gerendert', () => {
+    const override: CommunityNavOverride = { entries: [{ id: 'group-1', label: 'Products' }] }
+    expect(ids(resolveCommunityNav(candidates, override))).not.toContain('group-1')
+  })
+
+  it('GEGENPROBE: eine Gruppe, deren Kinder ALLE ausgeblendet sind, ebenfalls nicht', () => {
+    const override: CommunityNavOverride = {
+      entries: [{ id: 'group-1', label: 'Products' }, { id: 'feed', hidden: true, parent: 'group-1' }],
+    }
+    expect(ids(resolveCommunityNav(candidates, override))).not.toContain('group-1')
+  })
+
+  it('GEGENPROBE: eine Gruppe OHNE Text fällt weg, ein `to` an ihr wird ignoriert', () => {
+    const leer: CommunityNavOverride = { entries: [{ id: 'group-1', label: '  ' }, child('feed', 'group-1')] }
+    expect(ids(resolveCommunityNav(candidates, leer))).toEqual(['feed', 'discussions', 'events', 'page-about'])
+
+    const mitZiel: CommunityNavOverride = {
+      entries: [{ id: 'group-1', label: 'Products', to: 'https://evil.example', external: true }, child('feed', 'group-1')],
+    }
+    const items = resolveCommunityNav(candidates, mitZiel)
+    expect(items[0]!.to).toBe('')
+    expect(items[0]!.external).toBe(false)
+  })
+
+  it('GEGENPROBE: eine Gruppe als KIND ist ein toter Eintrag und fällt weg', () => {
+    const override: CommunityNavOverride = {
+      entries: [{ id: 'feed' }, { id: 'group-1', label: 'Products', parent: 'feed' }],
+    }
+    const items = resolveCommunityNav(candidates, override)
+    expect(items[0]!.children).toBeUndefined()
+    expect(JSON.stringify(items)).not.toContain('group-1')
+  })
+
+  it('eine ausgeblendete Gruppe nimmt ihre Kinder nicht mit (Zusage 6)', () => {
+    const override: CommunityNavOverride = {
+      entries: [{ id: 'group-1', label: 'Products', hidden: true }, child('feed', 'group-1')],
+    }
+    expect(ids(resolveCommunityNav(candidates, override))[0]).toBe('feed')
+  })
+
+  it('ein Hauptpunkt MIT Ziel und OHNE Kinder bleibt ein gewöhnlicher Link', () => {
+    const items = resolveCommunityNav(candidates, { entries: [{ id: 'feed' }] })
+    expect(items[0]!.children).toBeUndefined()
+    expect(navItemHasTarget(items[0]!)).toBe(true)
+  })
+})
+
+describe('resolveCommunityNav — Zusage 8: die Antwort zählt nur Hauptpunkte', () => {
+  it('drei Kinder unter einem Hauptpunkt belegen EINEN Platz in der Reihe', () => {
+    const override: CommunityNavOverride = {
+      entries: [
+        { id: 'group-1', label: 'Alles' },
+        child('feed', 'group-1'),
+        child('discussions', 'group-1'),
+        child('events', 'group-1'),
+      ],
+    }
+    const items = resolveCommunityNav(candidates, override)
+    // Ohne Verschachtelung wären es vier Einträge (und damit ein Überlauf).
+    expect(items).toHaveLength(2)
+    expect(ids(items)).toEqual(['group-1', 'page-about'])
+  })
+
+  it('GEGENPROBE: ohne Gruppierung sind es wieder vier', () => {
+    expect(resolveCommunityNav(candidates, null)).toHaveLength(4)
+  })
+})
+
+describe('navMenuChildren — was im Aufklapper steht', () => {
+  const kind: CommunityNavItem = { id: 'events', label: 'Events', to: '/events', external: false }
+
+  it('Hauptpunkt MIT eigenem Ziel: er selbst steht als ERSTER Eintrag', () => {
+    const item: CommunityNavItem = { id: 'feed', label: 'Feed', to: '/feed', external: false, children: [kind] }
+    const menu = navMenuChildren(item)
+    expect(menu.map(entry => entry.id)).toEqual(['feed', 'events'])
+    expect(menu[0]).toMatchObject({ label: 'Feed', to: '/feed' })
+    // … und zwar OHNE Kinder, sonst wäre der erste Eintrag ein zweiter Aufklapper.
+    expect(menu[0]!.children).toBeUndefined()
+  })
+
+  it('GEGENPROBE: eine Gruppe (kein eigenes Ziel) steht NICHT in ihrem eigenen Aufklapper', () => {
+    const gruppe: CommunityNavItem = { id: 'group-1', label: 'Products', to: '', external: false, children: [kind] }
+    expect(navMenuChildren(gruppe).map(entry => entry.id)).toEqual(['events'])
+  })
+
+  it('GEGENPROBE: ohne Kinder gibt es keinen Aufklapper', () => {
+    expect(navMenuChildren({ id: 'feed', label: 'Feed', to: '/feed', external: false })).toEqual([])
+    expect(navMenuChildren({ id: 'feed', label: 'Feed', to: '/feed', external: false, children: [] })).toEqual([])
+  })
+
+  it('rührt die Kinder-Liste des Eintrags nicht an', () => {
+    const item: CommunityNavItem = { id: 'feed', label: 'Feed', to: '/feed', external: false, children: [kind] }
+    navMenuChildren(item).push(kind)
+    expect(item.children).toHaveLength(1)
+  })
+})
+
+describe('navItemHasTarget', () => {
+  it('unterscheidet Gruppe von Link', () => {
+    expect(navItemHasTarget({ to: '/feed' })).toBe(true)
+    expect(navItemHasTarget({ to: 'https://x.example' })).toBe(true)
+    expect(navItemHasTarget({ to: '' })).toBe(false)
   })
 })
 
@@ -233,6 +513,17 @@ describe('parseCommunityNavOverride', () => {
   it('übernimmt nur die bekannten Felder in der richtigen Form', () => {
     const parsed = parseCommunityNavOverride('{"entries":[{"id":"a","hidden":"ja","label":5,"external":"x","to":"/b"}]}')
     expect(parsed).toEqual({ entries: [{ id: 'a', to: '/b' }] })
+  })
+
+  it('übernimmt `parent` (U15 Teil 3)', () => {
+    expect(parseCommunityNavOverride('{"entries":[{"id":"events","parent":"feed"}]}'))
+      .toEqual({ entries: [{ id: 'events', parent: 'feed' }] })
+  })
+
+  it('GEGENPROBE: ein `parent`, das keine Zeichenkette ist, heisst „Hauptpunkt"', () => {
+    for (const raw of ['{"entries":[{"id":"a","parent":5}]}', '{"entries":[{"id":"a","parent":null}]}', '{"entries":[{"id":"a","parent":true}]}']) {
+      expect(parseCommunityNavOverride(raw)).toEqual({ entries: [{ id: 'a' }] })
+    }
   })
 })
 

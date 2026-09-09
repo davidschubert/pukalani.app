@@ -3,6 +3,9 @@
  *  Discover · Journal) — inkl. Konto-Menü (Runde 132, David): das
  *  Avatar-Menü wohnt DAUERHAFT hier oben rechts, nicht mehr in der
  *  Werkstatt-Topbar. */
+import type { NavigationMenuItem } from '@nuxt/ui'
+import { navMenuChildren } from '../../../core/shared/communityNavigation'
+
 const route = useRoute()
 /* Die Beschriftungen laufen seit 2026-09-01 über i18n (`brand.nav.*`) —
  * vorher standen sie fest deutsch auch auf der englischen Oberfläche.
@@ -31,19 +34,80 @@ const localePath = useLocalePath()
  * und Insights bleiben draussen, bis ihre Marketing-Seiten existieren (die
  * i18n-Schlüssel `brand.nav.products` etc. bleiben dafür stehen).
  *
+ * ── DIE LISTE IST SEIT DEM 2026-09-08 NICHT MEHR FEST (U15 Teil 3) ─────────
+ * Hier standen drei hartkodierte Einträge, und daneben gab es unter
+ * /dashboard/community/navigation einen Navigations-Editor, der auf dieser Site
+ * NICHTS anbot und dessen Ergebnis niemand las — ein Schalter ohne Draht. Jetzt
+ * kommen die Einträge aus `useCommunityNav()`: Registry (`pukalani.chrome.nav`,
+ * eingetragen in `app/app.config.ts` dieses Layers) + veröffentlichte
+ * CMS-Seiten, danach die gespeicherte Wahl des Betreibers. Dieselbe Rechnung,
+ * dieselbe Regel und dieselben Zusagen wie auf jedem Pool-Host
+ * (PRODUKT-BILANZ: Pool und Silo zeigen identisches Produktverhalten).
+ *
  * Links IMMER über `localePath()` — nackte Pfade warfen den Besucher von /de
- * auf die englische Fassung.
+ * auf die englische Fassung. Das tut jetzt das Composable (`candidate.to`).
  */
-const menuItems = computed(() => [
-  // `includes` und nicht `endsWith`: die Anatomie `/discover/<slug>` gehört
-  // zu diesem Punkt, und ein Menü, das auf der Unterseite ausgeht, sieht wie
-  // ein anderer Bereich aus.
-  { label: t('brand.nav.discover'), to: localePath('/discover'), active: route.path.includes('/discover') },
-  // Seit der Aufteilung (Davids Entscheidung 2026-09-04) sind das ZWEI
-  // Seiten: /about = wer wir sind, /team = die Menschen dahinter.
-  { label: t('brand.nav.about'), to: localePath('/about'), active: route.path.endsWith('/about') },
-  { label: t('brand.nav.team'), to: localePath('/team'), active: route.path.endsWith('/team') },
-])
+const { items } = useCommunityNav()
+
+/**
+ * Steht der Besucher gerade auf diesem Eintrag?
+ *
+ * `startsWith(to + '/')` statt des früheren `route.path.includes('/discover')`:
+ * die Anatomie `/discover/<slug>` gehört zu diesem Punkt (ein Menü, das auf der
+ * Unterseite ausgeht, sieht wie ein anderer Bereich aus), aber `includes` traf
+ * auch jeden fremden Pfad, in dem das Wort irgendwo vorkommt — und die Ziele
+ * sind jetzt frei wählbar, nicht mehr drei bekannte.
+ *
+ * Die Startseite (und ihre `/de`-Fassung) wird bewusst nur EXAKT aktiv: sonst
+ * wäre ein eigener Link auf `/` auf jeder Seite hervorgehoben.
+ */
+function isActive(to: string): boolean {
+  if (!to || to.startsWith('http')) return false
+  if (route.path === to) return true
+  if (to === '/' || /^\/[a-z]{2}$/.test(to)) return false
+  return route.path.startsWith(`${to}/`)
+}
+
+/**
+ * UNTERPUNKTE: `UNavigationMenu` versteht `children` selbst — waagerecht als
+ * Aufklapper, im mobilen `#body`-Menü als Akkordeon.
+ *
+ * ── NACHGELESEN IN `node_modules/@nuxt/ui` (4.11.1), NICHT GERATEN ─────────
+ * Ein Hauptpunkt MIT `to` UND `children` ist in `NavigationMenu.vue` kein
+ * gewöhnlicher Link mehr: waagerecht rendert ihn die Komponente als
+ * `NavigationMenuTrigger` (Reka UI), dessen Klick-Handler das Menü umschaltet
+ * — das `href` bleibt zwar stehen, aber auf einem Touch-Gerät verbraucht der
+ * Tipp den Klick und der Aufklapper öffnet sich nie. SENKRECHT ist es
+ * schlimmer: mit `href` rendert die Komponente einen `NavigationMenuLink` statt
+ * eines `AccordionTrigger`, es gibt also gar keinen Auslöser mehr — die Kinder
+ * wären im mobilen Menü unerreichbar.
+ *
+ * Deshalb bekommt ein Hauptpunkt mit Kindern hier bewusst KEIN `to`, und sein
+ * eigenes Ziel reist über `navMenuChildren()` als ERSTER Eintrag im Aufklapper
+ * mit (core entscheidet das, damit beide Renderer es gleich tun). `active`
+ * rechnet trotzdem den Hauptpunkt UND seine Kinder mit — die Hervorhebung soll
+ * nicht verschwinden, nur weil das Ziel eine Etage tiefer steht.
+ */
+const menuItems = computed<NavigationMenuItem[]>(() => items.value.map((item) => {
+  const children = navMenuChildren(item)
+  if (children.length) {
+    return {
+      label: item.label,
+      active: isActive(item.to) || children.some(child => isActive(child.to)),
+      children: children.map(child => ({
+        label: child.label,
+        to: child.to,
+        ...(child.external ? { target: '_blank' as const, rel: 'noopener' } : {}),
+      })),
+    }
+  }
+  return {
+    label: item.label,
+    to: item.to,
+    active: isActive(item.to),
+    ...(item.external ? { target: '_blank' as const, rel: 'noopener' } : {}),
+  }
+}))
 
 /* Neue Brand oeffnet das Start-Modal von jeder Seite aus. */
 const newBrandOpen = ref(false)

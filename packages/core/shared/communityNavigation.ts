@@ -13,7 +13,26 @@
  *
  * Davids Zuschnitt, und nur der: **ausblenden · umordnen · umbenennen**, dazu
  * **eigene Links** (auf CMS-Seiten dieser Community und auf externe
- * https-Adressen). Bewusst NICHT: Untermenüs, Icons, je Sprache eigene Texte.
+ * https-Adressen).
+ *
+ * ── UNTERPUNKTE, SEIT DEM 2026-09-08 (U15 Teil 3) ─────────────────────────
+ * Hier stand bis zu diesem Tag „Bewusst NICHT: Untermenüs". Das war richtig,
+ * solange das Menü aus vier Produkt-Einträgen bestand — und wurde falsch, als
+ * die ERSTE Site mit einer gewachsenen Seitenwelt dazukam: auf
+ * branding.supply gehören „Products", „Discover Brands" und „Brand Insights"
+ * nach Davids Aufteilung unter EINEN Punkt, und eine Reihe aus acht
+ * gleichrangigen Wörtern ist kein Menü, sondern eine Liste. Davids
+ * Entscheidung vom 2026-09-08 (DECISION-LOG „Navigation anpassen"): **GENAU
+ * EINE Ebene** — ein Hauptpunkt darf Kinder haben, ein Kind nicht. Alles
+ * andere aus der alten Absage gilt weiter: keine Icons je Kind, keine
+ * Beschreibungen je Kind, keine Texte je Sprache.
+ *
+ * Zwei Dinge daran sind bewusst und nicht bequem: (1) das neue Feld heisst
+ * `parent` und sitzt am KIND — eine `children`-Liste am Hauptpunkt hätte
+ * dieselbe Wahrheit zweimal beschrieben (Reihenfolge im Array UND
+ * Verschachtelung) und wäre bei einem gelöschten Hauptpunkt unlesbar geworden.
+ * (2) Es gibt eine neue Id-Art `group-<n>` für einen Hauptpunkt OHNE eigenes
+ * Ziel, weil sonst jeder Aufklapper eine Seite bräuchte, die es nicht gibt.
  *
  * ── EIGENE LABELS GELTEN FÜR BEIDE SPRACHEN (bewusster Verzicht) ───────────
  * Ein `labelKey` löst je Sprache auf; ein eigener Text tut das nicht. Der
@@ -53,6 +72,23 @@ export const COMMUNITY_NAVIGATION_TABLE = 'community_navigation'
  * Override-Eintrag ein Produkt MEINT oder selbst einer IST.
  */
 export const CUSTOM_NAV_LINK_PREFIX = 'link-'
+
+/**
+ * Präfix der Ids von GRUPPEN (`group-1`, `group-2`, … — U15 Teil 3, seit
+ * 2026-09-08).
+ *
+ * Eine Gruppe ist ein Hauptpunkt OHNE eigenes Ziel: ein Wort, das aufklappt.
+ * Sie braucht ein EIGENES Präfix und nicht bloss ein Feld an einem eigenen
+ * Link, weil sich beide Arten in genau der Frage unterscheiden, die jeder
+ * Leser stellt: „darf ich das anklicken?". Ein eigener Link OHNE `to` wäre ein
+ * Link ins Nichts — die Regel unten wirft ihn weg (`customLinkItem`), und
+ * genau das soll sie auch weiterhin tun. Ein Wort, das aufklappt, ist etwas
+ * anderes, und es sagt es über seine Id.
+ *
+ * Dieselbe Namensraum-Begründung wie oben gilt unverändert: `group-` ist
+ * reserviert, ein Produkt kann nie so heissen.
+ */
+export const GROUP_NAV_PREFIX = 'group-'
 
 /** Obergrenzen — sie stehen hier, damit Schema (schreiben) und Regel (lesen)
  *  dieselbe Zahl lesen; die Spaltengrösse rechnet die Migration daraus. */
@@ -101,17 +137,30 @@ export function communityNavConfigFits(override: CommunityNavOverride): boolean 
  */
 export interface CommunityNavOverrideEntry {
   /** Registry-Id eines Produkt-Eintrags, `page-<slug>` einer CMS-Seite,
-   *  oder `link-<n>` für einen eigenen Link. */
+   *  `link-<n>` für einen eigenen Link oder `group-<n>` für einen Hauptpunkt
+   *  ohne eigenes Ziel. */
   id: string
   /** Aus dem Menü nehmen (der Eintrag bleibt gespeichert und ist wieder
    *  einschaltbar — Verstecken ist kein Löschen). */
   hidden?: boolean
-  /** Eigener Text. Leer/fehlend = die mitgelieferte Übersetzung. */
+  /** Eigener Text. Leer/fehlend = die mitgelieferte Übersetzung.
+   *  Bei GRUPPEN ist er Pflicht: sie haben keinen mitgelieferten. */
   label?: string
   /** NUR für eigene Links: das Ziel. */
   to?: string
   /** NUR für eigene Links: externes Ziel (neuer Tab, rel="noopener"). */
   external?: boolean
+  /**
+   * NEU (U15 Teil 3, 2026-09-08): die Id des HAUPTPUNKTS, unter dem dieser
+   * Eintrag hängt. Fehlend = der Eintrag IST ein Hauptpunkt — und damit
+   * beschreibt der Default exakt das Verhalten von vor diesem Tag (additiv,
+   * s. Kopf der Schnittstelle).
+   *
+   * GENAU EINE EBENE: ein Eintrag mit `parent` darf selbst kein `parent`
+   * anderer sein. Die Regel unten setzt das fail-soft durch (Zusage 6), das
+   * Schema fail-loud beim Schreiben.
+   */
+  parent?: string
 }
 
 /** Die gespeicherte Wahl. Reihenfolge = Array-Reihenfolge. */
@@ -136,22 +185,205 @@ export interface CommunityNavCandidate {
   icon?: string
   planProduct?: string
   order: number
+  /**
+   * Derselbe Pfad OHNE Locale-Präfix (U15 Teil 3, additiv).
+   *
+   * WOZU EIN ZWEITER: `to` ist das fertige Ziel eines LINKS und läuft durch
+   * `localePath()` — auf `/de` steht dort `/de/feed`. Der EDITOR zeigt aber
+   * keine Links, er zeigt einem Menschen ADRESSEN („/feed"), und ein
+   * mitwandernder Sprach-Präfix sähe dort wie ein Teil der Adresse aus. Beide
+   * Werte am Kandidaten zu führen ist billiger als eine zweite
+   * Kandidaten-Rechnung für den Editor — genau die Doppelung, die
+   * `useCommunityNav()` beseitigt hat. Fehlend = `to` (Bestands-Aufrufer).
+   */
+  path?: string
 }
 
 /** Ein Eintrag, wie ihn das Layout RENDERT. */
 export interface CommunityNavItem {
   id: string
   label: string
+  /**
+   * Das Ziel. `''` GENAU bei Gruppen (`group-<n>`) — ein Wort, das nur
+   * aufklappt, hat keines. Renderer fragen `navItemHasTarget()`, statt den
+   * Leerstring an zwanzig Stellen selbst zu prüfen.
+   */
   to: string
   icon?: string
   planProduct?: string
   /** Externes Ziel — der Renderer setzt target="_blank" + rel="noopener". */
   external: boolean
+  /**
+   * Die Unterpunkte (U15 Teil 3) — fehlend/leer heisst „ein gewöhnlicher
+   * Eintrag", also das Verhalten von vor dem 2026-09-08. Genau eine Ebene: ein
+   * Kind trägt selbst nie `children`.
+   */
+  children?: CommunityNavItem[]
 }
 
 /** Ist das die Id eines EIGENEN Links (und nicht die eines Produkts)? */
 export function isCustomNavLinkId(id: string): boolean {
   return id.startsWith(CUSTOM_NAV_LINK_PREFIX) && id.length > CUSTOM_NAV_LINK_PREFIX.length
+}
+
+/** Ist das die Id einer GRUPPE (Hauptpunkt ohne eigenes Ziel)? */
+export function isGroupNavId(id: string): boolean {
+  return id.startsWith(GROUP_NAV_PREFIX) && id.length > GROUP_NAV_PREFIX.length
+}
+
+/**
+ * Hat dieser Eintrag ein eigenes Ziel? (Alles ausser einer Gruppe.)
+ *
+ * Als FUNKTION und nicht als Vergleich an der Aufrufstelle, weil die Antwort
+ * an vier Stellen gebraucht wird (zwei Renderer, Editor, Vorschau) und ein
+ * `item.to !== ''` dort wie ein Zufall aussähe.
+ */
+export function navItemHasTarget(item: Pick<CommunityNavItem, 'to'>): boolean {
+  return typeof item.to === 'string' && item.to !== ''
+}
+
+/**
+ * WAS EIN RENDERER IM AUFKLAPPER ZEIGT — die EINE Antwort für beide Renderer
+ * (blueprint-Layout und BwSiteNav).
+ *
+ * Hat der Hauptpunkt ein EIGENES Ziel und Kinder, steht er SELBST als erster
+ * Eintrag im Aufklapper (eigener Text, eigenes Ziel), danach seine Kinder.
+ *
+ * WARUM DAS HIER ENTSCHIEDEN WIRD UND NICHT JE RENDERER: sonst wäre das Ziel
+ * eines Hauptpunkts mit Kindern auf der einen Site erreichbar und auf der
+ * anderen nicht. Und es ist nicht bloss Geschmack — es ist die Deckung für
+ * eine Eigenheit der Bauteile: ein Punkt, der aufklappt, verbraucht den Klick
+ * fürs Aufklappen (auf einem Touch-Gerät sowieso), sein eigenes Ziel wäre
+ * damit für einen Teil der Leute unerreichbar. Als erster Eintrag im
+ * Aufklapper ist es für ALLE erreichbar.
+ *
+ * Ohne Kinder: leere Liste — dann rendert der Renderer einen gewöhnlichen Link
+ * und gar keinen Aufklapper.
+ */
+export function navMenuChildren(item: CommunityNavItem): CommunityNavItem[] {
+  const children = item.children ?? []
+  if (children.length === 0) return []
+  if (!navItemHasTarget(item)) return [...children]
+  // Der Hauptpunkt selbst — OHNE `children`, sonst wäre der erste Eintrag des
+  // Aufklappers ein zweiter Aufklapper.
+  const { children: _children, ...self } = item
+  return [self, ...children]
+}
+
+// ── DIE CMS-SEITEN ALS MENÜ-QUELLE ────────────────────────────────────────
+//
+// UMGEZOGEN AM 2026-09-08 (U15 Teil 3) aus `packages/pages/shared/types/page.ts`
+// — dort re-exportiert, bestehende Importe bleiben also gültig (und der
+// Auto-Import über `shared/types` ebenso; `core/shared/*.ts` wird NICHT
+// auto-importiert, es gibt hier also keine zweite Auto-Import-Quelle).
+//
+// ZWEI GRÜNDE, EINER DAVON HART: (1) der brand-Layer rendert seit heute
+// dasselbe Menü und darf den pages-Layer NICHT importieren (A14 — kein Layer
+// kennt einen fremden Produkt-Layer). (2) Die Kandidaten-Rechnung soll GENAU
+// EINMAL existieren (`useCommunityNav()`), und die stand vorher dreimal da.
+// Der pages-Layer bleibt trotzdem der EIGENTÜMER der Seiten: er liefert sie
+// aus (`/api/pages/public`) und er verwaltet sie. Was hierher gezogen ist, ist
+// ausschliesslich die Frage „wie heisst so eine Seite im MENÜ".
+
+/**
+ * Nav-Eintrag einer veröffentlichten Seite — bewusst OHNE body.
+ *
+ * Er stand seit dem 2026-08-02 in `pages/shared/types/page.ts` (statt an der
+ * Route, deren Nitro-Auto-Imports im App-Programm nicht existieren) und ist
+ * heute nur eine Etage tiefer gewandert, in dasselbe `shared`-Land.
+ */
+export interface PublicPageNavItem {
+  slug: string
+  title: string
+  sortOrder: number
+}
+
+/**
+ * Die Slugs, die eine CMS-Seite zu einer RECHTSSEITE machen — sie gehören in
+ * die Fußzeile, nicht in die Hauptnavigation.
+ *
+ * ZWEI SCHREIBWEISEN JE BEGRIFF, und das ist Absicht: die Slugs im Dashboard
+ * sind FREI benennbar, und ein deutschsprachiger Kunde legt „impressum" an,
+ * kein „imprint". Die SPRACHE einer Seite steckt dagegen in der ZEILE
+ * (`PageRow.locale`), nicht im Slug.
+ *
+ * Vor der Konstante lebte diese Liste dreimal, unterschiedlich lang — und eine
+ * veröffentlichte `terms`-Seite stand in blueprint-Apps in der
+ * HAUPTNAVIGATION und in portfolio im Fuß.
+ */
+export const LEGAL_PAGE_SLUGS = ['imprint', 'impressum', 'privacy', 'datenschutz', 'terms', 'agb'] as const
+export type LegalPageSlug = (typeof LEGAL_PAGE_SLUGS)[number]
+
+/** Ist dieser Slug eine Rechtsseite? Der EINE Test für Nav und Fußzeile. */
+export function isLegalPageSlug(slug: string): boolean {
+  return (LEGAL_PAGE_SLUGS as readonly string[]).includes(slug)
+}
+
+/**
+ * Die Nav-Id einer CMS-Seite (U15) — der Schlüssel, unter dem der
+ * Navigations-Editor sie ausblendet, umbenennt oder verschiebt.
+ *
+ * Sie wurde früher an ZWEI Orten gebildet (Layout und Editor); heute bildet sie
+ * nur noch `useCommunityNav()`. Die Konstante bleibt trotzdem, weil die
+ * Zeichenkette in Beweisen und im Bestand der gespeicherten Dokumente steht.
+ */
+export function cmsPageNavId(slug: string): string {
+  return `page-${slug}`
+}
+
+/**
+ * Wo CMS-Seiten im Menü stehen, wenn niemand etwas anderes gesagt hat: nach
+ * den Produkten (Default 50), vor „Pricing" (90).
+ */
+export const CMS_PAGE_NAV_ORDER = 60
+
+/**
+ * WESSEN MENÜ IST DAS? — die rowId in `community_navigation` (U15 Teil 3, seit
+ * 2026-09-08).
+ *
+ * Die Tabelle hat keine `communityId`-Spalte, ihre **rowId IST der Besitzer**
+ * (Form von `community_branding`, system-028). Bis heute rechnete das jede
+ * Route selbst als `useTenant(event)?.communityId` — und genau daran scheiterte
+ * das Speichern in JEDER Silo-App: dort gibt es keinen Mandanten, also war die
+ * Id leer, also antwortete `PATCH /api/pages/navigation` 404. Auf
+ * branding.supply und comments.pukalani.app war der Reiter deshalb ein
+ * Schalter ohne Draht.
+ *
+ * DREI FÄLLE, und der mittlere ist der neue:
+ *
+ *  1. **Pool-Mandant** ⇒ seine `communityId` (unverändert).
+ *  2. **Kein Mandant und keine Mandantenfähigkeit** (Silo/Single-Tenant:
+ *     branding, portfolio, comments, photos, Playground) ⇒ `'instance'`. Die
+ *     Instanz IST hier der Besitzer, es gibt genau eine Website. Kollidieren
+ *     kann der Name nicht: die Community-Zeilen liegen im POOL-Projekt, die
+ *     `instance`-Zeile in einem SILO-Projekt — nie beide im selben —, und ein
+ *     `unique()`-Schlüssel ist ohnehin 20 Hex-Zeichen. ERST WAR ES `_instance`
+ *     nach dem Muster `_account` der Benachrichtigungen — aber das ist dort ein
+ *     Spalten-WERT; als ROW-ID lehnt Appwrite einen führenden Unterstrich ab
+ *     („Can't start with a leading underscore", Klickbeweis 2026-09-08:
+ *     Speichern antwortete 500). Muster also nicht übertragbar.
+ *  3. **Kontroll-Host der Pool-App** (kein Mandant, aber Mandantenfähigkeit an)
+ *     ⇒ `null`. Dort gibt es keine Community, deren Menü jemand wählen dürfte;
+ *     GET liefert leer, PATCH antwortet 404 — genau wie vorher. Ohne diese
+ *     Unterscheidung schrieben alle Kontroll-Hosts in dieselbe `instance`-Zeile
+ *     und legten damit ein Menü an, das nie jemand rendert.
+ *
+ * `onControlHost` kommt server-seitig aus `event.context.controlCenter` — die
+ * Fahne, die `00.tenant.ts` genau in Fall 3 setzt. Sie ist ein eigenes
+ * Argument und nicht aus dem Mandanten hergeleitet, weil sie es nicht sein
+ * KANN: Fall 2 und Fall 3 haben beide `tenant === null`.
+ */
+export const INSTANCE_NAV_ROW_ID = 'instance'
+
+export function communityNavRowId(
+  tenant: { communityId?: string } | null | undefined,
+  onControlHost = false,
+): string | null {
+  if (onControlHost) return null
+  if (!tenant) return INSTANCE_NAV_ROW_ID
+  // Fail-closed: ein Mandant OHNE communityId ist ein Datenfehler (der Resolver
+  // setzt sie immer) — dann lieber kein Menü als das der ganzen Instanz.
+  return tenant.communityId || null
 }
 
 /**
@@ -233,6 +465,31 @@ function customLinkItem(entry: CommunityNavOverrideEntry): CommunityNavItem | nu
 }
 
 /**
+ * Aus einem Override-Eintrag eine GRUPPE machen — oder nichts (U15 Teil 3).
+ *
+ * Dieselbe defensive Haltung wie bei `customLinkItem` daneben, und derselbe
+ * Grund: das Dokument ist JSON in einer Spalte. Eine Gruppe OHNE Text wäre ein
+ * leeres Wort im Kopf der Seite, eine Gruppe MIT `to` wäre eine Umlenkung, die
+ * das Schema verbietet — hier fällt beides weg, statt es durchzulassen. Das
+ * `to` wird bewusst IGNORIERT und nicht als Fehler behandelt: es soll nichts
+ * verschwinden, nur weil ein altes Dokument ein Feld zu viel trägt.
+ */
+function groupItem(entry: CommunityNavOverrideEntry): CommunityNavItem | null {
+  if (!isGroupNavId(entry.id)) return null
+  if (entry.hidden === true) return null
+  const label = typeof entry.label === 'string' ? entry.label.trim() : ''
+  if (!label) return null
+  return { id: entry.id, label: label.slice(0, MAX_NAV_LABEL), to: '', external: false }
+}
+
+/** Der erklärte Hauptpunkt eines Eintrags — oder `null` („ist selbst einer"). */
+function declaredParent(entry: CommunityNavOverrideEntry): string | null {
+  const parent = typeof entry.parent === 'string' ? entry.parent.trim() : ''
+  if (!parent || parent === entry.id) return null
+  return parent
+}
+
+/**
  * DIE REGEL: angebotene Einträge + gespeicherte Wahl ⇒ das fertige Menü.
  *
  * ── VIER ZUSAGEN, DIE MAN NICHT „VEREINFACHEN" DARF ───────────────────────
@@ -261,6 +518,32 @@ function customLinkItem(entry: CommunityNavOverrideEntry): CommunityNavItem | nu
  * (4) **OHNE WAHL ÄNDERT SICH NICHTS.** Leeres/fehlendes Override ⇒ exakt die
  *     heutige Sortierung nach `order`. Fail-soft ist hier kein Zusatz,
  *     sondern der Normalfall: die allermeisten Communities haben keine Row.
+ *
+ * ── VIER WEITERE ZUSAGEN FÜR UNTERPUNKTE (U15 Teil 3, 2026-09-08) ─────────
+ *
+ * (5) **EIN KIND FOLGT SEINEM HAUPTPUNKT.** Ein Eintrag mit `parent` erscheint
+ *     als Kind, wenn dieser Hauptpunkt als SICHTBARER HAUPTPUNKT gerendert
+ *     wird. Die Kinder-Reihenfolge ist die Array-Reihenfolge UNTER
+ *     GESCHWISTERN — unabhängig davon, wo im Array das Kind steht. Ein Kind,
+ *     das vor seinem Hauptpunkt notiert ist, landet trotzdem hinter ihm; sonst
+ *     hinge die Anzeige davon ab, in welcher Reihenfolge der Editor gerade
+ *     gespeichert hat.
+ *
+ * (6) **NICHTS VERSCHWINDET DURCH EINEN FEHLENDEN HAUPTPUNKT (fail-soft).**
+ *     Ist der Hauptpunkt ausgeblendet, unbekannt, selbst ein Kind oder gar
+ *     nicht im Dokument, steht das Kind an SEINER EIGENEN Array-Position als
+ *     Hauptpunkt (mit seinem eigenen `hidden`). Eine Wand ist schlimmer als
+ *     ein Eintrag zu viel — und ein Owner, der einen Hauptpunkt ausblendet,
+ *     hat über dessen Kinder nichts gesagt.
+ *
+ * (7) **EINE GRUPPE OHNE SICHTBARE KINDER WIRD NICHT GERENDERT.** Ein
+ *     Aufklapper ohne Inhalt ist ein toter Klick. (Ein Hauptpunkt MIT Ziel und
+ *     ohne Kinder bleibt selbstverständlich ein gewöhnlicher Link.)
+ *
+ * (8) **DIE ANTWORT ZÄHLT NUR HAUPTPUNKTE.** Kinder hängen in `children` und
+ *     nicht in der obersten Liste — die Überlauf-Rechnung der Renderer („ab
+ *     dem sechsten Eintrag ins Mehr-Menü") bekommt damit ohne Zutun die
+ *     richtige Zahl.
  */
 export function resolveCommunityNav(
   candidates: readonly CommunityNavCandidate[],
@@ -272,7 +555,18 @@ export function resolveCommunityNav(
 
   const byId = new Map(byOrder.map(candidate => [candidate.id, candidate]))
   const seen = new Set<string>()
-  const items: CommunityNavItem[] = []
+  /**
+   * Was rendert, in Array-Reihenfolge — samt erklärtem Hauptpunkt und der
+   * Auskunft, ob die gespeicherte Wahl diesen Eintrag ÜBERHAUPT NENNT.
+   *
+   * `mentioned` trägt Zusage 6 („gar nicht im Dokument"): nur ein AUSDRÜCKLICH
+   * genannter Eintrag kann Hauptpunkt einer Gruppe sein. Ein Eintrag, der bloss
+   * über den Anhang dazukommt (Zusage 3 — ein Produkt, das es beim Speichern
+   * noch nicht gab), zieht keine Kinder an sich: er steht am ENDE der Liste, das
+   * Kind sprang dorthin mit, und der Owner hätte eine Umsortierung erlebt, die
+   * er nie angefordert hat.
+   */
+  const rendered: Array<{ item: CommunityNavItem, parent: string | null, mentioned: boolean }> = []
 
   for (const entry of entries.slice(0, MAX_NAV_ENTRIES)) {
     if (!entry || typeof entry.id !== 'string' || !entry.id) continue
@@ -281,20 +575,88 @@ export function resolveCommunityNav(
     if (seen.has(entry.id)) continue
     seen.add(entry.id)
 
+    const parent = declaredParent(entry)
     const candidate = byId.get(entry.id)
     if (candidate) {
       if (entry.hidden === true) continue
-      items.push(toItem(candidate, labelFor(candidate.label, entry.label)))
+      rendered.push({ item: toItem(candidate, labelFor(candidate.label, entry.label)), parent, mentioned: true })
       continue
     }
-    const custom = customLinkItem(entry)
-    if (custom) items.push(custom)
+    const own = customLinkItem(entry) ?? groupItem(entry)
+    if (own) rendered.push({ item: own, parent, mentioned: true })
     // sonst: Zusage (2) — unbekannte Id, still ignoriert.
   }
 
   // Zusage (3): alles, worüber die gespeicherte Wahl nichts sagt.
   for (const candidate of byOrder) {
-    if (!seen.has(candidate.id)) items.push(toItem(candidate))
+    if (!seen.has(candidate.id)) rendered.push({ item: toItem(candidate), parent: null, mentioned: false })
+  }
+
+  return nestCommunityNav(rendered)
+}
+
+/**
+ * Die flache, gerenderte Folge in EINE Ebene Verschachtelung bringen
+ * (Zusagen 5–8). Getrennt von `resolveCommunityNav`, damit die Rechnung „wer
+ * hängt unter wem" für sich lesbar bleibt — sie ist der einzige Teil, der nicht
+ * geradeaus ist.
+ */
+function nestCommunityNav(
+  rendered: ReadonlyArray<{ item: CommunityNavItem, parent: string | null, mentioned: boolean }>,
+): CommunityNavItem[] {
+  const declared = new Map(rendered.map(row => [row.item.id, row.parent]))
+  /** Wer überhaupt Hauptpunkt einer Gruppe sein DARF (s. `mentioned` oben). */
+  const attachable = new Set(rendered.filter(row => row.mentioned).map(row => row.item.id))
+
+  /**
+   * Unter welcher Id hängt dieser Eintrag WIRKLICH? `null` = Hauptpunkt.
+   *
+   * Memoisiert, und mit einem Zyklen-Schutz, den man nicht weglassen darf: ein
+   * Dokument, in dem A auf B und B auf A zeigt, ist von Hand oder von einer
+   * älteren Fassung schreibbar — ohne `laufend` liefe die Rekursion hier für
+   * immer und nähme die Seite mit. Wer im Kreis zeigt, wird zum Hauptpunkt.
+   */
+  const memo = new Map<string, string | null>()
+  const laufend = new Set<string>()
+  function attachesTo(id: string): string | null {
+    const cached = memo.get(id)
+    if (cached !== undefined) return cached
+    if (laufend.has(id)) return null
+    laufend.add(id)
+    let result: string | null = null
+    const parent = declared.get(id) ?? null
+    // Zusage 6: nur ein Hauptpunkt, der WIRKLICH rendert, ausdrücklich genannt
+    // ist und selbst keiner Gruppe angehört, nimmt Kinder auf. Alles andere ⇒
+    // das Kind ist Hauptpunkt.
+    if (parent && attachable.has(parent) && attachesTo(parent) === null) result = parent
+    laufend.delete(id)
+    memo.set(id, result)
+    return result
+  }
+
+  const kinder = new Map<string, CommunityNavItem[]>()
+  const haupt: CommunityNavItem[] = []
+  for (const { item } of rendered) {
+    const parent = attachesTo(item.id)
+    if (parent === null) {
+      haupt.push(item)
+      continue
+    }
+    // Zusage 5: Array-Reihenfolge UNTER GESCHWISTERN — hier entsteht sie, weil
+    // `rendered` in Array-Reihenfolge durchlaufen wird.
+    const liste = kinder.get(parent)
+    if (liste) liste.push(item)
+    else kinder.set(parent, [item])
+  }
+
+  const items: CommunityNavItem[] = []
+  for (const item of haupt) {
+    // Ein Kind, das selbst eine leere Gruppe ist, wäre ein toter Eintrag im
+    // Aufklapper — dieselbe Zusage 7, eine Etage tiefer.
+    const children = (kinder.get(item.id) ?? []).filter(child => navItemHasTarget(child))
+    if (children.length) items.push({ ...item, children })
+    else if (navItemHasTarget(item)) items.push(item)
+    // sonst: Zusage 7 — Gruppe ohne sichtbare Kinder, sie fällt weg.
   }
   return items
 }
@@ -328,20 +690,35 @@ export function filterChromeNavEntries(
 }
 
 /**
- * Die nächste freie `link-<n>`-Id für eine bestehende Wahl.
+ * Die nächste freie `<präfix><n>`-Id für eine bestehende Wahl.
  *
  * Zählt über das MAXIMUM, nicht über die Anzahl: wer einen Link entfernt und
  * einen neuen anlegt, bekommt sonst die Id des entfernten — und damit dessen
  * Platz in einem Menü, das jemand anderes gerade offen hat.
+ *
+ * SEIT U15 TEIL 3 MIT PRÄFIX-ARGUMENT (`link-` und `group-` zählen getrennt).
+ * Getrennte Zähler und kein gemeinsamer: die beiden Namensräume sind
+ * unabhängig, und ein gemeinsamer Zähler liesse Lücken entstehen, die beim
+ * Lesen eines Dokuments wie ein Datenverlust aussehen.
  */
-export function nextCustomNavLinkId(entries: readonly CommunityNavOverrideEntry[]): string {
+export function nextPrefixedNavId(entries: readonly CommunityNavOverrideEntry[], prefix: string): string {
   let max = 0
   for (const entry of entries) {
-    if (!isCustomNavLinkId(entry.id)) continue
-    const n = Number.parseInt(entry.id.slice(CUSTOM_NAV_LINK_PREFIX.length), 10)
+    if (!entry?.id?.startsWith(prefix) || entry.id.length <= prefix.length) continue
+    const n = Number.parseInt(entry.id.slice(prefix.length), 10)
     if (Number.isFinite(n) && n > max) max = n
   }
-  return `${CUSTOM_NAV_LINK_PREFIX}${max + 1}`
+  return `${prefix}${max + 1}`
+}
+
+/** Die nächste freie `link-<n>`-Id (der Name von vor U15 Teil 3). */
+export function nextCustomNavLinkId(entries: readonly CommunityNavOverrideEntry[]): string {
+  return nextPrefixedNavId(entries, CUSTOM_NAV_LINK_PREFIX)
+}
+
+/** Die nächste freie `group-<n>`-Id. */
+export function nextGroupNavId(entries: readonly CommunityNavOverrideEntry[]): string {
+  return nextPrefixedNavId(entries, GROUP_NAV_PREFIX)
 }
 
 /**
@@ -369,6 +746,10 @@ export function parseCommunityNavOverride(raw: string | null | undefined): Commu
         ...(typeof entry.label === 'string' ? { label: entry.label } : {}),
         ...(typeof entry.to === 'string' ? { to: entry.to } : {}),
         ...(entry.external === true ? { external: true } : {}),
+        // `parent` in derselben defensiven Form wie `to`: nur eine Zeichenkette
+        // kommt durch, alles andere ist so, als stünde sie nicht da — und das
+        // heisst „Hauptpunkt", also das Verhalten von vor U15 Teil 3.
+        ...(typeof entry.parent === 'string' ? { parent: entry.parent } : {}),
       })
     }
     return { entries: clean }

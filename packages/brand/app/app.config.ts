@@ -66,6 +66,43 @@ import type { BrandWorkspaceNavExtra } from '../shared/brandWorkspaceNav'
  */
 export default defineAppConfig({
   pukalani: {
+    /**
+     * DIE KOPF-NAVIGATION DIESER SITE ALS REGISTRY (U15 Teil 3, Davids
+     * Entscheidung 2026-09-08, DECISION-LOG „Navigation anpassen").
+     *
+     * Bis heute stand diese Liste FEST in `BwSiteNav.vue`. Der
+     * Navigations-Editor unter /dashboard/community/navigation war damit auf
+     * branding.supply eine leere Seite und ein Schalter ohne Draht: er bietet
+     * genau zwei Quellen an — diese Registry und die veröffentlichten
+     * CMS-Seiten —, und beide waren leer (die einzigen Seiten sind Impressum,
+     * Datenschutz und AGB, und die gehören in den Fuß).
+     *
+     * `pukalani.chrome.nav` ist der bestehende Vertrag dafür
+     * (core/shared/types/chrome.ts, OBJEKT-Map): jeder Layer trägt seine
+     * Einträge selbst ein, niemand importiert jemanden (A14). Die Reihenfolge
+     * kommt aus `order` und ist die von vorher (Discover · About · Team).
+     *
+     * KEIN `productKey` und kein `planProduct`: das Produkt-Gate `brand`
+     * schaltet den WIZARD ab, nicht die Marketing-Seiten dieser Site, und
+     * Tarife gibt es hier nicht (branding.supply hat keine Mandanten).
+     *
+     * Die Beschriftungen bleiben, wo sie hingehören: in den Locale-Katalogen
+     * dieses Layers (`brand.nav.*`). Davids Eigennamen-Regel gilt dort weiter
+     * — die Hauptpunkte heißen in BEIDEN Sprachen englisch; `pnpm
+     * check:i18n-keys` deckt `pukalani.chrome.nav.<id>.labelKey` ohnehin ab.
+     *
+     * `products` und `insights` stehen BEWUSST NICHT hier, obwohl ihre
+     * i18n-Schlüssel existieren: ihre Seiten gibt es noch nicht, und ein
+     * Registry-Eintrag ist ein Menüpunkt, der sofort erscheint (Davids
+     * 404-Audit vom 2026-09-03). Sobald sie da sind, ist es eine Zeile.
+     */
+    chrome: {
+      nav: {
+        discover: { labelKey: 'brand.nav.discover', to: '/discover', order: 10 },
+        about: { labelKey: 'brand.nav.about', to: '/about', order: 20 },
+        team: { labelKey: 'brand.nav.team', to: '/team', order: 30 },
+      },
+    },
     admin: {
       /**
        * DIE BETREIBER-FLÄCHE DIESES LAYERS (2026-09-05) — bisher hatte `brand`
