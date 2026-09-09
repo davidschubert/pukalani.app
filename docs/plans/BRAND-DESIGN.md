@@ -941,6 +941,22 @@ unverändert. Beweise: Share 51/51 (Gegenprobe 36/51), Design 130/130
 (Gegenprobe 108/130), Sessions 383/383, 2 664 Tests. (3) Prototyp
 eingefroren; (4) Ereignis bleibt `step.completed` mit `stepKey`.
 
+**Audit + A1 (2026-09-09):** Audit der Schicht ohne hohe Befunde
+(docs/archiv/audits/BRAND-DESIGN-AUDIT-2026-09-09.md). Paket A1 GEBAUT und
+geprüft (Core a3d83495: IP-Eimer `brand:brief`, Vision-Eingangsklemme
+`AI_VISION_MAX_IMAGES` 16 / `AI_VISION_MAX_BYTES` 64 MB vor jedem Netzaufruf,
+Gate = Aufruf über die effektive Config, Anbieter-Fehler nur als
+`code`/`type` im Log, Tests für den Laufzeit-Override; brand f22c7b0b:
+GDPR-Purges werfen bei Nicht-404 (`strictFile`, Klick bleibt fail-soft),
+Burst-Deckel `retainBrandGeneration` in Lesung/DNA/Briefing/Entwürfe,
+Archetyp-Test für die D2b-Wirkung, Kommentar am Karten-Button). Beweise
+danach: Design 130/130, Share 51/51, Sessions 383/383; 1 597 + 2 705 Tests.
+Nebenbefund, geparkt: `aiComplete` loggt weiter 300 Zeichen Anbieter-Rumpf
+(Text-Weg, nicht Teil des Audits); 413 `reading_too_large` hat keinen
+eigenen UI-Satz (unter den Produkt-Deckeln unerreichbar). **Es folgt
+Davids Abnahme** (Inhalts-Gates D1–D8), dann OPEN-ITEMS-COMPLETE und dieser
+Plan ins Archiv.
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
