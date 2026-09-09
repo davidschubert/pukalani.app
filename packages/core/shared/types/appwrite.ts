@@ -1,4 +1,5 @@
 import type { Models } from 'node-appwrite'
+import type { DashboardNavPrefs } from '../dashboardNav'
 
 /**
  * Basis für Domain-Types in Produkt Layern und Apps:
@@ -34,6 +35,14 @@ export interface PukalaniUserPrefs extends Models.Preferences {
    * Fehlt bei jedem Konto von VOR dieser Änderung.
    */
   businessConfirmedAt?: string
+  /**
+   * Persönliche Reihenfolge der Dashboard-Navigation (NAV1 Paket 3,
+   * Entscheidung 3 vom 2026-09-08) — Gruppen, Einträge, Ausgeblendetes.
+   * Fehlt bei jedem Konto, das nichts gewählt hat; das ist der Normalfall.
+   * Gelesen wird IMMER über `parseDashboardNavPrefs` (fail-soft), geschrieben
+   * über `PUT /api/auth/dashboard-nav`.
+   */
+  dashboardNav?: DashboardNavPrefs
 }
 
 export type CurrentUser = Models.User<PukalaniUserPrefs>

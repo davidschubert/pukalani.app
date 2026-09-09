@@ -18,6 +18,8 @@
  * sieht sie sonst nicht (CLAUDE.md).
  */
 
+import type { DashboardNavPrefs } from '../dashboardNav'
+
 /** POST /api/auth/login */
 export interface LoginResponse {
   ok: true
@@ -62,4 +64,18 @@ export interface MfaDisableResponse {
 export interface TimezoneResponse {
   ok: true
   timezone: string
+}
+
+/**
+ * PUT /api/auth/dashboard-nav
+ *
+ * `dashboardNav: null` ist die Antwort auf das Zurücksetzen — der Schlüssel
+ * wurde aus den Prefs ENTFERNT, nicht auf `{}` gesetzt. Die Route gibt den
+ * GESPEICHERTEN Stand zurück, nicht den geschickten: leere Listen fallen beim
+ * Lesen weg (parseDashboardNavPrefs), und der Client soll denselben Stand
+ * sehen wie die Seitenleiste nach `auth.refresh()`.
+ */
+export interface DashboardNavResponse {
+  ok: true
+  dashboardNav: DashboardNavPrefs | null
 }
