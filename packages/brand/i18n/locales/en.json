@@ -516,6 +516,22 @@
         "transitions": "Transition tokens",
         "logo": "Should your mark move?",
         "rules": "Motion rules"
+      },
+      "m": {
+        "types": "What do you need names for — products, services, formats, places, digital things?",
+        "patterns": "Naming pattern per kind",
+        "rules": "Your naming rules"
+      },
+      "n": {
+        "scope": "What may AI produce in your name?",
+        "review": "Who approves before anything goes out?",
+        "guardrails": "Your guardrails for AI",
+        "prompts": "Prompt templates"
+      },
+      "p": {
+        "facts": "Which facts may go into the press kit?",
+        "contact": "Who is your press contact?",
+        "summary": "Preview of your press kit"
       }
     },
     "labels": {
@@ -603,7 +619,10 @@
       "type": "Type is voice in form. Your tone leads to a pair for headings and body text, plus sizes, hierarchy and the rules for where each cut applies.",
       "mark": "The direction of your mark — wordmark, monogram or symbol — with a brief and set examples. A draft is a draft, not a finished, protectable logo.",
       "imagery": "How your brand looks when it is not speaking: photography style, illustration and icons — with do & don’t to feel rather than a list of adjectives.",
-      "motion": "Motion with character: pace and transitions, whether your mark moves — and what happens for someone who asked for reduced motion."
+      "motion": "Motion with character: pace and transitions, whether your mark moves — and what happens for someone who asked for reduced motion.",
+      "nomenclature": "When a brand grows, every new thing gets a name — and without a pattern it gets just any name. Otto derives one naming pattern per kind of thing from your brand architecture and turns it into rules every future name can be measured against.",
+      "aiguide": "AI already writes along. Here you settle what it may produce in your name, who approves it and which guardrails apply — tone, banned words, spellings. Nika derives all of it from your voice; nothing is invented.",
+      "presskit": "Almost finished from what is already there: boilerplates, tagline, marks. Two things still need a human — which facts may travel publicly and who the press contact is."
     },
     "part": {
       "a": {
@@ -675,6 +694,9 @@
       "f": {
         "taste": "Vitra, Patagonia, Aesop — short, distinctive, memorable without explanation.",
         "noGos": "No made-up English words, nothing with global or 24 in the name."
+      },
+      "p": {
+        "contact": "Leilani Kahale, owner — press and partnerships"
       }
     },
     "help": {
@@ -861,7 +883,7 @@
       "chapterState": {
         "empty": "Open",
         "active": "In conversation",
-        "generating": "George is writing …",
+        "generating": "{voice} is writing …",
         "edited": "Edited by you",
         "confirmed": "Done",
         "stale": "Being updated"
@@ -877,7 +899,7 @@
         "placeholder": "Write your answer — or ask a question",
         "nothingOpen": "Nothing open in this chapter — confirm it when it fits.",
         "questionsDone": "My questions are done — we'll shape the remaining fields right here in the conversation.",
-        "nextDraft": "Let’s start with “{field}”: click “George, draft this” and I’ll lay out a first version from what you’ve told me so far — or just tell me here what’s on your mind about it.",
+        "nextDraft": "Let’s start with “{field}”: click “{voice}, draft this” and I’ll lay out a first version from what you’ve told me so far — or just tell me here what’s on your mind about it.",
         "nextConfirm": "Next step: look at “{field}” and confirm it — or click “Revise” if it doesn’t fit yet.",
         "send": "Send"
       },
@@ -903,7 +925,7 @@
       "completeFailed": "The chapter is not finished yet",
       "reopenFailed": "Reopening didn't work — try again in a moment",
       "missingRequired": "Some required decisions are still open — confirm them, then try again.",
-      "draftBadge": "Draft by George",
+      "draftBadge": "Draft by {voice}",
       "site": {
         "label": "Your website",
         "never": "Not read yet.",
@@ -931,12 +953,12 @@
         "again": "{voice}, try again",
         "stop": "Stop",
         "hintPlaceholder": "Hint — e.g. warmer, shorter, less jargon",
-        "hintLabel": "Hint for George",
+        "hintLabel": "Hint for {voice}",
         "answerPlaceholder": "Notes, sentences — whatever you know about it",
         "answerLabel": "Answer for {voice}",
-        "aiDisabled": "George is not drafting right now. You can keep writing as usual.",
-        "noGenerator": "There is no George draft for this field yet. Write it yourself — it will be saved.",
-        "busy": "George is already writing somewhere else. One moment.",
+        "aiDisabled": "{voice} is not drafting right now. You can keep writing as usual.",
+        "noGenerator": "There is no draft by {voice} for this field yet. Write it yourself — it will be saved.",
+        "busy": "{voice} is already writing somewhere else. One moment.",
         "parallelLimit": "George is already writing in two places at once. As soon as one finishes, this one can start.",
         "slotLimit": "George has had enough goes at this field for today. Try again tomorrow — or write it yourself now.",
         "talkLimit": "George has done enough talking on this branding today. Keep going — your answers are saved, and he is back tomorrow.",
@@ -1069,7 +1091,10 @@
       "type": "Typography",
       "mark": "Mark",
       "imagery": "Imagery",
-      "motion": "Motion"
+      "motion": "Motion",
+      "nomenclature": "Nomenclature",
+      "aiguide": "AI guidelines",
+      "presskit": "Press kit"
     },
     "advisors": {
       "george": {
@@ -2178,12 +2203,17 @@
         "purpose": "Purpose, vision, mission",
         "positionierung": "Positioning",
         "architektur": "Brand architecture",
+        "nomenklatur": "Nomenclature",
         "werte": "Values",
         "stimme": "Personality & voice",
         "manifest": "Manifesto",
         "messaging": "Tagline & messaging",
         "name": "Name",
         "visuell": "Visual identity",
+        "zeichen-anwendung": "Mark usage",
+        "farbe-anwendung": "Colour usage",
+        "typografie-anwendung": "Type usage",
+        "pressekit": "Press kit",
         "ki-texte": "Rules for AI copy"
       },
       "label": {
@@ -2703,6 +2733,13 @@
       "info": "The visual identity of your brand — derived from foundation and brand language, not from a catalogue. Colour, type and mark follow from archetype, values and voice; every decision carries its reason. Brand Design is unlocked by the studio after the intro call.",
       "progress": "{done} of {total} chapters",
       "result": "Visual identity"
+    },
+    "kitLayer": {
+      "label": "Brand Book & Kit",
+      "lockedNote": "Part of the derivation",
+      "info": "Rules and tools: the book explains, the kit works. Nothing new is decided here — it curates and delivers what foundation and design already settled. The derivation is unlocked by the studio after the intro call.",
+      "progress": "{done} of {total} chapters",
+      "result": "Kit"
     },
     "inspiration": {
       "title": "Your references",

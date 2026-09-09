@@ -2,7 +2,7 @@ import { brandStepAcceptance } from '../../../../../shared/brandJourney'
 import { blockingFindingSlots } from '../../../../../shared/brandFindings'
 import { BRAND_DIRECTIONS_VERSION, brandDirectionById } from '../../../../../shared/brandDirections'
 import { buildBrandFoundation } from '../../../../../shared/brandFoundation'
-import { type BrandStepKey, isBrandDesignStep, slotsForStep } from '../../../../../shared/slotRegistry'
+import { type BrandStepKey, isBrandDesignStep, isBrandKitStep, slotsForStep } from '../../../../../shared/slotRegistry'
 import type {
   BrandFoundationResponse,
   BrandFoundationStepState,
@@ -70,6 +70,11 @@ export default defineEventHandler(async (event): Promise<BrandFoundationResponse
     // gerechnete Tabellen, kein Fliesstext. Gelesen werden sie deshalb unten
     // als PRESET (`loadBrandDesignPreset`), nicht hier als Wertliste.
     if (isBrandDesignStep(entry.stepKey)) continue
+    // UND SCHICHT 3 GENAUSO WENIG (K0): ohne Freischaltung ist sie `skipped`
+    // und fällt schon oben heraus, danach hätte sie hier bis K4 nichts zu
+    // zeigen — die fünf neuen Kapitel-Anker (§2.5) bekommen ihre Blöcke dort,
+    // nicht hier als Wertliste.
+    if (isBrandKitStep(entry.stepKey)) continue
     const row = byStepKey.get(entry.stepKey)
     const openConflicts = blockingFindingSlots(
       findings,

@@ -9,8 +9,8 @@ import {
  * DAS INHALTSVERZEICHNIS DER LESE-ANSICHTEN — EINE Regel für drei Seiten
  * (Konzept docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.6, Brand Design D8).
  *
- * Privat (`/brand/:id/foundation`), öffentlich (`/brand/share/:token`) und das
- * Beispiel (`/beispiel/kailua-coffee`) zeigen dieselben Kapitel und brauchen
+ * Privat (`/brand/:id/foundation`), öffentlich (`/brand/share/:token`) und die
+ * Anatomie (`/discover/<slug>`) zeigen dieselben Kapitel und brauchen
  * dieselbe Liste. Sie stand dreimal da; seit Kapitel 10 UNTERPUNKTE hat
  * (Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung), wären drei
  * Kopien drei Gelegenheiten, sie zu vergessen.

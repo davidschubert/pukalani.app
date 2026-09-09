@@ -48,7 +48,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 49 Felder in 13 Kapiteln (Purpose, Vision & Mission · Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 54 Felder in 16 Kapiteln (Purpose, Vision & Mission · Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -96,7 +96,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 55 Felder in 13 Kapiteln (Purpose, Vision & Mission · Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 60 Felder in 16 Kapiteln (Purpose, Vision & Mission · Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -144,7 +144,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 45 Felder in 12 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 50 Felder in 15 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -192,7 +192,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 36 Felder in 10 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 37 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -294,7 +294,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+**Fliesst später in:** 2 Felder in 1 Kapiteln (Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -334,7 +334,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 53 Felder in 13 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 58 Felder in 16 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -374,7 +374,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 9 Felder in 4 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Tagline & Messaging · Name)
+**Fliesst später in:** 14 Felder in 7 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Tagline & Messaging · Name · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -414,7 +414,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 9 Felder in 4 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Tagline & Messaging · Name)
+**Fliesst später in:** 14 Felder in 7 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Tagline & Messaging · Name · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -454,7 +454,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 40 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 45 Felder in 14 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -522,7 +522,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 48 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 53 Felder in 14 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -572,7 +572,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 41 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 46 Felder in 14 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -620,7 +620,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 41 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 46 Felder in 14 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -668,7 +668,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 48 Felder in 13 Kapiteln (Purpose, Vision & Mission · Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 53 Felder in 16 Kapiteln (Purpose, Vision & Mission · Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -716,7 +716,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 34 Felder in 10 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 35 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -764,7 +764,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 34 Felder in 10 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 35 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -810,7 +810,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 3 Felder in 2 Kapiteln (Markenarchitektur · Tagline & Messaging)
+**Fliesst später in:** 8 Felder in 5 Kapiteln (Markenarchitektur · Tagline & Messaging · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -858,7 +858,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 1 Felder in 1 Kapiteln (Tagline & Messaging)
+**Fliesst später in:** 2 Felder in 2 Kapiteln (Tagline & Messaging · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -899,7 +899,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 40 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 45 Felder in 14 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -939,7 +939,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 33 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 34 Felder in 10 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -979,7 +979,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 34 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 35 Felder in 10 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1029,7 +1029,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 2 Felder in 1 Kapiteln (Markenarchitektur)
+**Fliesst später in:** 6 Felder in 3 Kapiteln (Markenarchitektur · Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1075,7 +1075,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 2 Felder in 1 Kapiteln (Markenarchitektur)
+**Fliesst später in:** 6 Felder in 3 Kapiteln (Markenarchitektur · Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1121,7 +1121,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 2 Felder in 1 Kapiteln (Markenarchitektur)
+**Fliesst später in:** 6 Felder in 3 Kapiteln (Markenarchitektur · Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1167,7 +1167,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 1 Felder in 1 Kapiteln (Markenarchitektur)
+**Fliesst später in:** 5 Felder in 3 Kapiteln (Markenarchitektur · Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1207,7 +1207,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+**Fliesst später in:** 4 Felder in 2 Kapiteln (Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1259,7 +1259,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 45 Felder in 12 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 50 Felder in 15 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1307,7 +1307,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 45 Felder in 12 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 50 Felder in 15 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1357,7 +1357,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 45 Felder in 12 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 50 Felder in 15 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1397,7 +1397,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 44 Felder in 12 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 49 Felder in 15 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1447,7 +1447,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** zwischen 3 und 5 Einträgen
 
-**Fliesst später in:** 43 Felder in 12 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 48 Felder in 15 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1497,7 +1497,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** nennt JEDEN Eintrag aus `c.final`
 
-**Fliesst später in:** 32 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 33 Felder in 10 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1693,7 +1693,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 1 Felder in 1 Kapiteln (Archetyp und Stimme)
+**Fliesst später in:** 3 Felder in 2 Kapiteln (Archetyp und Stimme · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1835,7 +1835,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 43 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 48 Felder in 14 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1875,7 +1875,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 47 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 52 Felder in 14 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1915,7 +1915,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 46 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 51 Felder in 14 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 ### `d.primary` — Primärer Archetyp
 
@@ -1942,7 +1942,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 44 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 49 Felder in 14 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1982,7 +1982,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** nennt nicht dasselbe wie `d.primary`
 
-**Fliesst später in:** 2 Felder in 1 Kapiteln (Archetyp und Stimme)
+**Fliesst später in:** 4 Felder in 2 Kapiteln (Archetyp und Stimme · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2068,7 +2068,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+**Fliesst später in:** 2 Felder in 1 Kapiteln (AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2122,7 +2122,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 36 Felder in 10 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 41 Felder in 13 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Nomenklatur · AI-Guidelines · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2180,7 +2180,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 1 Felder in 1 Kapiteln (Tagline & Messaging)
+**Fliesst später in:** 3 Felder in 2 Kapiteln (Tagline & Messaging · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2244,7 +2244,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 32 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 33 Felder in 10 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2291,7 +2291,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 32 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 33 Felder in 10 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2338,7 +2338,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 31 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 32 Felder in 10 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2379,7 +2379,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 31 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 32 Felder in 10 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2423,7 +2423,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 30 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 31 Felder in 10 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2477,7 +2477,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** der Wert ist ein Satz aus `e.manifesto`
 
-**Fliesst später in:** 29 Felder in 8 Kapiteln (Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+**Fliesst später in:** 30 Felder in 9 Kapiteln (Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung · Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2527,7 +2527,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2613,7 +2613,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Pressekit)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2705,7 +2705,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+**Fliesst später in:** 2 Felder in 1 Kapiteln (AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2770,7 +2770,7 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 5 Felder in 1 Kapiteln (Name)
+**Fliesst später in:** 9 Felder in 3 Kapiteln (Name · Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2817,7 +2817,7 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 5 Felder in 1 Kapiteln (Name)
+**Fliesst später in:** 9 Felder in 3 Kapiteln (Name · Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2864,7 +2864,7 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 5 Felder in 1 Kapiteln (Name)
+**Fliesst später in:** 9 Felder in 3 Kapiteln (Name · Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2904,7 +2904,7 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 4 Felder in 1 Kapiteln (Name)
+**Fliesst später in:** 8 Felder in 3 Kapiteln (Name · Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2958,7 +2958,7 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 3 Felder in 1 Kapiteln (Name)
+**Fliesst später in:** 7 Felder in 3 Kapiteln (Name · Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -3006,7 +3006,7 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 2 Felder in 1 Kapiteln (Name)
+**Fliesst später in:** 6 Felder in 3 Kapiteln (Name · Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -3056,7 +3056,7 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 1 Felder in 1 Kapiteln (Name)
+**Fliesst später in:** 5 Felder in 3 Kapiteln (Name · Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -3106,7 +3106,7 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** jede Zeile stammt aus `f.shortlist`
 
-**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+**Fliesst später in:** 4 Felder in 2 Kapiteln (Nomenklatur · AI-Guidelines)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -4254,10 +4254,376 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
   - en:
   > Only two properties at a time: opacity and one shift. No rotation, no scaling of text.
 
+## Nomenklatur (`nomenclature`) — 3 Sessions, **Σ ~4 Min** (7 Züge)
+
+Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
+
+### `m.types` — Wofür braucht ihr Namen — Produkte, Leistungen, Formate, Orte, Digitales?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle which kinds of things this brand actually needs names for, chosen from the catalogue of five — products, services, programmes, places, digital.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every chosen kind has at least one real example in this brand, today or planned.
+- A kind they do not have is left out — the list is what needs naming, not what sounds ambitious.
+- The choice comes from the catalogue; nothing is typed in freely.
+
+**Was zurückgewiesen wird:**
+
+- Ticking all five because none of them is wrong in principle.
+- A kind chosen for something that will exist "some day" without anyone planning it.
+
+**Gesprächsleiter:**
+
+- Eröffnung: ask which of the five kinds of things they give names to today — and which they already know will come; name one example per kind from their own answers.
+- Nachfrage: if they name only the obvious kind, ask about the things around it: a course, a second location, a newsletter
+- Umdeutung: if they start proposing names, say that names come in the next session and ask only which kinds there are
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 4 Felder in 2 Kapiteln (Nomenklatur · AI-Guidelines)
+
+### `m.patterns` — Namensmuster je Typ
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** draft one naming pattern per chosen kind, each with one example and the line in the foundation it follows from.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every chosen kind has exactly one pattern — no kind is left without one.
+- Every pattern is a rule someone else could apply tomorrow, not a description of taste.
+- Every pattern names its source: the architecture model, the naming rule, the decided name or a tone word.
+- Every pattern carries one example that obeys it.
+
+**Was zurückgewiesen wird:**
+
+- A pattern that only says "fits the brand" — that is the conclusion, not the rule.
+- Two patterns for the same kind, so that nobody knows which one applies.
+- An example that breaks its own pattern.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 3 Felder in 2 Kapiteln (Nomenklatur · AI-Guidelines)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Programm / Format: Dachmarke + Substantiv ohne Anglizismus — „Sprachhaus Tafelrunde". Herkunft: Architektur-Modell „eine Marke" und Tabu-Wort „Experience".
+  - en:
+  > Programme or format: umbrella brand plus a plain noun — "Sprachhaus Tafelrunde". Source: the architecture model "one brand" and the banned word "experience".
+- **Marken-Relaunch**
+  - de:
+  > Ort / Filiale: Dachmarke + Stadtteil, nie eine Nummer — „Radwerk Weststadt". Herkunft: Wert „Nähe" — ein Ort hat einen Namen, keine Filialnummer.
+  - en:
+  > Place: umbrella brand plus the district, never a number — "Radwerk Weststadt". Source: the value "closeness" — a place has a name, not a branch number.
+
+### `m.rules` — Eure Namens-Regeln
+
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** confirm the naming rules that follow from the patterns: capitalisation, separators, the order of umbrella brand and product, and what is never done.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every rule can be checked against a name without asking anybody.
+- There is one rule about the order of umbrella brand and product.
+- There is at least one rule that says what is NEVER done.
+- No rule contradicts a pattern from the session before.
+
+**Was zurückgewiesen wird:**
+
+- A rule that says "keep it consistent" — that is the wish, not the rule.
+- A rule that repeats a pattern in other words instead of adding the part the pattern leaves open.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 2 Felder in 1 Kapiteln (AI-Guidelines)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Die Dachmarke steht vorn: „Sprachhaus Abendkurs", nie „Abendkurs by Sprachhaus".
+  - en:
+  > The umbrella brand comes first: "Sprachhaus Abendkurs", never "Abendkurs by Sprachhaus".
+- **Marken-Relaunch**
+  - de:
+  > In Adressen und Dateinamen alles klein und mit Bindestrich; nie zwei Namen für dieselbe Sache — die Werkstatt heisst an der Tür so wie auf der Rechnung.
+  - en:
+  > In addresses and file names everything is lower case with hyphens; never two names for one thing — the workshop is called the same on the door and on the invoice.
+
+## AI-Guidelines (`aiguide`) — 4 Sessions, **Σ ~4 Min** (8 Züge)
+
+Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George.
+
+### `n.scope` — Was darf KI in eurem Namen erzeugen?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle what AI may produce in the name of this brand: drafts for everything, text only, internal only, or nothing customer-facing.
+
+**Woran man einen guten Wert erkennt:**
+
+- The answer is one of the four offered ways, not a description of a workflow.
+- The choice matches what they actually do today — not what sounds responsible.
+- They understand that this answer travels: it goes into brand.md, which other people and their tools will read.
+
+**Was zurückgewiesen wird:**
+
+- A choice of "nothing" out of caution, while the same people use AI daily — the guideline would be a rule nobody keeps.
+- An answer that mixes scope and approval ("only with review") — approval is the next session.
+
+**Gesprächsleiter:**
+
+- Eröffnung: ask plainly what AI is allowed to produce for them, name the four ways in one sentence each, and say which one most brands their size end up with.
+- Umdeutung: if they answer with who checks it, say that the check is the next question and ask only what may be produced
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+### `n.review` — Wer gibt frei, bevor etwas rausgeht?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the approval rule: every publication read by a human, a spot check, or a rule that depends on the channel.
+
+**Woran man einen guten Wert erkennt:**
+
+- The answer is one of the three offered rules.
+- The rule names a person or a role, not a hope.
+- The rule can be kept on a normal working day, at the volume they really publish.
+
+**Was zurückgewiesen wird:**
+
+- A rule so strict that the first busy week breaks it.
+- A spot check without a number — "now and then" is not a rule.
+
+**Gesprächsleiter:**
+
+- Eröffnung: ask who reads a text before it goes out, and offer the three rules with what each one costs in a normal week.
+- Umdeutung: if they say "it depends", ask them to name the channel it depends on — that is the third rule
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+### `n.guardrails` — Eure Leitplanken für KI
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** draft the guardrails as a list: tone parameters, taboos, the spelling of brand marks, and the topics this brand does not speak about — each line taken from a settled value.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every line comes from a confirmed value above and says which one.
+- The tone parameters are the tone words with one voice sample each, not adjectives added here.
+- The taboos are the words already banned in the vocabulary sessions, not new ones.
+- The spelling rules name the brand marks that really exist: title, tagline, product names.
+
+**Was zurückgewiesen wird:**
+
+- A guardrail invented here because it sounds sensible — the list is a summary, not a new decision.
+- A taboo that contradicts a word the brand uses on its own website.
+- A line so general that no text could ever break it.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (AI-Guidelines)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Ton: „ruhig" — kurze Sätze, kein Ausrufezeichen. Stimmprobe: „Der Kurs beginnt am 3. März. Zehn Plätze." Herkunft: Ton-Wort „ruhig" plus eure Stimmprobe.
+  - en:
+  > Tone: "quiet" — short sentences, no exclamation marks. Voice sample: "The course starts on 3 March. Ten places." Source: the tone word "quiet" plus your voice sample.
+- **Marken-Relaunch**
+  - de:
+  > Tabu: „Rundum-sorglos", „Premium", „Experience". Herkunft: eure Meiden-Liste aus dem Wort-Leitfaden — sie gilt für KI wortgleich.
+  - en:
+  > Taboo: "all-round carefree", "premium", "experience". Source: your avoid list from the word guide — it applies to AI word for word.
+
+### `n.prompts` — Prompt-Vorlagen
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** assemble three ready-to-copy prompt templates from the settled values and the guardrails: a system prompt, a social post, and an email to customers.
+
+**Woran man einen guten Wert erkennt:**
+
+- Each template stands on its own: someone can paste it into a chat without adding context.
+- Each template carries the guardrails, not a summary of them.
+- Nothing in the templates is new — every sentence traces back to a confirmed value.
+- The system prompt is the short form of brand.md, in the same words.
+
+**Was zurückgewiesen wird:**
+
+- A template that asks the model to "be creative" — that is exactly the instruction the guardrails exist against.
+- A fourth template, because three is what a person keeps at hand.
+- A placeholder nobody can fill, because the value behind it was never settled.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > System-Prompt: „Du schreibst für Sprachhaus. Ton: ruhig, gerade heraus. Nie: Superlative, „Experience". Immer: Termin und Platzzahl im ersten Satz."
+  - en:
+  > System prompt: "You write for Sprachhaus. Tone: quiet, straightforward. Never: superlatives, the word experience. Always: date and number of places in the first sentence."
+- **Marken-Relaunch**
+  - de:
+  > Social-Post: „Ein Satz, was es gibt. Ein Satz, für wen. Ein Satz, wo. Keine Emojis, kein Ausrufezeichen — so wie eure Aushänge in der Werkstatt."
+  - en:
+  > Social post: "One sentence on what it is. One on who it is for. One on where. No emoji, no exclamation marks — the way your workshop notices read."
+
+## Pressekit (`presskit`) — 3 Sessions, **Σ ~3 Min** (8 Züge)
+
+Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
+
+### `p.facts` — Welche Fakten dürfen ins Pressekit?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle which of the facts from the profile may travel into the press kit — one opt-in per entry, nothing released by default.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every released fact is one a stranger may read, today and in a year.
+- Nothing is released just because it is true — the question is whether it should be public.
+- A fact that stays back keeps its reason, so the decision can be read again later.
+- The released text is the fact itself, not a summary of several.
+
+**Was zurückgewiesen wird:**
+
+- Releasing everything at once because the list is short.
+- Releasing a number that is a negotiating position: revenue, margins, the share of one customer.
+- Rewriting a fact while releasing it, so that the press kit says something the profile does not.
+
+**Gesprächsleiter:**
+
+- Eröffnung: go through the facts one by one and ask for each whether it may be public; say plainly that nothing travels unless they say so.
+- Umdeutung: if they want to release everything at once, take the two most sensitive entries and ask about those two alone
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Pressekit)
+
+### `p.contact` — Wer ist eure Ansprechperson für Presse?
+
+**Art:** Frage (optional) · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the press contact — name, role and email of one person the press may write to.
+
+**Woran man einen guten Wert erkennt:**
+
+- There is exactly one person, with a role that says why they are the one to ask.
+- The email is one that is actually read; a shared mailbox is fine if somebody reads it.
+- They have seen, before confirming, that this line travels publicly.
+
+**Was zurückgewiesen wird:**
+
+- A private mobile number given because the field was there.
+- Two contacts, so that a journalist has to guess which one to try.
+- A reference to the account holder instead of a confirmed text — the account may change hands later, and the press kit would change with it silently.
+
+**Gesprächsleiter:**
+
+- Eröffnung: offer the contacts already on file as a template — the account holder and, if there is one, the contact from the intro call — and say that this line will be public.
+- Nachfrage: if they hesitate, ask who takes the call when a local paper rings on a Tuesday morning
+- Umdeutung: if nobody is responsible yet, say that the entry is optional and the press kit works without it
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: mittel · Nachfragen: höchstens 2 · „weiss nicht" gilt · vertagen möglich
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Pressekit)
+
+### `p.summary` — Vorschau eures Pressekits
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** lay out the press kit as it will be read: boilerplates in three lengths, the tagline, the mark settings, the released facts and the contact — nothing new, only assembled.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every part comes from a confirmed value; the preview invents no sentence of its own.
+- A part that is missing is named as missing, not filled with something similar.
+- No fact appears that was not released in the session before.
+- The whole thing reads as one page, not as a list of fields.
+
+**Was zurückgewiesen wird:**
+
+- A boilerplate rewritten here because it reads better in this context.
+- A fact from the profile that nobody released.
+- An empty section rendered as if it were finished.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Kurz: „Sprachhaus ist eine Sprachschule in Mainz mit Abendkursen für Erwachsene." Tagline, Wortmarke, zwei freigegebene Fakten, Kontakt.
+  - en:
+  > Short: "Sprachhaus is a language school in Mainz with evening courses for adults." Tagline, wordmark, two released facts, contact.
+- **Marken-Relaunch**
+  - de:
+  > Ohne Design: Boilerplates, Tagline und Fakten stehen; der Abschnitt „Zeichen" nennt offen, dass er mit Brand Design kommt.
+  - en:
+  > Without design: boilerplates, tagline and facts are there; the "marks" section says plainly that it arrives with Brand Design.
+
 ## Umfang insgesamt
 
-- **Basispfad** (ohne Markenarchitektur, ohne Name): ~117 Min · 232 Züge
-- **Vollpfad** (mit beiden): ~135 Min · 270 Züge
+- **Basispfad** (ohne Markenarchitektur, ohne Name): ~128 Min · 255 Züge
+- **Vollpfad** (mit beiden): ~146 Min · 293 Züge
 
 Die Zahl je Session ist eine SCHÄTZUNG der aktiven Zeit, nicht der Sitzungsdauer;
 kommuniziert wird sie als Kapitel-Etappe („11 Sessions, ~14 Min"), damit sichtbar

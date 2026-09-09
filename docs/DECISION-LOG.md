@@ -85,6 +85,19 @@ Sucheintrag dort eine Fläche ohne Wirkung, und wir müssten das Feld je Site au
 es zu bedienen.
 ---
 
+## 2026-09-09 — Brand Book & Kit (Produkt 03): Prototyp freigegeben, Pakete K0–K8 verbindlich
+
+**Entscheidung (David, Fragenrunde):** „Prototyp freigegeben, K0 starten" — nach Vorlage der
+neun Aufnahmen (docs/plans/BRAND-BOOK-KIT.md §3) ohne Korrekturen; die Alternative „Hafenkontor
+statt Kailua im Nomenklatur-Kapitel" (Kailua hat laut Foundation keine Untermarken) wurde nicht
+gewählt, die Hinweis-Zeile im Dummy bleibt. Damit ist der Paketschnitt §2.18 VERBINDLICH und der
+Prototyp die Komponenten-Vorlage („nichts wird zweimal gebaut"); die Pakete starten selbstständig
+nacheinander (Regel vom 2026-09-05), David wird nur an den Gates gebraucht: brand-025 vor dem
+Prod-Lauf (K1), Blick auf `brand.md` (K3) und Leseansicht (K4), Inhalts-Gate Otto/Nika (K5),
+Lieferseite (K6), Copy (K7), Abnahme (K8).
+
+---
+
 ## 2026-09-09 — Brand Book & Kit (Produkt 03): Konzept freigegeben, Prototyp beauftragt
 
 **Entscheidung (David):** „Konzept freigegeben, bau den Prototyp im Playground." Damit ist

@@ -32,6 +32,7 @@ import {
   type BrandTeamKind,
   exampleKeyFor,
   isBrandDesignStep,
+  isBrandKitStep,
   partLabelKeyFor,
   questionKeyFor,
   slotById,
@@ -717,7 +718,7 @@ const turns = computed<StageTurn[]>(() => {
           role: 'george',
           text: t(
             `brand.workspace.george.${hasValue ? 'nextConfirm' : 'nextDraft'}`,
-            { field: slotLabel(slot) },
+            { field: slotLabel(slot), voice: voice.value.name },
           ),
         }]
       }
@@ -746,7 +747,7 @@ const turns = computed<StageTurn[]>(() => {
       : null
     const intro = t('brand.workspace.george.questionsDone')
     const text = actionKey && firstOpen
-      ? `${intro} ${t(`brand.workspace.george.${actionKey}`, { field: slotLabel(firstOpen) })}`
+      ? `${intro} ${t(`brand.workspace.george.${actionKey}`, { field: slotLabel(firstOpen), voice: voice.value.name })}`
       : intro
     return [...spoken, { id: 'done', role: 'george', text }]
   }
@@ -1717,9 +1718,11 @@ const generationNotice = computed<string | null>(() => {
   if (!code) return null
   const throttled = brandAiRejectionMessageKey(code)
   if (throttled) return t(throttled)
-  if (code === 'ai_disabled') return t('brand.workspace.generate.aiDisabled')
-  if (code === 'no_generator') return t('brand.workspace.generate.noGenerator')
-  if (code === 'generation_active') return t('brand.workspace.generate.busy')
+  // Die drei Betriebs-Sätze NENNEN die Stimme — und die ist in Schicht 2 Frida
+  // (D8). Ein hier ausgeschriebenes „George" stand sonst unter Fridas Kapitel.
+  if (code === 'ai_disabled') return t('brand.workspace.generate.aiDisabled', { voice: voice.value.name })
+  if (code === 'no_generator') return t('brand.workspace.generate.noGenerator', { voice: voice.value.name })
+  if (code === 'generation_active') return t('brand.workspace.generate.busy', { voice: voice.value.name })
   if (code === 'aborted') return t('brand.workspace.generate.stopped')
   if (code === 'not_ready') return t('brand.workspace.generate.notReady')
   if (code === 'slot_confirmed') return t('brand.workspace.generate.slotConfirmed')
@@ -2613,7 +2616,7 @@ const railLayers = computed<BwRailLayer[]>(() => [{
     // Zusatzprodukt kommt danach.
     ...navExtras.value,
   ],
-}, designRailLayer.value])
+}, designRailLayer.value, kitRailLayer.value])
 
 /**
  * DER ZWEITE LAYER: BRAND DESIGN (Konzept §2.1/§2.10, Paket D1, Prototyp
@@ -2711,6 +2714,68 @@ const designRailLayer = computed<BwRailLayer>(() => {
     ],
   }
 })
+
+/**
+ * WELCHE SCHICHT STEHT ÜBER DEM KAPITEL-NAMEN? — drei Produkte, drei Namen
+ * (K0; bis dahin waren es zwei).
+ *
+ * Sie steht als Rechnung und nicht als verschachtelter Ausdruck im Markup: mit
+ * der dritten Schicht wäre das dort ein zweifach geschachtelter Bedingungs-
+ * Ausdruck in einer Zeile, die ohnehin schon 200 Zeichen lang ist.
+ */
+const currentLayerLabelKey = computed(() => {
+  if (stepKey.value && isBrandKitStep(stepKey.value)) return 'brand.kitLayer.label'
+  if (stepKey.value && isBrandDesignStep(stepKey.value)) return 'brand.designLayer.label'
+  return 'brand.workspace.railLayer'
+})
+
+/**
+ * DER DRITTE LAYER: BRAND BOOK & KIT (Konzept docs/plans/BRAND-BOOK-KIT.md
+ * §2.7, Paket K0, Prototyp `demoRail.ts` Layer `book` + `demoRailWithKit`).
+ *
+ * ── K0 BAUT NUR DIE SCHRANKE ─────────────────────────────────────────────
+ * Er steht bei jeder Marke da, und heute steht er bei JEDER Marke GESPERRT:
+ * die Freischaltung („Ableitung") gibt es erst mit K1, die drei Kapitel
+ * bekommen ihre Seiten mit K5 und die Lieferseite „Kit" mit K6. Der gesperrte
+ * Zustand ist trotzdem schon der richtige — eine Schicht, die man nicht sieht,
+ * kann man nicht wollen, und die Auskunft „das gibt es, so kommt ihr dran" ist
+ * die halbe Produktseite (dieselbe Begründung wie bei Brand Design D1).
+ *
+ * Der offene Zweig ist deshalb bewusst NICHT vorweggenommen: er hätte heute
+ * keine Adresse, auf die er zeigen könnte, und ein Punkt ohne Ziel ist die
+ * Sorte Vorschuss, die niemand einlöst.
+ *
+ * ── DIE COPY IST DIE DES PROTOTYPS ───────────────────────────────────────
+ * Kein „Templates", kein „Strategy Playbook" (die gehören zu Produkt 04,
+ * §2.16): Brand Book · Kit & Brand Context · Pressekit. Der Sperrsatz ist
+ * „Teil der Ableitung" (§2.7) und nicht „baut auf eurer Foundation auf" — das
+ * ist der Satz von Schicht 2 und hier schlicht falsch.
+ */
+const kitRailLayer = computed<BwRailLayer>(() => ({
+  id: 'kit',
+  label: t('brand.kitLayer.label'),
+  locked: true,
+  lockedNote: t('brand.kitLayer.lockedNote'),
+  info: {
+    description: t('brand.kitLayer.info'),
+    minutes: t('brand.session.minutes', {
+      minutes: store.kitSteps.reduce((sum, entry) => sum + chapterEffortMinutes(entry.stepKey), 0),
+    }),
+    bausteine: store.kitSteps.map(entry => ({
+      label: t(`brand.steps.${entry.stepKey}`),
+      note: t(`brand.stepInfo.${entry.stepKey}`),
+    })),
+  },
+  // Die Punkte stehen auch gesperrt komplett da (Runde 85, David) — mit
+  // Schloss im Status-Kreis statt versteckter Liste.
+  steps: store.kitSteps.map((entry): BwRailStep => ({
+    id: entry.stepKey,
+    label: t(`brand.steps.${entry.stepKey}`),
+    icon: '',
+    state: 'locked',
+    info: railInfo(entry),
+  })),
+}))
 
 /** Ein Kapitel ist anklickbar, sobald die pure Regel den Eintritt erlaubt. */
 function canEnterStep(entry: BrandJourneyStep): boolean {
@@ -3408,7 +3473,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                Foundation" stand über „Moodboard" der Name der falschen Schicht
                — die eine Stelle, an der die Werkstatt behauptet hätte, Brand
                Design sei ein Kapitel der Foundation. -->
-          <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ t(stepKey && isBrandDesignStep(stepKey) ? 'brand.designLayer.label' : 'brand.workspace.railLayer') }}</p>
+          <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ t(currentLayerLabelKey) }}</p>
           <p class="truncate font-semibold">{{ stepKey ? t(`brand.steps.${stepKey}`) : '' }}</p>
         </div>
         <!-- Der Log-Toggle wirkt nur, wo es eine Log-SPALTE gibt: unter 768 px
@@ -3742,7 +3807,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     <p class="bw-label" style="color: var(--bw-muted)">{{ slotLabel(pendingCard.slot) }}</p>
                     <span v-if="pendingCard.controls.showDraftBadge" class="bw-state bw-state--draft">
                       <UIcon name="i-ph-pen-nib" />
-                      {{ t('brand.workspace.draftBadge') }}
+                      {{ t('brand.workspace.draftBadge', { voice: voice.name }) }}
                     </span>
                   </div>
                   <UTextarea
@@ -3886,14 +3951,14 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     size="sm" class="flex-1" maxlength="500"
                     :model-value="hints[pendingCard.slot.id] ?? ''"
                     :placeholder="t('brand.workspace.generate.hintPlaceholder')"
-                    :aria-label="t('brand.workspace.generate.hintLabel')"
+                    :aria-label="t('brand.workspace.generate.hintLabel', { voice: voice.name })"
                     :disabled="generation.streaming.value"
                     @update:model-value="value => hints = { ...hints, [pendingCard!.slot.id]: String(value) }"
                     @keydown.enter="generateSlot(pendingCard!.slot)"
                   />
                   <UButton
                     size="sm" color="neutral" variant="ghost" class="bw-send rounded-full"
-                    icon="i-ph-arrow-right" :aria-label="t('brand.workspace.generate.hintLabel')"
+                    icon="i-ph-arrow-right" :aria-label="t('brand.workspace.generate.hintLabel', { voice: voice.name })"
                     :disabled="generation.streaming.value"
                     @click="generateSlot(pendingCard.slot)"
                   />
@@ -4105,7 +4170,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
       <div ref="promptBox" class="w-full">
         <UChatPrompt
           v-if="!acceptanceView"
-          v-model="promptDraft" :placeholder="t('brand.workspace.george.placeholder')"
+          v-model="promptDraft" :placeholder="t('brand.workspace.george.placeholder', { voice: voice.name })"
           :disabled="!promptEnabled" :autofocus="false" class="w-full"
           :ui="{ root: 'has-[textarea:focus-visible]:outline-none has-[textarea:focus-visible]:ring-default' }"
           @submit="submitPrompt" @keydown.tab="promptTab"

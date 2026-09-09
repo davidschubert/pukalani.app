@@ -77,6 +77,27 @@ export default defineNuxtConfig({
     port: 3010,
   },
 
+  /**
+   * DIE ALTE BEISPIEL-SEITE ANTWORTET 301.
+   *
+   * `/beispiel/kailua-coffee` war die redaktionelle Zweitfassung des
+   * Beispiel-Brandings (Paket G5, 2026-09-07). Seit Discover D5 steht dieselbe
+   * Marke als ECHTE Anatomie unter `/discover/kailua-coffee-co` — aus
+   * `brand_publications`, mit Steckbrief, Markenabdruck und eigenem og:image.
+   * Zwei indexierbare Seiten für eine Marke sind zwei Pflegestellen und zwei
+   * Kandidaten in derselben Suche; die Seite ist deshalb gelöscht und ihre
+   * Adresse zeigt dauerhaft auf das Original.
+   *
+   * ZWEI ZEILEN, WEIL ES ZWEI ADRESSEN GIBT (i18n 'prefix_except_default'):
+   * die englische ohne Prefix, die deutsche unter `/de/*`. Eine Regel `/de/**`
+   * gibt es hier bewusst nicht — sie träfe jede deutsche Seite.
+   * Muster: `apps/marketing/nuxt.config.ts`.
+   */
+  routeRules: {
+    '/beispiel/kailua-coffee': { redirect: { to: '/discover/kailua-coffee-co', statusCode: 301 } },
+    '/de/beispiel/kailua-coffee': { redirect: { to: '/de/discover/kailua-coffee-co', statusCode: 301 } },
+  },
+
   // Eigene Keys der App — werden mit den Layer-Locales gemergt (gleicher code)
   i18n: {
     locales: [

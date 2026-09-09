@@ -221,18 +221,36 @@ export type BrandFoundationBlock =
  * so unveränderlich wie eine Slot-Id: ein verschickter Tieflink darf nicht
  * ins Leere zeigen.
  */
+/*
+ * SEIT K0 STEHEN FÜNF ANKER MEHR DARIN (Konzept BRAND-BOOK-KIT.md §2.5) —
+ * ADDITIV und an ihrem endgültigen Platz: `nomenklatur` hinter `architektur`,
+ * die drei Anwendungs-Kapitel hinter `visuell`, `pressekit` vor `ki-texte`.
+ * `ki-texte` bleibt, wo und wie es heisst (§2.20 Nr. 6: der Anker ist ein
+ * Vertrag, nur sein TITEL wird nach Abnahme von `aiguide` zu „AI-Guidelines").
+ *
+ * IN K0 BAUT DER RENDERER FÜR SIE NOCH KEINE BLÖCKE — ein Kapitel ohne Blöcke
+ * wird ohnehin gefiltert (s. `buildBrandFoundation`), es erscheint also
+ * nirgends. Die Ids stehen trotzdem schon hier, weil sie der VERTRAG sind:
+ * Reihenfolge und Sprungmarken werden einmal festgelegt, nicht in dem Paket,
+ * das zufällig als erstes einen Block dafür schreibt (K4).
+ */
 export const BRAND_FOUNDATION_CHAPTER_IDS = [
   'story',
   'kontext',
   'purpose',
   'positionierung',
   'architektur',
+  'nomenklatur',
   'werte',
   'stimme',
   'manifest',
   'messaging',
   'name',
   'visuell',
+  'zeichen-anwendung',
+  'farbe-anwendung',
+  'typografie-anwendung',
+  'pressekit',
   'ki-texte',
 ] as const
 export type BrandFoundationChapterId = (typeof BRAND_FOUNDATION_CHAPTER_IDS)[number]
@@ -282,6 +300,10 @@ export const BRAND_FOUNDATION_SOURCE_STEPS: Readonly<
   purpose: ['pvm'],
   positionierung: ['pvm'],
   architektur: ['architecture'],
+  // Schicht 3 (K0): die Nomenklatur wird im Kapitel `nomenclature` abgenommen —
+  // sie liegt nur auf dem B2-Weg (§2.20 Nr. 4), und ein Kapitel, das nicht auf
+  // dem Weg liegt, zählt hier ohnehin nicht als offen (s. Kopf).
+  nomenklatur: ['nomenclature'],
   werte: ['values'],
   /**
    * NUR `archetype` (Davids Entscheidung 2026-09-09, Befund 12).
@@ -300,8 +322,22 @@ export const BRAND_FOUNDATION_SOURCE_STEPS: Readonly<
   messaging: ['verbal'],
   name: ['naming'],
   visuell: [],
+  /*
+   * DIE DREI ANWENDUNGS-KAPITEL zeigen dasselbe Preset wie `visuell`, nur eine
+   * Zoomstufe tiefer (§2.5: Kapitel 10 ist die Vitrine, die Anwendung das
+   * Regelwerk). Sie nennen trotzdem ihr EIGENES Quell-Kapitel und nicht wie
+   * `visuell` gar keines: dort ist die Schranke, an der nichts zu bestätigen
+   * ist — hier weiss man genau, welches Werkstatt-Kapitel die Regeln füllt,
+   * und der Vermerk „noch nicht abgenommen" springt dann auch dorthin.
+   */
+  'zeichen-anwendung': ['mark'],
+  'farbe-anwendung': ['color'],
+  'typografie-anwendung': ['type'],
+  pressekit: ['presskit'],
   // Der KI-Rahmen ist eine Zusammenfassung dreier Kapitel — solange eines
-  // davon offen ist, kann sich sein Inhalt noch ändern.
+  // davon offen ist, kann sich sein Inhalt noch ändern. Das Kapitel `aiguide`
+  // kommt hier mit K4 dazu (§2.5): erst dann rendert es die Guidelines statt
+  // des festen Rahmens, und erst dann kann es auf sie warten.
   'ki-texte': ['values', 'archetype', 'verbal'],
 }
 

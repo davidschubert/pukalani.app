@@ -516,6 +516,22 @@
         "transitions": "Übergangs-Tokens",
         "logo": "Soll sich euer Zeichen bewegen?",
         "rules": "Bewegungs-Regeln"
+      },
+      "m": {
+        "types": "Wofür braucht ihr Namen — Produkte, Leistungen, Formate, Orte, Digitales?",
+        "patterns": "Namensmuster je Typ",
+        "rules": "Eure Namens-Regeln"
+      },
+      "n": {
+        "scope": "Was darf KI in eurem Namen erzeugen?",
+        "review": "Wer gibt frei, bevor etwas rausgeht?",
+        "guardrails": "Eure Leitplanken für KI",
+        "prompts": "Prompt-Vorlagen"
+      },
+      "p": {
+        "facts": "Welche Fakten dürfen ins Pressekit?",
+        "contact": "Wer ist eure Ansprechperson für Presse?",
+        "summary": "Vorschau eures Pressekits"
       }
     },
     "labels": {
@@ -603,7 +619,10 @@
       "type": "Schrift ist Stimme in Form. Aus eurer Tonalität folgt ein Paar für Überschrift und Text, dazu Grade, Hierarchie und die Regeln, wo welcher Schnitt gilt.",
       "mark": "Die Richtung eures Zeichens — Wortmarke, Monogramm oder Bildmarke — mit Briefing und gesetzten Beispielen. Ein Entwurf ist ein Entwurf, kein fertiges, schützbares Logo.",
       "imagery": "Wie eure Marke aussieht, wenn sie nicht spricht: Fotografie-Stil, Illustration und Icons — mit Do & Don’t zum Fühlen statt einer Liste von Adjektiven.",
-      "motion": "Bewegung mit Charakter: Tempo und Übergänge, ob euer Zeichen sich bewegt — und was passiert, wenn jemand reduzierte Bewegung eingestellt hat."
+      "motion": "Bewegung mit Charakter: Tempo und Übergänge, ob euer Zeichen sich bewegt — und was passiert, wenn jemand reduzierte Bewegung eingestellt hat.",
+      "nomenclature": "Wenn die Marke wächst, bekommt jedes neue Ding einen Namen — und ohne Muster bekommt es irgendeinen. Otto leitet je Produkttyp ein Namensmuster aus eurer Markenarchitektur her und macht daraus Regeln, an denen sich jeder künftige Name messen lässt.",
+      "aiguide": "KI schreibt längst mit. Hier legt ihr fest, was sie in eurem Namen erzeugen darf, wer freigibt und welche Leitplanken gelten — Ton, Tabu-Wörter, Schreibweisen. Nika leitet alles aus eurer Stimme ab; erfunden wird nichts.",
+      "presskit": "Fast fertig aus dem, was schon steht: Boilerplates, Tagline, Zeichen. Zwei Dinge muss trotzdem ein Mensch sagen — welche Fakten öffentlich reisen dürfen und wer die Ansprechperson ist."
     },
     "part": {
       "a": {
@@ -675,6 +694,9 @@
       "f": {
         "taste": "Vitra, Patagonia, Aesop — kurz, eigenständig, ohne Erklärung merkbar.",
         "noGos": "Keine englischen Kunstwörter, nichts mit Global oder 24 im Namen."
+      },
+      "p": {
+        "contact": "Leilani Kahale, Inhaberin — Presse und Kooperationen"
       }
     },
     "help": {
@@ -861,7 +883,7 @@
       "chapterState": {
         "empty": "Offen",
         "active": "Im Gespräch",
-        "generating": "George schreibt …",
+        "generating": "{voice} schreibt …",
         "edited": "Von dir bearbeitet",
         "confirmed": "Fertig",
         "stale": "Wird aktualisiert"
@@ -874,10 +896,10 @@
       },
       "george": {
         "subtitle": "Dein Markenberater",
-        "placeholder": "Antwort schreiben — oder George etwas fragen",
+        "placeholder": "Antwort schreiben — oder {voice} etwas fragen",
         "nothingOpen": "In diesem Kapitel ist nichts mehr offen — bestätige es, wenn es passt.",
         "questionsDone": "Meine Fragen sind durch — die offenen Felder unten formen wir jetzt hier im Gespräch.",
-        "nextDraft": "Fangen wir mit „{field}“ an: Klick auf „George, entwirf das“, dann lege ich dir eine erste Fassung aus euren bisherigen Antworten vor — oder erzähl mir hier, was dir dazu durch den Kopf geht.",
+        "nextDraft": "Fangen wir mit „{field}“ an: Klick auf „{voice}, entwirf das“, dann lege ich dir eine erste Fassung aus euren bisherigen Antworten vor — oder erzähl mir hier, was dir dazu durch den Kopf geht.",
         "nextConfirm": "Nächster Schritt: Sieh dir „{field}“ an und bestätige es — oder klick auf „Korrigieren“, wenn es noch nicht passt.",
         "send": "Senden"
       },
@@ -903,7 +925,7 @@
       "completeFailed": "Das Kapitel ist noch nicht fertig",
       "reopenFailed": "Wieder öffnen hat nicht geklappt — versuch es gleich nochmal",
       "missingRequired": "Einige Pflicht-Entscheidungen sind noch offen — bestätige sie und versuch es erneut.",
-      "draftBadge": "Entwurf von George",
+      "draftBadge": "Entwurf von {voice}",
       "site": {
         "label": "Eure Website",
         "never": "Noch nicht gelesen.",
@@ -931,12 +953,12 @@
         "again": "{voice}, versuch es nochmal",
         "stop": "Stopp",
         "hintPlaceholder": "Hinweis — z. B. wärmer, kürzer, weniger Fachsprache",
-        "hintLabel": "Hinweis für George",
+        "hintLabel": "Hinweis für {voice}",
         "answerPlaceholder": "Stichworte, Sätze — alles, was ihr dazu wisst",
         "answerLabel": "Antwort für {voice}",
-        "aiDisabled": "George entwirft gerade nicht. Du kannst alles ganz normal weiterschreiben.",
-        "noGenerator": "Für dieses Feld gibt es noch keinen Entwurf von George. Schreib es selbst — es wird gespeichert.",
-        "busy": "George schreibt schon an einer anderen Stelle. Einen Moment noch.",
+        "aiDisabled": "{voice} entwirft gerade nicht. Du kannst alles ganz normal weiterschreiben.",
+        "noGenerator": "Für dieses Feld gibt es noch keinen Entwurf von {voice}. Schreib es selbst — es wird gespeichert.",
+        "busy": "{voice} schreibt schon an einer anderen Stelle. Einen Moment noch.",
         "parallelLimit": "George schreibt schon an zwei Stellen gleichzeitig. Sobald eine fertig ist, geht es hier weiter.",
         "slotLimit": "Für dieses Feld hat George heute genug Anläufe gemacht. Morgen wieder — oder schreib es jetzt selbst.",
         "talkLimit": "Für dieses Branding hat George heute genug geantwortet. Schreib ruhig weiter — deine Antworten werden gespeichert, morgen redet er wieder mit.",
@@ -1069,7 +1091,10 @@
       "type": "Typografie",
       "mark": "Zeichen",
       "imagery": "Bildsprache",
-      "motion": "Bewegung"
+      "motion": "Bewegung",
+      "nomenclature": "Nomenklatur",
+      "aiguide": "AI-Guidelines",
+      "presskit": "Pressekit"
     },
     "advisors": {
       "george": {
@@ -2178,12 +2203,17 @@
         "purpose": "Purpose, Vision, Mission",
         "positionierung": "Positionierung",
         "architektur": "Markenarchitektur",
+        "nomenklatur": "Nomenklatur",
         "werte": "Werte",
         "stimme": "Persönlichkeit & Stimme",
         "manifest": "Manifest",
         "messaging": "Tagline & Messaging",
         "name": "Name",
         "visuell": "Visuelle Identität",
+        "zeichen-anwendung": "Zeichen-Anwendung",
+        "farbe-anwendung": "Farb-Anwendung",
+        "typografie-anwendung": "Typografie-Anwendung",
+        "pressekit": "Pressekit",
         "ki-texte": "Regeln für KI-Texte"
       },
       "label": {
@@ -2703,6 +2733,13 @@
       "info": "Die visuelle Identität eurer Marke — hergeleitet aus Foundation und Brand Language, nicht aus dem Katalog. Farben, Schrift und Zeichen entstehen aus Archetyp, Werten und Stimme; jede Entscheidung trägt ihre Begründung. Freigeschaltet wird Brand Design vom Studio nach dem Erstgespräch.",
       "progress": "{done} von {total} Kapiteln",
       "result": "Visuelle Identität"
+    },
+    "kitLayer": {
+      "label": "Brand Book & Kit",
+      "lockedNote": "Teil der Ableitung",
+      "info": "Regelwerk und Werkzeuge: Das Book erklärt, das Kit arbeitet. Hier wird nichts Neues entschieden — es wird kuratiert und ausgeliefert, was in Foundation und Design längst steht. Freigeschaltet wird die Ableitung vom Studio nach dem Erstgespräch.",
+      "progress": "{done} von {total} Kapiteln",
+      "result": "Kit"
     },
     "inspiration": {
       "title": "Eure Vorbilder",

@@ -8,13 +8,22 @@ import { KAILUA_COFFEE_DESIGN } from './kailuaCoffeeDesign'
  * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §4 und §5 Paket G5).
  *
  * ── WARUM EIN SNAPSHOT UND KEINE SEITE MIT TEXTEN ────────────────────────
- * Die öffentliche Beispiel-Seite `/beispiel/kailua-coffee` soll zeigen, was am
- * Ende eines Gesprächs herauskommt — nicht, wie eine Marketing-Seite darüber
- * REDET. Sie fährt deshalb GENAU DEN Renderer, der auch das echte Handbuch
- * baut (`buildBrandFoundation`), auf genau der Eingabeform, die ein
- * eingefrorener Share-Snapshot hat (`BrandFoundationInput`). Damit ist die
- * Werbe-Aussage „so sieht euer Ergebnis aus" keine Behauptung, sondern
- * dieselbe Maschine: ändert sich der Renderer, ändert sich das Beispiel mit.
+ * Die öffentliche Beispiel-Seite `/beispiel/kailua-coffee` sollte zeigen, was
+ * am Ende eines Gesprächs herauskommt — nicht, wie eine Marketing-Seite
+ * darüber REDET. Sie fuhr deshalb GENAU DEN Renderer, der auch das echte
+ * Handbuch baut (`buildBrandFoundation`), auf genau der Eingabeform, die ein
+ * eingefrorener Share-Snapshot hat (`BrandFoundationInput`).
+ *
+ * ── DIE SEITE GIBT ES SEIT 2026-09-09 NICHT MEHR ─────────────────────────
+ * Seit Discover D5 ist „Kailua Coffee Co." eine ECHTE Veröffentlichung
+ * (`brand_publications`, Badge `example`) und steht als Anatomie unter
+ * `/discover/kailua-coffee-co`. Die redaktionelle Zweitfassung ist gelöscht,
+ * ihre Adresse antwortet 301 (`apps/branding/nuxt.config.ts`).
+ *
+ * DIESER SNAPSHOT BLEIBT — als PRÜFSTAND des Renderers: `kailuaCoffeeExample.
+ * test.ts` fährt an ihm die Zusagen des Fundaments ab (was reist, was nicht,
+ * welche Kapitel ohne Lücke entfallen). Produktions-Code liest ihn seither
+ * NICHT mehr; wer ihn wieder einbaut, sollte das hier vermerken.
  *
  * ── WAS HIER NICHT STEHT, STEHT AUCH NICHT ZUFÄLLIG NICHT ────────────────
  * Nur Sessions, die REISEN (`sessionTravels` — öffentlich UND Festlegung,

@@ -28,12 +28,15 @@ import {
 import { brandRestartImpact, computeSourcesHash, sessionsAffectedBy } from '../shared/brandSessions'
 import {
   BRAND_DESIGN_STEP_KEYS,
+  BRAND_FOUNDATION_STEP_KEYS,
+  BRAND_KIT_STEP_KEYS,
   BRAND_SLOTS,
   BRAND_STEP_KEYS,
   type BrandSlotStateFacts,
   type BrandStepKey,
   confirmableRequiredSlotsForStep,
   isBrandDesignStep,
+  isBrandKitStep,
   requiredSlotsForStep,
   slotById,
   slotsForStep,
@@ -99,10 +102,33 @@ describe('includedBrandSteps — die Weichen', () => {
       .toEqual(['context', 'pvm', 'values', 'archetype', 'manifesto', 'verbal', 'result'])
     expect(includedBrandSteps(BASE_PROFILE).filter(isBrandDesignStep))
       .toEqual([...BRAND_DESIGN_STEP_KEYS])
+    // SCHICHT 3 DAGEGEN LIEGT OHNE FREISCHALTUNG GAR NICHT AUF DEM WEG (K0,
+    // §2.8) — anders als Schicht 2, die dort gesperrt steht. Der Unterschied
+    // ist die D0-Lehre: was nicht auf dem Weg liegt, zählt nirgends mit.
+    expect(includedBrandSteps(BASE_PROFILE).filter(isBrandKitStep)).toEqual([])
   })
 
   it('Vollpfad: alle neun der Foundation plus die sechs von Brand Design', () => {
-    expect(includedBrandSteps(FULL_PROFILE)).toEqual([...BRAND_STEP_KEYS])
+    expect(includedBrandSteps(FULL_PROFILE))
+      .toEqual([...BRAND_FOUNDATION_STEP_KEYS, ...BRAND_DESIGN_STEP_KEYS])
+  })
+
+  it('Vollpfad MIT Ableitung: die drei Kapitel von Book & Kit kommen dazu', () => {
+    const unlocked: BrandProfileFacts = { ...FULL_PROFILE, derivationUnlocked: true }
+    expect(includedBrandSteps(unlocked)).toEqual([...BRAND_STEP_KEYS])
+  })
+
+  it('NOMENKLATUR ERBT DIE WEICHE DER MARKENARCHITEKTUR (§2.20 Nr. 4)', () => {
+    // Ohne Untermarken gibt es kein Namensmuster, das zu bestätigen wäre — die
+    // Schreibweisen stehen dann in `n.guardrails`. Die anderen beiden Kapitel
+    // der Schicht laufen trotzdem.
+    const ohneUntermarken: BrandProfileFacts
+      = { ...FULL_PROFILE, subBrands: 'no', derivationUnlocked: true }
+    const steps = includedBrandSteps(ohneUntermarken)
+    expect(steps).not.toContain('architecture')
+    expect(steps).not.toContain('nomenclature')
+    expect(steps).toContain('aiguide')
+    expect(steps).toContain('presskit')
   })
 
   it('W4 unbeantwortet zählt NICHT als abgewählt, hält den Weg aber auch nicht auf', () => {
@@ -184,9 +210,11 @@ describe('resolveBrandJourney — Reihenfolge und Freischaltung', () => {
     expect(stateOf(journey, 'pvm').state).toBe('locked')
   })
 
-  it('markiert nur architecture und naming als weichen-abhängig', () => {
+  it('markiert architecture, naming und nomenclature als weichen-abhängig', () => {
+    // `nomenclature` seit K0: sie erbt die Weiche W4 von `architecture`
+    // (§2.20 Nr. 4) und ist damit genauso optional wie ihr Vorbild.
     const optional = resolveBrandJourney(FULL_PROFILE).filter(step => step.optional).map(step => step.stepKey)
-    expect(optional).toEqual(['architecture', 'naming'])
+    expect(optional).toEqual(['architecture', 'naming', 'nomenclature'])
   })
 
   it('trägt Fortschritt und offene Pflicht-Slots je Baustein', () => {
@@ -266,11 +294,15 @@ describe('resolveBrandJourney — Happy-Path über den ganzen Vollpfad', () => {
 
     const final = resolveBrandJourney(FULL_PROFILE, done)
     expect(final.filter(step => step.state === 'done')).toHaveLength(9)
-    expect(final.filter(step => !isBrandDesignStep(step.stepKey))
+    expect(final.filter(step =>
+      !isBrandDesignStep(step.stepKey) && !isBrandKitStep(step.stepKey))
       .every(step => step.progress.pct === 100)).toBe(true)
     // Und die zweite Schicht bleibt dahinter zu — ohne Freischaltung.
     expect(final.filter(step => isBrandDesignStep(step.stepKey))
       .every(step => step.state === 'locked' && step.reason === 'design_locked')).toBe(true)
+    // Und die dritte Schicht liegt gar nicht erst auf dem Weg (K0).
+    expect(final.filter(step => isBrandKitStep(step.stepKey))
+      .every(step => step.state === 'skipped' && step.reason === 'derivation_locked')).toBe(true)
   })
 
   it('endet auf dem Basispfad mit sieben done und zwei skipped', () => {
@@ -280,7 +312,7 @@ describe('resolveBrandJourney — Happy-Path über den ganzen Vollpfad', () => {
     const journey = resolveBrandJourney(BASE_PROFILE, done)
     expect(journey.filter(step => step.state === 'done')).toHaveLength(7)
     expect(journey.filter(step => step.state === 'skipped').map(step => step.stepKey))
-      .toEqual(['architecture', 'naming'])
+      .toEqual(['architecture', 'naming', ...BRAND_KIT_STEP_KEYS])
   })
 })
 

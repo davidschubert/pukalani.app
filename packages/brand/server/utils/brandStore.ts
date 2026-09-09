@@ -32,6 +32,7 @@ import {
   type BrandSlotStateFacts,
   type BrandStepKey,
   isBrandDesignStep,
+  isBrandKitStep,
   slotById,
 } from '../../shared/slotRegistry'
 import { computeSourcesHash } from '../../shared/brandSessions'
@@ -152,6 +153,16 @@ export type BrandProfileRow = Models.Row & {
    * ohne Datum wäre die Behauptung einer Freischaltung, die es nicht gibt.
    */
   designUnlockedBy?: string | null
+  /**
+   * DIE FREISCHALTUNG DER ABLEITUNG (Book & Kit + Marktvergleich, Konzept
+   * BRAND-BOOK-KIT.md §2.8) — die Spalte kommt mit Migration **brand-025**
+   * (Paket K1). Sie steht hier schon, damit `profileFacts()` sie lesen KANN;
+   * bis zur Migration fehlt sie in jeder Zeile, und `undefined` ist genau der
+   * Default „nicht freigeschaltet". Der Leser läuft also bewusst ohne sie —
+   * sonst wäre der Code vor der Migration nicht deploybar (D1-Lehre:
+   * Migration VOR Code, aber der Code darf nicht darauf bestehen).
+   */
+  derivationUnlockedAt?: string | null
   /**
    * DAS OPT-IN „diese Marke darf als öffentliche Seite in der Galerie stehen"
    * (Migration brand-020, Discover D1). EIGENE Spalte neben `marketVisibility`
@@ -758,6 +769,15 @@ export function profileFacts(row: BrandProfileRow): BrandProfileFacts {
     // Default „nicht freigeschaltet". Der Leser läuft bewusst weiter ohne die
     // Spalte — sonst wäre der Code vor der Migration nicht deploybar.
     designUnlockedAt: row.designUnlockedAt ?? null,
+    // BRAND BOOK & KIT, SCHICHT 3 (Konzept §2.8, Migration brand-025): heute
+    // IMMER `false` — die Spalte gibt es noch nicht, und `undefined` ist der
+    // richtige Default. FAIL-SOFT mit Absicht: die drei Kapitel liegen damit
+    // nicht auf dem Weg, was für jede Bestands-Marke der Zustand ist.
+    //
+    // K1 legt hier die pure Regel `resolveDerivationAccess` darüber (Beta-Konto
+    // ODER Zeitstempel) — die Journey bekommt weiterhin nur ihr ERGEBNIS, nie
+    // die Einzelteile.
+    derivationUnlocked: Boolean(row.derivationUnlockedAt),
   }
 }
 
@@ -1124,6 +1144,12 @@ export function resolveProfileProgress(journey: readonly BrandJourneyStep[]): Br
     // Foundation noch das Design beschreibt — und die Marken-Karte bleibt die
     // Karte der Foundation.
     if (isBrandDesignStep(step.stepKey)) continue
+    // UND SCHICHT 3 GENAUSO WENIG (K0, dieselbe Begründung). Ohne
+    // Freischaltung stehen ihre Kapitel ohnehin auf `skipped` und fielen schon
+    // oben heraus; die Klemme hier gilt dem Tag DANACH: eine freigeschaltete
+    // Marke soll nicht im Freischalt-Moment von 100 % auf 80 % fallen, ohne
+    // dass sich an ihrer Foundation etwas geändert hätte.
+    if (isBrandKitStep(step.stepKey)) continue
     lastOnPath = step.stepKey
     total += step.progress.requiredTotal
     filled += step.progress.requiredFilled

@@ -1,6 +1,6 @@
 import { brandStepAcceptance } from '../../../../../shared/brandJourney'
 import { blockingFindingSlots } from '../../../../../shared/brandFindings'
-import { BRAND_SLOTS, isBrandDesignStep, slotsForStep } from '../../../../../shared/slotRegistry'
+import { BRAND_SLOTS, isBrandDesignStep, isBrandKitStep, slotsForStep } from '../../../../../shared/slotRegistry'
 import type {
   BrandDocumentChapter,
   BrandDocumentResponse,
@@ -72,6 +72,13 @@ export default defineEventHandler(async (event): Promise<BrandDocumentResponse> 
     // Identität"), so wie in Kapitel 10 der Leseansicht; abgenommen werden sie
     // weiterhin in der Werkstatt.
     if (isBrandDesignStep(entry.stepKey)) continue
+    // SCHICHT 3 STEHT HIER NOCH NICHT (K0). Ohne Freischaltung ist sie
+    // `skipped` und fiele schon oben heraus; die Klemme gilt dem Tag DANACH.
+    // Ihre Werte sind heute weder gerendert noch beschriftet — die drei
+    // Kapitel kommen mit K5 (Werkstatt) und K4 (Leseansicht) in das Dokument,
+    // und zwar zusammen mit ihren Blöcken. Ein Abschnitt aus rohen
+    // Katalog-Ids wäre dieselbe Falle wie bei Schicht 2 vor D8.
+    if (isBrandKitStep(entry.stepKey)) continue
     const row = stepRows.find(candidate => candidate.stepKey === entry.stepKey)
     const records = recordsByStep.get(entry.stepKey) ?? {}
     const openConflicts = blockingFindingSlots(
