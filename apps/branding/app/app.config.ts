@@ -13,6 +13,17 @@ export default defineAppConfig({
      */
     ai: {
       visionModel: 'google/gemini-2.5-flash',
+      /**
+       * BILDER ERZEUGEN (Zeichen, Stufe 3 — KI-Entwürfe, D5c): Davids
+       * Entscheidung vom 2026-09-08 (DECISION-LOG). Dieselbe Anbieter-Familie
+       * wie die Lesung; die ZDR-Klemme sitzt im Core-Transport `aiImage`.
+       * Der zuerst genannte Preview-Slug (`…-image-preview`) hat bei OpenRouter
+       * seit 2026-09 keine Endpunkte mehr („No endpoints found", echter Lauf
+       * 2026-09-08) — dies ist das freigegebene Nachfolgemodell derselben
+       * Familie; der Lauf unter `data_collection: deny` + `zdr` lieferte
+       * vier Bilder.
+       */
+      imageModel: 'google/gemini-2.5-flash-image',
     },
     /**
      * DER NAME, DEN DER BESUCHER SIEHT.
@@ -151,6 +162,18 @@ export default defineAppConfig({
      * zwar erst dann: sie ist die einzige Stelle, an der ein Besucher erfährt,
      * dass er einen ungeprüften Text vor sich hat.
      */
+    /**
+     * DIE HÜLLE UNTEN LINKS HEISST „WEBSITE-EINSTELLUNGEN" (Davids Entscheidung
+     * 2026-09-08, DECISION-LOG „Navigation anpassen"): diese Site ist ein Silo
+     * ohne Community, und der Menüpunkt hieß trotzdem „Community-Einstellungen"
+     * — eine falsche Auskunft über eine Fläche, in der die Rechtsseiten und
+     * die Navigation DIESER Website stehen. Der Schalter ist derselbe wie in
+     * apps/comments (Begründung dort und an `instanceTabs` in
+     * packages/core/app/app.config.ts): er benennt die Hülle um UND hängt die
+     * vier Betreiber-Reiter Produkte · Speicher · Konfiguration · System
+     * hinein — hier richtig, denn der Betreiber dieser Instanz ist David.
+     */
+    admin: { instanceTabs: true },
     pages: {
       draftNotice: ['imprint', 'privacy', 'terms'],
     },

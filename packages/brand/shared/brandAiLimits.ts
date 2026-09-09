@@ -126,6 +126,24 @@ export const BRAND_AI_REVIEW_DAILY_LIMIT = 120
 export const BRAND_DESIGN_READING_DAILY_LIMIT = 3
 
 /**
+ * WIE OFT EINE MARKE AM TAG KI-ENTWÜRFE DES ZEICHENS ERZEUGEN LÄSST (Brand
+ * Design D5c, §2.5 Stufe 3 / §2.12: „Drossel 3 Läufe je Marke und Tag").
+ *
+ * ── WARUM SO WENIG ────────────────────────────────────────────────────────
+ * EIN Lauf sind VIER Bild-Aufrufe an ein Bildmodell — der teuerste Klick
+ * dieses Layers, teurer noch als die Vorbilder-Lesung. Und er ist ein Vorgang
+ * mit natürlichem Ende: die Entwürfe sind Ideen für die Designer-Arbeit, kein
+ * Automat, an dem man dreht, bis das Logo herausfällt. Drei decken den
+ * Normalfall (einmal sehen, einmal nach einer Briefing-Korrektur, einmal für
+ * einen Irrtum); der vierte Lauf am selben Tag wäre dieselbe Frage.
+ *
+ * Dieselbe Zahl wie beim Lesungs-Eimer, aber ein EIGENER Eimer: sie zählen
+ * zwei verschiedene Rechnungen in zwei verschiedenen Kapiteln, und geteilt
+ * nähme das Lesen der Vorbilder dem Zeichen seine Entwürfe.
+ */
+export const BRAND_DESIGN_DRAFTS_DAILY_LIMIT = 3
+
+/**
  * WAS EIN AUFRUF IM REVIEW-EIMER KOSTET (Plan §13) — nicht jeder gleich viel.
  *
  * Stufe 1 ist der Normalfall und kostet 1. Stufe 2 läuft auf dem TEUREN
@@ -184,6 +202,7 @@ export interface BrandAiLimits {
   talkDay: number
   reviewDay: number
   readingDay: number
+  draftsDay: number
   accountDay: number
   instanceDay: number
 }
@@ -194,6 +213,7 @@ export const BRAND_AI_LIMITS: BrandAiLimits = {
   talkDay: BRAND_AI_TALK_DAILY_LIMIT,
   reviewDay: BRAND_AI_REVIEW_DAILY_LIMIT,
   readingDay: BRAND_DESIGN_READING_DAILY_LIMIT,
+  draftsDay: BRAND_DESIGN_DRAFTS_DAILY_LIMIT,
   accountDay: BRAND_AI_ACCOUNT_DAILY_LIMIT,
   instanceDay: BRAND_AI_INSTANCE_DAILY_DEFAULT,
 }
@@ -268,6 +288,18 @@ export function brandDesignReadingDayKey(profileId: string): string {
   return `brand-reading-day:${profileId}`
 }
 
+/**
+ * DIE KI-ENTWÜRFE EINES BRANDINGS (D5c) — ohne Slot und ohne Konto, aus
+ * denselben Gründen wie die Lesung eine Funktion weiter oben.
+ *
+ * Ohne SLOT, obwohl der Lauf genau eine Session bedient (`j.drafts`): der
+ * Slot-Eimer zählt ANLÄUFE AN EINER FRAGE (10/Tag) und wäre hier mehr als
+ * dreimal zu gross — für den teuersten Lauf des Layers.
+ */
+export function brandDesignDraftsDayKey(profileId: string): string {
+  return `brand-drafts-day:${profileId}`
+}
+
 export function brandAiInstanceDayKey(): string {
   return 'brand-ai-instance-day'
 }
@@ -299,6 +331,12 @@ export const BRAND_AI_REVIEW_LIMIT_CODE = 'brand_ai_review_limit'
  * und die Zeile „heute keine Läufe mehr".
  */
 export const BRAND_DESIGN_READING_LIMIT_CODE = 'brand_reading_limit'
+/**
+ * Der Deckel der KI-Entwürfe (D5c). Er erreicht die Oberfläche WIRKLICH — wie
+ * der Lesungs-Deckel und aus demselben Grund: der Lauf ist das, was der Mensch
+ * gerade angeklickt hat.
+ */
+export const BRAND_DESIGN_DRAFTS_LIMIT_CODE = 'brand_drafts_limit'
 export const BRAND_AI_DAILY_LIMIT_CODE = 'brand_ai_daily_limit'
 export const BRAND_AI_INSTANCE_LIMIT_CODE = 'brand_ai_instance_limit'
 
@@ -308,6 +346,7 @@ export type BrandAiRejectionCode =
   | typeof BRAND_AI_TALK_LIMIT_CODE
   | typeof BRAND_AI_REVIEW_LIMIT_CODE
   | typeof BRAND_DESIGN_READING_LIMIT_CODE
+  | typeof BRAND_DESIGN_DRAFTS_LIMIT_CODE
   | typeof BRAND_AI_DAILY_LIMIT_CODE
   | typeof BRAND_AI_INSTANCE_LIMIT_CODE
 
@@ -317,6 +356,7 @@ const REJECTION_CODES: readonly string[] = [
   BRAND_AI_TALK_LIMIT_CODE,
   BRAND_AI_REVIEW_LIMIT_CODE,
   BRAND_DESIGN_READING_LIMIT_CODE,
+  BRAND_DESIGN_DRAFTS_LIMIT_CODE,
   BRAND_AI_DAILY_LIMIT_CODE,
   BRAND_AI_INSTANCE_LIMIT_CODE,
 ]
@@ -345,6 +385,7 @@ export function brandAiRejectionMessageKey(value: unknown): string | null {
   // sobald irgendwann eine Route den Code doch weiterreicht.
   if (value === BRAND_AI_REVIEW_LIMIT_CODE) return 'brand.workspace.generate.reviewLimit'
   if (value === BRAND_DESIGN_READING_LIMIT_CODE) return 'brand.workspace.generate.readingLimit'
+  if (value === BRAND_DESIGN_DRAFTS_LIMIT_CODE) return 'brand.workspace.generate.draftsLimit'
   if (value === BRAND_AI_DAILY_LIMIT_CODE) return 'brand.workspace.generate.dailyLimit'
   return 'brand.workspace.generate.instanceLimit'
 }
@@ -379,6 +420,13 @@ export interface BrandAiQuotaCounts {
    * nur einer belegt.
    */
   readingDay: number
+  /**
+   * Zählerstand des Entwurfs-Eimers nach dieser Buchung (Brand Design D5c).
+   *
+   * Der FÜNFTE enge Zähler, und wie die vier anderen ist in EINEM Aufruf immer
+   * nur einer belegt.
+   */
+  draftsDay: number
   /** Zählerstand des Konto-Eimers nach dieser Buchung. */
   accountDay: number
   /** Zählerstand des Instanz-Eimers nach dieser Buchung. */
@@ -413,6 +461,7 @@ export function decideBrandAiQuota(
   if (counts.talkDay > limits.talkDay) return BRAND_AI_TALK_LIMIT_CODE
   if (counts.reviewDay > limits.reviewDay) return BRAND_AI_REVIEW_LIMIT_CODE
   if (counts.readingDay > limits.readingDay) return BRAND_DESIGN_READING_LIMIT_CODE
+  if (counts.draftsDay > limits.draftsDay) return BRAND_DESIGN_DRAFTS_LIMIT_CODE
   if (counts.accountDay > limits.accountDay) return BRAND_AI_DAILY_LIMIT_CODE
   if (counts.instanceDay > limits.instanceDay) return BRAND_AI_INSTANCE_LIMIT_CODE
   return null

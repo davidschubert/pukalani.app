@@ -8,6 +8,7 @@ import {
   BRAND_INSPIRATION_TABLE,
   purgeBrandInspiration,
 } from './brandInspirationStore'
+import { BRAND_MARK_DRAFTS_TABLE, purgeBrandMarkDrafts } from './brandMarkDrafts'
 import { runBrandProfileCascades } from './brandProfileCascade'
 import { BRAND_PUBLICATIONS_TABLE, BRAND_PUBLICATION_REPORTS_TABLE } from './brandPublications'
 import {
@@ -147,6 +148,14 @@ export async function brandExportUserData(event: H3Event, userId: string): Promi
        * mit (`purgeBrandInspiration`, s. u.).
        */
       inspiration: await safeListAll(event, BRAND_INSPIRATION_TABLE, filter),
+      /**
+       * DIE KI-ENTWÜRFE DES ZEICHENS (brand-023, Brand Design D5c) — NUR die
+       * Metadaten: Name, Modell, Prompt-Hash und ob der Mensch den Entwurf
+       * behalten hat. Die BILDER selbst reisen NICHT mit, aus demselben Grund
+       * wie eine Zeile darüber: der Export ist eine JSON-Antwort. Die LÖSCHUNG
+       * nimmt sie sehr wohl mit (`purgeBrandMarkDrafts`, s. u.).
+       */
+      markDrafts: await safeListAll(event, BRAND_MARK_DRAFTS_TABLE, filter),
     })
   }
 
@@ -264,6 +273,12 @@ export async function brandDeleteUserData(event: H3Event, userId: string): Promi
      * Rest, gegen den §2.13 geschrieben ist.
      */
     deleted += await purgeBrandInspiration(event, profile.$id)
+    /**
+     * DIE KI-ENTWÜRFE (brand-023) — ZEILEN **UND** DATEIEN, aus demselben
+     * Grund wie die Vorbilder eine Zeile darüber (Zeilen-Id = Datei-Id im
+     * Bucket `brand-drafts`).
+     */
+    deleted += await purgeBrandMarkDrafts(event, profile.$id)
     // Die Mitläufer anderer Layer an derselben `profileId` (MV1 M1) — dieselbe
     // Registry und dieselbe Stelle wie in der Löschroute. Ohne sie bliebe nach
     // einer Konto-Löschung Inhalt liegen, den keine Route mehr erreicht.

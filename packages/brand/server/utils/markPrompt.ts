@@ -118,3 +118,92 @@ export function brandMarkBriefPrompt(input: BrandMarkBriefPromptInput): string {
     '{"character":"<text>","formLanguage":"<text>","noGos":"<text>","places":"<text>"}',
   ].join('\n')
 }
+
+/**
+ * DER AUFTRAG AN DAS BILDMODELL (Brand Design D5c,
+ * docs/plans/BRAND-DESIGN.md §2.5 Stufe 3, Davids Entscheidung §1.11 b).
+ *
+ * ── ER STEHT NEBEN DEM BRIEFING-PROMPT, NICHT DARIN ───────────────────────
+ * Beide gehören zum Zeichen, aber sie sprechen mit verschiedenen Modellen über
+ * verschiedene Dinge: der eine bittet um TEXT, den ein Mensch bearbeitet, der
+ * andere um ein BILD, das niemand bearbeiten kann. Eine gemeinsame Fassung
+ * hätte an jeder zweiten Zeile ein „ausser beim Bild".
+ *
+ * ── ER NENNT NIE EIN FREMDWERK ────────────────────────────────────────────
+ * Kein Marken-, Studio- oder Künstlername, keine Aufforderung „im Stil von",
+ * und ausdrücklich auch nicht die Vorbilder des Kunden (§2.13: sie reisen nie
+ * in einen Prompt). Was das Modell bekommt, sind EIGENSCHAFTEN — Charakter,
+ * Formsprache, Farbwerte, der Name der Schriftfamilie —, also genau das, was
+ * im Briefing steht. Ein Entwurf, der einem fremden Zeichen ähnelt, weil wir
+ * danach gefragt haben, wäre der teuerste Fehler dieser Fläche.
+ *
+ * ── DIE VIER ENTWÜRFE SIND VIER AUFRUFE ───────────────────────────────────
+ * Der Chat-Completions-Weg liefert je Aufruf ein Bild (§2.12 / Kopf von
+ * `core/server/utils/aiImage.ts`); die vier ANGLES unten sind der Unterschied
+ * zwischen ihnen. Sie sind bewusst grob und beschreiben KEIN Motiv: sie sagen,
+ * wie streng, wie geometrisch, wie viel Buchstabe — die Entscheidung, WAS zu
+ * sehen ist, bleibt beim Modell und danach beim Menschen.
+ */
+
+/** Die vier Blickwinkel EINES Laufs — vier Aufrufe, ein Prompt-Gerüst. */
+export const BRAND_MARK_DRAFT_ANGLES: readonly string[] = [
+  'a strictly geometric construction, built from as few elements as possible',
+  'a mark carried by the letterform of the initial, not by a picture',
+  'a soft, hand-drawn feel with one uneven edge, still reduced to one idea',
+  'an abstract sign that reads at 24 pixels and carries no illustration at all',
+]
+
+export interface BrandMarkDraftPromptInput {
+  readonly brandName: string
+  /** Der Anfangsbuchstabe, wie ihn die Setzungen benutzen. */
+  readonly initial: string
+  /** Die Richtung des Zeichens: Id plus Lesefassung. */
+  readonly kind: string
+  /** Charakter und Formsprache aus dem Briefing — wörtlich, geklemmt. */
+  readonly character: string
+  readonly formLanguage: string
+  /** Die DNA-Zeile „form language" als Lesefassung, wenn es sie gibt. */
+  readonly formDna: string
+  /** Die bestätigten Hex-Werte: Tinte, Papier, Akzent. */
+  readonly ink: string
+  readonly paper: string
+  readonly accent: string
+  /** Der NAME der Überschriften-Familie — nie eine Datei, nie ein Zitat. */
+  readonly headingFamily: string
+  /** Welcher der vier Blickwinkel (s. `BRAND_MARK_DRAFT_ANGLES`). */
+  readonly angle: string
+}
+
+export function brandMarkDraftPrompt(input: BrandMarkDraftPromptInput): string {
+  return [
+    `Design ONE logo draft for the brand "${input.brandName}".`,
+    '',
+    'THE BRIEFING (this is the yardstick)',
+    `- kind of mark: ${input.kind}`,
+    `- character: ${input.character}`,
+    `- form language: ${input.formLanguage}`,
+    ...(input.formDna ? [`- visual DNA, form: ${input.formDna}`] : []),
+    `- initial of the brand: ${input.initial}`,
+    '',
+    'COLOURS — use these and no others',
+    `- ink: ${input.ink}`,
+    `- background: ${input.paper}`,
+    `- accent (sparingly, or not at all): ${input.accent}`,
+    '',
+    'THIS DRAFT',
+    `- ${input.angle}`,
+    '',
+    'RULES',
+    '- One single mark, centred, on a plain background of the given colour. Nothing else in the '
+    + 'image: no mockup, no business card, no shadow, no reflection, no gradient mesh, no frame.',
+    '- Flat vector look, clean edges, as if it were drawn in a vector program.',
+    '- It must still read as one shape at 24 pixels.',
+    `- If you set the brand name or the initial, set it in a typeface close to ${input.headingFamily}.`,
+    '- No tagline, no lorem ipsum, no caption, no watermark, no signature.',
+    '- Do not imitate any existing brand, studio or designer, and do not use any existing logo, '
+    + 'emblem, coat of arms or trademark as a starting point.',
+    '- No photographic elements, no 3D rendering, no text other than the brand name or initial.',
+    '',
+    'Square image.',
+  ].join('\n')
+}

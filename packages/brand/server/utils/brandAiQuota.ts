@@ -15,6 +15,7 @@ import {
   brandCheckAccountDayKey,
   brandCheckInstanceDayKey,
   brandCheckIpDayKey,
+  brandDesignDraftsDayKey,
   brandDesignReadingDayKey,
   decideBrandAiQuota,
   decideBrandCheckQuota,
@@ -69,7 +70,7 @@ export interface BrandAiQuotaRequest {
    * Slot-Typ, ein Gesprächszug auf das Gespräch DIESES Brandings. Warum das
    * zwei Eimer sind und kein geteilter, steht im Kopf von `brandAiLimits.ts`.
    */
-  kind: 'slot' | 'talk' | 'review' | 'reading'
+  kind: 'slot' | 'talk' | 'review' | 'reading' | 'drafts'
   /** Nur bei `kind: 'slot'` — der Slot-TYP, dessen Anläufe gezählt werden. */
   slotId?: string
   /**
@@ -138,6 +139,7 @@ export async function bookBrandAiQuota(
     talkDay: 0,
     reviewDay: 0,
     readingDay: 0,
+    draftsDay: 0,
     accountDay: 0,
     instanceDay: 0,
   }
@@ -160,7 +162,9 @@ export async function bookBrandAiQuota(
       ? brandAiReviewDayKey(request.profileId)
       : request.kind === 'reading'
         ? brandDesignReadingDayKey(request.profileId)
-        : brandAiSlotDayKey(request.profileId, request.slotId ?? '')
+        : request.kind === 'drafts'
+          ? brandDesignDraftsDayKey(request.profileId)
+          : brandAiSlotDayKey(request.profileId, request.slotId ?? '')
   // Das GEWICHT (s. `weight`): mehrere Treffer auf denselben Schlüssel, aber
   // EIN Aufruf — entschieden wird nach dem letzten Stand, nicht nach jedem.
   const weight = Math.max(1, Math.trunc(request.weight ?? 1))
@@ -175,6 +179,7 @@ export async function bookBrandAiQuota(
   if (request.kind === 'talk') counts.talkDay = narrowState.count
   else if (request.kind === 'review') counts.reviewDay = narrowState.count
   else if (request.kind === 'reading') counts.readingDay = narrowState.count
+  else if (request.kind === 'drafts') counts.draftsDay = narrowState.count
   else counts.slotDay = narrowState.count
   const narrow = decideBrandAiQuota(counts, limits)
   if (narrow) return { code: narrow, retryAfterSec: retryAfter(narrowState.resetInMs) }

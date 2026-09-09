@@ -2508,7 +2508,10 @@ const showMarkPanel = computed(() => stepKey.value === 'mark')
  * noch gewählt wird: sie entsteht im Lauf (server-seitig, `POST …/mark/brief`)
  * oder von Hand. Stünde sie in dieser Liste, überschriebe der Autosave beim
  * nächsten Rendern genau den Text, den der Mensch gerade bekommen hat.
- * `j.drafts` (Stufe 3) fehlt, weil es sie noch nicht gibt (D5c).
+ * `j.drafts` (Stufe 3, D5c) fehlt aus einem anderen Grund: der Wert dieser
+ * Session beschreibt die BEHALTENEN Entwürfe und wird server-seitig
+ * nachgezogen (`syncBrandMarkDraftsSlot`) — ein Autosave von hier schriebe ihn
+ * bei jedem Rendern leer.
  */
 const MARK_SLOTS = ['j.kind', 'j.examples', 'j.pick'] as const
 /** Bestätigt sein kann auch `j.brief` — das Panel sperrt dann seinen Lauf. */
@@ -3036,7 +3039,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
              gesetzten Beispiele auf EINER Werkbank. Wie Farbwelt und
              Typografie steht sie ÜBER dem Gespräch; bestätigt wird jede
              Session unten auf ihrer Karte (`RENDERED_ABOVE`). Stufe 3 (die
-             KI-Entwürfe) ist dort nur ein Platzhalter — sie kommt mit D5c. -->
+             KI-Entwürfe, D5c) hängt als eigene Komponente darunter. -->
         <BwMarkPanel
           v-if="showMarkPanel"
           :profile-id="profileId"

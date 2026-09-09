@@ -818,6 +818,33 @@ unsichtbar; `g.mix` stand im Beweis als Platzhalter. Inhalts-Gate:
 Prinzip-Namen/Achsen-Texte (Don't-Hälften sind Entwurf des Baus), Do &
 Don't-Wortlaut, Strichstärke-Regel (ggf. vierte Option `light` 1,125 px).
 
+**Stand D5c (Zeichen, Stufe 3: KI-Entwürfe):** GEBAUT und geprüft 2026-09-08
+(Core b900208e `aiImage`; brand d38b5748 Migration brand-023 + Speicher +
+Routen, 3496db4d Bühne `BwDraftsPanel`, 20b5ac32 Beweis; branding-Config
+mit dem Bild-Modell). Transport: Chat-Completions mit `modalities:
+['image','text']`, Antwort `choices[].message.images[]` als Data-URL —
+zwingend der Chat-Weg, weil das Routing-Objekt des `/images`-Endpunkts KEIN
+`data_collection` kennt (Doku-Beleg im Kopf von `aiImage.ts`); ZDR fest,
+Klemmung PNG/JPEG/WebP ≤ 2 MB, max 4; Gate `pukalani.ai.imageModel`.
+Tabelle `brand_mark_drafts` (Zeilen-Id = Datei-Id, model/promptHash/kept/
+title), Bucket `brand-drafts` (2 MB, server-only), Auslieferung nur an den
+Besitzer `private, no-store`, Drossel 3 Läufe/Tag + IP-Eimer `brand:drafts`
+(getrennt von `brand:drafts-edit`), Slot `j.drafts` nie `confirmed`, GDPR
+Export/Löschung, Snapshot/Dokument ohne Entwurf (Gegenprobe). Beweis
+326/326 (Abschnitt 29 mit Stub) und 301/301 (503-Zweig), 2 592 + 1 482
+Tests. **Echter Lauf (lokal, Prod-Schlüssel):** der Preview-Slug
+`google/gemini-2.5-flash-image-preview` hat bei OpenRouter KEINE Endpunkte
+mehr („No endpoints found") — umgestellt auf das freigegebene
+Nachfolgemodell **`google/gemini-2.5-flash-image`** (vier Google-Endpunkte,
+~0,03 ct je Bild); unter `data_collection: deny` + `zdr` + ohne Fallback
+lieferte der Lauf vier PNG 1024×1024 (Roast auf Papier, Serif-Wortmarke,
+Monogramm-Ansatz, Siegel), Besitzer 200 `no-store`, anonym 404. brand-023
+auf Prod gefahren (Tabelle, sechs Spalten, Index, Bucket). Inhalts-Gate:
+Disclaimer und Markenrechts-Hinweis (wörtlich Prototyp), Privatheits-Zusage,
+Karten-/Knopf-Texte, der Bild-Prompt samt vier Blickwinkeln (Entwurf des
+Baus). Offen: Preset-Anschluss `keptDrafts` (D8); Karten-Disclaimer nicht
+im SSR (Karten laden nach `onMounted`).
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |

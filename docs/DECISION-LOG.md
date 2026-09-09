@@ -7,6 +7,70 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Session-Token-Hygiene: CLAUDE.md wird KERN + pfadgebundene `.claude/rules/`
+
+**Anlass:** Eine Session stand bei 655k Tokens Kontext (Messages 547k, CLAUDE.md +
+Memory-Index 53k je Runde, 445 MCP-Werkzeuge). CLAUDE.md war auf 88 KB ≈ 44k Tokens
+gewachsen und liegt in JEDER Runde und in JEDEM Subagenten (außer Explore/Plan) im
+Kontext — bei fünf Subagenten also 220k nur für die Konstitution.
+
+**Entscheidung (David, Option A von drei):** CLAUDE.md bleibt die eine Quelle, wird aber
+KERN (Projekt, Architektur, Config-Gates, Produkte, Coding Rules, Git, Doku-Ordnung —
+24 KB) plus neun Domänen-Dateien unter `.claude/rules/<name>.md`, die WORTGLEICH aus
+CLAUDE.md gezogen sind und per `paths:`-Frontmatter nur laden, wenn eine passende
+Datei gelesen wird (appwrite, themes, hosts-ops, onboarding, ki-mail-embed-moderation,
+tenant-isolation, editor, tests, ai-runner). Beweis: eine frische `claude -p`-Session
+liest `packages/themes/package.json` und hat danach die Themes-Regel im Kontext, die
+Isolations-Regel nicht.
+
+**Verworfen:** (B) nur die drei größten Abschnitte auslagern — halber Effekt, gleiche
+Konfliktkosten; (C) so lassen — der Kontext wäre weiter der größte Posten.
+
+**Regeln daraus:** neue Domänen-Regel gehört in die passende rules-Datei, nicht in den
+Kern; Kern-Zuwachs nur als Regel + ein Satz Warum + Verweis (Geschichte nach docs/).
+Wer per Bash liest (cat/sed) oder nur berät, öffnet die rules-Datei bewusst per Read —
+der Pfad-Trigger hängt am Read-Tool. Dazu (Memory `session-token-hygiene`): Session pro
+Paket neu starten statt bei 500k+ weiterfahren, Erkundung an Explore statt an
+allgemeine Subagenten, nie `TaskOutput` auf einen laufenden Agenten (Transkript-Dump),
+Connectoren ohne Repo-Bezug in der Desktop-App abgeschaltet (Blender, Trello, Gmail,
+Kalender, Drive, Obsidian, Figma, Linear + Marketing-/PM-/Productivity-/Design-Plugins).
+
+---
+
+## 2026-09-08 — Navigation anpassen: vier Entscheidungen (Wording · Site-Nav mit Unterpunkten · Dashboard-Nav je Person)
+
+**Anlass:** Auf branding.supply war der Reiter „Navigation" unter /dashboard/community/navigation
+leer, und der Menüpunkt hieß „Community-Einstellungen", obwohl die Site keine Community ist.
+Befund: der Editor kennt nur `pukalani.chrome.nav` (dort registriert der brand-Layer nichts) und
+veröffentlichte CMS-Seiten ohne Rechtsseiten (auf branding gibt es nur die drei Rechtsseiten) —
+und selbst gefüllt hätte er nichts bewirkt, weil der EINZIGE Leser der gespeicherten Wahl das
+blueprint-Layout ist, während `BwSiteNav.vue` eine feste Liste rendert. Unterpunkte kennt der
+Vertrag `core/shared/communityNavigation.ts` nicht (flache Liste, ab dem sechsten Eintrag ein
+„Mehr"-Menü). Die Reihenfolge der DASHBOARD-Navigation ist überall fest (Gruppen im Layout,
+`order` in der Registry), ohne Laufzeit-Überschreibung.
+
+**Entscheidungen (David, 2026-09-08):**
+
+1. **Site-Navigation direkt MIT Unterpunkten** (Abweichung von der Empfehlung „erst flach,
+   dann Unterpunkte"): ein Durchgang — Vertrag additiv um Kinder erweitern, Editor mit Ziehen in
+   einen Hauptpunkt, gerendert in `BwSiteNav` (branding) UND im blueprint-Layout (Pool), damit
+   Pool und Silo dasselbe Produktverhalten zeigen (PRODUKT-BILANZ). Der brand-Layer registriert
+   seine Routen in `chrome.nav`, damit der Editor Kandidaten hat. Prototyp vor der Freigabe.
+2. **Die Hülle heißt im Silo „Website-Einstellungen"** (nicht „Instanz-Einstellungen" — für einen
+   Kunden ist „Instanz" Technik). Derselbe Schalter `admin.instanceTabs`, neues Label in de/en, der
+   i18n-Schlüssel `instanceSettings` bleibt (Label ≠ Key). AN jetzt in comments, portfolio und
+   branding; die vier Betreiber-Reiter kommen mit.
+3. **Reihenfolge der Dashboard-Navigation ist die Wahl JEDER PERSON** (Prefs des Kontos, gilt auf
+   jeder Site) — nicht je Community: die Nav ist rollen-gefiltert, eine Owner-Reihenfolge ginge
+   für einen Moderator nicht auf. Beide Varianten („je Instanz", „beides") verworfen.
+4. **Reihenfolge der Pakete:** Wording → Site-Nav → Dashboard-Nav, jedes mit Check-in.
+
+**Beantwortet damit auch Davids Frage „geht das für alle pukalani.app-Sites?":** ja — das
+Dashboard-Layout gehört dem admin-Layer und ist in jeder App dasselbe; eine Überschreibung dort
+gilt für Pool, Silo und Kontroll-Host gleichermaßen.
+
+---
+
 ## 2026-09-08 — Brand Insights (BI1): Konzeptrunde — acht Entscheidungen
 
 **Anlass:** Die Konzeptrunde vom 2026-09-08 hat aus den zehn offenen Fragen des Redaktions-
@@ -97,6 +161,10 @@ Tag ≈ 0,40–0,60 €). Vor dem Bau wird geprüft, ob das Modell unter `data_c
 geroutet wird — sonst antwortet die Stufe ruhig 503 und das Kapitel läuft ohne sie. Die
 Prod-Migration **brand-023** (Tabelle `brand_mark_drafts`, Bucket `brand-drafts`) darf nach der
 Prüfung von D5c gefahren werden, vor dem Push (wie brand-022/024).
+**Nachtrag (Fable, echter Lauf am selben Tag):** der Preview-Slug hat bei OpenRouter keine
+Endpunkte mehr („No endpoints found"); gesetzt ist das freigegebene Nachfolgemodell derselben
+Familie `google/gemini-2.5-flash-image` — unter der ZDR-Klemme geroutet, vier Bilder, ~0,03 ct je
+Bild. brand-023 ist auf `branding` gefahren.
 
 ---
 

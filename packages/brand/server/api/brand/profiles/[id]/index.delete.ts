@@ -3,6 +3,7 @@ import { Query } from 'node-appwrite'
 import type { BrandProfileDeleteResponse } from '../../../../../shared/types/brand'
 import { BRAND_FINDINGS_TABLE } from '../../../../utils/brandFindingsStore'
 import { purgeBrandInspiration } from '../../../../utils/brandInspirationStore'
+import { purgeBrandMarkDrafts } from '../../../../utils/brandMarkDrafts'
 import { runBrandProfileCascades } from '../../../../utils/brandProfileCascade'
 import {
   BRAND_PUBLICATIONS_TABLE,
@@ -104,6 +105,14 @@ export default defineEventHandler(async (event): Promise<BrandProfileDeleteRespo
    * teuerste Rest, den dieses Produkt hinterlassen kann (§2.13).
    */
   const inspiration = await purgeBrandInspiration(event, profileId)
+  /**
+   * DIE KI-ENTWÜRFE DES ZEICHENS (brand-023, Brand Design D5c) — ZEILEN **UND**
+   * DATEIEN, aus demselben Grund wie die Vorbilder darüber: an jeder Zeile
+   * hängt eine Datei im Bucket `brand-drafts` (Zeilen-Id = Datei-Id). Ein
+   * `deleteRow` allein liesse unfertige Logo-Vorschläge im Speicher liegen,
+   * die keine Route mehr erreicht (§2.13).
+   */
+  const markDrafts = await purgeBrandMarkDrafts(event, profileId)
   let publications = 0
   try {
     await tablesDB.deleteRow({ databaseId, tableId: BRAND_PUBLICATIONS_TABLE, rowId: profileId })
@@ -131,7 +140,7 @@ export default defineEventHandler(async (event): Promise<BrandProfileDeleteRespo
   // Ereignis über ein gelöschtes Profil wäre der einzige Rest, der bliebe.
   logEvent('info', 'brand.profile_deleted', {
     profileId, steps, messages, shares, events, findings, publications, publicationReports,
-    inspiration, ...cascades,
+    inspiration, markDrafts, ...cascades,
   })
 
   return { deleted: true, removed: { steps, messages, shares, events, findings } }

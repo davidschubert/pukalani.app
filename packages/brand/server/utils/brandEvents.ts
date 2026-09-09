@@ -138,6 +138,24 @@ export type BrandEventType =
    * die Reihenfolge, die das Produkt behauptet (§2.5).
    */
   | 'design.mark.brief'
+  /**
+   * DIE KI-ENTWÜRFE DES ZEICHENS (D5c, §2.5 Stufe 3 / §2.14) — drei Ereignisse
+   * für die drei Fragen, die dieses Produkt an die Fläche hat.
+   *
+   * `run`: wie viele Bilder ein Lauf wirklich gebracht hat (Teilerfolg ist
+   * Erfolg), Modell-Kennung, Prompt-Hash, Dauer — und im Fehlerfall der Grund.
+   * `kept`/`discarded`: wie viele Entwürfe der Mensch danach BEHÄLT. Das ist
+   * die eigentliche Produktfrage: Entwürfe, die niemand behält, sind eine
+   * teure Attrappe, und Entwürfe, die alle behalten, sagen etwas über die
+   * Reihenfolge der drei Stufen.
+   *
+   * NIE ein Bild, NIE der Prompt, NIE ein Briefing-Feld und NIE ein Name
+   * (Regel 1 im Kopf). Der HASH darf mit: er ist dieselbe Herkunfts-Auskunft,
+   * die auf der Karte steht, und sagt für sich genommen nichts über die Marke.
+   */
+  | 'design.drafts.run'
+  | 'design.drafts.kept'
+  | 'design.drafts.discarded'
 
 export interface BrandEventInput {
   type: BrandEventType

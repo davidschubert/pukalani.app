@@ -233,7 +233,11 @@ const communityTabsHere = computed(() => resolveSettingsTabs(
  *
  * Der Schalter dafür war schon da: `admin.instanceTabs` (Core-Default aus)
  * hängt genau die vier Betreiber-Reiter in diese Hülle (packages/admin/app/
- * app.config.ts). Wo er an ist, heißt sie nach dem, was drin steht. Gelesen
+ * app.config.ts). Wo er an ist, heißt sie „Website-Einstellungen" — Davids
+ * Wort vom 2026-09-08 (davor „Instanz-Einstellungen": für einen Kunden ist
+ * „Instanz" Technik, „Website" das, was er vor sich hat; der i18n-SCHLÜSSEL
+ * `instanceSettings` bleibt, Label ≠ Key). An ist er in den drei Silo-Apps
+ * comments, portfolio und branding. Gelesen
  * über dieselbe pure Regel wie die Registry-Gates (`configFlagEnabled`,
  * fail-closed) — kein zweiter Weg zu derselben Tatsache.
  *
