@@ -1,5 +1,6 @@
 import { Query } from 'node-appwrite'
 import { createBrandMessagesQuerySchema } from '../../../../../schemas/brandAccess'
+import { swapBrandChoiceValueLine } from '../../../../../shared/brandChoiceOptions'
 import type { BrandMessageView, BrandMessagesResponse } from '../../../../../shared/types/brand'
 import {
   BRAND_MESSAGES_TABLE,
@@ -40,7 +41,7 @@ import {
 export default defineEventHandler(async (event): Promise<BrandMessagesResponse> => {
   const { userId } = await requireBrandAccess(event)
   const profileId = requireProfileIdParam(event)
-  await loadOwnedProfile(event, userId, profileId)
+  const profile = await loadOwnedProfile(event, userId, profileId)
 
   const query = await getValidatedQuery(event, createBrandMessagesQuerySchema().parse)
   // Ein unbekannter Baustein-Schlüssel wird ABGEWIESEN, nicht ignoriert: sonst
@@ -103,7 +104,22 @@ export default defineEventHandler(async (event): Promise<BrandMessagesResponse> 
     // '' = Kapitel-Verlauf von vor BW2 (brand-011) — ein Wert, keine Lücke.
     sessionKey: row.sessionKey ?? '',
     role: row.role === 'user' || row.role === 'system' ? row.role : 'george',
-    body: row.body,
+    /**
+     * DIE LESEFASSSUNG STATT DER ROHEN ID (D9, offener Punkt aus D8).
+     *
+     * Ein Karten-Klick speichert den STABILEN Wert (`snappy`, `yes`, `word`) —
+     * so muss es sein, die Ids sind sprachneutral und dürfen nie übersetzt in
+     * der Ablage stehen. Der Berater tauscht sie vor dem Persistieren
+     * (`swapBrandChoiceValueLine` in `advisorGenerator.ts`); der Zug des
+     * MENSCHEN lief bisher an diesem Tausch vorbei, und nach dem Neuladen stand
+     * im Verlauf wörtlich „snappy". Der Tausch gehört deshalb zusätzlich in den
+     * LESE-Pfad: er ist idempotent (eine Anzeige-Fassung ist selbst ein
+     * gültiger Katalog-Treffer) und lässt Prosa unangetastet.
+     *
+     * Die Sprache ist die INHALTSSPRACHE der Marke, nicht die des Lesers: der
+     * Verlauf ist das Gespräch, das in dieser Sprache geführt wurde.
+     */
+    body: swapBrandChoiceValueLine(row.sessionKey ?? '', row.body, profile.contentLocale),
     // `parts` ist strukturiertes JSON (Chips, Karten, Paar-Referenzen). Kaputte
     // Zeilen geben `null` statt eine Ausnahme — eine unlesbare Beilage darf
     // nicht den ganzen Verlauf kosten.
