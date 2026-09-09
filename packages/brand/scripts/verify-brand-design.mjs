@@ -1463,10 +1463,14 @@ try {
   check('… und die Board-Seite antwortet 404, wie für jede unbekannte Marke',
     afterDelete.status === 404, String(afterDelete.status))
 
-  // Die Marken dieses Kontos sind mit ihm gelöscht — das Aufräumen unten muss
-  // sie nicht mehr suchen.
-  cleanup.profiles.length = 0
-  cleanup.users = cleanup.users.filter(id => id !== owner.id)
+  /*
+   * DAS AUFRÄUMEN UNTEN LÄUFT TROTZDEM — es wird hier NICHTS aus den Listen
+   * gestrichen. Naheliegend wäre, die gelöschte Marke zu streichen („die ist
+   * ja weg"); genau das hat beim Bau eine halbe Marke im Speicher liegen
+   * lassen, als die Löschung einmal NICHT durchlief. Ein Aufräumen, das dem
+   * Erfolg eines Schrittes vertraut, räumt genau dann nicht, wenn es nötig
+   * wäre. Doppelte Löschversuche kosten hier ein paar 404, mehr nicht.
+   */
 }
 catch (error) {
   fail++
