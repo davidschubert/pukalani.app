@@ -7,6 +7,21 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-09 — Brand Design: Audit-Befunde (A1) — zwei Entscheidungen
+
+**Kontext:** Audit der Design-Schicht nach D9 (docs/archiv/audits/BRAND-DESIGN-AUDIT-2026-09-09.md):
+keine hohen Befunde, drei mittlere, drei niedrige, vier Hinweise ⇒ Paket A1.
+**Entscheidung 1 (Fable):** der fehlende IP-Eimer für `POST …/mark/brief` war beim Bau von D5a
+übersehen, nicht Absicht — jede KI-ausgebende Route trägt einen Eimer, der VOR Auth und Datentür
+greift (die fachlichen Tages-Deckel sind die zweite Schicht, nicht die erste).
+**Entscheidung 2 (Fable):** die GDPR-Purges der Vorbilder und KI-Entwürfe werden ROT, wenn eine
+Datei- oder Zeilen-Löschung mit etwas anderem als 404 scheitert (Muster `brandUserData.ts`). Grund:
+`deleteUserCompletely` löscht das Konto nur bei Voll-Erfolg der Contributors — ein Contributor, der
+transiente Fehler schluckt, macht aus der Löschzusage eine Behauptung; genau in den zwei Tabellen
+mit Fremdwerken/Entwürfen im Bucket wäre das der teuerste Fall. Die Klick-Löschung bleibt fail-soft.
+
+---
+
 ## 2026-09-09 — Wizard-Befunde aus dem Kailua-Lauf: Befunde bleiben Hinweise, George behauptet nichts, Handbuch-Kapitel „Stimme" wird geteilt
 
 **Anlass:** Das Beispiel-Branding Kailua Coffee Co. wurde über den echten Wizard gebaut (Discover
