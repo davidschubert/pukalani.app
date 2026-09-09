@@ -184,7 +184,12 @@ eröffnet George mit einem kurzen SPIEGEL des Bekannten (converse-12 kennt die K
 Eröffnungs-Auftrag verlangt künftig ein bis zwei Sätze Zusammenschau vor der Frage). Verworfen: wie
 heute springen mit Abschlusssatz; erst den Reihenfolge-Umbau abwarten. Widerspruch, den der Test
 zeigte: George bohrte nach („ich brauche noch etwas Konkretes"), während die Session rechts schon
-den Haken trug — Rückfrage und Bestätigung wussten nichts voneinander.
+den Haken trug — Rückfrage und Bestätigung wussten nichts voneinander. GEBAUT `b39eaeb0`
+(`converse-14`, Marker `CONFIRM:` als Bedienelement, `closing`-Zug, `skippedSessionsBetween`,
+`brandLogCardAction`). Zuschnitt dabei bewusst erweitert: auch der Sprung nach jeder ANTWORT
+entfällt (er feuerte, sobald ein Wert im Feld stand, und hätte die Knöpfe unklickbar gemacht); nur
+die Eröffnung einer Entwurfs-Session springt weiter (8). Neu gefunden: ohne `?s=` rechnete die
+Bühne nach der Bestätigung still die nächste Session — `pinSession` hält sie in der Adresse.
 
 ---
 
