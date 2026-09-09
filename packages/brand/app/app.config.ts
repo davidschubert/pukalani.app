@@ -97,11 +97,11 @@ export default defineAppConfig({
      * ist, ist es eine Zeile.
      *
      * ── DAVIDS ZUSCHNITT VOM 2026-09-08 (Korrektur am Prototyp) ────────────
-     * Das Standard-Menü lautet „Products ▾ (Brand Score) · Discover Brands ·
+     * Das Standard-Menü lautet „Products ▾ (Brand-Check) · Discover Brands ·
      * About · Team". `products` ist ein AUFKLAPPER OHNE EIGENE SEITE (`to: ''`)
      * — eine Produkt-Übersichtsseite gibt es nicht, und ein Menüpunkt, der auf
      * eine fehlende Seite zeigt, ist genau der 404 aus dem Audit oben. Unter
-     * ihm hängt heute ein Eintrag: „Brand Score" auf `/brand-check`, die
+     * ihm hängt heute ein Eintrag: „Brand-Check" auf `/brand-check`, die
      * Seite, die es wirklich gibt (`app/pages/brand-check/index.vue`).
      *
      * `parent` ist die Registry-Vorgabe (Zusage 9 in
@@ -116,7 +116,7 @@ export default defineAppConfig({
     chrome: {
       nav: {
         products: { labelKey: 'brand.nav.products', to: '', order: 10 },
-        'brand-score': { labelKey: 'brand.nav.brandScore', to: '/brand-check', parent: 'products', order: 11 },
+        'brand-check': { labelKey: 'brand.nav.brandCheck', to: '/brand-check', parent: 'products', order: 11 },
         discover: { labelKey: 'brand.nav.discover', to: '/discover', order: 20 },
         about: { labelKey: 'brand.nav.about', to: '/about', order: 30 },
         team: { labelKey: 'brand.nav.team', to: '/team', order: 40 },

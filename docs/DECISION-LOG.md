@@ -280,7 +280,8 @@ Vertrag `core/shared/communityNavigation.ts` nicht (flache Liste, ab dem sechste
 
 **Nachtrag Prototyp-Runde (David, 2026-09-08):** Paket 2 zunächst „Korrekturen zuerst" —
 das Standard-Menü von branding.supply soll **Products → Brand Score · Discover Brands · About ·
-Team** sein. Folge: der Bauplan (Registry `pukalani.chrome.nav`) darf Gruppen VORGEBEN
+Team** sein — der Unterpunkt heißt seit demselben Abend **„Brand-Check"** (Davids Umbenennung,
+Registry-Id `brand-check`, Schlüssel `brand.nav.brandCheck`). Folge: der Bauplan (Registry `pukalani.chrome.nav`) darf Gruppen VORGEBEN
 (`parent`, `to: ''` = Aufklapper ohne Seite; Zusage 9 in `resolveCommunityNav`) — nicht bloß
 eine gespeicherte Wahl je Instanz. Danach freigegeben und gemergt.
 
