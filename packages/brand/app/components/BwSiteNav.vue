@@ -253,9 +253,25 @@ const userMenu = computed(() => [[
          Aufklappers sonst erst beim Öffnen — die Unterpunkte („Brand Score")
          stünden dann in KEINEM SSR-HTML, und ein Crawler fände den Link nur,
          wenn ihn eine Seite anderswo trägt. So liegen sie versteckt im DOM. -->
+    <!-- AUFKLAPPER-BREITE UND -FARBE (PS1-Klickbeweis 2026-09-09, gemessen):
+         Reka misst die Viewport-Breite am CONTENT-Element, und das ist im
+         Nuxt-UI-Theme `absolute w-full` — es kann also nie breiter werden als
+         die Menüleiste selbst (347 px bei vier Punkten), das 34-rem-Raster der
+         Kinder wurde rechts abgeschnitten — und ein `w-max` am Content half
+         nicht: Rekas `--reka-navigation-menu-viewport-width` blieb bei der
+         ersten Messung stehen, und ein `sm:w-[34rem]` am Viewport verlor gegen
+         Nuxt-UIs `sm:w-(--reka-…-viewport-width)` (tailwind-merge kennt die
+         Variablen-Kurzform nicht als `w-`-Klasse, beide bleiben stehen, die
+         Variable gewinnt in der CSS-Reihenfolge). `min-width` ist eine andere
+         Eigenschaft und schlägt jede kleinere `width`: der Viewport ist damit
+         mindestens 34 rem, der Content `w-full` davon, und Rekas
+         Positionsrechnung misst genau diese Breite (Rand-Klammer rechts).
+         `bw-overlay` dazu: `bw-root` allein malt den Seiten-Grund (--bw-paper),
+         und der ist auf der Seite unsichtbar — teleportierte Flächen brauchen
+         die KARTEN-Farbe (brand.css, Runde 19c). -->
     <UNavigationMenu
       :items="menuItems" variant="link" color="neutral" :unmount-on-hide="false"
-      :ui="{ link: 'text-sm text-(--bw-muted) data-active:text-(--bw-ink) hover:text-(--bw-ink)', viewport: 'bw-root', childList: 'grid-cols-1 sm:w-[34rem] sm:grid-cols-2', childLinkDescription: 'text-(--bw-muted)' }"
+      :ui="{ link: 'text-sm text-(--bw-muted) data-active:text-(--bw-ink) hover:text-(--bw-ink)', viewport: 'bw-root bw-overlay sm:min-w-[34rem]', childList: 'grid-cols-1 sm:grid-cols-2', childLinkDescription: 'text-(--bw-muted)' }"
     />
 
     <template #right>
