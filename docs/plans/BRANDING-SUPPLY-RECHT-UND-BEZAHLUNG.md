@@ -1073,6 +1073,11 @@ stehen, damit nachvollziehbar ist, wie sie beantwortet wurden:
    §1.11 dort). Eingabe für den Preis-Katalog in Z1 (`exclusive`); vor Z1
    erscheint der Betrag nirgends im Produkt, an der Schranke steht weiter kein
    Preis, die Beta bleibt frei.
+   **Nachtrag 2026-09-09 (PS1, Davids Entscheidung c):** auf den
+   MARKETING-Seiten `/products/*` erscheint der Betrag ab sofort („149 € netto
+   je Branding, einmalig, zzgl. USt — Beta-Konten frei, Kauf folgt"); die
+   Werkstatt-Schranke bleibt bis Z1 bei „Preis im Erstgespräch"
+   ([PRODUCTS-SEITE.md](PRODUCTS-SEITE.md) §5).
 3. ~~**Welcher Generator** die Grundfassung liefert (Frage 2)~~ —
    **BEANTWORTET 2026-09-08: activeMind** für die Erstfassung, **Wechsel zu
    eRecht24 Premium** mit R3/Fassung 2 oder spätestens vor dem Öffnen der Beta

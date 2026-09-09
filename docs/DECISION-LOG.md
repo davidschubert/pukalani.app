@@ -7,6 +7,39 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-09 — Products-Seite auf branding.supply (PS1): Konzept entschieden
+
+**Anlass:** Vorhaben PS1 (Nebenbefund aus BI1, 2026-09-08) — Übersicht plus je
+eine Marketing-Seite pro Produkt, der Nav-Punkt „Products" kehrt erst mit den
+Seiten zurück. Konzeptrunde als [docs/plans/PRODUCTS-SEITE.md](plans/PRODUCTS-SEITE.md),
+Bestand geprüft: von den sieben Klickdummy-Kindern existieren fünf (Brand-Check,
+Foundation, Marktvergleich, Brand Design, Book & Kit in Konzeption), zwei nicht
+(Experience, Monitoring); Insights ist Redaktion, kein Produkt.
+
+**Entscheidungen (sechs Fragen, zwei Runden):** (a) **Fünf Produkte entlang des
+Kundenwegs** (Brand-Check → Foundation → Marktvergleich → Brand Design → Book &
+Kit — Foundation VOR Compare, weil der Marktvergleich sie voraussetzt) **plus
+zwei abgeblendete „kommt"-Karten** für Experience und Monitoring, ohne Link, ohne
+Seite, ohne Nav-Eintrag (gegen die Empfehlung „weglassen": die volle Suite bleibt
+sichtbar). (b) **Deutsche Slugs je Sprache** — `/products/market-comparison` und
+`/de/produkte/marktvergleich`; die englischen Eigennamen (Brand-Check, Brand
+Foundation, Brand Design, Brand Book & Kit) bleiben in beiden Sprachen, übersetzt
+werden nur „Produkte" und „Marktvergleich" (gegen die Empfehlung „nur englische
+Slugs"). (c) **149 € netto je Branding erscheint JETZT** auf den Marketing-Seiten,
+vor Z1 (gegen die Empfehlung „kein Betrag ohne Kauf-Knopf"): Zeile „einmalig, zzgl.
+USt, Beta-Konten frei, Kauf folgt — bis dahin per Erstgespräch". Das hebt den Satz
+„vor Z1 erscheint der Betrag nirgends im Produkt" (BS1 §9.2) für die MARKETING-
+Seiten auf; die Werkstatt-Schranke bleibt bis Z1 bei „Preis im Erstgespräch".
+(c2) **Book & Kit: „im Einmalpreis der Ableitung enthalten"** — ein Preis,
+zweimal genannt, kein zweiter Betrag. (d) **Ein Screen je Produktseite** (Hero ·
+Was ihr bekommt · So funktioniert es · Beleg · Preis-Zeile + CTA) **mit echtem
+Beleg-Link** (Ranking, Kailua Coffee, /discover). (e) **Aufklapper mit Kindern**
+(Icon + Titel + Beschreibung, Nuxt-UI-Muster), Übersicht reist als erster Eintrag
+mit; die Nav-Registry bekommt dafür ein optionales `descriptionKey` (core).
+
+**Verworfen:** Langform je Produkt (mehr Text, der bei BK1/Z1 nachgezogen werden
+müsste); „nur die vier, die es gibt" (Supply-Ebene fehlte); ein gemeinsamer
+Preisblock „Ableitung" auf der Übersicht.
 ## 2026-09-09 — Sucheintrag: die Owner-Beschreibung gilt auch im Silo
 
 **Anlass:** Nebenbefund aus NAV1 (letzte offene Entscheidung der Zeile `13 · NAV1`): den
