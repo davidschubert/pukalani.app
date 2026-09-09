@@ -3,7 +3,7 @@ import { type AiProviderRouting, aiProviderErrorTag } from './aiComplete'
 
 /**
  * BILDER LESEN — der Vision-Transport des Core (Konzept
- * docs/plans/BRAND-DESIGN.md §2.12, DECISION-LOG 2026-09-08 „Vision/Bild über
+ * docs/archiv/BRAND-DESIGN.md §2.12, DECISION-LOG 2026-09-08 „Vision/Bild über
  * OpenRouter mit ZDR-Filter").
  *
  * ── DIESELBE FAMILIE WIE `aiComplete`, EIN ANDERER NACHRICHTEN-TYP ────────

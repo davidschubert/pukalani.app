@@ -192,7 +192,7 @@ export default defineAppConfig({
       /** Model-Id der OpenAI-kompatiblen Chat-Completions-API (Default: OpenRouter) */
       model: 'anthropic/claude-haiku-4.5',
       /**
-       * BILDER LESEN (`aiVision`, docs/plans/BRAND-DESIGN.md §2.12) — LEER
+       * BILDER LESEN (`aiVision`, docs/archiv/BRAND-DESIGN.md §2.12) — LEER
        * heisst AUS, und das ist der Core-Default.
        *
        * Der Modell-Name IST das Gate: es gibt keinen zweiten Schalter daneben
@@ -208,7 +208,7 @@ export default defineAppConfig({
        */
       visionModel: '',
       /**
-       * BILDER ERZEUGEN (`aiImage`, docs/plans/BRAND-DESIGN.md §2.12, Paket
+       * BILDER ERZEUGEN (`aiImage`, docs/archiv/BRAND-DESIGN.md §2.12, Paket
        * D5c) — LEER heisst AUS, und das ist der Core-Default.
        *
        * Dieselbe Bauform und dieselbe Begründung wie beim Vision-Modell eine

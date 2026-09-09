@@ -575,7 +575,7 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^(POST|DELETE) \/api\/brand\/profiles\/[^/]+\/publication$/, bucket: 'brand:publish', max: TOKEN_MAX },
   /**
-   * DIE VORBILDER — Hochladen, Ändern, Entfernen (docs/plans/BRAND-DESIGN.md
+   * DIE VORBILDER — Hochladen, Ändern, Entfernen (docs/archiv/BRAND-DESIGN.md
    * §2.2 Schritt 2, Paket D2a).
    *
    * DER TEUERSTE SCHREIBWEG DIESES LAYERS, DER KEIN MODELL RUFT: jeder Aufruf

@@ -3,7 +3,7 @@ import { type AiProviderRouting, aiProviderErrorTag } from './aiComplete'
 
 /**
  * BILDER ERZEUGEN — der Bild-Transport des Core (Konzept
- * docs/plans/BRAND-DESIGN.md §2.12, Paket D5c; DECISION-LOG 2026-09-08
+ * docs/archiv/BRAND-DESIGN.md §2.12, Paket D5c; DECISION-LOG 2026-09-08
  * „Bild-Modell `google/gemini-2.5-flash-image-preview`, ZDR fest").
  *
  * ── DRITTE DATEI DERSELBEN FAMILIE ────────────────────────────────────────
