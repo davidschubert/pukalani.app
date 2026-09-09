@@ -2181,7 +2181,10 @@ function railSessions(entry: BrandJourneyStep): BwRailSession[] {
     return {
       id: slot.id,
       label: slotLabel(slot),
-      effort: t('brand.session.minutes', { minutes: slot.effort.minutes }),
+      // Die Minuten sind eine VORSCHAU auf Arbeit — eine bestätigte Session hat
+      // keine mehr (Davids Klick-Test 2026-09-09: „die Zeit verschwindet dann
+      // auch hinten dran"). `stale` behält sie: dort steht Arbeit wieder an.
+      effort: state === 'done' ? '' : t('brand.session.minutes', { minutes: slot.effort.minutes }),
       state: slot.id === activeSessionKey.value
         ? 'active'
         : view?.deferred ? 'deferred' : state,

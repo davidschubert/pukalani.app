@@ -166,6 +166,20 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
       store.applySaveResponse(response, sentConfidence)
       errorRetries = 0
       silentConflicts = 0
+      /**
+       * EINE BESTÄTIGUNG BEWEGT DIE SESSION-ZUSTÄNDE (Davids Klick-Test
+       * 2026-09-09): die PATCH-Antwort trägt Slots und `revision`, aber nicht,
+       * welche Session damit `done` wurde und welche abhängige sich geöffnet
+       * hat — das rechnet der Server (`resolveSessionStates`) und liefert es
+       * nur im vollen Abruf. Ohne diesen Nachzug blieb der Gründungsimpuls in
+       * der Leiste links „offen", während er rechts längst den Haken trug.
+       * Nachgeladen wird nur, wenn der Rumpf eine Bestätigung enthielt — ein
+       * Tastendruck im Text löst keinen zweiten Abruf aus. `refreshStep` lässt
+       * das Gespräch und die offene Eingabe stehen (Kopf im Store).
+       */
+      if (store.stepKey && Object.values(body.slots).some(patch => patch.confirmed !== undefined)) {
+        void store.refreshStep(id, store.stepKey)
+      }
     }
     catch (error) {
       const status = (error as { status?: number, statusCode?: number }).status
