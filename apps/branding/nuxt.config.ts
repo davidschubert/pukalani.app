@@ -31,6 +31,21 @@ export default defineNuxtConfig({
    * gehören damit auf die branding-Instanz; die Soll-Liste im
    * Schema-Parity-Wächter zieht mit.
    *
+   * SEIT BI1 I1 (2026-09-09) MIT `insights`: der redaktionelle Bereich (Plan
+   * docs/plans/BRAND-INSIGHTS.md, Davids Entscheidung 1 in §11) ist ein
+   * EIGENER Produkt-Layer — eigenes Dokument (der Beitrag), eigene
+   * Zustandsmaschine (Entwurf → Redaktion → veröffentlicht), eigenes Publikum
+   * (anonyme Leser statt eingeloggter Eigentümer) und ein eigener Gegenstand
+   * (FREMDE Marken, nicht die des Kunden). Er hängt per `requires` an `brand`
+   * und kennt ihn über GENAU EINEN Vertrag
+   * (`packages/insights/server/contracts/brandContract.ts`, CONCEPT A14) —
+   * nicht über die extends-Kette. Seine drei Tabellen (insights-001…003)
+   * gehören auf die branding-Instanz; die Soll-Liste im Schema-Parity-Wächter
+   * zieht mit. `insights` steht NACH `market` und VOR `pages`: die beiden
+   * ersten kennt die kanonische EXTENDS_ORDER nicht und hängt sie in der
+   * Reihenfolge des Site-Manifests ans Ende, und `pages` muss mit seiner
+   * dynamischen Route `/[slug]` zuletzt bleiben.
+   *
    * SEIT BS1 R1 (2026-09-07) MIT `pages`: die Rechtstexte (Impressum,
    * Datenschutz, AGB) leben als CMS-Zeilen wie auf pukalani.studio — Davids
    * Entscheidung zu Frage 1 des Plans
@@ -43,7 +58,7 @@ export default defineNuxtConfig({
    * Priorität haben und keine Wizard-Seite überlagern.
    *
    * REIHENFOLGE: themes/admin vorn (kanonische EXTENDS_ORDER), dann brand,
-   * dann market, dann pages (die drei kennt die EXTENDS_ORDER nicht, sie
+   * dann market, dann insights, dann pages (die vier kennt die EXTENDS_ORDER nicht, sie
    * landen in der Reihenfolge des Site-Manifests am Ende der Produkte) —
    * die Werkstatt-Optik kollidiert mit keiner admin-Datei (eigene
    * Bw-Präfixe, eigene Routen); das frühere App-Layout `dashboard.vue`
@@ -52,7 +67,7 @@ export default defineNuxtConfig({
    * fordern seit demselben Tag das default-Layout an (Wizard-Nav) — sie
    * sind Kunden-Fläche, keine Betreiber-Fläche.
    */
-  extends: ['../../packages/themes', '../../packages/admin', '../../packages/brand', '../../packages/market', '../../packages/pages', '../../packages/core', '../../packages/system'],
+  extends: ['../../packages/themes', '../../packages/admin', '../../packages/brand', '../../packages/market', '../../packages/insights', '../../packages/pages', '../../packages/core', '../../packages/system'],
 
   // Port pro App eindeutig vergeben (3000–3009 vergeben — 3006 hält platform,
   // 3009 der brand-Playground; die erste Wahl 3006 kollidierte damit und ist

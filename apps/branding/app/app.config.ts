@@ -225,6 +225,36 @@ export default defineAppConfig({
      * `app_config.products.market.enabled = false` (Produkt-Registry).
      */
     market: { enabled: true },
+    /**
+     * DER REDAKTIONELLE BEREICH GEHÖRT AUF DIESE SITE (BI1 I1, 2026-09-09 —
+     * Plan docs/plans/BRAND-INSIGHTS.md §11 Frage 1: „eigener Layer, KEINE
+     * eigene Site — es lebt auf branding.supply").
+     *
+     * Der Layer-Default ist `false` und bleibt es (Begründung dort): die
+     * Redaktion ist ein BETREIBER-Produkt, und die Site sagt mit dieser Zeile
+     * ausdrücklich Ja. Damit steht an EINER Stelle, wer diesen Bereich
+     * betreibt — bei einer zweiten Brand-Site wäre das eine echte
+     * Entscheidung und keine Nebenwirkung des `extends`.
+     *
+     * ── DER SCHALTER STEHT SCHON AUF `true`, OBWOHL I1 NICHTS ZEIGT ──────
+     * Anders als beim Marktvergleich daneben, wo das `true` erst NACH der
+     * Prod-Migration kam — und aus einem Grund, der die Regel nicht bricht,
+     * sondern sie einhält: I1 baut KEINE Route und KEINE Seite. Es gibt
+     * nichts, was dieser Schalter sichtbar machen könnte, und deshalb auch
+     * nichts, was ohne Tabelle in einen Fehler liefe. Was der Schalter
+     * bewirkt, entsteht mit I2/I3 — und bis dahin ist er die Aussage „diese
+     * Site betreibt die Redaktion", nicht „die Redaktion ist offen".
+     *
+     * Die REIHENFOLGE bleibt trotzdem unverändert: die Prod-Migrationen
+     * insights-001…003 gehören VOR den Code-Deploy von I2, und ihr Gate ist
+     * Davids Ja (CLAUDE.md). Rückweg ohne Deploy: der Runtime-Kill
+     * `app_config.products.insights.enabled = false` (Produkt-Registry,
+     * `apiPrefixes: ['/api/insights']`).
+     *
+     * EINE BEZAHL-SCHRANKE GIBT ES NICHT und soll es nicht geben: Insights
+     * ist öffentlicher Inhalt, sein Zweck ist Reichweite (Entscheidung 9).
+     */
+    insights: { enabled: true },
   },
   ui: {},
 })

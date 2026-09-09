@@ -27,6 +27,15 @@ export default {
     'admin',
     'brand',
     'market',
+    // Der redaktionelle Bereich (BI1 I1, 2026-09-09 — Plan
+    // docs/plans/BRAND-INSIGHTS.md §11 Frage 1): Markenprofile fremder Marken,
+    // Duelle, Artikel, Rankings. Eigener Produkt-Layer mit
+    // `requires: ['brand']` und GENAU EINEM Vertrag dorthin
+    // (packages/insights/server/contracts/brandContract.ts) — nicht über die
+    // extends-Kette. Steht NACH `market` (beide kennt die kanonische
+    // EXTENDS_ORDER nicht, sie landen in dieser Reihenfolge am Ende) und VOR
+    // `pages`, das zuletzt bleiben muss.
+    'insights',
     // Rechtsseiten als CMS (BS1 R1, 2026-09-07 — Plan
     // docs/plans/BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md §9 Frage 1): Impressum,
     // Datenschutz und AGB entstehen als Entwurfs-Zeilen in der Tabelle `pages`

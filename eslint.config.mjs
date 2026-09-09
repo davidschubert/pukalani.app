@@ -287,15 +287,6 @@ export default createConfigForNuxt({
    * Ziel-Layer, nicht die Quelldatei —, aber der Kopf jener Datei sagt es,
    * und eine zweite Sprungstelle fällt in der Durchsicht auf.
    */
-  /**
-   * KEINE DRITTE AUSNAHME FÜR `insights` — NOCH NICHT (BI1, Paket I0).
-   * Der Layer trägt dasselbe `requires: ['brand']` wie `market`, importiert
-   * aber im Prototyp NICHTS aus einem fremden Layer: was dem brand-Layer
-   * gehört (Score-Ring, Farbwelt, Archetyp-Namen), kommt als Prop oder Slot
-   * in die `In*`-Komponenten. Die Ausnahme kommt mit I1 zusammen mit dem
-   * Vertrag in `packages/insights/server/contracts/` — vorher wäre sie eine
-   * Erlaubnis für etwas, das es nicht gibt.
-   */
   files: ['packages/market/**'],
   rules: {
     'no-restricted-imports': ['error', {
@@ -307,6 +298,66 @@ export default createConfigForNuxt({
     'pukalani/no-cross-layer-relative': ['error', {
       allow: alsoAllowed(['brand']),
       hint: 'market darf NUR den brand-Vertrag kennen (MV1 §2.1) — gebündelt in server/utils/brandContract.ts (CONCEPT.md A14).',
+    }],
+  },
+}).append({
+  /**
+   * DIE DRITTE PRODUKT-AUSNAHME: insights → brand (BI1 I1, Plan
+   * docs/plans/BRAND-INSIGHTS.md §9.1 Nr. 2 + Davids Entscheidung 1 in §11).
+   *
+   * Bis I0 stand hier „KEINE DRITTE AUSNAHME — NOCH NICHT": der Prototyp
+   * importierte NICHTS aus einem fremden Layer, was dem brand-Layer gehörte
+   * (Score-Ring, Farbwelt, Archetyp-Namen), kam als Prop oder Slot in die
+   * `In*`-Komponenten. Mit I1 gibt es den Vertrag, und damit ist die Ausnahme
+   * eine Erlaubnis für etwas, das es gibt.
+   *
+   * Dieselbe Lage wie bei `market` eine Zeile darüber: `insights` ist ein
+   * eigener Produkt-Layer mit eigenen Tabellen — und trotzdem hängt er an
+   * `brand`. Von dort kommen der BESTEHENDE Brand-Score (Entscheidung 7:
+   * „keine zweite Skala"), die Farbwelt, der Archetyp- und der
+   * Branchen-Katalog, die Slug-Regel (§9.2: „geteilt wird nur die FUNKTION,
+   * nie der Index") und der SSRF-feste Abruf samt robots.txt- und
+   * TDM-Prüfung. Ein zweiter SSRF-Schutz oder eine zweite Slug-Regel wären
+   * zwei Wahrheiten über dieselbe Sache.
+   *
+   * Die Richtung ist EINSEITIG: brand kennt insights nicht und darf es nicht
+   * — dafür sorgt der PRODUCTS-Block weiter oben, der für `packages/brand/**`
+   * unverändert gilt. Und `market` steht NICHT in der Erlaubnis: zwei
+   * Produkt-Layer nebeneinander importieren einander nie (CONCEPT A14).
+   * Genau deshalb sind `evidenceIsGrounded` und der Herabsetzungs-/
+   * Namensfilter mit Paket I1a nach `packages/core/shared` gezogen —
+   * `insights` liest sie dort, und `core` ist ohnehin immer erlaubt.
+   *
+   * Und sie ist GEBÜNDELT: im insights-Layer greift genau EINE Datei über die
+   * Paketgrenze (`server/contracts/brandContract.ts`), alle anderen
+   * importieren von dort. Die Regel hier kann das nicht erzwingen — sie
+   * erlaubt den Ziel-Layer, nicht die Quelldatei —, aber der Kopf jener Datei
+   * sagt es, und eine zweite Sprungstelle fällt in der Durchsicht auf.
+   *
+   * ── WARUM `insights` NICHT IM DATENTÜR-BLOCK STEHT (tablesDB-Sperre) ────
+   * Weiter unten verbietet ein `no-restricted-syntax`-Block rohes `.tablesDB`
+   * in `server/api/**` und `server/plugins/**` der GEPOOLTEN Layer. `insights`
+   * gehört bewusst NICHT dazu — aus demselben Grund wie `brand` und `market`:
+   * seine drei Tabellen tragen kein `communityId`, und der Layer läuft
+   * ausschliesslich auf der Single-Tenant-Instanz `branding` (Silo). Es gibt
+   * dort keinen zweiten Mandanten, gegen den `tenantDb` scopen könnte — die
+   * Tür wäre eine Tür in einer freistehenden Wand. Die Grenze dieses Layers
+   * ist eine andere: die Redaktion hängt an der Capability `insights.manage`,
+   * und was öffentlich wird, entscheidet die Leseroute über `state` und
+   * `translationReviewed`. Käme je eine insights-Tabelle mit `communityId`
+   * dazu, gehört der Layer in denselben Moment in jenen Block.
+   */
+  files: ['packages/insights/**'],
+  rules: {
+    'no-restricted-imports': ['error', {
+      patterns: [
+        { group: otherLayers(['brand']),
+          message: 'insights darf NUR den brand-Vertrag kennen (BI1 §9.1) — sonst keine Layer-Imports (CONCEPT.md A14).' },
+      ],
+    }],
+    'pukalani/no-cross-layer-relative': ['error', {
+      allow: alsoAllowed(['brand']),
+      hint: 'insights darf NUR den brand-Vertrag kennen (BI1 §9.1) — gebündelt in server/contracts/brandContract.ts (CONCEPT.md A14).',
     }],
   },
 }).append({

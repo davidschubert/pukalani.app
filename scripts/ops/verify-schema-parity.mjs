@@ -363,6 +363,36 @@ const MARKET_TABLES = [
   'market_reports',
 ]
 
+/**
+ * insights (packages/insights) — der redaktionelle Bereich Brand Insights
+ * (BI1 I1, Plan docs/plans/BRAND-INSIGHTS.md §9.3). Wie die brand_*- und die
+ * market_*-Tabellen laufen die drei AUSSCHLIESSLICH auf `branding` und stehen
+ * deshalb NUR im BRANDING_SOLL — nicht in der instanzweiten Spalten-Parität.
+ *
+ * Sie hängen an KEINEM Branding: der Layer schreibt über FREMDE Marken, nicht
+ * über Kunden. Es gibt daher auch keine Profil-Kaskade; der GDPR-Contributor
+ * des Layers geht über die Kontakt-Adresse eines Korrekturvorschlags und über
+ * die zwei Betreiber-Stempel `reviewedBy`/`claimedBy`.
+ *
+ * Wer die Tabellen hier einträgt, ohne `pnpm migrate --app branding --layer
+ * insights` zu fahren, bekommt genau das gemeldet — das ist die Absicht.
+ */
+const INSIGHTS_TABLES = [
+  // insights-001: der Beitrag — alle vier Formate in einer Zeile (Profil,
+  // Duell, Artikel, Ranking), beide Sprachfassungen nebeneinander,
+  // `translationReviewed` als Riegel vor der unredigierten Maschinenfassung.
+  'insights_posts',
+  // insights-002: die Marken-Entität einer FREMDEN Marke — Zeichen, Historie
+  // und Beziehungen je mit Beleg, `state: 'removed'` als protokollierter
+  // Notausgang. Bewusst NICHT `brand_publications` (§9.3: andere
+  // Rechtsgrundlage, anderer Notausgang, anderer Inhalt).
+  'insights_brands',
+  // insights-003: Korrekturvorschlag UND Entfernen-Wunsch in einer Tabelle.
+  // `contactEmail`/`ipHash` werden nach 12 Monaten geleert (`retentionAt` +
+  // Sweep), die Entscheidungs-Zeile selbst bleibt als Nachweis.
+  'insights_corrections',
+]
+
 const PORTFOLIO_SOLL = [
   ...SYSTEM_TABLES,
   ...ADMIN_TABLES,
@@ -410,12 +440,16 @@ const PORTFOLIO_SOLL = [
 // `pnpm migrate --app branding` die admin-Migrationen gefahren hat.
 // Seit MV1 M1 (2026-09-05) zusätzlich mit `market`: der Marktvergleich ist
 // ein eigener Produkt-Layer im Site-Manifest dieser App.
+// Seit BI1 I1 (2026-09-09) zusätzlich mit `insights`: der redaktionelle
+// Bereich (Plan docs/plans/BRAND-INSIGHTS.md §9.1) ist ein eigener
+// Produkt-Layer im Site-Manifest dieser App; seine drei Tabellen gehören auf
+// die branding-Instanz (Migration VOR dem Code-Deploy, Gate ist Davids Ja).
 // Seit BS1 R1 (2026-09-07) zusätzlich mit `pages`: Impressum, Datenschutz und
 // AGB leben als CMS-Zeilen (Davids Entscheidung zu Frage 1 des Plans
 // docs/plans/BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md). Die sechs
 // pages-Migrationen gehören damit auf die branding-Instanz — Migration VOR
 // dem Code-Deploy (§2.3 des Plans).
-const BRANDING_SOLL = [...SYSTEM_TABLES, ...ADMIN_TABLES, ...BRAND_TABLES, ...MARKET_TABLES, ...PAGES_TABLES]
+const BRANDING_SOLL = [...SYSTEM_TABLES, ...ADMIN_TABLES, ...BRAND_TABLES, ...MARKET_TABLES, ...INSIGHTS_TABLES, ...PAGES_TABLES]
 
 /**
  * photos (apps/photos) = themes admin media core system. NICHT ausgerollt

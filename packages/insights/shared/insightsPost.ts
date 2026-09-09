@@ -90,6 +90,40 @@ export const INSIGHTS_QUOTE_MAX: number = EVIDENCE_QUOTE_MAX
 /** Alte Slugs je Zeile (§9.2) — ≤ 5, damit die 301-Suche eine Grenze hat. */
 export const INSIGHTS_SLUG_HISTORY_MAX = 5
 
+/**
+ * DIE UMBENENNUNG (§9.2, BI1 I1) — der alte Slug reiht sich VORN ein.
+ *
+ * Die Regel, die DB1 versprochen und nicht gebaut hat (§9.2, „Abhängigkeit in
+ * die andere Richtung"): `brand_publications` trägt heute einen `slug` ohne
+ * Historie, und eine Umbenennung bricht dort jeden Link still. BI1 baut sie
+ * für die eigenen Tabellen — pur, damit sie EINE Wahrheit hat und eine
+ * Gegenprobe bekommen kann.
+ *
+ * ── VORN, NICHT HINTEN ──────────────────────────────────────────────────
+ * Wenn der Deckel greift, fällt der ÄLTESTE Eintrag heraus. Das ist die
+ * richtige Richtung: ein Link auf den vorletzten Namen wird häufiger geklickt
+ * als einer auf den Namen von vor fünf Umbenennungen, und irgendwo muss die
+ * Liste enden (sonst wächst eine varchar-Spalte unbegrenzt).
+ *
+ * ── DREI FÄLLE, DIE NICHTS TUN ──────────────────────────────────────────
+ *  1. Ein LEERER alter Slug (Zeile war noch nie veröffentlicht) — es gibt
+ *     nichts umzuleiten.
+ *  2. Der alte Slug steht schon vorn — dieselbe Umbenennung zweimal
+ *     gespeichert soll die Liste nicht bewegen (Idempotenz).
+ *  3. Der alte Slug ist der NEUE (Aufrufer hat nichts geändert) — dafür
+ *     müsste der Aufrufer die Gleichheit selbst prüfen; hier fängt es der
+ *     Duplikat-Filter mit ab, sobald er ohnehin in der Liste steht.
+ *
+ * Duplikate werden IMMER entfernt: derselbe Name zweimal in der Historie
+ * verbrauchte einen der fünf Plätze für nichts.
+ */
+export function insightsSlugHistoryPush(history: readonly string[], oldSlug: string): string[] {
+  const trimmed = oldSlug.trim()
+  if (!trimmed) return [...history]
+  if (history[0] === trimmed) return [...history]
+  return [trimmed, ...history.filter(entry => entry !== trimmed)].slice(0, INSIGHTS_SLUG_HISTORY_MAX)
+}
+
 /** Ein Ranking hat zehn Plätze — eingefroren, mit Stand (§11 Frage 7). */
 export const INSIGHTS_RANKING_PLACES = 10
 
