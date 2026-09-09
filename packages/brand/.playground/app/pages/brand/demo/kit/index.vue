@@ -491,8 +491,13 @@ useHead({ title: `Brand Kit · ${DS_BRAND.title}` })
           </div>
 
           <template v-if="hasDesign">
-            <div class="mt-4">
-              <UTable :data="[...DK_LICENSES]" :columns="licenseColumns" />
+            <!-- Sichtbefund Abnahme-Runde: mit den nowrap-Zellen lief die Tabelle bei
+                 1440 px rechts aus der Karte — Zellen dürfen umbrechen, Rest scrollt. -->
+            <div class="mt-4 overflow-x-auto">
+              <UTable
+                :data="[...DK_LICENSES]" :columns="licenseColumns"
+                :ui="{ td: 'whitespace-normal align-top', th: 'whitespace-normal' }"
+              />
             </div>
             <p class="bw-doc-text mt-3">{{ DK_LICENSE_NOTE }}</p>
             <div class="mt-3 flex flex-wrap items-center gap-2">
