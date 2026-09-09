@@ -250,11 +250,18 @@ export default defineAppConfig({
           order: 132,
         },
         /**
-         * DIE FREISCHALTUNG VON BRAND DESIGN (Konzept
-         * docs/archiv/BRAND-DESIGN.md §2.10, Paket D1) — der fünfte
-         * Betreiber-Eintrag dieses Layers, unter den anderen (`order: 133`).
-         * Alle sind Arbeitslisten desselben Menschen, und zwischen ihnen
-         * gehört keine fremde Sache.
+         * DIE FREISCHALTUNGEN (Konzept docs/archiv/BRAND-DESIGN.md §2.10 für
+         * Schicht 2, docs/plans/BRAND-BOOK-KIT.md §2.20 Nr. 5 für die
+         * Ableitung) — der fünfte Betreiber-Eintrag dieses Layers, unter den
+         * anderen (`order: 133`). Alle sind Arbeitslisten desselben Menschen,
+         * und zwischen ihnen gehört keine fremde Sache.
+         *
+         * EIN EINTRAG FÜR ZWEI SCHRANKEN (K1): bis dahin hiess er „Brand
+         * Design" und zeigte auf `/dashboard/brand-design`. Seit K1 stehen
+         * Brand Design und die Ableitung als zwei SPALTEN einer Tabelle unter
+         * `/dashboard/brand-unlocks` (Davids Entscheidung §2.20 Nr. 5); die
+         * alte Adresse antwortet 301 (routeRules im Layer). Zwei
+         * Menü-Einträge wären zwei Orte für dieselbe Frage.
          *
          * Dieselbe Capability wie die vier darüber: `users.manage`. §2.10
          * nennt eine Capability `brand.manage` — die gibt es hier nicht, und
@@ -270,11 +277,11 @@ export default defineAppConfig({
          * zurücknehmbar sein.
          */
         {
-          id: 'brand-design-unlock',
+          id: 'brand-unlocks',
           scope: 'operator',
-          labelKey: 'brand.admin.designUnlock.nav',
-          icon: 'i-ph-palette',
-          to: '/dashboard/brand-design',
+          labelKey: 'brand.admin.unlocks.nav',
+          icon: 'i-ph-lock-simple-open',
+          to: '/dashboard/brand-unlocks',
           requiredCapability: 'users.manage',
           group: 'management',
           order: 133,

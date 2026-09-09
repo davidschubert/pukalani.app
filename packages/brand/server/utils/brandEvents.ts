@@ -100,6 +100,28 @@ export type BrandEventType =
   | 'design.unlocked'
   | 'design.locked'
   /**
+   * DIE FREISCHALTUNG DER ABLEITUNG (Konzept docs/plans/BRAND-BOOK-KIT.md
+   * §2.8/§2.13, Paket K1) — die zweite Betreiber-Handlung in diesem Funnel,
+   * und sie steht hier aus demselben Grund wie `design.unlocked`: sie hat
+   * Folgen für den KUNDEN. Ab dieser Zeile sind Brand Book & Kit UND der
+   * Marktvergleich für seine Marke offen — EIN Feld, zwei Produkte.
+   *
+   * `payload` trägt Kennzahlen: `via` (`operator`, ab BS1 Z1 auch `purchase`),
+   * beim Freischalten die Zahl nachgezogener `brand_steps`-Zeilen und den
+   * Foundation-Fortschritt, beim Zurücknehmen die Tage, die das Produkt offen
+   * war. `beta` sagt, ob das Konto des Eigentümers ohnehin frei ist — die
+   * Zahl, an der man nach dem ersten Verkauf ablesen kann, ob wir überhaupt
+   * etwas freischalten, das nicht schon frei war. `userId` ist der BETREIBER
+   * (bzw. leer beim Webhook), die Marke steht in `profileId`. Kein Titel,
+   * keine Adresse (Regel 1 im Kopf).
+   *
+   * §2.13 nennt sie als Messpunkt: der Abstand zwischen `derivation.unlocked`
+   * und dem ersten Kit-Download ist die Zeit, die das Produkt braucht, um
+   * benutzt zu werden.
+   */
+  | 'derivation.unlocked'
+  | 'derivation.locked'
+  /**
    * DIE VORBILDER (Konzept §2.2 Schritt 2, Paket D2a) — die zwei Handlungen am
    * Upload-Instrument. Sie beantworten die Frage, an der die ganze Weiche
    * hängt: bringen Kunden überhaupt Vorbilder mit, und WOFÜR (Bereich)?

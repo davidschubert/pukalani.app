@@ -58,7 +58,7 @@ import {
  * Stand vor. Die Journey sperrt die Kapitel trotzdem sofort, weil sie die
  * Sperre VOR dem gespeicherten `done` prüft.
  */
-export function requireBrandDesignOperator(event: H3Event) {
+export function requireBrandUnlockOperator(event: H3Event) {
   return requirePermission(event, 'users.manage')
 }
 
@@ -80,7 +80,7 @@ export function brandDesignUnlockUnavailable(error: unknown, data: Record<string
  * hierher kommt, hat `users.manage` und darf wissen, dass es diese Marke nicht
  * (mehr) gibt.
  */
-export function requireBrandDesignProfileId(event: H3Event): string {
+export function requireBrandUnlockProfileId(event: H3Event): string {
   const id = getRouterParam(event, 'id')
   if (!id || id.length > 64) throw createError({ status: 400, statusText: 'Missing id' })
   return id
@@ -115,7 +115,12 @@ export async function brandFoundationIsComplete(
   profile: BrandProfileRow,
 ): Promise<boolean> {
   const stepRows = await loadStepRows(event, profile.$id)
-  const journey = resolveBrandJourney(profileFacts(profile), toStepFacts(stepRows))
+  // `betaAccount: false` ist hier keine Auskunft über den Eigentümer, sondern
+  // die Feststellung, dass sie für DIESE Frage nichts beiträgt: gefragt wird
+  // allein der Zustand von `result`, und Schicht 1 hängt an keiner
+  // Freischaltung (K1). Die Beta-Zulassung des BETREIBERS wäre hier ohnehin
+  // die falsche — sie gehört einem anderen Konto als die Marke.
+  const journey = resolveBrandJourney(profileFacts(profile, false), toStepFacts(stepRows))
   return journey.find(entry => entry.stepKey === 'result')?.state === 'done'
 }
 
@@ -165,7 +170,7 @@ export async function ensureBrandDesignStepRows(
 }
 
 /** Die Betreiber-Liste: alle Brandings, neueste zuerst. */
-export async function listBrandDesignUnlockRows(
+export async function listBrandProfilesForOperator(
   event: H3Event,
   input: { limit: number, cursor?: string },
 ): Promise<{ rows: BrandProfileRow[], total: number }> {
@@ -199,7 +204,11 @@ export function toBrandDesignUnlockItem(
   row: BrandProfileRow,
   foundationDone: boolean,
 ): BrandDesignUnlockItem {
-  const facts = profileFacts(row)
+  // Diese Zeile spricht NUR über Schicht 2, und die hängt allein an der Spalte
+  // — die Beta-Zulassung des Eigentümers ändert daran nichts (K1). Die Liste
+  // der ABLEITUNG braucht sie sehr wohl und holt sie sich gebündelt
+  // (`toBrandUnlockItem`).
+  const facts = profileFacts(row, false)
   return {
     id: row.$id,
     title: row.title ?? '',

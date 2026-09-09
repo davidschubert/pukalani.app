@@ -77,8 +77,8 @@ import {
  * die Sessions OHNE Marke.
  */
 export default defineEventHandler(async (event): Promise<BrandSessionCloseResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const context = await loadBrandAcceptanceContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const context = await loadBrandAcceptanceContext(event, userId, betaAccount)
   const { profile, stepKey, stepRow, stepRows, records, stepFacts } = context
   const body = await readValidatedBody(event, createBrandSessionCloseSchema().parse)
 
@@ -103,7 +103,7 @@ export default defineEventHandler(async (event): Promise<BrandSessionCloseRespon
   }
 
   const contentLocale = profile.contentLocale
-  const { pathKind, team } = profileFacts(profile)
+  const { pathKind, team } = profileFacts(profile, betaAccount)
   const stepSlotIds = slotsForStep(stepKey).map(entry => entry.id)
 
   /** Die offenen Befunde, an denen ein Feld DIESES Kapitels beteiligt ist. */
@@ -124,7 +124,7 @@ export default defineEventHandler(async (event): Promise<BrandSessionCloseRespon
       stepKey,
       {
         slots: afterFacts.find(entry => entry.stepKey === stepKey)?.slots ?? {},
-        sessions: resolveBrandSessionStates(profileFacts(profile), afterFacts),
+        sessions: resolveBrandSessionStates(profileFacts(profile, betaAccount), afterFacts),
       },
       suggestion,
     )

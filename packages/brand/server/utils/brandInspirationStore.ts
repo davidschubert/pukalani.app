@@ -202,11 +202,12 @@ export interface BrandInspirationContext {
 export async function requireBrandInspirationContext(
   event: H3Event,
   userId: string,
+  betaAccount: boolean,
 ): Promise<BrandInspirationContext> {
   const profileId = requireProfileIdParam(event)
   const profile = await loadOwnedProfile(event, userId, profileId)
   const stepRows = await loadStepRows(event, profile.$id)
-  const journey = resolveBrandJourney(profileFacts(profile), toStepFacts(stepRows))
+  const journey = resolveBrandJourney(profileFacts(profile, betaAccount), toStepFacts(stepRows))
   const decision = canEnterBrandStep(journey, BRAND_INSPIRATION_STEP_KEY)
   if (!decision.allowed) throw createError({ status: 404, statusText: 'Not Found' })
   return { profile, stepRows }

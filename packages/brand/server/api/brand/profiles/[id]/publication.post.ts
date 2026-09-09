@@ -67,7 +67,7 @@ import {
  * Slug, Zustand, Codes und Umfang — nie Inhalte.
  */
 export default defineEventHandler(async (event): Promise<BrandPublicationResponse> => {
-  const { userId } = await requireBrandAccess(event)
+  const { userId, betaAccount } = await requireBrandAccess(event)
   const profileId = requireProfileIdParam(event)
   const profile = await loadOwnedProfile(event, userId, profileId)
   const body = await readValidatedBody(event, createBrandPublicationSubmitSchema().parse)
@@ -107,7 +107,7 @@ export default defineEventHandler(async (event): Promise<BrandPublicationRespons
     })
   }
 
-  const { payload } = buildBrandSnapshot(profile, stepRows)
+  const { payload } = buildBrandSnapshot(profile, stepRows, { betaAccount })
 
   const slug = existing?.slug || await findFreeBrandPublicationSlug(
     event,

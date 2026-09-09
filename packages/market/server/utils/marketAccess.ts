@@ -43,6 +43,18 @@ export { MARKET_UNLOCK_STEP } from '../../shared/marketProfile'
 
 export interface MarketRouteContext {
   userId: string
+  /**
+   * Hat das KONTO einen gültigen Beta-Zugang (`brand_access`)? — die Tatsache
+   * aus dem Gate des Wizards, nicht hier ermittelt (BK1 K1, §2.17: „ein
+   * zweiter Leser der Beta-Wahrheit wäre ein Leck").
+   *
+   * Sie steht hier, weil die Schranke des Marktvergleichs sie braucht
+   * (`resolveMarketPaywall`) — bis BK1 K1 stand dort ein hart verdrahtetes
+   * `true`, weil „wer hier ankommt, ist durch das Beta-Gate gegangen". Das
+   * stimmte, solange die Beta der einzige Weg war; ab dem ersten Kauf ist es
+   * eine Behauptung, die niemand mehr prüft.
+   */
+  betaAccount: boolean
   profileId: string
   profile: BrandProfileRow
 }
@@ -95,10 +107,10 @@ export function requireMarketEnabled(): void {
  */
 export async function requireMarketProfile(event: H3Event): Promise<MarketRouteContext> {
   requireMarketEnabled()
-  const { userId } = await requireBrandAccess(event)
+  const { userId, betaAccount } = await requireBrandAccess(event)
   const profileId = requireProfileIdParam(event)
   const profile = await requireOwnedMarketProfile(event, userId, profileId)
-  return { userId, profileId, profile }
+  return { userId, betaAccount, profileId, profile }
 }
 
 /**

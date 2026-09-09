@@ -83,7 +83,7 @@ const SHARE_TTL_MS = 30 * 24 * 60 * 60 * 1000
  */
 
 export default defineEventHandler(async (event): Promise<BrandSharePublishResponse> => {
-  const { userId } = await requireBrandAccess(event)
+  const { userId, betaAccount } = await requireBrandAccess(event)
   const profileId = requireProfileIdParam(event)
   const profile = await loadOwnedProfile(event, userId, profileId)
   await readValidatedBody(event, createBrandSharePublishSchema().parse)
@@ -103,6 +103,7 @@ export default defineEventHandler(async (event): Promise<BrandSharePublishRespon
    */
   const { preset } = await loadBrandDesignPreset(event, profile, stepRows)
   const { snapshot, payload } = buildBrandSnapshot(profile, stepRows, {
+    betaAccount,
     ...(preset ? { design: brandDesignSnapshotPreset(preset) } : {}),
   })
 

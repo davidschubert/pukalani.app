@@ -2,7 +2,7 @@ import type { MarketOverviewResponse } from '../../../../../shared/types/marketA
 import type { MarketAiView, MarketProfile } from '../../../../../shared/marketProfile'
 import { MARKET_COMPETITORS_MAX } from '../../../../../shared/marketProfile'
 import { resolveMarketPaywall } from '../../../../../shared/marketPaywall'
-import { brandMarketVisibilityOf, readBrandAiEnabled } from '../../../../contracts/brandContract'
+import { brandMarketVisibilityOf, readBrandAiEnabled, resolveDerivationAccess } from '../../../../contracts/brandContract'
 import { MARKET_UNLOCK_STEP, marketUnlocked, requireMarketProfile } from '../../../../utils/marketAccess'
 import { listMarketCompetitors, listMarketProfiles } from '../../../../utils/marketStore'
 import { loadMarketBrandChecks } from '../../../../utils/marketBrandCheck'
@@ -38,7 +38,7 @@ import {
  * sie nicht erklären.
  */
 export default defineEventHandler(async (event): Promise<MarketOverviewResponse> => {
-  const { profileId, profile } = await requireMarketProfile(event)
+  const { profileId, profile, betaAccount } = await requireMarketProfile(event)
 
   const [competitors, profileRows, aiEnabled, unlocked] = await Promise.all([
     listMarketCompetitors(event, profileId),
@@ -67,11 +67,24 @@ export default defineEventHandler(async (event): Promise<MarketOverviewResponse>
     aiEnabled,
     unlocked,
     unlockStepKey: MARKET_UNLOCK_STEP,
-    // Wer hier ankommt, ist durch `requireBrandAccess` gegangen — das IST der
-    // Beta-Zugang. Die Rechnung steht trotzdem in einer puren Funktion, damit
-    // der gesperrte Zweig eine Tatsache bleibt und kein toter Code
-    // (Begründung ausführlich in `shared/marketPaywall.ts`).
-    paywall: resolveMarketPaywall({ betaAccess: true }),
+    /**
+     * ZWEI ECHTE TATSACHEN STATT EINER VERDRAHTETEN (BK1 K1).
+     *
+     * Bis 2026-09-09 stand hier `betaAccess: true` mit der Begründung „wer hier
+     * ankommt, ist durch `requireBrandAccess` gegangen". Das stimmte, solange
+     * die Beta der einzige Weg war — und war deshalb nie eine geprüfte Aussage.
+     * Jetzt kommt `betaAccess` aus dem Gate und `derivationUnlocked` aus der
+     * puren Regel des brand-Layers über DIESE Marke (Feld ODER Beta, §2.8).
+     * Beides zusammen ist die Schranke aus BS1 §4.1 (b).
+     */
+    paywall: resolveMarketPaywall({
+      betaAccess: betaAccount,
+      derivationUnlocked: resolveDerivationAccess({
+        betaAccount,
+        unlockedAt: profile.derivationUnlockedAt,
+        via: profile.derivationUnlockedVia,
+      }).unlocked,
+    }),
     max: MARKET_COMPETITORS_MAX,
     marketVisibility: brandMarketVisibilityOf(profile),
   }

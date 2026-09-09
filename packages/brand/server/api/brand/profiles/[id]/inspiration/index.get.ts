@@ -32,8 +32,8 @@ import { brandSlotStoredValue, parseSlotRecords } from '../../../../../utils/bra
  * falschen.
  */
 export default defineEventHandler(async (event): Promise<BrandInspirationListResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const { profile, stepRows } = await requireBrandInspirationContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile, stepRows } = await requireBrandInspirationContext(event, userId, betaAccount)
   const items = await listBrandInspiration(event, profile.$id)
 
   const dnaRow = stepRows.find(row => row.stepKey === BRAND_INSPIRATION_STEP_KEY)

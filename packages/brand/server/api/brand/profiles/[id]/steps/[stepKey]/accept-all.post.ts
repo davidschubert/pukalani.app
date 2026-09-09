@@ -29,8 +29,8 @@ import { acceptAllBrandSessions } from '../../../../../../utils/brandSessionWrit
  * mit keinem.
  */
 export default defineEventHandler(async (event): Promise<BrandStepAcceptAllResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const context = await loadBrandAcceptanceContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const context = await loadBrandAcceptanceContext(event, userId, betaAccount)
   const body = await readValidatedBody(event, createBrandStepAcceptAllSchema().parse)
 
   return acceptAllBrandSessions(event, context, body.revision)

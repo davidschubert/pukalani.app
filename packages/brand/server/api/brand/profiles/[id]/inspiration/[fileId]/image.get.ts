@@ -37,8 +37,8 @@ import {
  * Vision-Modell und dem Menschen zwei verschiedene Bilder zu zeigen.
  */
 export default defineEventHandler(async (event) => {
-  const { userId } = await requireBrandAccess(event)
-  const { profile } = await requireBrandInspirationContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile } = await requireBrandInspirationContext(event, userId, betaAccount)
 
   const fileId = getRouterParam(event, 'fileId')
   if (!fileId || fileId.length > 64) throw createError({ status: 400, statusText: 'Missing id' })

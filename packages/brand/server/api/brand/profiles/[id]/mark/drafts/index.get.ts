@@ -16,8 +16,8 @@ import { listBrandMarkDrafts } from '../../../../../../utils/brandMarkDrafts'
  * ausgetragen hat. Das 503 gehört dem LAUF, nicht der Liste.
  */
 export default defineEventHandler(async (event): Promise<BrandMarkDraftsListResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const { profile } = await requireBrandMarkContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile } = await requireBrandMarkContext(event, userId, betaAccount)
   return {
     items: await listBrandMarkDrafts(event, profile.$id),
     max: BRAND_MARK_DRAFTS_MAX,

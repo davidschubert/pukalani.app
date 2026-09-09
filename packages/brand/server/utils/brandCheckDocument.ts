@@ -34,8 +34,10 @@ import {
 export function brandDocumentCheckFields(
   profile: BrandProfileRow,
   stepRows: readonly BrandStepRow[],
+  /** Die Beta-Tatsache des Aufrufers (K1) — s. `profileFacts`. */
+  betaAccount: boolean,
 ): BrandCheckJudgeDocumentField[] {
-  const facts = profileFacts(profile)
+  const facts = profileFacts(profile, betaAccount)
   const journey = resolveBrandJourney(facts, toStepFacts(stepRows))
   const contentLocale = profile.contentLocale || 'de'
 

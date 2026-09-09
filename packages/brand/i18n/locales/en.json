@@ -195,56 +195,93 @@
           "generic": "That did not work just now. Please try again in a minute."
         }
       },
-      "designUnlock": {
-        "nav": "Brand Design",
-        "title": "Unlock Brand Design",
-        "subtitle": "Brand Design is studio-guided: a brand gets layer two once the intro call has happened. Until then the six chapters stay locked.",
+      "unlocks": {
+        "nav": "Unlocks",
+        "title": "Unlocks",
+        "subtitle": "Two gates per brand: Brand Design (layer 2) and the derivation — one field that opens Brand Book & Kit and the market comparison at once. Both are studio-guided: a brand gets them once the intro call has happened. Beta accounts have the derivation for free, permanently, even without an entry.",
         "refresh": "Reload",
         "rowActions": "Actions for this branding",
         "emptyTitle": "No branding yet",
-        "empty": "As soon as someone creates a brand it appears here — with the button, once its foundation is complete.",
+        "empty": "As soon as someone creates a brand it shows up here — with the buttons, once its foundation is done.",
         "actionFailed": "That did not work",
+        "events": "Actions in this session",
         "counts": {
           "all": "Brandings",
-          "ready": "Ready to unlock",
-          "unlocked": "Unlocked"
+          "ready": "Foundation done",
+          "design": "Brand Design open",
+          "derivation": "Derivation open"
         },
         "col": {
           "brand": "Brand",
           "foundation": "Foundation",
           "design": "Brand Design",
+          "derivation": "Derivation",
           "created": "Created"
         },
         "foundation": {
           "done": "Complete",
-          "open": "Open · {pct}%"
+          "open": "Open · {pct} %"
         },
         "state": {
           "locked": "Locked",
-          "unlocked": "Open since {date}"
+          "unlocked": "Open since {date}",
+          "unlockedVia": "Open since {date} · {via}",
+          "beta": "Open · beta account"
+        },
+        "grant": {
+          "beta": "beta account",
+          "operator": "by the studio",
+          "purchase": "purchased",
+          "none": "locked"
         },
         "action": {
-          "unlock": "Unlock Brand Design",
-          "lock": "Revoke the unlock"
+          "design": {
+            "unlock": "Unlock Brand Design",
+            "lock": "Revoke Brand Design"
+          },
+          "derivation": {
+            "unlock": "Unlock derivation",
+            "lock": "Revoke derivation"
+          }
         },
         "done": {
-          "unlock": "Brand Design is unlocked",
-          "lock": "Unlock revoked"
+          "design": {
+            "unlock": "Brand Design is unlocked",
+            "lock": "Brand Design is locked again"
+          },
+          "derivation": {
+            "unlock": "The derivation is unlocked",
+            "lock": "The derivation is locked again"
+          }
         },
         "confirm": {
-          "unlock": {
-            "title": "Unlock Brand Design?",
-            "body": "\"{brand}\" gets the six chapters of layer two — mood board, colour world, typography, mark, imagery, motion. You can revoke this at any time.",
-            "action": "Unlock"
+          "design": {
+            "unlock": {
+              "title": "Unlock Brand Design?",
+              "body": "“{brand}” gets the six chapters of layer 2 — moodboard, colour, type, mark, imagery, motion. You can revoke this at any time.",
+              "action": "Unlock"
+            },
+            "lock": {
+              "title": "Revoke Brand Design?",
+              "body": "Brand Design is locked again for “{brand}”. Nothing is deleted: finished chapters stay as they are and are back after another unlock.",
+              "action": "Revoke"
+            }
           },
-          "lock": {
-            "title": "Revoke the unlock?",
-            "body": "Brand Design is locked again for \"{brand}\". Nothing is deleted: chapters already worked on stay as they are and reappear after a new unlock.",
-            "action": "Revoke"
+          "derivation": {
+            "unlock": {
+              "title": "Unlock the derivation?",
+              "body": "“{brand}” gets Brand Book & Kit AND the market comparison — it is one field, not two. The three chapter rows are created, and the action leaves an event entry with your name.",
+              "action": "Unlock"
+            },
+            "lock": {
+              "title": "Revoke the derivation?",
+              "body": "Brand Book & Kit and the market comparison are locked again for “{brand}”. Nothing is deleted: finished chapters stay as they are. If the account is a beta account the derivation stays open — that is what the beta access decides, not this brand.",
+              "action": "Revoke"
+            }
           }
         },
         "error": {
-          "foundation_incomplete": "This brand has not finished its Brand Foundation — layer two requires the result chapter.",
+          "foundation_incomplete": "This brand has not finished its brand foundation yet — both gates require the result chapter.",
           "generic": "Please try again."
         }
       }
@@ -1001,6 +1038,10 @@
       "designLocked": {
         "title": "Brand Design is not unlocked yet",
         "description": "The studio unlocks this layer for your brand after the intro call. Your brand foundation stays open as it is."
+      },
+      "derivationLocked": {
+        "title": "Book & Kit is part of the derivation",
+        "description": "The studio unlocks this layer for your brand after the intro call — together with the market comparison. Your brand foundation stays open as it is."
       }
     },
     "brands": {

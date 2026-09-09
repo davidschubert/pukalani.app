@@ -1,9 +1,9 @@
 import { createBrandDesignUnlockListQuerySchema } from '../../../../../schemas/brandDesignUnlock'
 import type { BrandDesignUnlockListResponse } from '../../../../../shared/types/brand'
 import {
-  listBrandDesignUnlockRows,
+  listBrandProfilesForOperator,
   loadBrandFoundationDone,
-  requireBrandDesignOperator,
+  requireBrandUnlockOperator,
   toBrandDesignUnlockItem,
 } from '../../../../utils/brandDesignUnlock'
 
@@ -34,10 +34,10 @@ import {
  * (dieselbe Begründung wie bei den Nachbar-Betreiberrouten).
  */
 export default defineEventHandler(async (event): Promise<BrandDesignUnlockListResponse> => {
-  requireBrandDesignOperator(event)
+  requireBrandUnlockOperator(event)
 
   const query = await getValidatedQuery(event, createBrandDesignUnlockListQuerySchema().parse)
-  const { rows, total } = await listBrandDesignUnlockRows(event, {
+  const { rows, total } = await listBrandProfilesForOperator(event, {
     limit: query.limit,
     cursor: query.cursor,
   })

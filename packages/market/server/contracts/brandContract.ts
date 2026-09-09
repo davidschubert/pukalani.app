@@ -113,6 +113,22 @@ export type { BrandProfileCascade } from '../../../brand/server/utils/brandProfi
 export { BRAND_SLOTS, slotById } from '../../../brand/shared/slotRegistry'
 export type { BrandSlot } from '../../../brand/shared/slotRegistry'
 
+/**
+ * DIE FREISCHALTUNG DER ABLEITUNG — DIE PURE REGEL DES brand-LAYERS
+ * (BK1 K1, docs/plans/BRAND-BOOK-KIT.md §2.8; sie löst BS1 §4.1 (b) ein).
+ *
+ * `market` bekommt KEINE eigene Rechnung darüber, ob eine Marke „bezahlt" ist.
+ * Es ist EIN Feld an `brand_profiles` und EINE Regel darüber, und sie gehören
+ * dem Layer, dem die Tabelle gehört — eine zweite Fassung hier wäre die zweite
+ * Wahrheit über einen KAUF, und die wäre genau dort falsch, wo sie am meisten
+ * kostet.
+ *
+ * Sie ist PUR (keine Tabelle, kein H3): die Tatsachen kommen von der
+ * Aufrufstelle — `betaAccount` aus `requireBrandAccess`, die zwei Spalten aus
+ * der ohnehin geladenen Profil-Zeile.
+ */
+export { resolveDerivationAccess } from '../../../brand/shared/brandDerivation'
+
 // ── Das Zugangs-Gate der Beta (§2.4) ───────────────────────────────────────
 // `market` bekommt KEIN eigenes Gate. Der Marktvergleich ist ein Zusatz zum
 // Wizard; wer nicht in dessen Beta ist, hat kein Branding, gegen das er

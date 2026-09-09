@@ -2751,12 +2751,17 @@ const currentLayerLabelKey = computed(() => {
  * „Teil der Ableitung" (§2.7) und nicht „baut auf eurer Foundation auf" — das
  * ist der Satz von Schicht 2 und hier schlicht falsch.
  */
-const kitRailLayer = computed<BwRailLayer>(() => ({
-  id: 'kit',
-  label: t('brand.kitLayer.label'),
-  locked: true,
-  lockedNote: t('brand.kitLayer.lockedNote'),
-  info: {
+const kitRailLayer = computed<BwRailLayer>(() => {
+  /**
+   * ÜBERSPRUNGENE KAPITEL ZÄHLEN NICHT MIT (K1): `nomenclature` läuft nur auf
+   * dem B2-Weg (§2.20 Nr. 4). Auf einer Solo-Marke stünde sonst dauerhaft „0
+   * von 3" mit einem Punkt, den niemand öffnen kann. Der Filter fragt den
+   * ZUSTAND und nicht die Weiche selbst — die Rechnung dazu steht in der
+   * Journey, hier steht nur ihr Ergebnis (dieselbe Regel wie bei `railSteps`).
+   */
+  const onPath = store.kitSteps.filter(entry => entry.state !== 'skipped')
+  const doneCount = onPath.filter(entry => entry.state === 'done').length
+  const info: BwRailStepInfo = {
     description: t('brand.kitLayer.info'),
     minutes: t('brand.session.minutes', {
       minutes: store.kitSteps.reduce((sum, entry) => sum + chapterEffortMinutes(entry.stepKey), 0),
@@ -2765,17 +2770,62 @@ const kitRailLayer = computed<BwRailLayer>(() => ({
       label: t(`brand.steps.${entry.stepKey}`),
       note: t(`brand.stepInfo.${entry.stepKey}`),
     })),
-  },
-  // Die Punkte stehen auch gesperrt komplett da (Runde 85, David) — mit
-  // Schloss im Status-Kreis statt versteckter Liste.
-  steps: store.kitSteps.map((entry): BwRailStep => ({
-    id: entry.stepKey,
-    label: t(`brand.steps.${entry.stepKey}`),
-    icon: '',
-    state: 'locked',
-    info: railInfo(entry),
-  })),
-}))
+  }
+
+  if (!store.kitOpen) {
+    return {
+      id: 'kit',
+      label: t('brand.kitLayer.label'),
+      locked: true,
+      lockedNote: t('brand.kitLayer.lockedNote'),
+      info,
+      // Die Punkte stehen auch gesperrt komplett da (Runde 85, David) — mit
+      // Schloss im Status-Kreis statt versteckter Liste. Hier ALLE drei: was
+      // es gibt, soll man sehen, auch das Kapitel, das die eigene Weiche
+      // später überspringt.
+      steps: store.kitSteps.map((entry): BwRailStep => ({
+        id: entry.stepKey,
+        label: t(`brand.steps.${entry.stepKey}`),
+        icon: '',
+        state: 'locked',
+        info: railInfo(entry),
+      })),
+    }
+  }
+
+  return {
+    id: 'kit',
+    label: t('brand.kitLayer.label'),
+    note: t('brand.kitLayer.progress', { done: doneCount, total: onPath.length }),
+    info,
+    // KEIN Ergebnis-Punkt: die Lieferseite („Kit", `brand.kitLayer.result`)
+    // kommt mit K6 und hätte heute keine Adresse — ein Punkt ohne Ziel ist die
+    // Sorte Vorschuss, die niemand einlöst (dieselbe Regel wie in K0).
+    steps: onPath.map((entry): BwRailStep => {
+      const current = entry.stepKey === stepKey.value
+      return {
+        id: entry.stepKey,
+        label: t(`brand.steps.${entry.stepKey}`),
+        icon: '',
+        state: current && entry.state !== 'done' ? 'active' : railState(entry.state),
+        info: railInfo(entry),
+        counter: railCounter(entry, current),
+        ...(canEnterStep(entry) ? { to: localePath(`/brand/${profileId.value}/${entry.stepKey}`) } : {}),
+        // Dieselbe Regel wie in Foundation und Schicht 2: die Unterpunkte
+        // gehören dem OFFENEN Kapitel.
+        ...(current
+          ? {
+              sessions: railSessions(entry),
+              effort: t('brand.nav.chapterEffort', {
+                count: slotsForStep(entry.stepKey).length,
+                minutes: chapterEffortMinutes(entry.stepKey),
+              }) + railFindingSuffix(entry.stepKey),
+            }
+          : {}),
+      }
+    }),
+  }
+})
 
 /** Ein Kapitel ist anklickbar, sobald die pure Regel den Eintritt erlaubt. */
 function canEnterStep(entry: BrandJourneyStep): boolean {
@@ -2793,9 +2843,28 @@ function canEnterStep(entry: BrandJourneyStep): boolean {
  * Grund behält den alten Satz — ein unbekannter Code darf nie in einer leeren
  * Fläche enden.
  */
-const lockedTextKey = computed(() => (store.blocked === 'design_locked'
-  ? 'brand.workspace.designLocked'
-  : 'brand.workspace.stepLocked'))
+const lockedTextKey = computed(() => {
+  if (store.blocked === 'design_locked') return 'brand.workspace.designLocked'
+  // SCHICHT 3 SAGT ETWAS ANDERES ALS SCHICHT 2 (K1): „Book & Kit ist Teil der
+  // Ableitung" — und die Ableitung ist EIN Feld, das auch den Marktvergleich
+  // öffnet. Der Grund kommt aus derselben Quelle wie bei Schicht 2
+  // (`canEnterBrandStep` → `data.code`), nur heisst er hier
+  // `derivation_locked` und steht auf `skipped` statt auf `locked` (D0-Lehre:
+  // die Kapitel zählen sonst im Fortschritt mit).
+  if (store.blocked === 'derivation_locked') return 'brand.workspace.derivationLocked'
+  return 'brand.workspace.stepLocked'
+})
+
+/**
+ * DER WEG ZUM ERSTGESPRÄCH — AUS DER CONFIG, NICHT GETIPPT (BS1 R0).
+ *
+ * Er steht NUR an der Ableitungs-Schranke (K1, §2.7: „CTA, KEIN Preis"): dort
+ * ist die Auskunft „das gibt es, so kommt ihr dran" die halbe Produktseite.
+ * An der Design-Schranke bleibt es beim Satz — dort führt der Einstieg über
+ * Kapitel 10 der Leseansicht, und zwei CTAs auf denselben Weg wären zwei
+ * Zählungen desselben Klicks.
+ */
+const callCta = useBrandCompletionCta()
 
 /**
  * ZEIGT DIE BÜHNE DAS UPLOAD-INSTRUMENT? (Brand Design D2a, §2.2)
@@ -3414,10 +3483,20 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
       <p class="mt-1 text-sm" style="color: var(--bw-muted)">
         {{ t(`${lockedTextKey}.description`) }}
       </p>
-      <UButton
-        class="mt-5 rounded-full" variant="outline" :to="localePath('/dashboard/brands')"
-        :label="t('brand.brands.title')"
-      />
+      <div class="mt-5 flex flex-wrap items-center justify-center gap-2">
+        <UButton
+          class="rounded-full" variant="outline" :to="localePath('/dashboard/brands')"
+          :label="t('brand.brands.title')"
+        />
+        <!-- Nur an der Ableitungs-Schranke, und ohne Preis (s. `callCta`). -->
+        <UButton
+          v-if="store.blocked === 'derivation_locked'"
+          :to="callCta.to" :target="callCta.target" :rel="callCta.rel" :external="callCta.external"
+          class="rounded-full" trailing-icon="i-ph-arrow-right"
+          :label="t(callCta.labelKey)"
+          data-derivation-cta
+        />
+      </div>
     </div>
   </div>
 

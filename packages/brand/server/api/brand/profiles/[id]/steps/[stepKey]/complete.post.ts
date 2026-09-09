@@ -41,7 +41,7 @@ import { recordBrandEvent } from '../../../../../../utils/brandEvents'
  * der später widersprechen könnte.
  */
 export default defineEventHandler(async (event): Promise<BrandStepCompleteResponse> => {
-  const { userId } = await requireBrandAccess(event)
+  const { userId, betaAccount } = await requireBrandAccess(event)
   const {
     profile,
     stepKey,
@@ -51,7 +51,7 @@ export default defineEventHandler(async (event): Promise<BrandStepCompleteRespon
     sessionStates,
     openConflicts,
     journey: enteredJourney,
-  } = await loadBrandAcceptanceContext(event, userId)
+  } = await loadBrandAcceptanceContext(event, userId, betaAccount)
   const body = await readValidatedBody(event, createBrandStepCompleteSchema().parse)
 
   // DER GERECHNETE ZUSTAND, NICHT DER ROHE — dieselbe Regel wie im
@@ -137,7 +137,7 @@ export default defineEventHandler(async (event): Promise<BrandStepCompleteRespon
   const mergedRows = stepRows.map(row => (row.$id === stepRow.$id
     ? { ...row, state: 'done' as const, confidence: facts.confidence ?? null }
     : row))
-  const journey = resolveBrandJourney(profileFacts(profile), toStepFacts(mergedRows))
+  const journey = resolveBrandJourney(profileFacts(profile, betaAccount), toStepFacts(mergedRows))
   const progress = resolveProfileProgress(journey)
   await touchProfile(event, profile.$id, {
     progressPct: progress.progressPct,

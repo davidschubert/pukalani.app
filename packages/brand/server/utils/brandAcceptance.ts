@@ -93,8 +93,9 @@ export interface BrandAcceptanceContext extends BrandStepContext, BrandAcceptanc
 export async function loadBrandAcceptanceContext(
   event: H3Event,
   userId: string,
+  betaAccount: boolean,
 ): Promise<BrandAcceptanceContext> {
-  const context = await loadBrandStepContext(event, userId)
+  const context = await loadBrandStepContext(event, userId, betaAccount)
   const records = parseSlotRecords(context.stepRow.slots)
   const stepFacts = toStepFacts(context.stepRows)
   const findings = (await listBrandFindings(event, context.profile.$id, 'open')).map(toBrandFindingView)
@@ -108,7 +109,11 @@ export async function loadBrandAcceptanceContext(
     stepFacts,
     findings,
     openConflicts,
-    ...deriveBrandAcceptance(context.profile, context.stepKey, stepFacts, openConflicts),
+    // `context.betaAccount` und nicht das Argument: der Kontext ist ab hier
+    // die eine Quelle für alles, was hinter dem Eintritt gerechnet wird.
+    ...deriveBrandAcceptance(
+      context.profile, context.stepKey, stepFacts, context.betaAccount, openConflicts,
+    ),
   }
 }
 
@@ -121,10 +126,18 @@ export function deriveBrandAcceptance(
   profile: BrandProfileRow,
   stepKey: BrandStepKey,
   stepFacts: readonly BrandStepFacts[],
+  /**
+   * Die Beta-Tatsache des Aufrufers (K1) — sie steht VOR `openConflicts` und
+   * ist ohne Vorgabewert: `resolveBrandSessionStates` rechnet über die Journey,
+   * und die kennt seit Schicht 3 eine Sperre, die nicht an der Zeile hängt
+   * (§2.8). Ein Default `false` hätte einem Beta-Konto still die Sessions der
+   * dritten Schicht verborgen (`brandSessions.ts`, HIDDEN_REASONS).
+   */
+  betaAccount: boolean,
   openConflicts: readonly string[] = BRAND_OPEN_CONFLICTS_NONE,
 ): BrandAcceptanceDerivation {
   const allFacts = mergeBrandSlotFacts(stepFacts)
-  const sessionStates = resolveBrandSessionStates(profileFacts(profile), stepFacts)
+  const sessionStates = resolveBrandSessionStates(profileFacts(profile, betaAccount), stepFacts)
   const acceptance = brandStepAcceptance(stepKey, allFacts, sessionStates, openConflicts)
   return { allFacts, sessionStates, acceptance }
 }
@@ -249,12 +262,14 @@ export interface BrandDocumentContext {
 export async function loadBrandDocumentContext(
   event: H3Event,
   userId: string,
+  betaAccount: boolean,
 ): Promise<BrandDocumentContext> {
   const profileId = requireProfileIdParam(event)
   const profile = await loadOwnedProfile(event, userId, profileId)
   const stepRows = await loadStepRows(event, profileId)
   const stepFacts = toStepFacts(stepRows)
-  const journey = resolveBrandJourney(profileFacts(profile), stepFacts)
+  const facts = profileFacts(profile, betaAccount)
+  const journey = resolveBrandJourney(facts, stepFacts)
   const findings = (await listBrandFindings(event, profileId, 'open')).map(toBrandFindingView)
 
   return {
@@ -263,7 +278,7 @@ export async function loadBrandDocumentContext(
     stepFacts,
     journey,
     allFacts: mergeBrandSlotFacts(stepFacts),
-    sessionStates: resolveBrandSessionStates(profileFacts(profile), stepFacts),
+    sessionStates: resolveBrandSessionStates(facts, stepFacts),
     findings,
   }
 }
