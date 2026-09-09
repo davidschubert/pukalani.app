@@ -27,6 +27,15 @@ reichen nur noch ihren Rückfall herein. `noindex` bleibt bewusst dort, wo es li
 **Verworfen:** Silo-Sites behalten ihren eigenen, im Code stehenden Text — dann wäre der
 Sucheintrag dort eine Fläche ohne Wirkung, und wir müssten das Feld je Site ausblenden statt
 es zu bedienen.
+---
+
+## 2026-09-09 — Brand Book & Kit (Produkt 03): Konzept freigegeben, Prototyp beauftragt
+
+**Entscheidung (David):** „Konzept freigegeben, bau den Prototyp im Playground." Damit ist
+docs/plans/BRAND-BOOK-KIT.md §2 verbindlich (inkl. der sechs Entscheidungen in §2.20). Phase 3
+läuft wie bei BF1 und BD1: Klickdummy in `packages/brand/.playground` (acht Screens nach
+§2.15, Kailua als Marke, echte Nuxt-UI-Komponenten, Werte aus `demoDesign.ts`/
+`demoFoundation.ts` — kein Lorem), Davids Abnahme am lebenden Objekt, dann Pakete K0–K8.
 
 ---
 

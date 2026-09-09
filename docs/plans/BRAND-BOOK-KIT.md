@@ -1,11 +1,11 @@
 # Brand Book & Kit (Produkt 03) — Strategie
 
-Status: **Phase 2 (Konzeption, §2) GESCHRIEBEN 2026-09-09 — zur Freigabe;
-sechs Konzept-Fragen in §2.19.** Vorgeschichte: Strategie geschrieben
-2026-09-08, **freigegeben 2026-09-09** mit Davids acht Entscheidungen in
-§1.11 (sieben nach Empfehlung, der Betrag ist gesetzt: 149 € netto je
-Branding). Nach der Konzept-Freigabe folgt der Prototyp (§2.15, Playground);
-kein Code vorher. Kürzel in OPEN-ITEMS: **BK1**.
+Status: **Konzept FREIGEGEBEN 2026-09-09** („Konzept freigegeben, bau den
+Prototyp im Playground") — §2 ist verbindlich inkl. §2.20. **Phase 3
+(Prototyp, §3) im Bau:** Klickdummy in `packages/brand/.playground`, acht
+Screens nach §2.15. Vorgeschichte: Strategie geschrieben 2026-09-08,
+freigegeben 2026-09-09 (§1.11); Konzeption geschrieben und ihre sechs Fragen
+beantwortet 2026-09-09 (§2.19/§2.20). Kürzel in OPEN-ITEMS: **BK1**.
 
 Arbeitsablauf: docs/referenz/WORKFLOW.md (Strategie ist Phase 1). Vorlage für
 Aufbau und Tiefe: docs/archiv/BRAND-DESIGN.md §1 (Produkt 02).
