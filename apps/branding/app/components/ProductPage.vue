@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatDerivationPrice } from '../../shared/productPricing'
+import { formatDerivationPrice } from '../utils/productPricing'
 
 /**
  * DER RAHMEN JEDER PRODUKTSEITE (PS1, Plan docs/plans/PRODUCTS-SEITE.md §4).

@@ -46,7 +46,7 @@ kennt alle ihre Produkte, ein Layer die anderen nicht — A14), deutsch
 (`customRoutes: 'page'` ist der i18n-Default, `localePath('/products/…')` löst
 je Sprache auf; `/de/products` leitet nuxt-i18n selbst per 302 auf
 `/de/produkte`). Geteilter Rahmen `ProductPage.vue` + `ProductPriceLine.vue`,
-Preis als EINE Konstante `apps/branding/shared/productPricing.ts` (149 € netto,
+Preis als EINE Konstante `apps/branding/app/utils/productPricing.ts` (149 € netto,
 reist als `{price}` — steht in keiner Locale-Datei). Übersicht mit zwei
 abgeblendeten „Kommt"-Karten (Experience, Monitoring). Nav-Registry: core kennt
 `descriptionKey` (Vertrag statt Schlüssel-Konvention, FIELDS-Zeile im
@@ -78,7 +78,17 @@ Klickdummy-Schlüssel nannte George, die Rolle-vor-Name-Regel (2026-09-04) griff
 erst, als der Text sichtbar wurde. (4) Screenshot-Messungen am offenen Menü
 IMMER über eine eindeutige Klasse (`.bw-overlay`) — der erste
 `[data-state=open]` im DOM war einmal ein anderes Element (Höhe 0, Opazität 0)
-und täuschte ein Render-Problem vor, das es nicht gab.
+und täuschte ein Render-Problem vor, das es nicht gab. (5) **Ein Laufzeit-
+Import aus `apps/<app>/shared/` bricht den Prod-Build** (Deploy-Lauf
+34407402347 rot: `RollupError: Could not resolve "…/apps/branding/shared/
+productPricing.ts" from ".nuxt/dist/server/_nuxt/products-….js"`) — der
+Vite-SSR-Build lässt die Datei extern, Nitro findet sie nicht. Dev-Server,
+Typecheck und alle Tests sahen davon nichts. Die anderen Apps importieren aus
+ihrem `shared/` nur TYPEN (verschwinden beim Bauen); Laufzeit-Code, den nur die
+Oberfläche braucht, gehört in `app/utils/` (auto-importiert, sicher im Bundle);
+was Server UND Client brauchen, in das `shared/` eines LAYERS (dort bündelt es
+der Build, Beweis: `packages/brand/shared/brandLegalLinks`). Nachgezogen mit
+Fix-Commit + lokalem `pnpm --filter branding build` als Beweis.
 
 ### Sucheintrag-Beschreibung gilt auch im Silo (NAV1-Nebenbefund, letzte offene Entscheidung) ✅ 2026-09-09
 

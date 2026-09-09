@@ -113,7 +113,7 @@ der Betrag **erscheint jetzt** auf den Marketing-Seiten. Das hebt den Satz
 MARKETING-Seiten auf; die Schranke in der Werkstatt (`market.paywall.price`
 = „Preis im Erstgespräch") bleibt bis Z1 unverändert. EIN Preis, zweimal
 genannt, kein zweiter Betrag: Book & Kit ist Teil desselben Einmalpreises.
-Der Betrag lebt als EINE Konstante (`shared/productPricing.ts` in der App),
+Der Betrag lebt als EINE Konstante (`app/utils/productPricing.ts` in der App),
 die Z1 mit dem Stripe-Katalog verdrahtet.
 
 ## 6. Nav-Rückkehr
