@@ -456,6 +456,96 @@ describe('resolveCommunityNav — Zusage 8: die Antwort zählt nur Hauptpunkte',
   })
 })
 
+/**
+ * ZUSAGE 9 — DER BAUPLAN GIBT DIE GRUPPE VOR (Davids Korrektur 2026-09-08).
+ *
+ * Der Fall aus der Wirklichkeit: das Standard-Menü von branding.supply lautet
+ * „Products ▾ (Brand Score) · Discover Brands · About · Team", und `products`
+ * ist ein Aufklapper OHNE eigene Seite (`to: ''`).
+ */
+const brandCandidates: CommunityNavCandidate[] = [
+  { id: 'products', label: 'Products', to: '', order: 10 },
+  { id: 'brand-score', label: 'Brand Score', to: '/brand-check', order: 11, parent: 'products' },
+  { id: 'discover', label: 'Discover Brands', to: '/discover', order: 20 },
+  { id: 'about', label: 'About', to: '/about', order: 30 },
+  { id: 'team', label: 'Team', to: '/team', order: 40 },
+]
+
+describe('resolveCommunityNav — Zusage 9: der Bauplan darf Gruppen vorgeben', () => {
+  it('OHNE gespeicherte Wahl gilt die Hierarchie der Kandidaten', () => {
+    const items = resolveCommunityNav(brandCandidates, null)
+    expect(ids(items)).toEqual(['products', 'discover', 'about', 'team'])
+    expect(ids(items[0]!.children ?? [])).toEqual(['brand-score'])
+    // Der Aufklapper hat kein eigenes Ziel — und steht deshalb auch nicht
+    // selbst in seinem Aufklapper (navMenuChildren).
+    expect(navItemHasTarget(items[0]!)).toBe(false)
+  })
+
+  it('GEGENPROBE: ein Bauplan OHNE `parent` ergibt weiter eine flache Reihe (Zusage 4)', () => {
+    // Dieselben fünf Einträge, nur ohne Vorgabe — und `products` mit eigenem
+    // Ziel, damit hier NICHTS anderes mitspielt als die fehlende Elternschaft.
+    const flat = brandCandidates.map(candidate => ({ ...candidate, parent: undefined, to: candidate.to || '/products' }))
+    const items = resolveCommunityNav(flat, null)
+    expect(ids(items)).toEqual(['products', 'brand-score', 'discover', 'about', 'team'])
+    expect(items.every(item => item.children === undefined)).toBe(true)
+  })
+
+  it('GEGENPROBE: ein Kandidat, der auf SICH SELBST zeigt, bleibt Hauptpunkt', () => {
+    const items = resolveCommunityNav([{ id: 'products', label: 'Products', to: '/p', order: 10, parent: 'products' }], null)
+    expect(ids(items)).toEqual(['products'])
+    expect(items[0]!.children).toBeUndefined()
+  })
+
+  it('GEGENPROBE: fällt die Gruppe per Gate weg, ist das Kind Hauptpunkt', () => {
+    // Genau das tut ein Gate: der Eintrag ist gar nicht erst Kandidat.
+    const items = resolveCommunityNav(brandCandidates.filter(c => c.id !== 'products'), null)
+    expect(ids(items)).toEqual(['brand-score', 'discover', 'about', 'team'])
+    expect(items[0]!.children).toBeUndefined()
+  })
+
+  it('GEGENPROBE: eine Standard-Gruppe OHNE Kinder erscheint nicht (Zusage 7)', () => {
+    const items = resolveCommunityNav(brandCandidates.filter(c => c.id !== 'brand-score'), null)
+    expect(ids(items)).toEqual(['discover', 'about', 'team'])
+  })
+
+  it('die gespeicherte Wahl GEWINNT: sie darf die Standard-Gruppe auflösen', () => {
+    const override: CommunityNavOverride = {
+      entries: [{ id: 'products' }, { id: 'brand-score' }, { id: 'discover' }],
+    }
+    const items = resolveCommunityNav(brandCandidates, override)
+    // `products` hat kein Ziel und keine Kinder mehr ⇒ Zusage 7 nimmt es weg.
+    expect(ids(items)).toEqual(['brand-score', 'discover', 'about', 'team'])
+  })
+
+  it('und sie darf die Gruppe auch BESTÄTIGEN (parent im Dokument)', () => {
+    const override: CommunityNavOverride = {
+      entries: [{ id: 'products', label: 'Produkte' }, child('brand-score', 'products'), { id: 'about' }],
+    }
+    const items = resolveCommunityNav(brandCandidates, override)
+    expect(items[0]!.label).toBe('Produkte')
+    expect(ids(items[0]!.children ?? [])).toEqual(['brand-score'])
+    expect(ids(items)).toEqual(['products', 'about', 'discover', 'team'])
+  })
+
+  it('ein NACHZÜGLER-Kind bringt seinen Standard-Hauptpunkt mit (Zusage 9c)', () => {
+    // Die Wahl stammt aus einer Zeit, als es beide noch nicht gab: sie hängen
+    // hinten an — aber verschachtelt, nicht als zwei gleichrangige Wörter.
+    const override: CommunityNavOverride = { entries: [{ id: 'about' }, { id: 'team' }] }
+    const items = resolveCommunityNav(brandCandidates, override)
+    expect(ids(items)).toEqual(['about', 'team', 'products', 'discover'])
+    expect(ids(items[2]!.children ?? [])).toEqual(['brand-score'])
+  })
+
+  it('GEGENPROBE: ein GENANNTES Kind hängt NICHT an einen nachgezogenen Hauptpunkt', () => {
+    // `brand-score` ist genannt, `products` nur nachgezogen — das Kind bliebe
+    // sonst nicht an seinem Platz, sondern spränge ans Listenende.
+    const override: CommunityNavOverride = { entries: [child('brand-score', 'products'), { id: 'about' }] }
+    const items = resolveCommunityNav(brandCandidates, override)
+    expect(ids(items)).toEqual(['brand-score', 'about', 'discover', 'team'])
+    expect(items[0]!.children).toBeUndefined()
+  })
+})
+
 describe('navMenuChildren — was im Aufklapper steht', () => {
   const kind: CommunityNavItem = { id: 'events', label: 'Events', to: '/events', external: false }
 
@@ -570,5 +660,15 @@ describe('filterChromeNavEntries', () => {
 
   it('ohne Registry: leere Liste statt Absturz', () => {
     expect(filterChromeNavEntries(undefined, allOn)).toEqual([])
+  })
+
+  it('reicht `parent` und ein leeres `to` durch (Zusage 9)', () => {
+    const grouped = {
+      products: { labelKey: 'nav.products', to: '', order: 10 },
+      'brand-score': { labelKey: 'nav.brandScore', to: '/brand-check', parent: 'products', order: 11 },
+    }
+    const entries = filterChromeNavEntries(grouped, allOn)
+    expect(entries.map(entry => entry.parent)).toEqual([undefined, 'products'])
+    expect(entries[0]!.to).toBe('')
   })
 })

@@ -166,11 +166,16 @@ export function useCommunityNav(): CommunityNavState {
     }).map(entry => ({
       id: entry.id,
       label: t(entry.labelKey),
-      to: localePath(entry.to),
+      // `to: ''` heisst „Aufklapper ohne eigene Seite" (Zusage 9) — es darf
+      // NICHT durch `localePath()` laufen: das machte daraus auf /de ein `/de`,
+      // also einen Link auf die Startseite, und der Aufklapper wäre plötzlich
+      // klickbar. Der Leerstring ist die Aussage, nicht ein fehlender Wert.
+      to: entry.to ? localePath(entry.to) : '',
       path: entry.to,
       icon: entry.icon,
       planProduct: entry.planProduct,
       order: entry.order ?? 50,
+      parent: entry.parent,
     }))
     // `home` gehört der Startseite, die Rechtsseiten dem Fuß (Entscheidung 5
     // des Layout-Zuschnitts) — EINE Antwort für Layout, Editor und BwSiteNav.

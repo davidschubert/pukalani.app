@@ -210,8 +210,12 @@ const userMenu = computed(() => [[
       <span class="whitespace-nowrap text-[18px]" style="color: var(--bw-ink); font-weight: 400; letter-spacing: -0.01em">Branding Supply</span>
     </template>
 
+    <!-- `unmount-on-hide=false` (2026-09-08): Reka rendert den Inhalt eines
+         Aufklappers sonst erst beim Öffnen — die Unterpunkte („Brand Score")
+         stünden dann in KEINEM SSR-HTML, und ein Crawler fände den Link nur,
+         wenn ihn eine Seite anderswo trägt. So liegen sie versteckt im DOM. -->
     <UNavigationMenu
-      :items="menuItems" variant="link" color="neutral"
+      :items="menuItems" variant="link" color="neutral" :unmount-on-hide="false"
       :ui="{ link: 'text-sm text-(--bw-muted) data-active:text-(--bw-ink) hover:text-(--bw-ink)', viewport: 'bw-root', childList: 'grid-cols-1', childLinkDescription: 'text-(--bw-muted)' }"
     />
 

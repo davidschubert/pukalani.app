@@ -220,7 +220,13 @@ function buildRows(): EditorRow[] {
       custom: false,
       group: false,
       available: true,
-      parent: null,
+      // ZUSAGE 9c: ein unerwähnter Kandidat bringt den Standard-Hauptpunkt aus
+      // dem BAUPLAN mit (`chrome.nav.<id>.parent`) — sonst zeigte der Editor
+      // eine flache Reihe, während die Seite die Gruppe rendert. Steht dieser
+      // Hauptpunkt hier nicht als Zeile (oder ist selbst ein Kind), löst
+      // `normalize()` am Ende die Elternschaft auf — genau dieselbe Rechnung,
+      // die auch die Regel in core fail-soft macht.
+      parent: candidate.parent ?? null,
     })
   }
   return normalize(out)

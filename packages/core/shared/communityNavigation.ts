@@ -197,6 +197,17 @@ export interface CommunityNavCandidate {
    * `useCommunityNav()` beseitigt hat. Fehlend = `to` (Bestands-Aufrufer).
    */
   path?: string
+  /**
+   * DER STANDARD-HAUPTPUNKT AUS DEM BAUPLAN (Zusage 9, 2026-09-08) — die Id
+   * eines anderen Kandidaten, unter dem dieser hängt, solange die gespeicherte
+   * Wahl nichts anderes sagt. Er kommt aus `PukalaniChromeNavEntry.parent`
+   * (Registry) und wird von `filterChromeNavEntries` durchgereicht.
+   *
+   * Fehlend = Hauptpunkt, also das Verhalten von vor diesem Tag: für einen
+   * Layer OHNE Vorgaben bleibt Zusage 4 („ohne Wahl ändert sich nichts")
+   * wörtlich wahr.
+   */
+  parent?: string
 }
 
 /** Ein Eintrag, wie ihn das Layout RENDERT. */
@@ -490,6 +501,19 @@ function declaredParent(entry: CommunityNavOverrideEntry): string | null {
 }
 
 /**
+ * Derselbe Griff für einen KANDIDATEN (Zusage 9) — der Standard-Hauptpunkt aus
+ * dem Bauplan. Bewusst eine zweite kleine Funktion und kein gemeinsamer Helfer
+ * über einem `{ id, parent }`-Strukturtyp: die beiden Quellen beantworten
+ * verschiedene Fragen (Bauplan vs. gespeicherte Wahl), und wo sie sich
+ * widersprechen, gewinnt die Wahl.
+ */
+function candidateParent(candidate: CommunityNavCandidate): string | null {
+  const parent = typeof candidate.parent === 'string' ? candidate.parent.trim() : ''
+  if (!parent || parent === candidate.id) return null
+  return parent
+}
+
+/**
  * DIE REGEL: angebotene Einträge + gespeicherte Wahl ⇒ das fertige Menü.
  *
  * ── VIER ZUSAGEN, DIE MAN NICHT „VEREINFACHEN" DARF ───────────────────────
@@ -544,6 +568,41 @@ function declaredParent(entry: CommunityNavOverrideEntry): string | null {
  *     nicht in der obersten Liste — die Überlauf-Rechnung der Renderer („ab
  *     dem sechsten Eintrag ins Mehr-Menü") bekommt damit ohne Zutun die
  *     richtige Zahl.
+ *
+ * ── ZUSAGE 9: DER BAUPLAN DARF GRUPPEN VORGEBEN (2026-09-08) ──────────────
+ *
+ * (9) Davids Korrektur am Prototyp: das STANDARD-Menü von branding.supply
+ *     lautet „Products ▾ (Brand Score) · Discover Brands · About · Team".
+ *     Bis dahin konnte NUR die gespeicherte Owner-Wahl Unterpunkte erzeugen —
+ *     eine frische Instanz hätte also anders ausgesehen als die beworbene, und
+ *     der Owner hätte sein Standard-Menü erst im Editor nachbauen müssen.
+ *     Deshalb trägt jetzt auch ein KANDIDAT einen `parent`
+ *     (`PukalaniChromeNavEntry.parent` ⇒ `CommunityNavCandidate.parent`).
+ *
+ *     (a) **OHNE gespeicherte Wahl gilt die Hierarchie der Kandidaten.** Die
+ *         Kandidaten laufen durch dieselbe Verschachtelung wie sonst, nur mit
+ *         dem `parent` aus dem Bauplan. Für einen Layer OHNE Vorgaben bleibt
+ *         Zusage 4 damit WÖRTLICH wahr: kein `parent` ⇒ keine Kinder ⇒ die
+ *         Sortierung nach `order` von vorher.
+ *
+ *     (b) **MIT gespeicherter Wahl ist das Dokument für GENANNTE Einträge die
+ *         ganze Wahrheit.** `parent` kommt dort aus dem Override-Eintrag; fehlt
+ *         es, ist der Eintrag ein Hauptpunkt — auch wenn der Bauplan ihn unter
+ *         eine Gruppe hängen würde. Das ist keine Härte, sondern die einzige
+ *         Lesart, die den Editor nicht zur Lüge macht: er schreibt IMMER das
+ *         ganze Dokument, ein fehlendes `parent` ist dort also eine
+ *         ENTSCHEIDUNG („ausgerückt") und kein Schweigen. Sonst käme eine
+ *         Gruppe nach dem Speichern zurück, die der Owner gerade aufgelöst hat.
+ *
+ *     (c) **NACHZÜGLER BRINGEN IHREN BAUPLAN-PLATZ MIT.** Ein Kandidat, über
+ *         den die gespeicherte Wahl nichts sagt (Zusage 3), hängt hinten an —
+ *         und zwar unter dem `parent`, den der Bauplan ihm gibt. Ein neues
+ *         Produkt, das der Layer als Unterpunkt ausliefert, erscheint bei einer
+ *         Bestands-Community also nicht als achtes gleichrangiges Wort.
+ *
+ *     Wessen Gate die GRUPPE wegnimmt, nimmt ihre Kinder nicht mit: sie stehen
+ *     dann nach Zusage 6 oben, und eine Standard-Gruppe, deren einziges Kind
+ *     per Gate wegfällt, verschwindet nach Zusage 7 mit ihm.
  */
 export function resolveCommunityNav(
   candidates: readonly CommunityNavCandidate[],
@@ -551,7 +610,17 @@ export function resolveCommunityNav(
 ): CommunityNavItem[] {
   const byOrder = [...candidates].sort((a, b) => a.order - b.order)
   const entries = override?.entries
-  if (!Array.isArray(entries) || entries.length === 0) return byOrder.map(c => toItem(c))
+  // Zusage 9a: dieselbe Verschachtelung, nur mit dem `parent` des BAUPLANS.
+  // `mentioned: true` für alle, weil hier jeder Eintrag aus derselben Quelle
+  // kommt — die Unterscheidung „genannt/nachgezogen" gibt es nur gegenüber
+  // einem gespeicherten Dokument.
+  if (!Array.isArray(entries) || entries.length === 0) {
+    return nestCommunityNav(byOrder.map(candidate => ({
+      item: toItem(candidate),
+      parent: candidateParent(candidate),
+      mentioned: true,
+    })))
+  }
 
   const byId = new Map(byOrder.map(candidate => [candidate.id, candidate]))
   const seen = new Set<string>()
@@ -587,9 +656,12 @@ export function resolveCommunityNav(
     // sonst: Zusage (2) — unbekannte Id, still ignoriert.
   }
 
-  // Zusage (3): alles, worüber die gespeicherte Wahl nichts sagt.
+  // Zusage (3): alles, worüber die gespeicherte Wahl nichts sagt — und zwar
+  // mit dem Platz, den der Bauplan ihm gibt (Zusage 9c).
   for (const candidate of byOrder) {
-    if (!seen.has(candidate.id)) rendered.push({ item: toItem(candidate), parent: null, mentioned: false })
+    if (!seen.has(candidate.id)) {
+      rendered.push({ item: toItem(candidate), parent: candidateParent(candidate), mentioned: false })
+    }
   }
 
   return nestCommunityNav(rendered)
@@ -604,9 +676,7 @@ export function resolveCommunityNav(
 function nestCommunityNav(
   rendered: ReadonlyArray<{ item: CommunityNavItem, parent: string | null, mentioned: boolean }>,
 ): CommunityNavItem[] {
-  const declared = new Map(rendered.map(row => [row.item.id, row.parent]))
-  /** Wer überhaupt Hauptpunkt einer Gruppe sein DARF (s. `mentioned` oben). */
-  const attachable = new Set(rendered.filter(row => row.mentioned).map(row => row.item.id))
+  const rows = new Map(rendered.map(row => [row.item.id, row]))
 
   /**
    * Unter welcher Id hängt dieser Eintrag WIRKLICH? `null` = Hauptpunkt.
@@ -624,11 +694,26 @@ function nestCommunityNav(
     if (laufend.has(id)) return null
     laufend.add(id)
     let result: string | null = null
-    const parent = declared.get(id) ?? null
-    // Zusage 6: nur ein Hauptpunkt, der WIRKLICH rendert, ausdrücklich genannt
-    // ist und selbst keiner Gruppe angehört, nimmt Kinder auf. Alles andere ⇒
-    // das Kind ist Hauptpunkt.
-    if (parent && attachable.has(parent) && attachesTo(parent) === null) result = parent
+    const row = rows.get(id)
+    const parent = row?.parent ?? null
+    const parentRow = parent ? rows.get(parent) : undefined
+    /**
+     * DIE ANHÄNGE-REGEL, und sie ist ASYMMETRISCH (Zusage 6 + 9c):
+     *
+     *  - ein GENANNTES Kind hängt nur an einen GENANNTEN Hauptpunkt. Ein
+     *    Hauptpunkt, der bloss über den Anhang dazukommt (Zusage 3), steht am
+     *    ENDE der Liste — das Kind spränge mit ihm dorthin, und der Owner
+     *    erlebte eine Umsortierung, die er nie angefordert hat.
+     *  - ein NACHZÜGLER-Kind darf an JEDEN gerenderten Hauptpunkt hängen, auch
+     *    an einen nachgezogenen. Es hat selbst keinen Platz, den es verlöre:
+     *    beide stehen im Anhang, und der Bauplan sagt, wie sie dort zueinander
+     *    stehen (Zusage 9c).
+     *
+     * Zusätzlich muss der Hauptpunkt selbst einer SEIN (`attachesTo === null`) —
+     * genau eine Ebene. Alles andere ⇒ das Kind ist Hauptpunkt.
+     */
+    const anhaengbar = !!parentRow && (row?.mentioned === true ? parentRow.mentioned : true)
+    if (parent && anhaengbar && attachesTo(parent) === null) result = parent
     laufend.delete(id)
     memo.set(id, result)
     return result

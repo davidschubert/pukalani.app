@@ -81,6 +81,29 @@ Unerwähntes hängt hinten an · ohne Wahl ändert sich nichts) gelten unveränd
 8. **Der Überlauf zählt nur Hauptpunkte** („Mehr"-Menü ab dem sechsten Hauptpunkt;
    Kinder zählen nicht).
 
+9. **Der Bauplan darf Gruppen VORGEBEN** (Nachtrag, Davids Korrektur am Prototyp vom
+   2026-09-08: „das Standard-Menü lautet Products ▾ (Brand Score) · Discover Brands ·
+   About · Team"). Bis dahin entstanden Unterpunkte AUSSCHLIESSLICH über die
+   gespeicherte Owner-Wahl — eine frische Instanz sah also anders aus als die
+   beworbene. Deshalb trägt jetzt auch die Registry ein optionales `parent`
+   (`PukalaniChromeNavEntry.parent` ⇒ `CommunityNavCandidate.parent`, `to: ''` = ein
+   Aufklapper ohne eigene Seite):
+   - **ohne** gespeicherte Wahl gilt die Hierarchie der KANDIDATEN (danach wie gehabt
+     `nestCommunityNav`) — für einen Layer ohne Vorgaben bleibt Zusage 4 wörtlich wahr;
+   - **mit** gespeicherter Wahl ist das Dokument für GENANNTE Einträge die ganze
+     Wahrheit (`parent` aus dem Override-Eintrag; fehlt es, ist der Eintrag ein
+     Hauptpunkt — der Editor schreibt immer das ganze Dokument, ein fehlendes `parent`
+     ist dort eine Entscheidung und kein Schweigen);
+   - **Nachzügler** (Zusage 3) bringen ihren Bauplan-Platz mit. Die Anhänge-Regel ist
+     darum asymmetrisch: ein GENANNTES Kind hängt nur an einen GENANNTEN Hauptpunkt
+     (sonst spränge es ans Listenende), ein NACHZÜGLER-Kind an jeden gerenderten.
+   - Die Gates (`productKey`/`requiresAuth`/`planProduct`) gelten für den
+     Gruppen-Eintrag selbst; fällt die Gruppe weg, rücken die Kinder nach Zusage 6
+     auf die oberste Ebene, und eine Gruppe ohne sichtbare Kinder verschwindet nach
+     Zusage 7.
+   - Editor: `buildRows()` gibt einem unerwähnten Kandidaten `parent:
+     candidate.parent ?? null` (ungültige Elternschaft löst `normalize()` auf).
+
 `parseCommunityNavOverride` übernimmt `parent` (string) und Gruppen-Einträge in
 derselben defensiven Form wie eigene Links. Unit-Tests in
 `packages/core/tests/communityNavigation.test.ts` — je Zusage mindestens eine
@@ -149,12 +172,16 @@ Liefert `{ candidates, override, items, pages }` und ersetzt die dreifache Rechn
   (`NavigationMenu.vue`); wenn nicht, steht sein Ziel ohnehin über
   `navMenuChildren` als erstes Kind. Die feste Liste (Discover · About · Team)
   verschwindet aus der Komponente.
-- **brand `app.config.ts`** registriert `pukalani.chrome.nav`:
-  `discover` (`/discover`, `brand.nav.discover`, order 10),
-  `about` (`/about`, `brand.nav.about`, order 20),
-  `team` (`/team`, `brand.nav.team`, order 30). Die Eigennamen-Regel („englisch in
-  beiden Sprachen") bleibt in den i18n-Dateien. Kein `productKey` (der Layer hat
-  kein Laufzeit-Produkt-Gate für diese Seiten).
+- **brand `app.config.ts`** registriert `pukalani.chrome.nav` — seit Davids Korrektur
+  vom 2026-09-08 MIT Gruppe (Zusage 9):
+  `products` (`to: ''`, `brand.nav.products`, order 10) als Aufklapper ohne eigene
+  Seite, darunter `brand-score` (`/brand-check`, `brand.nav.brandScore`,
+  `parent: 'products'`, order 11), dann `discover` (`/discover`, order 20),
+  `about` (`/about`, order 30), `team` (`/team`, order 40). Die Eigennamen-Regel
+  („englisch in beiden Sprachen") bleibt in den i18n-Dateien — `brand.nav.brandScore`
+  steht in de UND en als „Brand Score". Kein `productKey` (der Layer hat kein
+  Laufzeit-Produkt-Gate für diese Seiten). Eine Produkt-Übersichtsseite gibt es
+  BEWUSST nicht: `to: ''` statt eines Menüpunkts in einen 404.
 - `pukalani.chrome.pagesNav`/`navOverride` setzt weiterhin NUR der pages-Layer.
 
 ## 9. Editor (`navigation.vue`)
