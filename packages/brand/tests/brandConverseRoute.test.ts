@@ -535,6 +535,9 @@ describe('Die nächste Frage gehört der Registry', () => {
 
     expect(lastPrompt).toContain('[the next question]\nWas loben eure Kunden?')
     expect(lastPrompt).toContain('Ask it IN YOUR OWN WORDS')
+    // converse-13 (Davids Klick-Test): das Profil dieses Tests gründet ALLEIN
+    // — die Weiche muss den Auftrag erreichen, nicht nur die Beschriftungen.
+    expect(lastPrompt).toContain('BUILDS THIS BRAND ALONE')
     // Und die Werkstatt erfährt, dass diese Frage gestellt wurde — daran hängt,
     // ob der Katalog-Satz darunter noch einmal erscheint.
     expect(readBack(chunks).at(-1)).toMatchObject({ slotId: 'a.customerPraise' })

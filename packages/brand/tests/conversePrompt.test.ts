@@ -129,7 +129,30 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     expect(instruction).not.toMatch(/press "/)
   })
 
-  it('die Fassung steigt mit — converse-12', () => {
+  it('converse-13: „alleine" heisst EINE Person im Singular — nie „ihr/euch"', () => {
+    // Davids Klick-Test 2026-09-09: „alleine" gewählt, George fragte „was euch
+    // dazu gebracht hat". Die Weiche erreichte die Beschriftungen, nie die Anrede.
+    const solo = brandConverseInstruction({ ...BOTH, team: 'solo' })
+    expect(solo).toMatch(/BUILDS THIS BRAND ALONE/)
+    expect(solo).toMatch(/du\/dich\/dein/)
+    expect(solo).toMatch(/never "ihr\/euch\/euer"/)
+    expect(solo).toMatch(/do not invent co-founders/)
+    // Auch der Eröffnungszug trägt sie — dort fiel der Fehler auf.
+    expect(brandConverseInstruction({ ...BOTH, team: 'solo', opening: true })).toMatch(/BUILDS THIS BRAND ALONE/)
+  })
+
+  it('converse-13: „im Team" heisst die Gruppe im Plural — und OHNE Weiche steht nichts', () => {
+    const team = brandConverseInstruction({ ...BOTH, team: 'team' })
+    expect(team).toMatch(/AS A TEAM/)
+    expect(team).toMatch(/ihr\/euch\/euer/)
+    expect(team).not.toMatch(/BUILDS THIS BRAND ALONE/)
+    // Gegenprobe: ein alter Client ohne Weiche bekommt kein geratenes „du".
+    const none = brandConverseInstruction({ ...BOTH })
+    expect(none).not.toMatch(/BUILDS THIS BRAND ALONE/)
+    expect(none).not.toMatch(/AS A TEAM/)
+  })
+
+  it('die Fassung steigt mit — converse-13', () => {
     // Ohne den Anstieg behaupteten Züge aus converse-3, aus diesem Auftrag zu
     // stammen (dieselbe Regel wie bei GEORGE_PROMPT_VERSION). converse-6 war
     // der Session-Block (BW2 Paket 3a); converse-7 die Gegenlese-Runde
@@ -140,7 +163,7 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     // converse-12 die Kapitel-Antworten im Rumpf, der Abschluss am
     // Entwurfs-Knopf und die eigene Frage einer Entwurfs-Session
     // (Kailua-Befunde 5 und 7).
-    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-12')
+    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-13')
   })
 
   it('würdigt Substanz — aber verbietet das Lob ohne Deckung', () => {

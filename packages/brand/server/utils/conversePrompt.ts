@@ -1,4 +1,4 @@
-import type { BrandSessionLadder } from '../../shared/slotRegistry'
+import type { BrandSessionLadder, BrandTeamKind } from '../../shared/slotRegistry'
 import type { BrandStartCard } from '../../shared/types/brand'
 import type { BrandSlotDependency } from './brandGenerators'
 /**
@@ -46,6 +46,15 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
 
 /**
  * Steht in jeder Gesprächs-Nachricht; steigt bei jeder inhaltlichen Änderung.
+ *
+ * `converse-13` (2026-09-09, Davids erster Klick-Test): die ANREDE folgt der
+ * Team-Weiche W3. David hatte im Start-Modal „alleine" gewählt, und Georges
+ * Eröffnungszug fragte trotzdem „was euch dazu gebracht hat … habt ihr bei
+ * anderen gesehen" — die Weiche erreichte die Beschriftungen der Felder, nie
+ * den Auftrag. Jetzt eine ausformulierte Regel je Fall (`addressLines`):
+ * `solo` ⇒ eine Person im Singular (du/dich/dein, keine erfundenen Mitgründer),
+ * `team` ⇒ die Gruppe im Plural (ihr/euch/euer). Ohne Weiche bleibt der Auftrag
+ * wie converse-12.
  *
  * `converse-12` (2026-09-08, Kailua-Befunde 5 und 7 — Davids zwei
  * Entscheidungen): DREI Änderungen, alle drei am ABSCHLUSS des Zuges und am
@@ -145,7 +154,7 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
  * heisst er „Frida, entwirf das", und ein fest verdrahteter George-Satz wäre
  * dort schlicht falsch.
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-12'
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-13'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis
@@ -414,6 +423,40 @@ export interface BrandConverseInstructionOptions {
    * von converse-11.
    */
   draftField?: string
+  /**
+   * DIE TEAM-WEICHE W3 (converse-13, Davids Klick-Test 2026-09-09): `solo`
+   * heisst, EIN Mensch gründet oder führt die Marke — George spricht dann
+   * eine Person an, nicht „euch". Im Test hatte David „alleine" gewählt, und
+   * der Eröffnungszug fragte „was euch dazu gebracht hat … habt ihr bei
+   * anderen gesehen": die Weiche erreichte bis dahin nur die Beschriftungen
+   * (`brandSlotPromptLabel`), nie die ANREDE.
+   *
+   * FEHLT sie (alter Client, Test ohne Profil), sagt der Auftrag nichts zur
+   * Anrede — das ist der Stand von converse-12, nicht ein geratenes „du".
+   */
+  team?: BrandTeamKind
+}
+
+/**
+ * DIE ANREDE FOLGT DER WEICHE, NICHT DEM GEFÜHL DES MODELLS. Eine Regel je
+ * Fall, weil „address them correctly" ohne Beispiel im Deutschen genau die
+ * Frage offenlässt, um die es geht (du/ihr).
+ */
+function addressLines(options: BrandConverseInstructionOptions): string[] {
+  if (options.team === 'solo') {
+    return [
+      'THE PERSON YOU ARE TALKING TO BUILDS THIS BRAND ALONE. Address ONE person, in the singular, '
+      + 'throughout — in German "du/dich/dein", never "ihr/euch/euer", never "your team", never "you all". '
+      + 'Speak about the brand as theirs alone; do not invent co-founders, colleagues or a team.',
+    ]
+  }
+  if (options.team === 'team') {
+    return [
+      'THE PEOPLE YOU ARE TALKING TO BUILD THIS BRAND AS A TEAM. Address the group, in the plural — in '
+      + 'German "ihr/euch/euer" — and speak about the brand as theirs together.',
+    ]
+  }
+  return []
 }
 
 /**
@@ -455,6 +498,8 @@ export function brandConverseInstruction(options: BrandConverseInstructionOption
     // hat er keinen Teil, der in der Inhaltssprache stünde.
     'Everything in this turn is chat and follows the CHAT language of rule 9 — all of it, without '
     + 'exception.',
+    // converse-13: die Anrede folgt der Team-Weiche (s. `addressLines`).
+    ...addressLines(options),
     // Die Werkstatt-Mechanik ist unsere Sache, nicht die des Gesprächs.
     'Never speak about fields, slots, forms, chapters-as-data, drafts-in-a-box or any other mechanics of '
     + 'this tool, and never mention the names in square brackets from the inputs below. You are talking '

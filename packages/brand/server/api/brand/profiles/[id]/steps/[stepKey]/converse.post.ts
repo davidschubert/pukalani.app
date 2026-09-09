@@ -768,6 +768,9 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
          * der Nebenbefund, der diese Runde ausgelöst hat.
          */
         ...(draftFieldLabel ? { draftField: draftFieldLabel } : {}),
+        // DIE ANREDE (converse-13, Davids Klick-Test): „alleine" heisst du,
+        // „im Team" heisst ihr — dieselbe Weiche wie bei den Beschriftungen.
+        team: profileFacts(profile).team,
         session: sessionOptions,
         ...(brief ? { brief: brief.options } : {}),
         ...(body.opening ? { opening: true, chapterIntro } : {}),
