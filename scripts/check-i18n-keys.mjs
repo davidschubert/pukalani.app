@@ -115,6 +115,16 @@ const FIELDS = [
     keys: p => Object.values(p.chrome?.nav ?? {}).flatMap(e => (e ? str(e.labelKey) : [])),
   },
   {
+    // PS1 (2026-09-09): die Beschreibung eines Kindes im Aufklapper — dieselbe
+    // Klasse Versprechen wie der `labelKey` eine Zeile darüber und derselbe
+    // fremde Renderer. Ohne diesen Eintrag stünde unter „Marktvergleich"
+    // wörtlich `brand.nav.product.benchmark`, und Typecheck, Lint und
+    // Unit-Tests sähen davon nichts.
+    pfad: 'pukalani.chrome.nav.<id>.descriptionKey',
+    quelle: 'packages/brand/app/components/BwSiteNav.vue',
+    keys: p => Object.values(p.chrome?.nav ?? {}).flatMap(e => (e ? str(e.descriptionKey) : [])),
+  },
+  {
     pfad: 'pukalani.admin.modules[].labelKey',
     quelle: 'packages/admin/app/layouts/dashboard.vue · packages/admin/app/components/DashboardUserMenu.vue',
     keys: p => arr(p.admin?.modules).flatMap(m => str(m?.labelKey)),

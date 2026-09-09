@@ -183,6 +183,18 @@ export interface CommunityNavCandidate {
   label: string
   to: string
   icon?: string
+  /**
+   * Die BEREITS ÜBERSETZTE Beschreibung (PS1, 2026-09-09, additiv) — sie kommt
+   * aus `PukalaniChromeNavEntry.descriptionKey` und wird dort gebildet, wo auch
+   * `label` entsteht (`useCommunityNav()`).
+   *
+   * SIE IST KEIN LABEL, und deshalb hat der Editor sie nicht: der Owner darf
+   * umbenennen (`CommunityNavOverrideEntry.label`), aber es gibt keine eigene
+   * Beschreibung — sie beschreibt das PRODUKT, nicht den Menüpunkt, und der
+   * Layer, dem das Produkt gehört, ist der einzige, der sie kennt. Eine
+   * Umbenennung lässt sie deshalb bewusst stehen.
+   */
+  description?: string
   planProduct?: string
   order: number
   /**
@@ -221,6 +233,12 @@ export interface CommunityNavItem {
    */
   to: string
   icon?: string
+  /**
+   * Die übersetzte Beschreibung des Eintrags (PS1) — heute gerendert unter dem
+   * Titel eines KINDES im Aufklapper (Nuxt-UI-Muster). Fehlend = keine Zeile
+   * darunter, also das Verhalten von vor dem 2026-09-09.
+   */
+  description?: string
   planProduct?: string
   /** Externes Ziel — der Renderer setzt target="_blank" + rel="noopener". */
   external: boolean
@@ -404,12 +422,20 @@ function labelFor(fallback: string, custom: string | undefined): string {
   return trimmed.slice(0, MAX_NAV_LABEL)
 }
 
+/**
+ * DIE EINE STELLE, an der aus einem Kandidaten ein gerenderter Eintrag wird —
+ * beide Wege laufen hier durch (ohne gespeicherte Wahl UND mit ihr). Genau
+ * deshalb reist die `description` (PS1) auf BEIDEN Wegen mit: läge das
+ * Durchreichen im Zweig ohne Override, verlöre ein Eintrag seine Beschreibung
+ * in dem Moment, in dem der Owner sein Menü zum ersten Mal speichert.
+ */
 function toItem(candidate: CommunityNavCandidate, label?: string): CommunityNavItem {
   return {
     id: candidate.id,
     label: label ?? candidate.label,
     to: candidate.to,
     ...(candidate.icon ? { icon: candidate.icon } : {}),
+    ...(candidate.description ? { description: candidate.description } : {}),
     ...(candidate.planProduct ? { planProduct: candidate.planProduct } : {}),
     external: false,
   }

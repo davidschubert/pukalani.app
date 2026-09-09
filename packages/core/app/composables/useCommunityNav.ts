@@ -173,6 +173,10 @@ export function useCommunityNav(): CommunityNavState {
       to: entry.to ? localePath(entry.to) : '',
       path: entry.to,
       icon: entry.icon,
+      // PS1: dieselbe Übersetzung wie beim Label, an derselben Stelle — ein
+      // fehlender `descriptionKey` heisst „keine Beschreibung" und darf NICHT
+      // durch `t()` laufen (vue-i18n gäbe sonst den leeren Schlüssel zurück).
+      description: entry.descriptionKey ? t(entry.descriptionKey) : undefined,
       planProduct: entry.planProduct,
       order: entry.order ?? 50,
       parent: entry.parent,

@@ -23,6 +23,27 @@ export interface PukalaniChromeNavEntry {
   to: string
   /** Icon (i-ph-…) — nur im Überlauf-Dropdown sichtbar */
   icon?: string
+  /**
+   * BESCHREIBUNG EINES KINDES IM AUFKLAPPER (PS1, 2026-09-09) — ein
+   * i18n-Schlüssel, genau wie `labelKey`, und aus demselben Grund: der Text
+   * gehört dem registrierenden Layer, gerendert wird er von einem fremden
+   * (`BwSiteNav`, blueprint-Layout).
+   *
+   * EIN VERTRAG UND KEINE SCHLÜSSEL-KONVENTION: der Renderer hätte sich die
+   * Beschreibung auch aus dem `labelKey` ableiten können (`<key>` ⇒
+   * `<key>Description`, wie es `billing.plans[].labelKey` tut). Dann stünde
+   * die Zuordnung im Renderer statt in der Registry, und ein Layer könnte
+   * seinem Eintrag keine Beschreibung geben, ohne seinen Label-Schlüssel
+   * umzubenennen — die Schlüssel der Produkt-Beschreibungen von
+   * branding.supply (`brand.nav.product.*`) heißen bewusst anders als die
+   * Labels (`brand.nav.*`).
+   *
+   * Fehlend = ein Eintrag ohne Beschreibung, also exakt das Verhalten von vor
+   * diesem Tag (additiv). Gedeckt vom Wächter `pnpm check:i18n-keys`
+   * (FIELDS-Zeile `pukalani.chrome.nav.<id>.descriptionKey`) — sonst stünde im
+   * Aufklapper wörtlich der Schlüssel.
+   */
+  descriptionKey?: string
   /** Sortierung (aufsteigend, Default 50) */
   order?: number
   /** Laufzeit-Produkt-Gate (F2): Eintrag verschwindet, wenn das Produkt aus ist */

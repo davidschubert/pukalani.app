@@ -575,6 +575,53 @@ describe('navMenuChildren — was im Aufklapper steht', () => {
   })
 })
 
+describe('resolveCommunityNav — Beschreibungen (PS1, 2026-09-09)', () => {
+  const mitBeschreibung: CommunityNavCandidate[] = [
+    { id: 'products', label: 'Products', to: '/products', order: 10 },
+    {
+      id: 'market-comparison',
+      label: 'Marktvergleich',
+      to: '/products/market-comparison',
+      description: 'Wettbewerber im selben Raster.',
+      parent: 'products',
+      order: 12,
+    },
+  ]
+
+  it('reicht die Beschreibung eines Kandidaten an den gerenderten Eintrag durch', () => {
+    const [haupt] = resolveCommunityNav(mitBeschreibung, null)
+    expect(haupt!.children?.[0]).toMatchObject({
+      id: 'market-comparison',
+      description: 'Wettbewerber im selben Raster.',
+    })
+  })
+
+  it('GEGENPROBE: ohne Beschreibung steht das Feld gar nicht da', () => {
+    const [haupt] = resolveCommunityNav(mitBeschreibung, null)
+    expect(haupt).not.toHaveProperty('description')
+  })
+
+  it('sie überlebt die gespeicherte Wahl — auch eine Umbenennung', () => {
+    const override: CommunityNavOverride = {
+      entries: [
+        { id: 'products' },
+        { id: 'market-comparison', parent: 'products', label: 'Wettbewerb' },
+      ],
+    }
+    const [haupt] = resolveCommunityNav(mitBeschreibung, override)
+    expect(haupt!.children?.[0]).toMatchObject({
+      label: 'Wettbewerb',
+      description: 'Wettbewerber im selben Raster.',
+    })
+  })
+
+  it('… und reist über navMenuChildren mit in den Aufklapper', () => {
+    const [haupt] = resolveCommunityNav(mitBeschreibung, null)
+    expect(navMenuChildren(haupt!).map(entry => entry.description))
+      .toEqual([undefined, 'Wettbewerber im selben Raster.'])
+  })
+})
+
 describe('navItemHasTarget', () => {
   it('unterscheidet Gruppe von Link', () => {
     expect(navItemHasTarget({ to: '/feed' })).toBe(true)
@@ -670,5 +717,20 @@ describe('filterChromeNavEntries', () => {
     const entries = filterChromeNavEntries(grouped, allOn)
     expect(entries.map(entry => entry.parent)).toEqual([undefined, 'products'])
     expect(entries[0]!.to).toBe('')
+  })
+
+  it('reicht `descriptionKey` durch (PS1) — übersetzt wird er beim Aufrufer', () => {
+    const withDescription = {
+      products: { labelKey: 'nav.products', to: '/products', order: 10 },
+      'brand-score': {
+        labelKey: 'nav.brandScore',
+        descriptionKey: 'nav.product.score',
+        to: '/brand-check',
+        parent: 'products',
+        order: 11,
+      },
+    }
+    const entries = filterChromeNavEntries(withDescription, allOn)
+    expect(entries.map(entry => entry.descriptionKey)).toEqual([undefined, 'nav.product.score'])
   })
 })
