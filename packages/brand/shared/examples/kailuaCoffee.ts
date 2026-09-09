@@ -1,6 +1,7 @@
 import { BRAND_DIRECTIONS_VERSION } from '../brandDirections'
 import type { BrandFoundationInput } from '../brandFoundation'
 import { formatBrandSlotList, formatBrandSlotStructured } from '../brandSlotFormat'
+import { KAILUA_COFFEE_DESIGN } from './kailuaCoffeeDesign'
 
 /**
  * DIE BEISPIEL-MARKE „KAILUA COFFEE CO." ALS FESTER SNAPSHOT (Konzept
@@ -74,6 +75,18 @@ export const KAILUA_COFFEE_EXAMPLE: BrandFoundationInput = {
    * ersten Katalog-Schritt keine Richtung mehr — und niemand hätte es gemerkt.
    */
   direction: { id: 'warm-editorial', version: String(BRAND_DIRECTIONS_VERSION) },
+
+  /**
+   * DIE VISUELLE IDENTITÄT (Brand Design D8, §2.8) — Kapitel 10 des Beispiels
+   * ist damit VOLL: Farbwelt, Schriftpaar, Zeichen, Bildsprache, Bewegung.
+   *
+   * Sie steht als eingefrorenes Preset in `kailuaCoffeeDesign.ts` und ist dort
+   * GERECHNET, nicht abgeschrieben (Begründung im Kopf jener Datei). Die
+   * gewählte Richtung darüber bleibt bewusst stehen: sie ist die Ansage, aus
+   * der das Preset entstanden ist — der Renderer zeigt mit Preset nur noch das
+   * Ergebnis, aber die Zeile hier ist die Herkunft und keine Anzeige.
+   */
+  ...(KAILUA_COFFEE_DESIGN ? { design: KAILUA_COFFEE_DESIGN } : {}),
 
   // Georges Synthese — drei Absätze, der erste trägt als Leitsatz.
   story: [

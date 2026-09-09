@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { BwTocLink } from '../../../../../packages/brand/app/components/BwReadingToc.vue'
 import { buildBrandFoundation } from '../../../../../packages/brand/shared/brandFoundation'
 import {
   KAILUA_COFFEE_EXAMPLE,
@@ -67,13 +66,13 @@ const stand = computed(() => {
     : ''
 })
 
-const tocLinks = computed<BwTocLink[]>(() => chapters.map((chapter, index) => ({
-  id: chapter.anchor,
-  text: t(chapter.titleKey),
-  // Ein festes Beispiel kennt kein „offen" — nur fertig und die Schranke.
-  state: chapter.state === 'locked' ? 'locked' : 'done',
-  counter: String(index).padStart(2, '0'),
-})))
+/**
+ * Dasselbe Verzeichnis wie in den beiden Foundation-Ansichten
+ * (`useBrandFoundationToc`) — inklusive der fünf Unterpunkte von Kapitel 10,
+ * seit das Beispiel eine visuelle Identität hat (Brand Design D8). Ein festes
+ * Beispiel kennt kein „offen": jeder Zustand kommt aus dem Renderer.
+ */
+const tocLinks = useBrandFoundationToc(() => chapters)
 
 /**
  * Dasselbe Ziel wie der Haupt-CTA der Startseite (`home.ctaStart`): Gäste in
@@ -128,6 +127,7 @@ function print(): void {
           <BwFoundationChapter
             v-for="(chapter, index) in chapters" :key="chapter.id"
             :chapter="chapter" :index="index" variant="share"
+            :design-stand="stand"
           />
         </div>
         <template #right>
