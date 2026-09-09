@@ -3,7 +3,7 @@ import { BRAND_MARK_BRIEF_FIELDS } from '../../../../../../shared/brandDesignMar
 import type { BrandMarkBriefResponse } from '../../../../../../shared/types/brand'
 import { type BrandAiQuotaMeasurement, bookBrandAiQuota } from '../../../../../utils/brandAiQuota'
 import { recordBrandEvent } from '../../../../../utils/brandEvents'
-import { readBrandAiEnabled } from '../../../../../utils/brandGenerators'
+import { readBrandAiEnabled, retainBrandGeneration } from '../../../../../utils/brandGenerators'
 import {
   BRAND_MARK_BRIEF_SLOT_ID,
   brandMarkBriefStubEnabled,
@@ -64,70 +64,95 @@ export default defineEventHandler(async (event): Promise<BrandMarkBriefResponse>
     }
   }
 
-  const measurement: BrandAiQuotaMeasurement = { narrowCount: 0, narrowResetSec: 0 }
-  const rejection = await bookBrandAiQuota(
-    event,
-    { userId, profileId: profile.$id, kind: 'slot', slotId: BRAND_MARK_BRIEF_SLOT_ID },
-    measurement,
-  )
-  if (rejection) {
-    logEvent('info', 'brand.mark_brief_throttled', { profileId: profile.$id, code: rejection.code })
-    setHeader(event, 'Retry-After', rejection.retryAfterSec)
-    throw createError({
-      status: 429,
-      statusText: 'Briefing limit reached',
-      data: { code: rejection.code },
-    })
-  }
-  const used = Math.min(measurement.narrowCount, BRAND_AI_SLOT_DAILY_LIMIT)
-  const quota = {
-    used,
-    limit: BRAND_AI_SLOT_DAILY_LIMIT,
-    remaining: Math.max(0, BRAND_AI_SLOT_DAILY_LIMIT - used),
-  }
+  /**
+   * DER BURST-PLATZ (Audit-Befund 2026-09-09) — die Sicherung gegen den
+   * PARALLELEN Lauf, nicht gegen den häufigen.
+   *
+   * `brandAiQuota.ts` sagt in seinem Kopf zu, dass die Route
+   * `retainBrandGeneration()` VOR der Buchung ruft; bis zu diesem Befund taten
+   * das nur der Entwurf und das Gespräch — ausgerechnet die vier neuen Läufe
+   * dieses Kapitels standen daneben, obwohl sie die teuersten sind (ein
+   * Vision-Zug über zwölf Bilder, vier Bild-Aufrufe in einem Klick). Zwölf
+   * gleichzeitig geöffnete Tabs hätten zwölf Läufe bezahlt, während der
+   * Tages-Deckel erst hinterher zählt.
+   *
+   * VOR der Buchung und nicht danach: zwischen Zählen und Belegen lägen sonst
+   * mehrere `await`, und in dieser Lücke zählten drei gleichzeitige Anfragen
+   * alle dieselbe Null (Begründung im Kopf von `brandAiQuota.ts`).
+   *
+   * Freigegeben wird im `finally` und damit auf JEDEM Ausgang — Erfolg, 429,
+   * Anbieterfehler, Abbruch. Der Platz gehört dem Lauf, nicht seinem Ergebnis.
+   */
+  const burst = retainBrandGeneration(userId)
+  try {
+    const measurement: BrandAiQuotaMeasurement = { narrowCount: 0, narrowResetSec: 0 }
+    const rejection = await bookBrandAiQuota(
+      event,
+      { userId, profileId: profile.$id, kind: 'slot', slotId: BRAND_MARK_BRIEF_SLOT_ID },
+      measurement,
+    )
+    if (rejection) {
+      logEvent('info', 'brand.mark_brief_throttled', { profileId: profile.$id, code: rejection.code })
+      setHeader(event, 'Retry-After', rejection.retryAfterSec)
+      throw createError({
+        status: 429,
+        statusText: 'Briefing limit reached',
+        data: { code: rejection.code },
+      })
+    }
+    const used = Math.min(measurement.narrowCount, BRAND_AI_SLOT_DAILY_LIMIT)
+    const quota = {
+      used,
+      limit: BRAND_AI_SLOT_DAILY_LIMIT,
+      remaining: Math.max(0, BRAND_AI_SLOT_DAILY_LIMIT - used),
+    }
 
-  const locale = profile.contentLocale === 'en' ? 'en' : 'de'
-  const model = stub ? 'dev-stub' : (await getEffectiveAiConfig(event)).model
-  const result = await runBrandMarkBrief(event, profile, stepRows, model)
+    const locale = profile.contentLocale === 'en' ? 'en' : 'de'
+    const model = stub ? 'dev-stub' : (await getEffectiveAiConfig(event)).model
+    const result = await runBrandMarkBrief(event, profile, stepRows, model)
 
-  if (result.failure || !result.brief) {
+    if (result.failure || !result.brief) {
+      await recordBrandEvent(event, {
+        type: 'design.mark.brief',
+        profileId: profile.$id,
+        userId,
+        payload: { fields: 0, failure: result.failure ?? 'incomplete', model },
+      })
+      if (result.failure === 'no_foundation') {
+        throw createError({
+          status: 409,
+          statusText: 'No confirmed foundation to derive from',
+          data: { code: 'mark_brief_no_foundation' },
+        })
+      }
+      throw createError({
+        status: 502,
+        statusText: 'The mark briefing failed',
+        data: { code: 'mark_brief_unavailable' },
+      })
+    }
+
+    await writeBrandMarkBriefSlot(event, profile, stepRows, result.brief, locale)
+
     await recordBrandEvent(event, {
       type: 'design.mark.brief',
       profileId: profile.$id,
       userId,
-      payload: { fields: 0, failure: result.failure ?? 'incomplete', model },
+      payload: {
+        fields: BRAND_MARK_BRIEF_FIELDS.length,
+        model: result.model ?? model,
+        ms: result.ms ?? 0,
+      },
     })
-    if (result.failure === 'no_foundation') {
-      throw createError({
-        status: 409,
-        statusText: 'No confirmed foundation to derive from',
-        data: { code: 'mark_brief_no_foundation' },
-      })
-    }
-    throw createError({
-      status: 502,
-      statusText: 'The mark briefing failed',
-      data: { code: 'mark_brief_unavailable' },
-    })
-  }
 
-  await writeBrandMarkBriefSlot(event, profile, stepRows, result.brief, locale)
-
-  await recordBrandEvent(event, {
-    type: 'design.mark.brief',
-    profileId: profile.$id,
-    userId,
-    payload: {
-      fields: BRAND_MARK_BRIEF_FIELDS.length,
+    return {
+      ok: true,
+      brief: { ...result.brief },
       model: result.model ?? model,
-      ms: result.ms ?? 0,
-    },
-  })
-
-  return {
-    ok: true,
-    brief: { ...result.brief },
-    model: result.model ?? model,
-    quota,
+      quota,
+    }
+  }
+  finally {
+    burst.release()
   }
 })

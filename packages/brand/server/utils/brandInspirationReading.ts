@@ -1,7 +1,12 @@
 import type { H3Event } from 'h3'
 import { BRAND_INSPIRATION_AREAS, BRAND_READING_VERDICTS, brandTermById, brandTermLabel } from '../../shared/brandDesignVocab'
 import { brandChoiceDisplayLabel } from '../../shared/brandChoiceOptions'
-import { type BrandInspirationEntry, detectBrandInspirationImage } from '../../shared/brandInspiration'
+import {
+  BRAND_INSPIRATION_MAX,
+  BRAND_INSPIRATION_MAX_BYTES,
+  type BrandInspirationEntry,
+  detectBrandInspirationImage,
+} from '../../shared/brandInspiration'
 import {
   type BrandReadingEntry,
   type BrandReadingRawResponse,
@@ -173,6 +178,8 @@ export type BrandReadingFailure =
   | 'no_images'
   | 'provider_error'
   | 'empty_result'
+  /** Mehr Bytes, als ein Zug tragen darf — die Route macht daraus eine 413. */
+  | 'too_large'
 
 export interface BrandReadingRunResult {
   readonly failure?: BrandReadingFailure
@@ -203,8 +210,21 @@ export async function runBrandInspirationReading(
 ): Promise<BrandReadingRunResult> {
   if (entries.length === 0) return { failure: 'no_images' }
 
+  /**
+   * DER PRODUKT-DECKEL, HIER UND NICHT ERST IM TRANSPORT (Audit-Befund
+   * 2026-09-09): zwölf Bilder je Marke sind die Zusage des Kapitels
+   * (`BRAND_INSPIRATION_MAX`), der Upload lässt keinen dreizehnten zu — die
+   * LISTE holt aber bewusst bis zu 50 Zeilen, damit ein Altbestand sichtbar
+   * bleibt (s. `listBrandInspiration`). Ohne diesen Schnitt bezahlte ein
+   * solcher Altbestand einen Vision-Zug über 50 Bilder.
+   *
+   * Geschnitten wird VOR dem Laden: was hier wegfällt, wird gar nicht erst aus
+   * dem Bucket geholt.
+   */
+  const capped = entries.slice(0, BRAND_INSPIRATION_MAX)
+
   const locale = profile.contentLocale === 'en' ? 'en' : 'de'
-  const images: BrandReadingPromptImage[] = entries.map(entry => ({
+  const images: BrandReadingPromptImage[] = capped.map(entry => ({
     id: entry.id,
     number: entry.number,
     area: areaForPrompt(entry.area, locale),
@@ -214,7 +234,7 @@ export async function runBrandInspirationReading(
   const started = Date.now()
 
   if (brandReadingStubEnabled()) {
-    const clamped = clampBrandReadings(stubReading(images), entries.map(e => e.id), at)
+    const clamped = clampBrandReadings(stubReading(images), capped.map(e => e.id), at)
     return {
       readings: clamped.readings,
       summary: clamped.summary,
@@ -232,7 +252,7 @@ export async function runBrandInspirationReading(
    * es hinterher als `missing`.
    */
   const payload: { mime: string, bytes: Uint8Array, label: string, id: string }[] = []
-  for (const [index, entry] of entries.entries()) {
+  for (const [index, entry] of capped.entries()) {
     try {
       const bytes = await readBrandInspirationBytes(event, entry.id)
       const kind = detectBrandInspirationImage(bytes)
@@ -253,6 +273,31 @@ export async function runBrandInspirationReading(
     }
   }
   if (payload.length === 0) return { failure: 'no_images' }
+
+  /**
+   * DIE SUMME, GEPRÜFT NACH DEM LADEN — weil die Zeile sie nicht trägt.
+   *
+   * `brand_inspiration` speichert keine Dateigrösse; die einzige Wahrheit über
+   * die Bytes ist die Datei selbst. Der Deckel steht deshalb hier und nicht vor
+   * der Schleife: geladen wird, was zwölf erlaubte Bilder sind, und danach
+   * entschieden. Er greift trotzdem VOR jedem Anbieter-Aufruf — das ist die
+   * Stelle, an der Geld anfängt zu kosten.
+   *
+   * Die Zahl ist die des PRODUKTS (12 × 5 MB) und damit enger als die
+   * Transport-Sicherung in `aiVision` (16 Bilder / 64 MB): ein Produkt sagt,
+   * was es zumutet, der Transport sagt, was er überhaupt noch abschickt.
+   */
+  const totalBytes = payload.reduce((sum, part) => sum + part.bytes.length, 0)
+  const maxBytes = BRAND_INSPIRATION_MAX * BRAND_INSPIRATION_MAX_BYTES
+  if (totalBytes > maxBytes) {
+    logEvent('warn', 'brand.reading_payload_too_large', {
+      profileId: profile.$id,
+      images: payload.length,
+      bytes: totalBytes,
+      maxBytes,
+    })
+    return { failure: 'too_large' }
+  }
 
   const prompt = brandReadingPrompt({
     contentLocale: locale,

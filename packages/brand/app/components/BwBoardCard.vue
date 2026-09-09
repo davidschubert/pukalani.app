@@ -51,6 +51,23 @@ const fonts = computed(() => brandSceneFonts(props.board.fontPairId))
     :disabled="disabled"
     @click="emit('pick', board.id)"
   >
+    <!--
+      DIE SZENE STEHT IM `button`, UND DAS BLEIBT SO (Audit-Befund
+      2026-09-09).
+
+      `BwDesignScene` rendert ein `div` mit `h3`/`p` darin, und Fluss-Inhalt in
+      einem `button` verletzt das Content-Modell von HTML. Es ist ein
+      VALIDITÄTS-Befund, kein Parser-Fall: anders als `<p><div>` schliesst der
+      Browser hier nichts vorzeitig, der Baum bleibt der geschriebene.
+
+      Die Alternative wäre ein `div role="button"` — und die kostet genau das,
+      was die Karte braucht: Tastatur-Fokus, Leertaste/Enter, `:disabled`
+      (statt `aria-disabled` plus eigenem Klick-Riegel) und das
+      Fokus-Verhalten des Browsers. Alles davon müsste von Hand nachgebaut
+      werden, damit ein Schachtelungs-Vorwurf verschwindet, den kein Nutzer
+      merkt. DIE KARTE IST DER KLICK, die Szene ist ihre Anzeige — deshalb
+      bleibt der `button` der Klick.
+    -->
     <BwDesignScene compact scheme="light" :colors="colors" :fonts="fonts" />
     <span class="mt-3 flex items-start justify-between gap-2">
       <span class="text-sm font-medium">{{ name }}</span>

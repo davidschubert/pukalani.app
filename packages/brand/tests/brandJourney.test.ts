@@ -967,6 +967,39 @@ describe('resolveSessionStates (§5)', () => {
     expect(slotById('g.dna')!.inputs.slots).toContain('g.reading')
   })
 
+  /**
+   * DIESELBE WIRKUNG EIN KAPITEL FRÜHER (Audit-Befund 2026-09-09, Test-Lücke):
+   * `d.primary`/`d.secondary` hängen an `d.pairs`, und das ist ein
+   * `special`-Slot — das Paarvergleichs-Instrument gibt es nicht, also wird
+   * `d.pairs` nie bestätigt (Davids Interim-Entscheidung 2026-09-04). Ohne die
+   * Regel „warte nicht auf eine Quelle, die nie bestätigt werden kann" stünde
+   * der halbe Archetyp-Baustein für immer zu.
+   *
+   * Sie greift hier NICHT als Freibrief: die Kette geht durch das Instrument
+   * HINDURCH auf dessen eigene Quelle `d.hypothesis` — die Gegenprobe unten
+   * hält genau das fest.
+   */
+  it('das Instrument reicht durch: mit `d.hypothesis` sind `d.primary` und `d.secondary` offen', () => {
+    const confirmed = { hasValue: true, confirmed: true, value: 'x' }
+    const states = resolveSessionStates(BASE_PROFILE, stepFacts({ 'd.hypothesis': confirmed }))
+    expect(states['d.primary']).toBe('open')
+    expect(states['d.secondary']).toBe('open')
+    // Das Instrument selbst bleibt in der Kette — sonst verlöre der
+    // Impact-Hinweis seinen Weg.
+    expect(slotById('d.primary')!.inputs.slots).toEqual(['d.pairs'])
+    expect(slotById('d.pairs')!.type).toBe('special')
+  })
+
+  it('GEGENPROBE: ohne `d.hypothesis` bleiben beide `locked`', () => {
+    const states = resolveSessionStates(BASE_PROFILE, stepFacts({}))
+    expect(states['d.primary']).toBe('locked')
+    expect(states['d.secondary']).toBe('locked')
+    // Auch ein blosser ENTWURF der Hypothese reicht nicht — bestätigt muss sie
+    // sein, sonst leitete der Archetyp aus einem Vorschlag ab.
+    const draftOnly = stepFacts({ 'd.hypothesis': { hasValue: true } })
+    expect(resolveSessionStates(BASE_PROFILE, draftOnly)['d.primary']).toBe('locked')
+  })
+
   it('die bedingte Quelle ist eine EIGENE Regel, prüfbar ohne die Zustandsmaschine', () => {
     expect(conditionalInputCounts('g.reading', {})).toBe(true)
     expect(conditionalInputCounts('g.reading', {

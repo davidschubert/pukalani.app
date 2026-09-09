@@ -10,7 +10,7 @@ import {
   writeBrandDnaSlot,
 } from '../../../../../utils/brandDnaProposal'
 import { recordBrandEvent } from '../../../../../utils/brandEvents'
-import { readBrandAiEnabled } from '../../../../../utils/brandGenerators'
+import { readBrandAiEnabled, retainBrandGeneration } from '../../../../../utils/brandGenerators'
 import {
   listBrandInspiration,
   requireBrandInspirationContext,
@@ -87,90 +87,115 @@ export default defineEventHandler(async (event): Promise<BrandDnaProposeResponse
     }
   }
 
-  const measurement: BrandAiQuotaMeasurement = { narrowCount: 0, narrowResetSec: 0 }
-  const rejection = await bookBrandAiQuota(
-    event,
-    { userId, profileId: profile.$id, kind: 'slot', slotId: BRAND_DNA_SLOT_ID },
-    measurement,
-  )
-  if (rejection) {
-    logEvent('info', 'brand.dna_throttled', { profileId: profile.$id, code: rejection.code })
-    setHeader(event, 'Retry-After', rejection.retryAfterSec)
-    throw createError({
-      status: 429,
-      statusText: 'Proposal limit reached',
-      data: { code: rejection.code },
-    })
-  }
-  const used = Math.min(measurement.narrowCount, BRAND_AI_SLOT_DAILY_LIMIT)
-  const quota = {
-    used,
-    limit: BRAND_AI_SLOT_DAILY_LIMIT,
-    remaining: Math.max(0, BRAND_AI_SLOT_DAILY_LIMIT - used),
-  }
+  /**
+   * DER BURST-PLATZ (Audit-Befund 2026-09-09) — die Sicherung gegen den
+   * PARALLELEN Lauf, nicht gegen den häufigen.
+   *
+   * `brandAiQuota.ts` sagt in seinem Kopf zu, dass die Route
+   * `retainBrandGeneration()` VOR der Buchung ruft; bis zu diesem Befund taten
+   * das nur der Entwurf und das Gespräch — ausgerechnet die vier neuen Läufe
+   * dieses Kapitels standen daneben, obwohl sie die teuersten sind (ein
+   * Vision-Zug über zwölf Bilder, vier Bild-Aufrufe in einem Klick). Zwölf
+   * gleichzeitig geöffnete Tabs hätten zwölf Läufe bezahlt, während der
+   * Tages-Deckel erst hinterher zählt.
+   *
+   * VOR der Buchung und nicht danach: zwischen Zählen und Belegen lägen sonst
+   * mehrere `await`, und in dieser Lücke zählten drei gleichzeitige Anfragen
+   * alle dieselbe Null (Begründung im Kopf von `brandAiQuota.ts`).
+   *
+   * Freigegeben wird im `finally` und damit auf JEDEM Ausgang — Erfolg, 429,
+   * Anbieterfehler, Abbruch. Der Platz gehört dem Lauf, nicht seinem Ergebnis.
+   */
+  const burst = retainBrandGeneration(userId)
+  try {
+    const measurement: BrandAiQuotaMeasurement = { narrowCount: 0, narrowResetSec: 0 }
+    const rejection = await bookBrandAiQuota(
+      event,
+      { userId, profileId: profile.$id, kind: 'slot', slotId: BRAND_DNA_SLOT_ID },
+      measurement,
+    )
+    if (rejection) {
+      logEvent('info', 'brand.dna_throttled', { profileId: profile.$id, code: rejection.code })
+      setHeader(event, 'Retry-After', rejection.retryAfterSec)
+      throw createError({
+        status: 429,
+        statusText: 'Proposal limit reached',
+        data: { code: rejection.code },
+      })
+    }
+    const used = Math.min(measurement.narrowCount, BRAND_AI_SLOT_DAILY_LIMIT)
+    const quota = {
+      used,
+      limit: BRAND_AI_SLOT_DAILY_LIMIT,
+      remaining: Math.max(0, BRAND_AI_SLOT_DAILY_LIMIT - used),
+    }
 
-  const locale = profile.contentLocale === 'en' ? 'en' : 'de'
-  // Die Vorbilder sind OPTIONAL: ohne sie läuft der Weg „Frida schlägt vor"
-  // vollständig weiter (Leitplanke „Stufe 1+2 pur"), nur ohne Belege.
-  const entries = await listBrandInspiration(event, profile.$id)
-  const readings = brandDnaPromptReadings(entries, locale)
+    const locale = profile.contentLocale === 'en' ? 'en' : 'de'
+    // Die Vorbilder sind OPTIONAL: ohne sie läuft der Weg „Frida schlägt vor"
+    // vollständig weiter (Leitplanke „Stufe 1+2 pur"), nur ohne Belege.
+    const entries = await listBrandInspiration(event, profile.$id)
+    const readings = brandDnaPromptReadings(entries, locale)
 
-  const model = stub ? 'dev-stub' : (await getEffectiveAiConfig(event)).model
-  const result = await runBrandDnaProposal(event, profile, stepRows, readings, model)
+    const model = stub ? 'dev-stub' : (await getEffectiveAiConfig(event)).model
+    const result = await runBrandDnaProposal(event, profile, stepRows, readings, model)
 
-  if (result.failure || !result.entries) {
+    if (result.failure || !result.entries) {
+      await recordBrandEvent(event, {
+        type: 'design.dna.run',
+        profileId: profile.$id,
+        userId,
+        payload: {
+          lines: 0,
+          withInspiration: readings.length > 0,
+          failure: result.failure ?? 'incomplete',
+          model,
+        },
+      })
+      if (result.failure === 'no_foundation') {
+        throw createError({
+          status: 409,
+          statusText: 'No confirmed foundation to derive from',
+          data: { code: 'dna_no_foundation' },
+        })
+      }
+      throw createError({
+        status: 502,
+        statusText: 'The DNA proposal failed',
+        data: { code: 'dna_unavailable' },
+      })
+    }
+
+    await writeBrandDnaSlot(event, profile, stepRows, brandDnaSlotValue(result.entries, locale))
+
+    const both = result.entries.filter(entry => entry.origin === 'both').length
     await recordBrandEvent(event, {
       type: 'design.dna.run',
       profileId: profile.$id,
       userId,
       payload: {
-        lines: 0,
-        withInspiration: readings.length > 0,
-        failure: result.failure ?? 'incomplete',
-        model,
+        lines: result.entries.length,
+        both,
+        withInspiration: result.hasInspiration ?? false,
+        model: result.model ?? model,
+        ms: result.ms ?? 0,
       },
     })
-    if (result.failure === 'no_foundation') {
-      throw createError({
-        status: 409,
-        statusText: 'No confirmed foundation to derive from',
-        data: { code: 'dna_no_foundation' },
-      })
-    }
-    throw createError({
-      status: 502,
-      statusText: 'The DNA proposal failed',
-      data: { code: 'dna_unavailable' },
-    })
-  }
 
-  await writeBrandDnaSlot(event, profile, stepRows, brandDnaSlotValue(result.entries, locale))
-
-  const both = result.entries.filter(entry => entry.origin === 'both').length
-  await recordBrandEvent(event, {
-    type: 'design.dna.run',
-    profileId: profile.$id,
-    userId,
-    payload: {
-      lines: result.entries.length,
-      both,
-      withInspiration: result.hasInspiration ?? false,
+    return {
+      ok: true,
+      entries: result.entries.map(entry => ({
+        dimension: entry.dimension,
+        value: entry.value,
+        origin: entry.origin,
+        reason: entry.reason,
+        ...(entry.inspirationReason ? { inspirationReason: entry.inspirationReason } : {}),
+      })),
+      hasInspiration: result.hasInspiration ?? false,
       model: result.model ?? model,
-      ms: result.ms ?? 0,
-    },
-  })
-
-  return {
-    ok: true,
-    entries: result.entries.map(entry => ({
-      dimension: entry.dimension,
-      value: entry.value,
-      origin: entry.origin,
-      reason: entry.reason,
-      ...(entry.inspirationReason ? { inspirationReason: entry.inspirationReason } : {}),
-    })),
-    hasInspiration: result.hasInspiration ?? false,
-    model: result.model ?? model,
-    quota,
+      quota,
+    }
+  }
+  finally {
+    burst.release()
   }
 })
