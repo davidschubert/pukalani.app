@@ -57,7 +57,9 @@ das Angebot, nicht die Site.
 **Beweis:** lokal (branding :3010 im Worktree, Session per Server-SDK, 8/8): PATCH /api/pages/seo
 mit eigener Beschreibung ⇒ 200; Startseite trägt sie in meta description, og:description und im
 JSON-LD-WebSite-Knoten; Gegenprobe /about behält seine eigene; PATCH leer ⇒ i18n-Fallback de und en
-steht wieder. Gemergt 4a544a03.
+steht wieder. Gemergt 4a544a03, LIVE mit Build 6d787e2e (CI viermal grün): Owner-Beschreibung per
+PATCH in Davids Session gesetzt ⇒ branding.supply/de und / tragen sie in description + og:description,
+/about unberührt; zurückgesetzt ⇒ i18n-Fallback wieder da.
 
 ---
 
