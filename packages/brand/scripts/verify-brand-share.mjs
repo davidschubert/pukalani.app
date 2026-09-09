@@ -26,9 +26,12 @@
  *  8. FREMD: der Zustand eines fremden Brandings ist 404, nicht 403.
  *  9. EREIGNISSE: `share.viewed` und `foundation.viewed` stehen im Funnel —
  *     und KEIN Ereignis dieses Brandings trägt den Token.
+ * 10. BRAND DESIGN (D8): jedes neue Abbild trägt `schemaVersion: 2` — und
+ *     weder ein KI-Entwurf noch ein Vorbild reist mit, auch dann nicht, wenn
+ *     ihre Slots bestätigt in der Ablage stehen (§1.11 b).
  *
  * ── DIE GEGENPROBE ────────────────────────────────────────────────────────
- * Mit `VERIFY_EXPECT_LEAK=1` dreht das Skript die Zusagen 4 und 5 um: es
+ * Mit `VERIFY_EXPECT_LEAK=1` dreht das Skript die Zusagen 4, 5 und 10 um: es
  * ERWARTET dann den Beschwerde-Text und MUSS rot werden. Ein „enthält nicht"
  * ist sonst auch für eine Antwort grün, die gar nichts enthält — die positiven
  * Zusagen (der Pitch steht da) sind die zweite Hälfte desselben Gedankens.
@@ -170,6 +173,9 @@ function hashToken(token) {
 /** Ein wiedererkennbarer Wert je Sorte — der eine reist, der andere nie. */
 const PITCH = 'Roesterei mit Ausschank auf Oahu G3BEWEIS'
 const COMPLAINT = 'Zweimal war die Suppe um 13 Uhr alle G3GEHEIM'
+/** Die zwei privaten Sorten aus Brand Design (D2a/D5c) — sie reisen NIE. */
+const DRAFT_SECRET_DRAFT = 'D8GEHEIM-KI-ENTWURF-SIEGEL'
+const DRAFT_SECRET_REFERENCE = 'D8GEHEIM-VORBILD-PINNWAND'
 
 try {
   const owner = await makeAccount('owner')
@@ -354,6 +360,70 @@ try {
     !payloads.includes(token) && !payloads.includes(secondToken) && !payloads.includes(legacyToken))
   check('KEIN Ereignis trägt Inhalt',
     !payloads.includes(PITCH) && !payloads.includes(COMPLAINT))
+
+  /**
+   * 10 · BRAND DESIGN IM ABBILD (Paket D8, §2.8/§1.11 b).
+   *
+   * ── WAS HIER GEPRÜFT WIRD ────────────────────────────────────────────────
+   * Zwei Dinge, die man nur an einer echten Zeile sieht: (a) jedes NEUE Abbild
+   * trägt `schemaVersion: 2` — die Form ist eine andere, auch wenn diese Marke
+   * kein fertiges Brand Design hat; (b) die zwei privaten Sorten reisen nicht.
+   *
+   * ── DER ADVERSARISCHE FALL ───────────────────────────────────────────────
+   * `g.inspiration` und `j.drafts` werden im Produkt NIE `confirmed` (D2a/D5c).
+   * Genau deshalb werden sie hier von Hand bestätigt in die Ablage geschrieben:
+   * die Zusage darf nicht daran hängen, dass ein Schreibweg sich benimmt,
+   * sondern am REGISTRY-Filter (`isBrandSlotShareable`) — und der ist die
+   * Stelle, die man später versehentlich lockert.
+   *
+   * Das volle v2-Abbild MIT Preset steht in Abschnitt 31 von
+   * `verify-brand-sessions.mjs`; hier geht es um das, was NICHT darin steht.
+   */
+  console.log('\n10 · Brand Design: `schemaVersion: 2` — und nichts Privates darin')
+
+  // Die sechs Design-Zeilen legt schon die Anlage an (D1) — hier wird nur
+  // geschrieben. Ein `createRow` liefe in ein 409 auf die eigene Id.
+  for (const [stepKey, slots] of [
+    ['dna', { 'g.inspiration': { confirmed: DRAFT_SECRET_REFERENCE, accepted: true } }],
+    ['mark', { 'j.drafts': { confirmed: DRAFT_SECRET_DRAFT, accepted: true } }],
+  ]) {
+    await tablesDB.updateRow({
+      databaseId,
+      tableId: 'brand_steps',
+      rowId: `${profileId}_${stepKey}`,
+      data: { state: 'done', slots: JSON.stringify(slots) },
+    })
+  }
+
+  const designShare = await call(`${base}/share`, { method: 'POST', cookie: owner.cookie, body: {} })
+  const designToken = designShare.json?.token ?? ''
+  check('ein neuer Link lässt sich erzeugen', designShare.status === 200 && designToken.length === 64,
+    `${designShare.status} ${designShare.text.slice(0, 160)}`)
+
+  const designRow = await tablesDB.getRow({
+    databaseId, tableId: 'brand_shares', rowId: designShare.json?.shareId ?? 'none',
+  }).catch(() => null)
+  cleanup.shares.push(designRow?.$id ?? '')
+  const designSnapshot = designRow ? JSON.parse(designRow.snapshot) : null
+  check('jedes neue Abbild trägt `schemaVersion: 2`',
+    designSnapshot?.schemaVersion === 2, String(designSnapshot?.schemaVersion))
+  check('… ohne fertiges Brand Design trägt es KEIN Preset',
+    designSnapshot !== null && designSnapshot.design === undefined,
+    JSON.stringify(Object.keys(designSnapshot ?? {})))
+
+  const designApi = await call(`/api/brand/share/${designToken}`)
+  const designPage = await call(`/brand/share/${designToken}`)
+  check('Seite und API antworten (200/200)',
+    designApi.status === 200 && designPage.status === 200,
+    `${designApi.status}/${designPage.status}`)
+  checkAbsent('der KI-Entwurf steht NICHT im eingefrorenen Abbild', designRow?.snapshot, DRAFT_SECRET_DRAFT)
+  checkAbsent('… und nicht in der API', designApi.text, DRAFT_SECRET_DRAFT)
+  checkAbsent('… und nicht im HTML', designPage.text, DRAFT_SECRET_DRAFT)
+  checkAbsent('das Vorbild steht NICHT im eingefrorenen Abbild', designRow?.snapshot, DRAFT_SECRET_REFERENCE)
+  checkAbsent('… und nicht in der API', designApi.text, DRAFT_SECRET_REFERENCE)
+  checkAbsent('… und nicht im HTML', designPage.text, DRAFT_SECRET_REFERENCE)
+  // Die positive Hälfte desselben Gedankens: das Abbild ist nicht einfach leer.
+  check('… die Festlegung steht weiterhin darin', designApi.text.includes(PITCH))
 }
 catch (error) {
   fail++
@@ -387,6 +457,9 @@ finally {
     }
     for (const stepKey of [
       'context', 'pvm', 'architecture', 'values', 'archetype', 'manifesto', 'verbal', 'naming', 'result',
+      // Die sechs Zeilen von Brand Design — sie entstehen bei der Anlage und
+      // blieben sonst als Waisen liegen (Abschnitt 10 schreibt in zwei davon).
+      'dna', 'color', 'type', 'mark', 'imagery', 'motion',
     ]) {
       await tablesDB.deleteRow({ databaseId, tableId: 'brand_steps', rowId: `${id}_${stepKey}` }).catch(() => {})
     }

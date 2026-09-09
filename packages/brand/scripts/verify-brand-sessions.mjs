@@ -164,6 +164,7 @@
  *   BRANDING_PORT=3016 node --env-file=apps/branding/.env \
  *     packages/brand/scripts/verify-brand-sessions.mjs
  */
+import { createHash, randomBytes } from 'node:crypto'
 import { request } from 'node:http'
 import { Client, ID, Query, Storage, TablesDB, Users } from 'node-appwrite'
 import { InputFile } from 'node-appwrite/file'
@@ -3726,6 +3727,254 @@ try {
     && String(motionStep.json?.slots?.['l.transitions']?.confirmed ?? '').includes('motion.slow')
     && String(motionStep.json?.slots?.['l.rules']?.confirmed ?? '').split('\n').length === 6,
     `${motionStep.json?.storedState} ${JSON.stringify(Object.keys(motionStep.json?.slots ?? {}))}`)
+
+  // ══ 31 · Das Ergebnis: Preset, Kapitel 10, Board, Snapshot v2 (D8) ═══════
+  //
+  // ── WAS DIESER ABSCHNITT PRÜFT ──────────────────────────────────────────
+  // Die REGELN (Rückwege der sechs Kapitel, `buildBrandDesign`, der Renderer
+  // mit und ohne Preset, v1/v2) sind vollständig in
+  // `tests/brandDesignValues.test.ts` und `tests/brandFoundationDesign.test.ts`
+  // belegt. HIER wird geprüft, was ein Unit-Test nicht sehen kann: dass das
+  // Preset an einer ECHTEN Marke aus ECHTEN Zeilen entsteht, dass die
+  // Leseansicht Kapitel 10 wirklich VOLL malt, dass die eigene Board-Route
+  // dem Besitzer gehört — und dass im geteilten Abbild kein Entwurf, kein
+  // Vorbild und keine Lesung steht.
+  //
+  // Er läuft NACH Abschnitt 30: dort sind alle sechs Kapitel abgenommen, und
+  // genau das ist die Bedingung für ein Preset.
+  console.log('\n31 · Brand Design: Preset, Kapitel 10, Board und Snapshot v2 (D8)')
+
+  const designApi = await call(`${base}/design`, { cookie: account.cookie })
+  check('die Preset-Route antwortet — sechs von sechs Kapiteln',
+    designApi.status === 200 && designApi.json?.done === 6 && designApi.json?.total === 6,
+    `${designApi.status} ${designApi.text.slice(0, 200)}`)
+
+  const preset = designApi.json?.preset ?? null
+  /**
+   * DIE ERWARTETEN WERTE STEHEN ALS LITERAL (Beweis-Regel 1): sie sind die,
+   * die die Abschnitte 25 bis 30 wirklich bestätigt haben — Basisfarbe
+   * `#4a3123`, Paar `editorial`, Tempo `calm`, Zeichen-Richtung `word`.
+   */
+  check('das Preset steht — aus den bestätigten Werten der sechs Kapitel',
+    preset !== null
+    && preset.color?.base === '#4a3123'
+    && preset.type?.pair === 'editorial'
+    && preset.motion?.tempo === 'calm'
+    && preset.mark?.kind === 'word',
+    JSON.stringify({
+      base: preset?.color?.base,
+      pair: preset?.type?.pair,
+      tempo: preset?.motion?.tempo,
+      kind: preset?.mark?.kind,
+    }))
+  check('… mit elf Rampen-Stufen hell UND dunkel, fünf Rollen, sechs geprüften Paaren',
+    Object.keys(preset?.color?.rampLight ?? {}).length === 11
+    && Object.keys(preset?.color?.rampDark ?? {}).length === 11
+    && (preset?.color?.roles ?? []).length === 5
+    && (preset?.color?.contrastPairs ?? []).length === 6,
+    JSON.stringify({
+      light: Object.keys(preset?.color?.rampLight ?? {}).length,
+      dark: Object.keys(preset?.color?.rampDark ?? {}).length,
+      roles: (preset?.color?.roles ?? []).length,
+      pairs: (preset?.color?.contrastPairs ?? []).length,
+    }))
+  check('… acht gerechnete Setzungen als SVG (nicht aus dem Slot gelesen)',
+    (preset?.mark?.examples ?? []).length === 8
+    && (preset?.mark?.examples ?? []).every(svg => svg.startsWith('<svg') && svg.endsWith('</svg>')),
+    String((preset?.mark?.examples ?? []).length))
+  check('… und die vier Übergangs-Tokens des ruhigen Tempos (120/240/384/60)',
+    JSON.stringify((preset?.motion?.transitions ?? []).map(token => token.durationMs))
+    === JSON.stringify([120, 240, 384, 60]),
+    JSON.stringify((preset?.motion?.transitions ?? []).map(token => token.durationMs)))
+
+  // ── DIE EIGENE ANSICHT GEHÖRT DEM BESITZER ────────────────────────────
+  const boardOwn = await call(`/de/brand/${profileId}/design`, { cookie: account.cookie })
+  check('die Board-Seite antwortet dem Besitzer (200, mit dem Board darin)',
+    boardOwn.status === 200 && boardOwn.text.includes('data-design-board'),
+    `${boardOwn.status} ${boardOwn.text.length} Zeichen`)
+  check('… und sie ist NICHT die Sperr-Fläche',
+    !boardOwn.text.includes('data-design-locked'), 'die Sperr-Fläche steht da')
+  const boardForeign = await call(`/de/brand/${profileId}/design`, { cookie: stranger.cookie })
+  const boardGuest = await call(`/de/brand/${profileId}/design`)
+  check('fremd und ohne Anmeldung: 404, wie überall in diesem Layer',
+    boardForeign.status === 404 && boardGuest.status === 404,
+    `${boardForeign.status}/${boardGuest.status}`)
+  const boardApiForeign = await call(`${base}/design`, { cookie: stranger.cookie })
+  check('… die Route ebenso (404, nicht 403)',
+    boardApiForeign.status === 404, String(boardApiForeign.status))
+
+  // ── KAPITEL 10 IST VOLL ───────────────────────────────────────────────
+  const foundationApi = await call(`${base}/foundation`, { cookie: account.cookie })
+  const visualChapter = (foundationApi.json?.view?.chapters ?? [])
+    .find(chapter => chapter.id === 'visuell')
+  check('die Leseansicht liefert Kapitel 10 als EINEN design-Block, abgenommen',
+    visualChapter?.state === 'done'
+    && JSON.stringify((visualChapter?.blocks ?? []).map(block => block.kind)) === '["design"]',
+    JSON.stringify({
+      state: visualChapter?.state,
+      kinds: (visualChapter?.blocks ?? []).map(block => block.kind),
+    }))
+  check('… der Block trägt KEINE Entwurfs-Ids, nur ihre Zahl',
+    visualChapter?.blocks?.[0]?.keptDrafts === 0
+    && !('keptDrafts' in (visualChapter?.blocks?.[0]?.preset?.mark ?? {})),
+    JSON.stringify(Object.keys(visualChapter?.blocks?.[0]?.preset?.mark ?? {})))
+  /**
+   * DER ZÄHLER RECHNET KAPITEL 10 MIT — als GENAU EINS, nicht als sechs.
+   *
+   * Verglichen wird gegen die Kapitel-Liste derselben Antwort: eine feste Zahl
+   * stünde hier falsch, sobald dieses Test-Branding einen Baustein mehr oder
+   * weniger auf dem Weg hat (dieser Beweis lässt bewusst Kapitel offen).
+   * Die ZUSAGE ist die Differenz, und die ist 1.
+   */
+  const foundationSteps = foundationApi.json?.chapters ?? []
+  const acceptedSteps = foundationSteps.filter(chapter => chapter.storedState === 'done').length
+  check('… und der Zähler rechnet Kapitel 10 mit — als EINS, nicht als sechs',
+    foundationApi.json?.accepted?.total === foundationSteps.length + 1
+    && foundationApi.json?.accepted?.chapters === acceptedSteps + 1,
+    JSON.stringify({
+      accepted: foundationApi.json?.accepted,
+      steps: foundationSteps.length,
+      done: acceptedSteps,
+    }))
+
+  const designReadPage = await call(`/de/brand/${profileId}/foundation`, { cookie: account.cookie })
+  check('die Leseansicht malt die Vitrine — Board als Kopf, fünf Abschnitte',
+    designReadPage.status === 200
+    && designReadPage.text.includes('data-design-chapter')
+    && designReadPage.text.includes('data-design-board'),
+    `${designReadPage.status} ${designReadPage.text.length} Zeichen`)
+  check('… mit allen fünf Sprungmarken (Farbwelt, Typografie, Zeichen, Bild, Bewegung)',
+    ['farbwelt', 'typografie', 'zeichen', 'bildsprache', 'bewegung']
+      .every(section => designReadPage.text.includes(`id="visuell-${section}"`)),
+    'eine Sprungmarke fehlt')
+  check('… und die Schranke ist weg (kein „folgt in Brand Design" mehr)',
+    !designReadPage.text.includes('folgt in Brand Design'),
+    'die Schranke steht noch da')
+  check('… die Farbwelt steht mit ihrer Basisfarbe und beiden Rampen da',
+    designReadPage.text.includes('#4a3123')
+    && designReadPage.text.includes(preset.color.rampDark[900]),
+    'Basisfarbe oder Dunkel-Rampe fehlen')
+  check('… die Wortmarke ist gesetzt (SVG mit dem Markennamen)',
+    designReadPage.text.includes('<svg') && designReadPage.text.includes('Kailua Coffee'),
+    'kein gesetztes Zeichen auf der Seite')
+
+  const documentPage = await call(`/de/brand/${profileId}/document`, { cookie: account.cookie })
+  check('„Euer Branding" zeigt denselben Abschnitt — nicht sechs leere Kapitel',
+    documentPage.status === 200
+    && documentPage.text.includes('data-design-chapter')
+    && !documentPage.text.includes('id="dna"'),
+    `${documentPage.status} ${documentPage.text.length} Zeichen`)
+
+  // ── DER SNAPSHOT STEIGT AUF v2 ────────────────────────────────────────
+  const designShare = await call(`${base}/share`, { method: 'POST', cookie: account.cookie, body: {} })
+  const shareToken = designShare.json?.token ?? ''
+  check('ein Link lässt sich erzeugen', designShare.status === 200 && shareToken.length === 64,
+    `${designShare.status} ${designShare.text.slice(0, 160)}`)
+
+  const shareRow = await tablesDB.getRow({
+    databaseId, tableId: 'brand_shares', rowId: designShare.json?.shareId ?? 'none',
+  }).catch(() => null)
+  const designSnapshot = shareRow ? JSON.parse(shareRow.snapshot) : null
+  check('der eingefrorene Snapshot trägt `schemaVersion: 2` und das Preset',
+    designSnapshot?.schemaVersion === 2 && designSnapshot?.design?.color?.base === '#4a3123',
+    JSON.stringify({ version: designSnapshot?.schemaVersion, base: designSnapshot?.design?.color?.base }))
+  check('… mit `presetId: design:<profileId>` und der Preset-Fassung',
+    designSnapshot?.presetId === `design:${profileId}` && designSnapshot?.presetVersion === '1',
+    JSON.stringify({ id: designSnapshot?.presetId, version: designSnapshot?.presetVersion }))
+  check('… und OHNE die behaltenen Entwürfe (§1.11 b)',
+    designSnapshot?.design && !('keptDrafts' in designSnapshot.design.mark),
+    JSON.stringify(Object.keys(designSnapshot?.design?.mark ?? {})))
+
+  /**
+   * DIE GEGENPROBE DES ABBILDS: drei Sorten, die NIE reisen dürfen — die
+   * Entwürfe (D5c), die Vorbilder (D2a) und die Lesung (D2b). Geprüft wird
+   * das rohe JSON, nicht die gerenderte Seite: die API-Antwort steht daneben
+   * und ist mit dem Token ohne Browser abrufbar.
+   */
+  const rawSnapshot = JSON.stringify(designSnapshot ?? {})
+  check('kein Vorbild, keine Lesung, kein Entwurf im Abbild',
+    !rawSnapshot.includes('g.inspiration')
+    && !rawSnapshot.includes('g.reading')
+    && !rawSnapshot.includes('j.drafts'),
+    'ein interner Slot steht im Snapshot')
+
+  const sharePage = await call(`/brand/share/${shareToken}`)
+  check('die Empfänger-Seite zeigt dasselbe volle Kapitel 10',
+    sharePage.status === 200
+    && sharePage.text.includes('data-design-chapter')
+    && sharePage.text.includes('data-design-board'),
+    `${sharePage.status} ${sharePage.text.length} Zeichen`)
+  check('… und weiterhin nichts Internes',
+    !sharePage.text.includes('data-design-drafts'),
+    'der Entwurfs-Hinweis steht in der öffentlichen Ansicht')
+
+  /**
+   * EIN v1-SNAPSHOT BLEIBT LESBAR (§2.7 des BF1-Konzepts): so sah jede Zeile
+   * vor D8 aus. Der Renderer fragt nach dem FELD, nicht nach der Zahl — ein
+   * alter Link zeigt deshalb weiter Richtung und Schranke statt einer leeren
+   * Seite.
+   */
+  const legacyToken = randomBytes(32).toString('hex')
+  const legacyShare = await tablesDB.createRow({
+    databaseId,
+    tableId: 'brand_shares',
+    rowId: ID.unique(),
+    data: {
+      profileId,
+      tokenHash: createHash('sha256').update(legacyToken, 'utf8').digest('hex'),
+      snapshot: JSON.stringify({
+        schemaVersion: 1,
+        title: 'Kailua Coffee',
+        contentLocale: 'de',
+        story: '',
+        chapters: [{ stepKey: 'context', slots: [{ slotId: 'a.pitch', value: 'D8-ALTLINK' }] }],
+        presetId: 'warm-editorial',
+        presetVersion: '1',
+      }),
+      publishedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 3600_000).toISOString(),
+    },
+  })
+  /**
+   * GEPRÜFT WIRD SPRACH-NEUTRAL: `/brand/share/:token` hat kein Locale-Präfix
+   * und rendert deshalb ENGLISCH. Ein deutscher Satz als Haken wäre hier immer
+   * rot — beim Bau am eigenen Lauf gefunden. `fd-dir-strip` ist der Streifen
+   * der gewählten RICHTUNG (Paket G4) und damit der Beweis, dass der alte
+   * Zweig gerendert hat.
+   */
+  const legacyPage = await call(`/brand/share/${legacyToken}`)
+  check('ein v1-Link ist weiter lesbar — Festlegung UND Richtung, ohne Preset',
+    legacyPage.status === 200
+    && legacyPage.text.includes('D8-ALTLINK')
+    && legacyPage.text.includes('fd-dir-strip')
+    && !legacyPage.text.includes('data-design-chapter'),
+    `${legacyPage.status} ${legacyPage.text.length} Zeichen · Richtung: `
+    + `${legacyPage.text.includes('fd-dir-strip')} · Preset: `
+    + `${legacyPage.text.includes('data-design-chapter')}`)
+  await tablesDB.deleteRow({ databaseId, tableId: 'brand_shares', rowId: legacyShare.$id })
+    .catch(() => {})
+
+  /**
+   * DIE GEGENPROBE ZUM PRESET: nimmt man EINEM Kapitel die Abnahme, fällt das
+   * ganze Preset weg — und Kapitel 10 ist wieder die Schranke. Eine Prüfung,
+   * die nur den fertigen Zustand kennt, wäre auch für eine Regel grün, die
+   * gar nicht nachsieht.
+   */
+  await setStepState(profileId, 'imagery', 'active')
+  const withoutOne = await call(`${base}/design`, { cookie: account.cookie })
+  check('GEGENPROBE: eine zurückgenommene Abnahme ⇒ kein Preset, Stand 5 von 6',
+    withoutOne.json?.preset === null && withoutOne.json?.done === 5,
+    JSON.stringify({ preset: withoutOne.json?.preset, done: withoutOne.json?.done }))
+  const lockedBoard = await call(`/de/brand/${profileId}/design`, { cookie: account.cookie })
+  check('… die Board-Seite wird zur ruhigen Sperr-Fläche statt zu einem 404',
+    lockedBoard.status === 200 && lockedBoard.text.includes('data-design-locked'),
+    `${lockedBoard.status} ${lockedBoard.text.length} Zeichen`)
+  const lockedFoundation = await call(`/de/brand/${profileId}/foundation`, { cookie: account.cookie })
+  check('… und Kapitel 10 zeigt wieder die Schranke',
+    lockedFoundation.text.includes('folgt in Brand Design')
+    && !lockedFoundation.text.includes('data-design-chapter'),
+    'die Schranke ist nicht zurückgekommen')
+  await setStepState(profileId, 'imagery', 'done')
 
 
 }
