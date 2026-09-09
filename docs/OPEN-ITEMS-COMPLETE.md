@@ -30,6 +30,54 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Kailua-Wizard-Befunde 8/9/10/12: George behauptet nichts, leere Bestätigung erklärt sich, „Alle abnehmen", Handbuch-Kapitel „Stimme" geteilt ✅ 2026-09-09
+
+**Was:** Der D5-Durchlauf (Beispiel-Branding Kailua Coffee Co. über den echten Wizard) brachte fünf
+Bedien-Befunde (OPEN-ITEMS BW1 8–12). Drei waren Produktfragen, per Fragenrunde entschieden
+(DECISION-LOG 2026-09-09: 11 kein Tor, 8 Prompt-Regel statt Auto-Entwurf, 12 Kapitel teilen —
+GEGEN die Empfehlung). Ein Opus-Lauf, im Hauptloop geprüft, Commit `ea87feb6`:
+- **8 — „ich trage das ein":** ein Gesprächszug bleibt ganz Nachricht (kein Marker, kein Feld —
+  die Trennung aus `conversePrompt.ts` steht). Neu `converse-11`: George darf NIE behaupten, etwas
+  eingetragen/notiert/geschrieben zu haben; nennt der Mensch eine Entscheidung, bestätigt er sie in
+  einem Satz und verweist auf den Knopf. Der Knopf-NAME reist wie `openFieldLabels` aus dem
+  Locale-Katalog (`brandDraftButtonLabel`, „George, entwirf das" / in Design-Kapiteln „Frida,
+  entwirf das"). Bühne: nach einem Gesprächszug ohne Wert wird der Entwurfs-Knopf `solid` statt
+  `ghost` (`draftNudge`), erlischt beim Klick, beim Kartenwechsel und mit dem ersten Wert.
+- **9 — stiller No-op:** gemessen war der Knopf NIE klickbar (`confirmEnabled = hasValue`,
+  natives `disabled`) — nur sagte nichts, was fehlt. Jetzt pure Regel `showConfirmBlockedNote`
+  + Satz „Erst entwerfen oder selbst schreiben" in Draft- und Confirm-Modul; das 400 `slot_empty`
+  der PATCH-Route landet als Toast (`rejectEmptyConfirmations` im Store) statt als stummes „Nicht
+  gespeichert".
+- **10 — „Alle abnehmen":** BULK-Route `POST …/steps/<stepKey>/accept-all` (Zod nur `revision`;
+  was abnehmbar ist, rechnet der Server — eine Client-Liste wäre eine Behauptung über den
+  Serverstand), dieselbe Tür wie die Einzel-Route, EIN `updateRow`, Teilerfolg als `failed[]`.
+  Grund gegen elf Client-Aufrufe: jede Abnahme dreht `revision`, elf abhängige Roundtrips auf
+  dieselbe Zeile hinterließen beim ersten 409 ein halb abgenommenes Kapitel. Pure Regel
+  `brandAcceptableSessions` versorgt jetzt auch `BwSessionBlock` (vorher eigener Ausdruck dort).
+- **12 — Kapitel geteilt:** `BRAND_FOUNDATION_SOURCE_STEPS.stimme = ['archetype']`, der
+  Wort-Leitfaden (`ep.vocabulary`) steht als `vocabularyBlocks` im Messaging-Kapitel nach den
+  Kernbotschaften. Keine Migration: alle vier Konsumenten (Leseansicht, Share, Discover-Anatomie,
+  foundation.get) rufen `buildBrandFoundation` mit rohen Slot-Werten zur Lesezeit.
+Gates: brand 2674 Tests (+17), Lint, Typecheck branding, i18n-Keys. Nebenbei: `check:bilanz` war
+nach der neuen Route rot und hielt den Deploy — die Nachbar-Session hat die Bilanz zeitgleich neu
+erzeugt (`bb39e223`), mein identischer Commit fiel beim Rebase als leer weg (Duplikat-Rennen
+verloren, wie die Regel es will).
+
+**Live-Beweis (Build `ea87feb6`, öffentlich ohne Login):** `/api/discover/kailua-coffee-co` liefert
+das Kapitel `stimme` nur noch mit Archetyp-Wahl, Ziel-Gefühl und Ton-Wörtern (`choice, text,
+chips`) und das Kapitel `messaging` mit dem Wort-Leitfaden (`list`); auf `/de/discover/
+kailua-coffee-co` steht „Wort-Leitfaden" unter Kapitel 05, nicht mehr unter Kapitel 04
+„Persönlichkeit & Stimme". Gesprächs-Regel, Karten-Hinweis und „Alle abnehmen" liegen hinter dem
+Login — Davids Klick-Test steht in OPEN-ITEMS BW1.
+
+**Gelernt:** (1) Ein „stiller No-op" ist oft ein deaktivierter Knopf ohne Erklärung — erst messen
+(`disabled`, Handler, Route), dann bauen; hier war die Lücke die fehlende Ansage, nicht der Klick.
+(2) Neue Route ⇒ `node scripts/produkt-bilanz.mjs` VOR dem Push, sonst hält das Lint-Gate den
+Deploy (dritter Vorfall dieser Art, CLAUDE.md-Regel). (3) Nicht rebasen, während ein Agent im selben
+Worktree schreibt — es ging nur gut, weil er noch keine getrackte Datei angefasst hatte.
+
+---
+
 ### Sucheintrag + Weiterleitungen speichern im Silo (NAV1-Nebenbefund) ✅ 2026-09-08
 
 **Was:** Davids Auftrag „fix die neu gefundenen Probleme": `PATCH /api/pages/seo` und
