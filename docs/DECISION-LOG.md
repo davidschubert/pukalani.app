@@ -47,6 +47,19 @@ alte Snapshots brauchen keine Migration. Dazu ohne Frage gebaut: Befund 9 (still
 „Übernehmen & bestätigen" ohne Entwurf ⇒ deaktiviert + Hinweis) und Befund 10 („Alle abnehmen" in
 der Finalen Abnahme).
 
+**Nachtrag, dieselbe Runde — die Befunde 1–7 aus dem ERSTEN Kailua-Lauf (David: „Erste
+Kailua-Befunde 1 bis 7", nach Empfehlung):** (4) **Anlage: das Modal legt an und springt in die
+Werkstatt** (Befund 6, nach Empfehlung): das Modal auf der Brands-Übersicht erledigt Weiche, Titel
+und Sprache und führt direkt ins erste Kapitel; die Vollseite `/dashboard/brands/new` bleibt nur
+als Ziel direkter Links und fragt die drei Felder einmal. Verworfen: nur die Vollseite (ein Klick
+mehr) und Vorbelegung aus dem Modal (zwei Wege bleiben). (5) **Chat-Sprache bleibt die Sprache der
+Oberfläche** (Befund 7, nach Empfehlung — bestätigt die Werkstatt-Entscheidung vom 2026-09-02):
+George spricht wie der Mensch, die Feldwerte stehen in der Inhaltssprache; kein Befund. Verworfen:
+Chat folgt der Inhaltssprache, Wahl je Marke (dritte Sprachachse). Die Befunde 1–5 (Pillen,
+Konflikt-Dialog gegen leere Serverfassung, optimistischer Zähler, Fakten-Karte, Kontext-Felder aus
+dem Gespräch) sind Fehler ohne Produktfrage — außer bei 5 stellt sich heraus, dass ein getippter
+Chat-Text heute keine Antwort auf die offene Katalog-Frage ist; dann wird gefragt.
+
 ---
 
 ## 2026-09-08 — branding.supply/Brand Insights: vier Entscheidungen (I0 freigegeben, Art. 27 verschoben, B2B, activeMind → eRecht24)
