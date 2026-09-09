@@ -2588,6 +2588,51 @@ function applyImageryPick(slotId: string, value: string): void {
   onInput(slotId, value)
 }
 
+// ── Die Bewegung (D7, §2.7) ───────────────────────────────────────────────
+
+/**
+ * DIESELBE ARBEITSTEILUNG WIE IN DEN VIER KAPITELN DAVOR:
+ * `useBrandMotionWorld()` rechnet, die SEITE schreibt.
+ */
+const motionWorld = useBrandMotionWorld()
+
+const showMotionPanel = computed(() => stepKey.value === 'motion')
+
+/**
+ * ALLE VIER Sessions belegt das Kapitel selbst vor — wie in der Bildsprache
+ * gibt es hier keinen Modell-Text, den ein Autosave überschreiben könnte
+ * (§1.4). `l.rules` ist `stage-edit` und darf von Hand ergänzt werden: eine
+ * BESTÄTIGTE Fassung rührt der Watcher unten nicht an (Sicherung 2).
+ */
+const MOTION_SLOTS = ['l.tempo', 'l.transitions', 'l.logo', 'l.rules'] as const
+
+const confirmedMotionSlots = computed(() =>
+  MOTION_SLOTS.filter(slotId => store.slotConfirmed(slotId)))
+
+/**
+ * DAS KAPITEL BELEGT SICH SELBST VOR (H5) — dieselbe Mechanik und dieselben
+ * vier Sicherungen wie Farbwelt, Typografie, Zeichen und Bildsprache darüber
+ * (Gleichheits-Prüfung, Bestätigtes bleibt unberührt, ein fehlender Wert
+ * löscht, erst NACH dem Mount).
+ */
+onMounted(() => {
+  watch(motionWorld.slotValues, (values) => {
+    if (stepKey.value !== 'motion') return
+    for (const slotId of MOTION_SLOTS) {
+      if (store.slotConfirmed(slotId)) continue
+      const value = values[slotId] ?? ''
+      if (store.slotValue(slotId) === value) continue
+      onInput(slotId, value)
+    }
+  }, { immediate: true })
+})
+
+/** Eine Wahl aus dem Bewegungs-Panel — derselbe Weg wie jede Eingabe. */
+function applyMotionPick(slotId: string, value: string): void {
+  if (store.slotConfirmed(slotId)) return
+  onInput(slotId, value)
+}
+
 /** Die Marken des Kontos für den Wähler oben in der Sidebar. */
 const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-circle-flags-de' }
 
@@ -3056,6 +3101,18 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           v-if="showImageryPanel"
           :confirmed="confirmedImagerySlots"
           @pick="applyImageryPick"
+        />
+
+        <!-- DIE BEWEGUNG (Kapitel `motion`, D7) — Tempo, Übergangs-Tokens,
+             kinetisches Zeichen und die Regeln auf EINER Werkbank. Wie die
+             vier Kapitel davor steht sie ÜBER dem Gespräch; bestätigt wird
+             jede Session unten auf ihrer Karte (`RENDERED_ABOVE`). Die drei
+             Tempos spielen als drei Szenen gleichzeitig — Tempo liest man
+             nicht (§2.7). -->
+        <BwMotionPanel
+          v-if="showMotionPanel"
+          :confirmed="confirmedMotionSlots"
+          @pick="applyMotionPick"
         />
 
         <p v-if="phaseIntro" class="bw-label" style="color: var(--bw-muted); padding-left: 2.65rem">{{ phaseIntro }}</p>
