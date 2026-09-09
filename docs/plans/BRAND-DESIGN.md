@@ -558,7 +558,7 @@ in JEDEM Kapitel — eine Komponente, sechs Zustände.
 
 ### 2.14 Messung
 
-`design.unlocked`, `design.step.completed` (stepKey, Sekunden),
+`design.unlocked`, `step.completed (mit `stepKey` eines Design-Kapitels — kein eigener Typ, Davids Entscheidung 2026-09-09)` (stepKey, Sekunden),
 `design.image.generated` (kind, count, model, ms), Korrekturrate je
 DNA-Dimension (wie oft „festhalten" vs. neu), Anteil behaltener Entwürfe,
 Zeit von Freischaltung bis Kapitel 10 voll. Alles im Funnel (`brand_events`).
@@ -929,7 +929,7 @@ Davids Abnahme mit den Inhalts-Gates aus D1–D8.** Offene Fragen an David:
 (1) Kontrast-Regel — darf ein heller Akzent mit dunkler Schrift bestehen,
 oder trägt ein Marken-Knopf immer hellen Text? (2) Design-Werte doppelt im
 Snapshot (Preset + rohe Slot-Werte)? (3) Klickdummy mitziehen oder
-einfrieren? (4) §2.14 nennt `design.step.completed`, gebaut ist der
+einfrieren? (4) §2.14 nennt `step.completed (mit `stepKey` eines Design-Kapitels — kein eigener Typ, Davids Entscheidung 2026-09-09)`, gebaut ist der
 generische `step.completed` mit `stepKey` — Konzept nachziehen?
 
 | # | Paket | Inhalt | Gate |
