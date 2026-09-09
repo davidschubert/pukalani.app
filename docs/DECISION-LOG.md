@@ -141,6 +141,22 @@ Dazu zwei Befunde aus demselben Test, ohne Frage gefixt: George sprach einen Sol
 an (die Team-Weiche erreichte nur die Beschriftungen — `converse-13`), und die Kapitel-Leiste hakte
 bestätigte Sessions erst nach Reload ab (die PATCH-Antwort trägt keine Session-Zustände — der
 Autosave lädt nach einer Bestätigung nach).
+(10) **SESSION-ABSCHLUSS: GEORGE FÜHRT** (Davids Bild vom Ablauf einer Session, Klick-Test
+2026-09-09, nach Empfehlung): Ist eine Antwort George zu dünn, fragt er nach und bietet ZWEI Knöpfe
+(„Passt so, bestätigen" / „Ich ergänze noch etwas") — Bestätigen ist dabei ein BEDIENELEMENT, das die
+Bestätigung auslöst, nie Chat-Text (converse-11 bleibt: George behauptet nichts). Ist die Antwort
+bestätigt, würdigt er sie in einem ABSCHLUSSZUG und bietet einen Knopf „Weiter zu …" — kein
+automatischer Sprung mehr mitten im Gespräch, keine nächste Katalogfrage als graue Zeile in der alten
+Session. Davids Rückfrage „wohin führt der Knopf, wenn das Nächste schon beantwortet ist?": das ZIEL
+kommt aus der REGEL (`resolveNextStop`: nächste offene Session, bestätigte/vertagte/gesperrte werden
+übersprungen), nicht aus Georges Urteil — eine Navigation, die ein Modell entscheidet, wäre
+nichtdeterministisch. George bekommt Ziel UND übersprungene Sessions in den Auftrag und spricht es
+aus („Kundenstimmen hast du schon beantwortet, weiter mit Kritik & Beschwerden"). Die nächste Session
+eröffnet George mit einem kurzen SPIEGEL des Bekannten (converse-12 kennt die Kapitel-Antworten; der
+Eröffnungs-Auftrag verlangt künftig ein bis zwei Sätze Zusammenschau vor der Frage). Verworfen: wie
+heute springen mit Abschlusssatz; erst den Reihenfolge-Umbau abwarten. Widerspruch, den der Test
+zeigte: George bohrte nach („ich brauche noch etwas Konkretes"), während die Session rechts schon
+den Haken trug — Rückfrage und Bestätigung wussten nichts voneinander.
 
 ---
 
