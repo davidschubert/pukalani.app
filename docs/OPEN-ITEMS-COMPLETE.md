@@ -129,6 +129,30 @@ Chrome testet, fasse ich den Browser nicht an — Fernsteuerung und Mensch teile
 und ein Navigate der Fernsteuerung frisst den Klick des Menschen lautlos. Beweis vor Vermutung: erst
 „was siehst du?", dann „klick", dann Log.
 
+**D5 — Beispiel-Branding „Kailua Coffee Co." über den echten Wizard ✅ 2026-09-08/09 (UTC):** zwei
+Opus-Läufe in Davids freigegebenem Chrome (Davids Konto, Profil-Id nur im Lauf), 19 + 14 George-Züge,
+keine Drossel. Der erste Lauf blieb an einem abgelehnten Befund hängen, den das Kapitel-Review bei
+jedem Lauf NEU anlegte (`writeBrandFindings` deduplizierte nur gegen offene Befunde) — Fix `53be8792`:
+Dedup gegen offene UND abgelehnte, nur ANGENOMMENE dürfen wiederkommen (Kehrtwende zu BW2 Paket 6,
+DECISION-LOG). Beweis im zweiten Lauf: Werte-Konflikt „Falscher Moment" abgelehnt → `finding_dismissed`
+im Log, nach Reload nicht wieder da, Kapitel 8/8. Danach Werte abgenommen, Archetyp-Kapitel 11/11
+(primär „Der Weise", sekundär „Der Schöpfer", Ton calm/grounded/plain-spoken — beides per
+Chat-Korrektur gesetzt, George übernahm), vier von acht Kapiteln abgenommen. Veröffentlichen mit
+Branche „Lebensmittel und Getränke" → `publication_submitted` 01:19 UTC, Freigabe → `publication_approved`
+01:20, Beispiel-Schalter → `publication_example: true` 01:20. Live geprüft (curl + Playwright-Screenshots
+an David): `/api/discover` 2 Marken, Kailua `example: true`, Branche `food`; `/de/discover` 200 mit
+Kailua im Hero (kein Featured gesetzt — der Hero fällt auf die neueste Marke zurück) und Badge
+„Beispiel" auf der Kachel; `/de/discover/kailua-coffee-co` 200 mit Kopf „Anatomie · Beispiel", sieben
+Kapiteln, Weiche „Neue Marke", Archetyp „Der Weise · Rest Der Schöpfer".
+**Neue Bedien-Befunde** (in OPEN-ITEMS BW1 eingetragen): George sagt „ich trage das ein" und trägt
+nichts ein; „Übernehmen & bestätigen" ohne Entwurf ist ein stiller No-op; Bestätigen ≠ Abnehmen — in der
+Finalen Abnahme fehlt ein „Alle abnehmen" (11 Einzelklicks); ein offener Lücke-Befund blockiert die
+Abnahme nicht; Leseansicht-Seitenleiste zeigt „Persönlichkeit & Stimme" offen, obwohl das Kapitel
+abgenommen ist. **Gelernt:** (1) Ein Dedup, der „entschieden" mit „angenommen" gleichsetzt, macht
+jede Ablehnung zur Endlosschleife — der Zustand, den man NICHT wiedersehen will, muss im Filter
+stehen. (2) Ein Bedien-Lauf ohne Screenshot-Pfade ist kein Beweis für David — die Beweisbilder macht
+der Hauptloop selbst (Playwright-CLI gegen die öffentlichen Seiten), nicht der Agent.
+
 ---
 
 ### S3: Zweiter Faktor auf allen vier Betreiber-Konten + Google-Login für die Betreiber-Konsole ✅ 2026-09-08

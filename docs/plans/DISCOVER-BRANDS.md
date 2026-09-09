@@ -1,9 +1,10 @@
 # Discover Brands — die öffentliche Markengalerie (Strategie + Konzept, 2026-09-08)
 
-> **STAND 2026-09-08: D0–D3 LIVE, erste Freigabe durch** (Krume & Gold öffentlich). Offen: D4
-> (Ähnliche/Sitemap/OG-Bild), D5 (Beispiel-Branding Kailua über den Wizard) und die Nachzüge aus
-> OPEN-ITEMS. Bleibt in `plans/`, bis D4/D5 gebaut sind; Erledigt-Eintrag in
-> OPEN-ITEMS-COMPLETE.
+> **STAND 2026-09-08: D0–D3 + D5 LIVE** — Krume & Gold und das Beispiel-Branding Kailua Coffee Co.
+> (`/discover/kailua-coffee-co`, Badge „Beispiel", über den echten Wizard gebaut) sind öffentlich;
+> die Nachzüge (Branche im Dialog, Sichtbarkeit bei neuem Stand, Befund-Dedup) sind drin. Offen:
+> nur noch D4 (Ähnliche/Sitemap/OG-Bild). Bleibt in `plans/`, bis D4 gebaut ist; Erledigt-Eintrag
+> in OPEN-ITEMS-COMPLETE.
 
 OPEN-ITEMS 10 · DB1, von David vorgezogen („mach mit discover brands weiter",
 2026-09-08). Grundlage: Phase-1-Plan „Discover-Seite" (Davids Idee 2026-08-27/29),
@@ -201,4 +202,4 @@ formuliert — als Facette erst nach Normalisierung).
 | D2 | Galerie `/discover` + Anatomie `/discover/<slug>` (nur `published`), Nav-Punkt, Teaser auf der Startseite | D1 |
 | D3 | Betreiber-Seite `/dashboard/discover`: Warteschlange (freigeben/ablehnen mit Begründung), Featured/Brand of the Day, Ausblenden, Meldungen; öffentliches Melden | D1 |
 | D4 | „Ähnliche Marken", Sitemap, OG-Bild je Anatomie | D2 |
-| D5 | Beispiel-Branding „Kailua Coffee Co." über den Wizard anlegen, veröffentlichen, als Beispiel markieren | D1–D3, Davids Konto |
+| D5 | Beispiel-Branding „Kailua Coffee Co." über den Wizard anlegen, veröffentlichen, als Beispiel markieren — ✅ 2026-09-08 (zwei Opus-Läufe in Davids Chrome; Befund-Schleife `53be8792` dabei gefixt) | D1–D3, Davids Konto |
