@@ -99,8 +99,10 @@ fehlen wegen des Tarifs, nicht wegen der Gruppe) — genau deshalb prüft der Ab
 Vorbedingung NACH statt sie anzunehmen. Kur: Tarif vor 15 zurück auf `pro`, auf das SSR-HTML
 warten. (2) Im ferngesteuerten Chrome-Tab kommen Klicks per Referenz nach einem `navigate`
 nicht mehr an (Tab ist `visibilityState: hidden`) — Klicks per JavaScript auf den ECHTEN
-Knopf funktionieren und messen dieselben Handler. (3) Pool-Klick im Browser blieb aus:
-David ist auf demo.pukalani.app nicht eingeloggt, und Anmelden mache ich nicht selbst.
+Knopf funktionieren und messen dieselben Handler. (3) Pool-Klick im Browser NACHGEHOLT (David eingeloggt, 2026-09-08): auf demo.pukalani.app
+Gruppe „Inhalte" mit Feed + Diskussionen angelegt, PATCH 200, Kopf zeigt den UDropdownMenu-
+Auslöser mit beiden Kindern (`data-nav-group`), Rest daneben plus „Mehr"; Zurücksetzen 200,
+Standard wieder da. Die Hülle heißt im Pool weiterhin „Community-Einstellungen" (richtig so).
 
 ### Sucheintrag + Weiterleitungen speichern im Silo (NAV1-Nebenbefund) ✅ 2026-09-08
 
