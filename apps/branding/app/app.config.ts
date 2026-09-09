@@ -149,6 +149,28 @@ export default defineAppConfig({
       termsUrl: '/terms',
       termsVersion: '2026-09-draft-1',
       termsDraft: true,
+      /**
+       * NUR FÜR UNTERNEHMEN UND SELBSTSTÄNDIGE (BS1 R1c, Davids Entscheidung
+       * vom 2026-09-08): branding.supply ist ein B2B-Angebot. In jedem
+       * Registrierungsweg steht deshalb ein zweites Pflicht-Häkchen „Ich
+       * handle als Unternehmer/in oder Selbstständige/r", und der Zeitpunkt
+       * landet als `businessConfirmedAt` in den Prefs des Kontos.
+       *
+       * WARUM DAS EINE ZUSAGE UND KEIN HINWEIS SEIN MUSS: einem VERBRAUCHER
+       * steht bei einem Fernabsatzvertrag ein Widerrufsrecht zu, einem
+       * Unternehmer nicht. Ein Satz auf der Preisseite ist dafür zu wenig —
+       * ohne die Bestätigung am Konto wäre später nicht mehr sagbar, dass
+       * dieses Konto sie überhaupt abgegeben hat. Dieselbe Lehre wie bei der
+       * AGB-Fassung eine Zeile darüber (R1).
+       *
+       * Der Google-Weg trägt sie mit: der Knopf ist gesperrt, solange EINES
+       * der beiden Häkchen offen ist (`oauthBlockedBy` in `RegisterForm.vue`).
+       *
+       * BLEIBT NACH R3 STEHEN — anders als `termsDraft`/`draftNotice`: der
+       * Schalter sagt nichts über den Reifegrad der Texte, sondern über den
+       * Zuschnitt des Angebots.
+       */
+      businessOnly: true,
     },
     /**
      * DIE DREI RECHTSSEITEN SIND VERÖFFENTLICHT UND TROTZDEM ENTWÜRFE
