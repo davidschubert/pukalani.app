@@ -1954,12 +1954,20 @@ export interface BrandDiscoverListResponse {
   spotlight: BrandDiscoverItem[]
 }
 
-/** Der GRUND als Id, nie als Satz — die Kachel schreibt ihn in ihrer Sprache. */
+/**
+ * Der GRUND als Id, nie als Satz — die Kachel schreibt ihn in ihrer Sprache.
+ *
+ * DREI GRÜNDE, IN DIESER STÄRKE (D4): Archetyp · Farbwelt · Branche. Die
+ * Reihenfolge ist die Aussagekraft, nicht der Zufall — „gleicher Archetyp"
+ * beschreibt die HALTUNG einer Marke, „gleiche Farbwelt" ihr Aussehen,
+ * „gleiche Branche" nur ihr Umfeld. Wer in mehreren Töpfen steht, erscheint
+ * einmal, mit dem stärksten (s. `similarDiscoverEntries`).
+ */
 export interface BrandDiscoverSimilar {
   slug: string
   title: string
   paletteId: string
-  reason: 'archetype' | 'palette'
+  reason: 'archetype' | 'palette' | 'industry'
 }
 
 /** Der Markenabdruck der Anatomie — der Check, der beim Einreichen galt. */

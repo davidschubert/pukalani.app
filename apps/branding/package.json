@@ -9,6 +9,7 @@
     "seed:legal": "node --experimental-strip-types --env-file=.env scripts/seed-legal-pages.ts",
     "lint": "eslint .",
     "preview": "nuxi preview",
+    "test": "nuxi prepare && vitest run",
     "typecheck": "nuxi typecheck"
   },
   "dependencies": {
@@ -40,6 +41,7 @@
     "@types/nodemailer": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
+    "vitest": "catalog:",
     "vue-tsc": "catalog:"
   }
 }
