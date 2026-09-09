@@ -294,7 +294,7 @@ export type InsightsBrandRef = z.infer<typeof insightsBrandRefSchema>
  * `translationReviewed` (ist die zweite es auch?) — ein Cache bräuchte
  * beides nicht.
  */
-export const insightsPostSchema = z.object({
+const insightsPostFields = {
   format: z.enum(INSIGHTS_FORMATS),
   slug: z.string().min(1).max(160),
   slugHistory: z.array(z.string().max(160)).max(INSIGHTS_SLUG_HISTORY_MAX).default([]),
@@ -322,36 +322,134 @@ export const insightsPostSchema = z.object({
   noteInternal: z.string().max(500).default(''),
   draftModel: z.string().max(120).default(''),
   draftPromptVersion: z.string().max(64).default(''),
-}).superRefine((post, ctx) => {
+}
+
+/**
+ * WAS DIE FORM-REGELN ÜBERHAUPT ANSEHEN — und warum das ein eigener Typ ist.
+ *
+ * Seit BI1 I2 gibt es ZWEI Schemas über denselben Feldern: den vollen Vertrag
+ * (`insightsPostSchema`, wie eine Zeile aussieht) und die Redaktions-Eingabe
+ * (`insightsPostEditSchema`, was ein Formular schicken DARF). Beide müssen
+ * dieselben Form-Regeln durchsetzen — ein Duell ohne Faktenzeilen ist in
+ * beiden Fällen keines. Zwei abgeschriebene `superRefine`-Blöcke wären zwei
+ * Wahrheiten, von denen die im Formular irgendwann milder wird.
+ *
+ * Der Typ steht deshalb HIER und leitet sich NICHT aus `InsightsPost` ab: der
+ * volle Typ entsteht erst aus dem Schema, das diese Funktion benutzt — das
+ * wäre ein Ring.
+ */
+interface InsightsPostRuleInput {
+  format: InsightsFormat
+  baseLocale: InsightsLocale
+  titleDe: string
+  titleEn: string
+  facts: readonly InsightsDuelFact[]
+  ranking: InsightsRanking | null
+  sources: readonly InsightsSource[]
+}
+
+/**
+ * DIE FORM-REGELN als LISTE statt als `ctx.addIssue`-Aufrufe: so sind sie ohne
+ * Zod-Kontext prüfbar und werden von beiden Schemas GELESEN, nicht kopiert.
+ */
+function insightsPostRuleIssues(post: InsightsPostRuleInput): { path: (string | number)[], message: string }[] {
+  const issues: { path: (string | number)[], message: string }[] = []
   // Die Grundfassung MUSS da sein — sie ist die redigierte (Entscheidung 3).
   if (!insightsTitleOf(post, post.baseLocale)) {
-    ctx.addIssue({ code: 'custom', path: ['baseLocale'], message: 'Grundfassung ohne Titel' })
+    issues.push({ path: ['baseLocale'], message: 'Grundfassung ohne Titel' })
   }
   // Zwei Faktenformen, zwei Formate. Ein Duell OHNE Zeilen ist kein Duell,
   // ein Artikel MIT ihnen ist ein Zeichen, dass jemand das Format gewechselt
   // und die alten Daten stehen gelassen hat.
   if (post.format === 'duel' && post.facts.length === 0) {
-    ctx.addIssue({ code: 'custom', path: ['facts'], message: 'Duell ohne Faktenzeilen' })
+    issues.push({ path: ['facts'], message: 'Duell ohne Faktenzeilen' })
   }
   if (post.format !== 'duel' && post.facts.length > 0) {
-    ctx.addIssue({ code: 'custom', path: ['facts'], message: 'Faktenzeilen nur im Duell' })
+    issues.push({ path: ['facts'], message: 'Faktenzeilen nur im Duell' })
   }
   if (post.format === 'ranking' && !post.ranking) {
-    ctx.addIssue({ code: 'custom', path: ['ranking'], message: 'Ranking ohne Liste' })
+    issues.push({ path: ['ranking'], message: 'Ranking ohne Liste' })
   }
   if (post.format !== 'ranking' && post.ranking) {
-    ctx.addIssue({ code: 'custom', path: ['ranking'], message: 'Liste nur im Ranking' })
+    issues.push({ path: ['ranking'], message: 'Liste nur im Ranking' })
   }
   // Jeder Beleg-Zeiger muss auf eine Quelle zeigen, die es gibt. Ein Zeiger
   // ins Leere sieht in der Tabelle aus wie ein Beleg.
   for (const [index, fact] of post.facts.entries()) {
     if (fact.sourceIndex >= post.sources.length) {
-      ctx.addIssue({ code: 'custom', path: ['facts', index, 'sourceIndex'], message: 'Beleg zeigt auf keine Quelle' })
+      issues.push({ path: ['facts', index, 'sourceIndex'], message: 'Beleg zeigt auf keine Quelle' })
     }
+  }
+  return issues
+}
+
+export const insightsPostSchema = z.object(insightsPostFields).superRefine((post, ctx) => {
+  for (const issue of insightsPostRuleIssues(post)) {
+    ctx.addIssue({ code: 'custom', path: issue.path, message: issue.message })
   }
 })
 
 export type InsightsPost = z.infer<typeof insightsPostSchema>
+
+/**
+ * DIE FELDER, DIE DER SERVER SELBST FÜHRT (BI1 I2) — und deshalb aus einer
+ * Redaktions-Eingabe VERSCHWINDEN müssen.
+ *
+ * Sie sind keine Meinung des Formulars, sondern Ergebnis einer Handlung:
+ * `state` setzt der Zustands-Umschalter (mit den sechs Prüfregeln davor),
+ * `publishedAt`/`reviewedAt`/`reviewedBy` die Freigabe, `translatedAt`/
+ * `translationModel`/`translationPromptVersion` der Übersetzen-Lauf,
+ * `draftModel`/`draftPromptVersion` der Entwurfs-Lauf, `readingMinutes` das
+ * Speichern (§9.3: „beim Speichern, nicht beim Lesen") und `slugHistory` die
+ * Umbenennung (`insightsSlugHistoryPush`).
+ *
+ * Sie WEGZULASSEN reicht nicht — sie müssen ABGELEHNT werden können: ein
+ * durchgereichtes `state: 'published'` im PATCH-Body wäre die Freigabe an den
+ * sechs Regeln vorbei, und ein durchgereichtes `reviewedBy` eine Unterschrift
+ * unter fremdem Namen. `z.object` ist in Zod standardmässig nachsichtig gegen
+ * unbekannte Schlüssel (sie fallen still weg) — genau das ist hier richtig:
+ * das Formular schickt weg, was es nicht ändern darf, und der Server setzt es
+ * selbst.
+ *
+ * `translationReviewed` ist BEWUSST NICHT dabei: das Häkchen „Übersetzung
+ * redigiert" ist die Aussage eines Menschen, nicht das Ergebnis eines Laufs —
+ * es ist die EINZIGE Stelle, an der die zweite Fassung öffentlich wird (§3.2),
+ * und sie gehört dem Redakteur.
+ */
+export const INSIGHTS_SERVER_OWNED_FIELDS = [
+  'state',
+  'publishedAt',
+  'reviewedAt',
+  'reviewedBy',
+  'translatedAt',
+  'translationModel',
+  'translationPromptVersion',
+  'draftModel',
+  'draftPromptVersion',
+  'slugHistory',
+  'readingMinutes',
+] as const
+
+/** Was ein Redaktions-Formular schicken darf (s. `INSIGHTS_SERVER_OWNED_FIELDS`). */
+export const insightsPostEditSchema = z.object(insightsPostFields).omit({
+  state: true,
+  publishedAt: true,
+  reviewedAt: true,
+  reviewedBy: true,
+  translatedAt: true,
+  translationModel: true,
+  translationPromptVersion: true,
+  draftModel: true,
+  draftPromptVersion: true,
+  slugHistory: true,
+  readingMinutes: true,
+}).superRefine((post, ctx) => {
+  for (const issue of insightsPostRuleIssues(post)) {
+    ctx.addIssue({ code: 'custom', path: issue.path, message: issue.message })
+  }
+})
+
+export type InsightsPostEdit = z.infer<typeof insightsPostEditSchema>
 
 export function insightsTitleOf(post: Pick<InsightsPost, 'titleDe' | 'titleEn'>, locale: InsightsLocale): string {
   return locale === 'de' ? post.titleDe : post.titleEn
@@ -402,6 +500,69 @@ export function insightsPublicFassung(post: InsightsPost, wanted: InsightsLocale
 /** Ist der Beitrag überhaupt öffentlich? Zwei Zustände, nie mehr (§3.2). */
 export function insightsIsPublic(post: Pick<InsightsPost, 'state'>): boolean {
   return (INSIGHTS_PUBLIC_STATES as readonly string[]).includes(post.state)
+}
+
+/**
+ * DIE ERLAUBTEN ZUSTANDS-ÜBERGÄNGE (BI1 I2, §3.2/§9.4) — eine TABELLE, keine
+ * Kette von `if`.
+ *
+ * Der Zustand ist die Sicherung dieses Produkts („nicht die Disziplin"), und
+ * eine Sicherung, die in einer Route steht, gilt nur in dieser Route. Sie
+ * steht deshalb hier: pur, mit Gegenprobe, und von Server-Gate wie Oberfläche
+ * gelesen (der Editor zeigt genau die Knöpfe, die diese Tabelle erlaubt).
+ *
+ *  · `draft → review`     — die sechs Prüfregeln laufen davor.
+ *  · `review → draft`     — zurück an die Verfassenden; das ist kein Fehler,
+ *                           sondern der Normalfall einer Redaktion.
+ *  · `review → published` — die Freigabe. Sie setzt `publishedAt`,
+ *                           `reviewedAt` und `reviewedBy`.
+ *  · `published → updated`— eine Auffrischung eines stehenden Beitrags. Sie
+ *                           bleibt öffentlich (beide Zustände sind
+ *                           `INSIGHTS_PUBLIC_STATES`) und sagt dem Leser nur,
+ *                           dass sich etwas geändert hat.
+ *  · `published → draft` und `updated → draft` — ZURÜCKZIEHEN. Der einzige
+ *                           Weg aus der Öffentlichkeit heraus, und er führt
+ *                           bewusst ganz nach vorn: was zurückgezogen wurde,
+ *                           geht durch dieselben sechs Regeln wie beim ersten
+ *                           Mal.
+ *
+ * ZWEI ÜBERGÄNGE FEHLEN ABSICHTLICH. `updated → published` wäre eine
+ * Rücknahme der Aussage „hier hat sich etwas geändert" — der Hinweis gehört
+ * dem Leser, nicht der Redaktion. Und `updated → updated` hätte nichts zu
+ * ändern: ein Beitrag, der schon als aktualisiert dasteht, wird durch eine
+ * zweite Auffrischung nicht aktueller. Wer eine solche sichtbar machen will,
+ * zieht zurück und gibt neu frei.
+ */
+export const INSIGHTS_TRANSITIONS: Readonly<Record<InsightsState, readonly InsightsState[]>> = {
+  draft: ['review'],
+  review: ['draft', 'published'],
+  published: ['updated', 'draft'],
+  updated: ['draft'],
+}
+
+export function insightsTransitionAllowed(from: InsightsState, to: InsightsState): boolean {
+  return (INSIGHTS_TRANSITIONS[from] ?? []).includes(to)
+}
+
+/**
+ * DIE ADRESSE DER METHODIK (Entscheidung 7/11) — EINMAL, weil sie in der
+ * Prüfregel 5, im Entwurfs-Prompt und in der Oberfläche dieselbe sein muss.
+ */
+export const INSIGHTS_METHODOLOGY_PATH = '/brand-check/methodik'
+
+/**
+ * VERLINKT DER BEITRAG DIE METHODIK? (Prüfregel 5.)
+ *
+ * Gefragt wird der FLIESSTEXT beider Sprachen, nicht ein Häkchen: die Regel
+ * soll sagen, ob der Leser von der Zahl zur Methode kommt, und dieser Weg ist
+ * ein Link im Text. Ein Feld daneben wäre eine Behauptung über den Text.
+ *
+ * BEIDE Sprachen zählen und nicht nur die Grundfassung: die zweite Fassung
+ * entsteht maschinell aus der ersten, und ein Link überlebt eine Übersetzung.
+ * Fehlt er in beiden, fehlt er wirklich.
+ */
+export function insightsMethodologyLinked(post: Pick<InsightsPost, 'bodyDe' | 'bodyEn'>): boolean {
+  return post.bodyDe.includes(INSIGHTS_METHODOLOGY_PATH) || post.bodyEn.includes(INSIGHTS_METHODOLOGY_PATH)
 }
 
 /**

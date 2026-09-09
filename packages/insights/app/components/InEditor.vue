@@ -3,78 +3,177 @@ import type { EditorToolbarItem, TabsItem } from '@nuxt/ui'
 import type {
   InsightsLocale,
   InsightsPost,
+  InsightsPostEdit,
   InsightsReviewIssue,
   InsightsSource,
+  InsightsSourceKind,
+  InsightsState,
 } from '../../shared/insightsPost'
 import {
   INSIGHTS_FORMATS,
   INSIGHTS_LOCALES,
   INSIGHTS_QUOTE_MAX,
+  INSIGHTS_SOURCE_KINDS,
   INSIGHTS_STATES,
+  INSIGHTS_TOPICS,
+  INSIGHTS_TRANSITIONS,
+  insightsDuelFactSchema,
+  insightsMethodologyLinked,
+  insightsRankingSchema,
   insightsReadingMinutes,
   insightsReviewIssues,
 } from '../../shared/insightsPost'
-import { evidenceIsGrounded } from '../../../core/shared/evidenceGrounding'
+import {
+  INSIGHTS_BRIEF_MAX,
+  INSIGHTS_DRAFT_WORDS_DEFAULT,
+  INSIGHTS_DRAFT_WORDS_MAX,
+  INSIGHTS_DRAFT_WORDS_MIN,
+} from '../../shared/insightsPrompts'
+import type { InsightsBrandListItem, InsightsEvidenceResponse } from '../../shared/types/insightsApi'
+import { bodyToSave as decideBodyToSave } from '../../../core/shared/editorBody'
 import { insightsDay, insightsHost } from '../utils/insightsFormat'
+import { createInsightsBrandSchema } from '../utils/insightsForms'
 
 /**
- * PROTOTYP (I0) — DER REDAKTIONS-EDITOR (§9.4).
+ * DER REDAKTIONS-EDITOR (§9.4) — seit BI1 I2 die echte Fläche.
  *
- * Er ist ein KLICKDUMMY: er speichert nichts, ruft kein Modell und kennt
- * keine Route. Was er zeigt, ist der ABLAUF, an dem die Umsetzung gemessen
- * wird — und die vier Stellen, an denen dieses Produkt anders ist als ein
- * Blog-Editor:
+ * Die FORM ist die des freigegebenen Prototyps I0 und bleibt es: links Kopf,
+ * Sprach-Reiter und Quellen, rechts die Prüfregeln und die Übergänge. Was
+ * dazugekommen ist, ist alles, was ein Klickdummy nicht haben konnte —
+ * Speichern, echte Belege, ein Modell, ein Server-Gate.
  *
- *  1. **Der Zustand ist die Sicherung, nicht die Disziplin** (§3.2). Der
- *     Übergang nach `review` ist GESPERRT, solange eine der sechs Prüfregeln
- *     offen ist — und die Liste sagt, welche und wo.
- *  2. **Der Beleg wird deterministisch geprüft**, nicht mit KI (§9.4): steht
- *     das Zitat WÖRTLICH in der Quelle? Die Ampel je Quelle ist genau diese
- *     Antwort. Der Riegel liegt seit BI1 I1a im FUNDAMENT
- *     (`core/shared/evidenceGrounding.ts`) und wird von hier gerufen — der
- *     Prototyp hatte ihn noch selbst gebaut, und zwar case-INSENSITIV: „WIR
- *     RÖSTEN SELBST" wäre als Beleg für „wir rösten selbst" durchgegangen.
- *  3. **Die zweite Fassung ist eine Fassung, kein Cache** (§11 Frage 4). Der
- *     Übersetzen-Knopf legt einen ENTWURF an; öffentlich wird er erst mit dem
- *     Häkchen „redigiert". Bis dahin steht über dem Feld, dass er maschinell
- *     ist.
- *  4. **Die Grundsprache wird gespeichert** (Entscheidung 3) — anders als
- *     beim UGC-Muster, wo es keine gespeicherte Ausgangssprache gibt. Ohne
- *     sie wüsste niemand, welche Fassung die redigierte ist.
+ * ── DIESE KOMPONENTE SPRICHT MIT KEINER ROUTE ────────────────────────────
+ * Sie bekommt einen Beitrag herein und meldet Absichten hinaus (`save`,
+ * `changeState`, `checkEvidence`, `translate`, `draft`, `createBrand`). Alles
+ * Ladende, alle Fehlercodes und alle Toasts gehören der SEITE. Zwei Gründe:
+ * der Prototyp im `.playground` mountet dieselbe Komponente ohne Server, und
+ * eine Komponente, die selbst holt, kann man in keinem zweiten Zusammenhang
+ * mehr benutzen.
  *
- * `UEditor` ist gesetzt (CLAUDE.md, „für Editor-Funktionen"), und der
- * Werkzeug-Vorrat ist an `core/shared/markdown.ts` GEKOPPELT: fett, kursiv,
- * Code, h2+h3, Listen, Link, Zitat, Codeblock — mehr kann der Parser nicht,
- * und alles darüber hinaus stünde als roher Text im Beitrag.
+ * ── VIER DINGE, DIE MAN HIER NICHT „VEREINFACHEN" DARF ───────────────────
+ *  1. **`bodyToSave` je Sprache** (`core/shared/editorBody.ts`). Öffnen und
+ *     Speichern OHNE Tastendruck darf nichts ändern — Tiptap normalisiert beim
+ *     Serialisieren, und ohne diesen Riegel meldete jeder Blick in einen
+ *     Beitrag eine Bearbeitung.
+ *  2. **Der Werkzeug-Vorrat ist an `core/shared/markdown.ts` gekoppelt.** Der
+ *     Parser kann fett/kursiv/Code/h2+h3/Listen/Link/Zitat/Codeblock — mehr
+ *     nicht. `strike: false`, `enableInputRules`/`enablePasteRules` als
+ *     ERLAUBNISLISTE (fail-closed), `transformPastedHTML` gegen die
+ *     Trennlinie, die `UEditor` unbedingt anhängt.
+ *  3. **`gfm: false` beim LESEN.** Mit Nuxt UIs Vorgabe parst `marked`
+ *     `~~alt~~` als Durchstreichung — die Marke gibt es hier nicht, und ein
+ *     Bestands-Beitrag verlöre die vier Zeichen beim blossen AUFSCHLAGEN.
+ *  4. **Die zwei Sprachspalten werden EINZELN geschrieben.** Ein `v-model` auf
+ *     einen berechneten Schlüssel wäre kürzer und schriebe beim Reiterwechsel
+ *     in die falsche Spalte, solange Vue den alten Wert noch hält.
  */
 const props = defineProps<{
   post: InsightsPost
-  /** Der Rohtext je Quelle — nur damit ist die Beleg-Prüfung deterministisch. */
-  sourceTexts?: Record<string, string>
-  /** Marken-Zeilen, die es gibt (Prüfregel 6). */
-  knownBrandIds?: readonly string[]
-  /** Verlinkt der Beitrag die Methodik-Seite? (Prüfregel 5.) */
-  methodologyLinked?: boolean
-  /** Wörter, die der Herabsetzungs-Filter beanstandet (Prüfregel 4). */
-  flagWords?: readonly string[]
+  /** Die Marken-Zeilen zur Auswahl (Prüfregel 6 zählt nur die nicht entfernten). */
+  brands: readonly InsightsBrandListItem[]
+  knownBrandIds: readonly string[]
+  /** Die offenen Prüfpunkte aus der LETZTEN Server-Antwort. */
+  issues: readonly InsightsReviewIssue[]
+  /** Die Beleg-Ampel je Quellen-Index — leer heisst „noch nicht geprüft". */
+  evidence?: Readonly<Record<number, InsightsEvidenceResponse>>
+  saving?: boolean
+  translating?: boolean
+  drafting?: boolean
+  transitioning?: boolean
+  /** Welche Quelle gerade geprüft wird (Index), sonst `null`. */
+  checkingIndex?: number | null
+}>()
+
+const emit = defineEmits<{
+  save: [InsightsPostEdit]
+  changeState: [InsightsState]
+  checkEvidence: [number]
+  translate: []
+  draft: [{ brief: string, targetWords: number }]
+  createBrand: [{ name: string, homepage: string, industry: string }]
 }>()
 
 const { t, locale } = useI18n()
-const toast = useToast()
 
-/* Der Entwurf, an dem gearbeitet wird. Eine KOPIE: der Klickdummy darf die
- * Demo-Daten nicht verändern, sonst „speichert" ein Reload mit. */
-const draft = reactive<InsightsPost>({ ...props.post, sources: props.post.sources.map(source => ({ ...source })) })
+// ── Der Entwurf, an dem gearbeitet wird ────────────────────────────────────
 
-const stateItems = computed(() => INSIGHTS_STATES.map(state => ({ label: t(`insights.state.${state}`), value: state })))
+/** Eine tiefe KOPIE: die Prop gehört der Seite, und ein `sources`-Eintrag,
+ *  den beide teilen, änderte den Bestand ohne Speichern. */
+function clone(post: InsightsPost): InsightsPost {
+  return {
+    ...post,
+    slugHistory: [...post.slugHistory],
+    topics: [...post.topics],
+    sources: post.sources.map(source => ({ ...source })),
+    brandRefs: post.brandRefs.map(ref => ({ ...ref })),
+    facts: post.facts.map(fact => ({ ...fact })),
+    ranking: post.ranking ? { ...post.ranking, entries: post.ranking.entries.map(entry => ({ ...entry })) } : null,
+  }
+}
+
+const draft = reactive<InsightsPost>(clone(props.post))
+
+/**
+ * Das Fakten-Feld steht HIER OBEN, obwohl sein Abschnitt weiter unten liegt:
+ * der `watch` auf `props.post` schreibt es mit, und eine `const` weiter unten
+ * wäre in dem Moment noch in der zeitlichen Totzone. Heute liefe das gut
+ * (`watch` ruft ohne `immediate` nicht sofort), aber die Sicherung soll nicht
+ * an dieser Kenntnis hängen.
+ */
+const factsText = ref('')
+const factsError = ref('')
+
+/**
+ * „Öffnen darf nichts ändern": `pristineBody` ist der Text aus der API,
+ * `normalizedBody` die erste Fassung, die der Editor von sich aus schreibt.
+ * Warum das nötig ist: `core/shared/editorBody.ts`.
+ */
+const pristineBody = reactive<Record<InsightsLocale, string>>({ de: props.post.bodyDe, en: props.post.bodyEn })
+const normalizedBody = reactive<Record<InsightsLocale, string | null>>({ de: null, en: null })
+
+for (const code of INSIGHTS_LOCALES) {
+  watch(() => (code === 'de' ? draft.bodyDe : draft.bodyEn), (value) => {
+    if (normalizedBody[code] === null && value !== pristineBody[code]) normalizedBody[code] = value
+  })
+}
+
+function bodyToSave(code: InsightsLocale): string {
+  return decideBodyToSave({
+    current: code === 'de' ? draft.bodyDe : draft.bodyEn,
+    pristine: pristineBody[code],
+    normalized: normalizedBody[code],
+  })
+}
+
+/** Kommt ein neuer Stand vom Server (gespeichert, übersetzt, entworfen),
+ *  beginnt der Editor von vorn — sonst stünde die alte Fassung über der neuen. */
+watch(() => props.post, (next) => {
+  Object.assign(draft, clone(next))
+  pristineBody.de = next.bodyDe
+  pristineBody.en = next.bodyEn
+  normalizedBody.de = null
+  normalizedBody.en = null
+  factsText.value = factsAsText()
+  factsError.value = ''
+})
+
+// ── Kopfzeile ──────────────────────────────────────────────────────────────
+
 const formatItems = computed(() => INSIGHTS_FORMATS.map(format => ({ label: t(`insights.format.${format}`), value: format })))
 const localeItems = computed(() => INSIGHTS_LOCALES.map(code => ({
   label: t(`insights.list.locale${code === 'de' ? 'De' : 'En'}`),
   value: code,
 })))
+const topicItems = computed(() => INSIGHTS_TOPICS.map(topic => ({ label: topic.label, value: topic.key })))
 
-/* Zwei Reiter: Grundfassung und zweite Fassung. Welche Sprache welcher Reiter
- * ist, hängt an `baseLocale` — nicht an einer festen Reihenfolge. */
+const stateItems = computed(() => INSIGHTS_STATES.map(state => ({ label: t(`insights.state.${state}`), value: state })))
+
+/** Lesezeit der GRUNDFASSUNG — dieselbe Rechnung, die der Server beim
+ *  Speichern anstellt (§9.3). Hier ist sie nur die Vorschau darauf. */
+const readingMinutes = computed(() => insightsReadingMinutes(draft.baseLocale === 'de' ? draft.bodyDe : draft.bodyEn))
+
+// ── Zwei Sprach-Reiter ─────────────────────────────────────────────────────
+
 const otherLocale = computed<InsightsLocale>(() => (draft.baseLocale === 'de' ? 'en' : 'de'))
 const activeTab = ref<'base' | 'translation'>('base')
 const tabs = computed<TabsItem[]>(() => [
@@ -84,9 +183,6 @@ const tabs = computed<TabsItem[]>(() => [
 
 const editing = computed<InsightsLocale>(() => (activeTab.value === 'base' ? draft.baseLocale : otherLocale.value))
 
-/* Schreibende Zugriffe auf die richtige Sprachspalte. Ein `v-model` auf einen
- * berechneten Schlüssel wäre kürzer und würde beim Reiterwechsel in die
- * falsche Spalte schreiben, solange Vue den alten Wert noch hält. */
 const titleValue = computed({
   get: () => (editing.value === 'de' ? draft.titleDe : draft.titleEn),
   set: (value: string) => { if (editing.value === 'de') draft.titleDe = value; else draft.titleEn = value },
@@ -100,7 +196,8 @@ const bodyValue = computed({
   set: (value: string) => { if (editing.value === 'de') draft.bodyDe = value; else draft.bodyEn = value },
 })
 
-/* Der Werkzeug-Vorrat = was `core/shared/markdown.ts` lesen kann. */
+// ── Der Editor selbst (s. Kopf, Punkte 2 und 3) ────────────────────────────
+
 const toolbarItems: EditorToolbarItem[] = [
   { kind: 'mark', mark: 'bold', icon: 'i-ph-text-b' },
   { kind: 'mark', mark: 'italic', icon: 'i-ph-text-italic' },
@@ -113,37 +210,194 @@ const toolbarItems: EditorToolbarItem[] = [
   { kind: 'blockquote', icon: 'i-ph-quotes' },
   { kind: 'codeBlock', icon: 'i-ph-code' },
 ]
-/* Durchgestrichen kennt der Parser nicht — der Editor bietet es gar nicht an. */
-const editorStarterKit = { strike: false as const }
+const editorStarterKit = { strike: false as const, heading: { levels: [2, 3] as (2 | 3)[] } }
+const editorMarkdown = { markedOptions: { gfm: false } } as const
+/** Erlaubnisliste, fail-closed: eine neue Extension ist damit automatisch aus. */
+const RULE_EXTENSIONS = ['bold', 'italic', 'code', 'codeBlock', 'heading', 'bulletList', 'orderedList', 'blockquote', 'link']
+/** Der zweite Weg zu einer Trennlinie — `UEditor` hängt `HorizontalRule`
+ *  unbedingt an, der Parser kennt sie nicht. */
+const editorProps = { transformPastedHTML: (html: string) => html.replace(/<hr\b[^>]*>/gi, '') }
 
-// ── Beleg-Prüfung (deterministisch, s. Kopf Nr. 2) ─────────────────────────
+// ── Quellen ────────────────────────────────────────────────────────────────
 
-const checked = ref<Record<number, boolean>>({})
-
-function quoteGrounded(source: InsightsSource): boolean {
-  return evidenceIsGrounded({ quote: source.quote, pageText: props.sourceTexts?.[source.url] ?? '' })
+/** Ausgeschrieben statt gerechnet: `brand-site` und `own-data` tragen einen
+ *  Bindestrich, und ein zusammengebauter Schlüssel wäre für den i18n-Wächter
+ *  unsichtbar. */
+const SOURCE_KIND_KEY: Record<InsightsSourceKind, string> = {
+  'brand-site': 'insights.sources.kindBrandSite',
+  'press': 'insights.sources.kindPress',
+  'wikipedia': 'insights.sources.kindWikipedia',
+  'youtube': 'insights.sources.kindYoutube',
+  'own-data': 'insights.sources.kindOwnData',
 }
 
-function checkEvidence(index: number): void {
-  const source = draft.sources[index]
-  if (!source) return
-  const ok = quoteGrounded(source)
-  checked.value = { ...checked.value, [index]: ok }
-  toast.add({
-    title: ok ? t('insights.editor.evidenceOk') : t('insights.editor.evidenceFail'),
-    color: ok ? 'success' : 'error',
-    duration: 2500,
-  })
+const sourceKindItems = computed(() => INSIGHTS_SOURCE_KINDS.map(kind => ({
+  label: t(SOURCE_KIND_KEY[kind]),
+  value: kind,
+})))
+
+function addSource(): void {
+  const fresh: InsightsSource = { url: '', publisher: '', date: '', kind: 'press' as InsightsSourceKind, quote: '', license: '' }
+  draft.sources.push(fresh)
 }
 
-// ── Die sechs Prüfregeln ───────────────────────────────────────────────────
+/**
+ * EINE QUELLE ENTFERNEN — und die Beleg-Zeiger MITZIEHEN.
+ *
+ * `facts[].sourceIndex` und `marks[].sourceIndex` zeigen auf eine POSITION.
+ * Löscht man Quelle 2, zeigt jeder Beleg ab 3 danach auf die falsche Quelle —
+ * und zwar unsichtbar, weil die Zahl weiter gültig ist. Zeiger auf genau
+ * diese Quelle werden ungültig gesetzt (`-1`), damit Prüfregel 3 sie zeigt.
+ */
+function removeSource(index: number): void {
+  draft.sources.splice(index, 1)
+  for (const fact of draft.facts) {
+    if (fact.sourceIndex === index) fact.sourceIndex = -1
+    else if (fact.sourceIndex > index) fact.sourceIndex -= 1
+  }
+  factsText.value = factsAsText()
+}
 
-const issues = computed<InsightsReviewIssue[]>(() => insightsReviewIssues(draft, {
-  sourceTexts: props.sourceTexts,
-  flagText: text => (props.flagWords ?? []).filter(word => text.toLowerCase().includes(word.toLowerCase())),
+/**
+ * DIE AMPEL EINER QUELLE als FLACHER Wert — bewusst nicht das rohe Ergebnis.
+ *
+ * Im Template stünden sonst drei Nicht-Null-Behauptungen (`evidence[i]!`) für
+ * denselben Wert; jede davon ist eine Zusage an den Übersetzer, die niemand
+ * prüft. `known: false` sagt dasselbe, ohne dass jemand sie geben muss.
+ */
+interface InsightsEvidenceView {
+  known: boolean
+  grounded: boolean
+  reasonKey: string
+}
+
+function evidenceOf(index: number): InsightsEvidenceView {
+  const entry: InsightsEvidenceResponse | undefined = props.evidence?.[index]
+  if (!entry) return { known: false, grounded: false, reasonKey: 'insights.editor.evidenceUnchecked' }
+  return { known: true, grounded: entry.grounded, reasonKey: `insights.editor.evidenceReason.${entry.reason}` }
+}
+
+// ── Marken ─────────────────────────────────────────────────────────────────
+
+const brandItems = computed(() => props.brands.map(brand => ({
+  label: brand.state === 'removed' ? `${brand.name} · ${t('insights.editor.brandRemoved')}` : brand.name,
+  value: brand.id,
+})))
+
+const selectedBrandIds = computed({
+  get: () => draft.brandRefs.map(ref => ref.brandId),
+  set: (ids: string[]) => {
+    // Bestehende Verweise BEHALTEN: sie tragen `checkId`, `libraryKey` und
+    // `publicationId`, und ein Neuaufbau der Liste würde sie stillschweigend
+    // verlieren.
+    const existing = new Map(draft.brandRefs.map(ref => [ref.brandId, ref]))
+    draft.brandRefs = ids.map(id => existing.get(id) ?? { brandId: id, checkId: '', libraryKey: '', publicationId: '' })
+  },
+})
+
+const brandDialogOpen = ref(false)
+const brandForm = reactive({ name: '', homepage: '', industry: '' })
+const brandSchema = computed(() => createInsightsBrandSchema(t))
+
+function submitBrand(): void {
+  emit('createBrand', { name: brandForm.name, homepage: brandForm.homepage, industry: brandForm.industry })
+  brandDialogOpen.value = false
+  brandForm.name = ''
+  brandForm.homepage = ''
+  brandForm.industry = ''
+}
+
+// ── Fakten (Duell-Zeilen bzw. Ranking) ─────────────────────────────────────
+
+/**
+ * IN I2 BEWUSST EIN JSON-FELD, kein Zeilen-Editor.
+ *
+ * Die beiden Faktenformen (§9.3) sind der aufwendigste Teil der Oberfläche und
+ * betreffen zwei der vier Formate. Ein halbfertiger Zeilen-Editor wäre teurer
+ * als dieses Feld und schlechter als der richtige — der kommt, wenn das erste
+ * echte Duell und das erste Ranking geschrieben sind und man weiss, woran man
+ * sich stösst. Was NICHT fehlt, ist die Prüfung: das Feld geht durch dasselbe
+ * Zod-Schema wie der Server, und ungültiges JSON wird nicht übernommen.
+ */
+function factsAsText(): string {
+  if (draft.format === 'ranking') return draft.ranking ? JSON.stringify(draft.ranking, null, 2) : ''
+  return draft.facts.length ? JSON.stringify(draft.facts, null, 2) : ''
+}
+
+factsText.value = factsAsText()
+
+function applyFacts(): void {
+  factsError.value = ''
+  const raw = factsText.value.trim()
+  if (!raw) {
+    draft.facts = []
+    draft.ranking = null
+    return
+  }
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  }
+  catch {
+    factsError.value = t('insights.editor.factsInvalidJson')
+    return
+  }
+  if (draft.format === 'ranking') {
+    const result = insightsRankingSchema.safeParse(parsed)
+    if (!result.success) {
+      factsError.value = t('insights.editor.factsInvalid')
+      return
+    }
+    draft.ranking = result.data
+    draft.facts = []
+    return
+  }
+  const result = insightsDuelFactSchema.array().safeParse(parsed)
+  if (!result.success) {
+    factsError.value = t('insights.editor.factsInvalid')
+    return
+  }
+  draft.facts = result.data
+  draft.ranking = null
+}
+
+const showFacts = computed(() => draft.format === 'duel' || draft.format === 'ranking')
+
+// ── KI-Entwurf ─────────────────────────────────────────────────────────────
+
+const brief = ref('')
+const targetWords = ref(INSIGHTS_DRAFT_WORDS_DEFAULT)
+
+function runDraft(): void {
+  if (!brief.value.trim()) return
+  emit('draft', { brief: brief.value.trim(), targetWords: targetWords.value })
+}
+
+// ── Prüfregeln ─────────────────────────────────────────────────────────────
+
+/**
+ * DIE FORMREGELN RECHNEN LOKAL MIT — am Entwurf, nicht erst nach dem Speichern.
+ *
+ * Das Schema des Servers weist eine Quelle ohne Herausgeber schon beim
+ * SPEICHERN ab (§9.3: die Prüfung sitzt im Schema UND im Übergang). Käme die
+ * Liste nur aus der Server-Antwort, stünde Regel 2 nie darin — der Redakteur
+ * sähe einen 400 und keinen Grund (im Klick-Beweis I2 genau so). Deshalb
+ * laufen die puren Regeln (Herausgeber, Datum, Lizenz, Beleg-Zeiger, Marken-
+ * Zeile, Methodik-Link) hier über den ENTWURF; vom Server kommen nur die zwei
+ * Punkte dazu, die ein Browser nicht rechnen kann: der Beleg-Abruf und der
+ * Herabsetzungs-Riegel. Beide Listen zusammen, ohne Doppelung.
+ */
+const SERVER_ONLY_CODES = new Set<InsightsReviewIssue['code']>(['quote_not_grounded', 'disparagement'])
+
+const localIssues = computed<InsightsReviewIssue[]>(() => insightsReviewIssues(draft, {
   knownBrandIds: props.knownBrandIds,
-  methodologyLinked: props.methodologyLinked,
+  methodologyLinked: insightsMethodologyLinked(draft),
 }))
+
+const shownIssues = computed<InsightsReviewIssue[]>(() => [
+  ...localIssues.value,
+  ...props.issues.filter(issue => SERVER_ONLY_CODES.has(issue.code)),
+])
 
 const ISSUE_KEY: Record<string, string> = {
   quote_too_long: 'insights.editor.issue.quoteTooLong',
@@ -157,8 +411,28 @@ const ISSUE_KEY: Record<string, string> = {
   brand_without_entity: 'insights.editor.issue.brandWithoutEntity',
 }
 
+/**
+ * Der Herabsetzungs-Riegel liefert als `detail` seinen GRUND
+ * (`competitor_name` · `competitor_domain` · `disparagement`), keinen
+ * Textausschnitt — der Redakteur bekäme sonst den rohen Schlüssel zu lesen
+ * (im Klick-Beweis I2 stand dort wörtlich `competitor_domain`). Bekannte
+ * Gründe werden übersetzt, alles andere bleibt, was es ist.
+ */
+const REASON_KEY: Record<string, string> = {
+  competitor_name: 'insights.editor.issue.reason.competitorName',
+  competitor_domain: 'insights.editor.issue.reason.competitorDomain',
+  disparagement: 'insights.editor.issue.reason.disparagement',
+}
+
+function issueDetail(issue: InsightsReviewIssue): string {
+  const detail = issue.detail ?? ''
+  if (issue.code !== 'disparagement') return detail
+  const key = REASON_KEY[detail]
+  return key ? t(key) : detail
+}
+
 function issueText(issue: InsightsReviewIssue): string {
-  return t(ISSUE_KEY[issue.code] ?? 'insights.editor.issue.quoteNotGrounded', { max: INSIGHTS_QUOTE_MAX, detail: issue.detail ?? '' })
+  return t(ISSUE_KEY[issue.code] ?? 'insights.editor.issue.quoteNotGrounded', { max: INSIGHTS_QUOTE_MAX, detail: issueDetail(issue) })
 }
 
 function issueWhere(issue: InsightsReviewIssue): string {
@@ -166,39 +440,86 @@ function issueWhere(issue: InsightsReviewIssue): string {
   return t(`insights.editor.at.${issue.at.kind}`, { number: issue.at.index + 1 })
 }
 
-// ── Zustands-Übergänge (Klickdummy: sie ändern nur die Anzeige) ────────────
+// ── Zustands-Übergänge ─────────────────────────────────────────────────────
 
-function toReview(): void {
-  if (issues.value.length > 0) return
-  draft.state = 'review'
+/** Genau die Knöpfe, die die Tabelle im Vertrag erlaubt — eine zweite Liste
+ *  hier wäre die zweite Wahrheit über denselben Weg. */
+const transitions = computed<InsightsState[]>(() => [...(INSIGHTS_TRANSITIONS[props.post.state] ?? [])])
+
+function transitionLabel(to: InsightsState): string {
+  const from = props.post.state
+  if (to === 'review') return t('insights.editor.toReview')
+  if (to === 'published') return t('insights.editor.publish')
+  if (to === 'updated') return t('insights.editor.markUpdated')
+  return from === 'review' ? t('insights.editor.backToDraft') : t('insights.editor.unpublish')
 }
 
-function publish(): void {
-  draft.state = 'published'
-  draft.publishedAt = draft.publishedAt || new Date().toISOString().slice(0, 10)
+function transitionIcon(to: InsightsState): string {
+  if (to === 'review') return 'i-ph-arrow-right'
+  if (to === 'published') return 'i-ph-check'
+  if (to === 'updated') return 'i-ph-arrows-clockwise'
+  return 'i-ph-arrow-u-left-up'
 }
 
-/**
- * Der Übersetzen-Knopf. Im Produkt ruft er den REDAKTIONS-Endpunkt (§11
- * Frage 4, Drossel 10/Stunde + 50/Tag je Konto); hier setzt er nur den
- * Stempel, damit der ZUSTAND sichtbar wird: Entwurf da, Häkchen fehlt.
- */
-function translate(): void {
-  draft.translatedAt = new Date().toISOString().slice(0, 10)
-  draft.translationModel = 'demo-modell'
-  draft.translationPromptVersion = 'insights-t-1'
-  draft.translationReviewed = false
-  activeTab.value = 'translation'
+// ── Speichern ──────────────────────────────────────────────────────────────
+
+function editPayload(): InsightsPostEdit {
+  return {
+    format: draft.format,
+    slug: draft.slug,
+    baseLocale: draft.baseLocale,
+    titleDe: draft.titleDe,
+    titleEn: draft.titleEn,
+    dekDe: draft.dekDe,
+    dekEn: draft.dekEn,
+    bodyDe: bodyToSave('de'),
+    bodyEn: bodyToSave('en'),
+    translationReviewed: draft.translationReviewed,
+    topics: [...draft.topics],
+    sources: draft.sources.map(source => ({ ...source })),
+    brandRefs: draft.brandRefs.map(ref => ({ ...ref })),
+    facts: draft.facts.map(fact => ({ ...fact })),
+    ranking: draft.ranking,
+    noteInternal: draft.noteInternal,
+  }
 }
 
-/** Lesezeit beim „Speichern" — nie beim Lesen (§9.3). */
-const readingMinutes = computed(() => insightsReadingMinutes(draft.baseLocale === 'de' ? draft.bodyDe : draft.bodyEn))
+/** Was der Server hätte, wenn man JETZT speichert — gegen den Bestand
+ *  verglichen. Ohne `bodyToSave` meldete jedes Öffnen „geändert". */
+const pristinePayload = computed(() => JSON.stringify({
+  format: props.post.format,
+  slug: props.post.slug,
+  baseLocale: props.post.baseLocale,
+  titleDe: props.post.titleDe,
+  titleEn: props.post.titleEn,
+  dekDe: props.post.dekDe,
+  dekEn: props.post.dekEn,
+  bodyDe: props.post.bodyDe,
+  bodyEn: props.post.bodyEn,
+  translationReviewed: props.post.translationReviewed,
+  topics: props.post.topics,
+  sources: props.post.sources,
+  brandRefs: props.post.brandRefs,
+  facts: props.post.facts,
+  ranking: props.post.ranking,
+  noteInternal: props.post.noteInternal,
+}))
+
+const dirty = computed(() => JSON.stringify(editPayload()) !== pristinePayload.value)
+
+function save(): void {
+  emit('save', editPayload())
+}
+
+// ── Vorschau ───────────────────────────────────────────────────────────────
+
+const previewOpen = ref(false)
 </script>
 
 <template>
   <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
     <div class="min-w-0 space-y-4">
-      <!-- Kopfzeile: Format · Grundsprache · Zustand -->
+      <!-- Kopfzeile: Format · Grundsprache · Adresse · Zustand -->
       <div class="bw-card p-6">
         <div class="flex flex-wrap items-end gap-4">
           <div>
@@ -209,17 +530,32 @@ const readingMinutes = computed(() => insightsReadingMinutes(draft.baseLocale ==
             <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.editor.baseLocale') }}</p>
             <USelect v-model="draft.baseLocale" :items="localeItems" value-key="value" class="mt-1 w-40" />
           </div>
+          <div class="min-w-64 flex-1">
+            <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.editor.slug') }}</p>
+            <UInput v-model="draft.slug" class="mt-1 w-full font-mono" />
+          </div>
           <div class="ml-auto flex items-center gap-2">
             <span
               v-for="state in stateItems" :key="state.value"
               class="bw-label rounded-full px-3 py-1"
-              :style="draft.state === state.value
+              :style="post.state === state.value
                 ? 'background: var(--bw-ink); color: var(--bw-paper)'
                 : 'background: var(--bw-surface); color: var(--bw-muted)'"
             >{{ state.label }}</span>
           </div>
         </div>
         <p class="bw-pending mt-3">{{ t('insights.editor.baseLocaleNote') }}</p>
+        <div class="mt-4">
+          <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.editor.topics') }}</p>
+          <USelectMenu
+            v-model="draft.topics"
+            :items="topicItems"
+            value-key="value"
+            multiple
+            class="mt-1 w-full"
+            :placeholder="t('insights.list.topicAll')"
+          />
+        </div>
       </div>
 
       <!-- Zwei Sprach-Reiter -->
@@ -230,15 +566,15 @@ const readingMinutes = computed(() => insightsReadingMinutes(draft.baseLocale ==
         <UAlert
           v-if="activeTab === 'translation' && draft.translatedAt && !draft.translationReviewed"
           class="mt-4" icon="i-ph-robot" color="warning" variant="subtle"
-          :title="t('insights.editor.machineNote', { date: insightsDay(draft.translatedAt, locale) })"
+          :title="t('insights.editor.machineNote', { date: insightsDay(draft.translatedAt.slice(0, 10), locale) })"
         />
 
         <div class="mt-4 space-y-3">
           <UFormField :label="t('insights.editor.titleField')">
-            <UInput v-model="titleValue" class="w-full" />
+            <UInput v-model="titleValue" class="w-full" :maxlength="200" />
           </UFormField>
           <UFormField :label="t('insights.editor.dekField')">
-            <UTextarea v-model="dekValue" :rows="2" class="w-full" />
+            <UTextarea v-model="dekValue" :rows="2" class="w-full" :maxlength="400" />
           </UFormField>
           <UFormField :label="t('insights.editor.bodyField')">
             <UEditor
@@ -246,10 +582,14 @@ const readingMinutes = computed(() => insightsReadingMinutes(draft.baseLocale ==
               v-model="bodyValue"
               content-type="markdown"
               :starter-kit="editorStarterKit"
+              :markdown="editorMarkdown"
               :image="false"
               :mention="false"
+              :enable-input-rules="RULE_EXTENSIONS"
+              :enable-paste-rules="RULE_EXTENSIONS"
+              :editor-props="editorProps"
               class="w-full rounded-md border border-default"
-              :ui="{ base: 'px-3 py-2', content: 'min-h-48' }"
+              :ui="{ base: 'px-3 py-2', content: 'min-h-64' }"
             >
               <UEditorToolbar :editor="editor" :items="toolbarItems" class="border-b border-default px-1.5 py-1" />
             </UEditor>
@@ -260,11 +600,12 @@ const readingMinutes = computed(() => insightsReadingMinutes(draft.baseLocale ==
           <UButton
             v-if="activeTab === 'translation'"
             :label="t('insights.editor.translate')" icon="i-ph-translate"
+            :loading="translating"
             color="neutral" variant="ghost" class="rounded-full" style="background: var(--bw-surface)"
-            @click="translate"
+            @click="emit('translate')"
           />
           <UCheckbox
-            v-if="activeTab === 'translation' && draft.translatedAt"
+            v-if="activeTab === 'translation'"
             v-model="draft.translationReviewed"
             :label="t('insights.editor.translationReviewed')"
           />
@@ -274,51 +615,167 @@ const readingMinutes = computed(() => insightsReadingMinutes(draft.baseLocale ==
         </div>
       </div>
 
+      <!-- KI-Entwurf: nur im Entwurf (§9.4, „kein Weg von der KI nach review") -->
+      <div v-if="post.state === 'draft'" class="bw-card p-6">
+        <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.editor.draftPanel') }}</p>
+        <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('insights.editor.draftHint') }}</p>
+        <UFormField class="mt-3" :label="t('insights.editor.draftBrief')">
+          <UTextarea
+            v-model="brief" :rows="4" class="w-full"
+            :maxlength="INSIGHTS_BRIEF_MAX"
+            :placeholder="t('insights.editor.draftBriefPlaceholder')"
+          />
+        </UFormField>
+        <div class="mt-3 flex flex-wrap items-end gap-3">
+          <UFormField :label="t('insights.editor.draftWords')">
+            <UInputNumber
+              v-model="targetWords"
+              :min="INSIGHTS_DRAFT_WORDS_MIN" :max="INSIGHTS_DRAFT_WORDS_MAX" :step="50"
+              class="w-40"
+            />
+          </UFormField>
+          <UButton
+            :label="t('insights.editor.draftRun')" icon="i-ph-sparkle"
+            :loading="drafting" :disabled="!brief.trim()"
+            class="rounded-full" @click="runDraft"
+          />
+        </div>
+      </div>
+
       <!-- Quellen-Panel mit Beleg-Ampel -->
       <div class="bw-card p-6">
         <div class="flex flex-wrap items-baseline justify-between gap-3">
           <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.editor.sourcesPanel') }}</p>
           <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.sources.lead', { max: INSIGHTS_QUOTE_MAX }) }}</p>
         </div>
-        <ul class="mt-4 space-y-4">
-          <li v-for="(source, index) in draft.sources" :key="index" class="border-b pb-4 last:border-0" style="border-color: var(--bw-line)">
+
+        <ul class="mt-4 space-y-5">
+          <li v-for="(source, index) in draft.sources" :key="index" class="border-b pb-5 last:border-0" style="border-color: var(--bw-line)">
             <div class="flex flex-wrap items-center gap-2">
               <span class="bw-label" style="color: var(--bw-muted)">{{ index + 1 }}</span>
               <span class="bw-label" style="color: var(--bw-ink-soft)">{{ insightsHost(source.url) }}</span>
-              <span class="bw-label" style="color: var(--bw-muted)">{{ source.publisher }} {{ source.date }}</span>
               <UButton
                 :label="t('insights.editor.checkEvidence')" size="xs" color="neutral" variant="ghost"
+                :loading="checkingIndex === index" :disabled="!source.url || !source.quote"
                 class="ml-auto rounded-full" style="background: var(--bw-surface)"
-                @click="checkEvidence(index)"
+                @click="emit('checkEvidence', index)"
               />
-              <!-- Die Ampel: geprüft und wahr · geprüft und falsch · ungeprüft. -->
-              <span
-                class="bw-label inline-flex items-center gap-1"
-                :style="checked[index] === undefined
-                  ? 'color: var(--bw-muted)'
-                  : (checked[index] ? 'color: var(--bw-accent)' : 'color: var(--bw-stale)')"
-              >
-                <UIcon
-                  :name="checked[index] === undefined ? 'i-ph-circle-dashed' : (checked[index] ? 'i-ph-check-circle-fill' : 'i-ph-x-circle-fill')"
-                  class="size-4"
-                />
-                {{ checked[index] === undefined
-                  ? t('insights.editor.evidenceUnchecked')
-                  : (checked[index] ? t('insights.editor.evidenceOk') : t('insights.editor.evidenceFail')) }}
-              </span>
+              <UButton
+                icon="i-ph-trash" size="xs" color="neutral" variant="ghost"
+                :aria-label="t('insights.editor.sourceRemove')"
+                @click="removeSource(index)"
+              />
             </div>
-            <UTextarea v-model="source.quote" :rows="2" class="mt-2 w-full" :maxlength="INSIGHTS_QUOTE_MAX" />
+
+            <!-- Die Ampel: geprüft und wahr · geprüft und falsch · ungeprüft. -->
+            <p
+              class="bw-label mt-2 inline-flex items-center gap-1"
+              :style="!evidenceOf(index).known
+                ? 'color: var(--bw-muted)'
+                : (evidenceOf(index).grounded ? 'color: var(--bw-accent)' : 'color: var(--bw-stale)')"
+            >
+              <UIcon
+                :name="!evidenceOf(index).known ? 'i-ph-circle-dashed' : (evidenceOf(index).grounded ? 'i-ph-check-circle-fill' : 'i-ph-x-circle-fill')"
+                class="size-4"
+              />
+              {{ t(evidenceOf(index).reasonKey) }}
+            </p>
+
+            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+              <UFormField :label="t('insights.editor.sourceUrl')">
+                <UInput v-model="source.url" class="w-full font-mono text-xs" :maxlength="512" />
+              </UFormField>
+              <UFormField :label="t('insights.editor.sourceKind')">
+                <USelect v-model="source.kind" :items="sourceKindItems" value-key="value" class="w-full" />
+              </UFormField>
+              <UFormField :label="t('insights.editor.sourcePublisher')">
+                <UInput v-model="source.publisher" class="w-full" :maxlength="160" />
+              </UFormField>
+              <UFormField :label="t('insights.editor.sourceDate')">
+                <UInput v-model="source.date" type="date" class="w-full" />
+              </UFormField>
+              <UFormField v-if="source.kind === 'wikipedia'" class="sm:col-span-2" :label="t('insights.editor.sourceLicense')">
+                <UInput v-model="source.license" class="w-full" :maxlength="200" />
+              </UFormField>
+              <UFormField class="sm:col-span-2" :label="t('insights.editor.sourceQuote')">
+                <UTextarea v-model="source.quote" :rows="2" class="w-full" :maxlength="INSIGHTS_QUOTE_MAX" />
+              </UFormField>
+            </div>
           </li>
         </ul>
+
+        <CoreEmptyState
+          v-if="draft.sources.length === 0"
+          class="mt-4"
+          icon="i-ph-link-simple"
+          :title="t('insights.editor.sourcesEmpty')"
+          :description="t('insights.editor.sourcesEmptyHint')"
+        />
+
+        <UButton
+          class="mt-4 rounded-full" icon="i-ph-plus" color="neutral" variant="ghost"
+          style="background: var(--bw-surface)"
+          :label="t('insights.editor.sourceAdd')"
+          @click="addSource"
+        />
+      </div>
+
+      <!-- Marken-Panel: Auswahl und Schnellanlage (Prüfregel 6) -->
+      <div class="bw-card p-6">
+        <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.editor.brandsPanel') }}</p>
+        <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('insights.editor.brandsHint') }}</p>
+        <USelectMenu
+          v-model="selectedBrandIds"
+          :items="brandItems"
+          value-key="value"
+          multiple
+          class="mt-3 w-full"
+          :placeholder="t('insights.editor.brandsSelect')"
+        />
+        <UButton
+          class="mt-3 rounded-full" icon="i-ph-plus" color="neutral" variant="ghost"
+          style="background: var(--bw-surface)"
+          :label="t('insights.editor.brandAdd')"
+          @click="brandDialogOpen = true"
+        />
+      </div>
+
+      <!-- Fakten: nur Duell und Ranking (s. Kopf des Abschnitts im Skript) -->
+      <div v-if="showFacts" class="bw-card p-6">
+        <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.editor.factsPanel') }}</p>
+        <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
+          {{ draft.format === 'ranking' ? t('insights.editor.factsHintRanking') : t('insights.editor.factsHintDuel') }}
+        </p>
+        <UTextarea v-model="factsText" :rows="10" class="mt-3 w-full" :ui="{ base: 'font-mono text-xs' }" />
+        <div class="mt-3 flex flex-wrap items-center gap-3">
+          <UButton
+            :label="t('insights.editor.factsApply')" icon="i-ph-check"
+            color="neutral" variant="ghost" class="rounded-full" style="background: var(--bw-surface)"
+            @click="applyFacts"
+          />
+          <p v-if="factsError" class="text-sm" style="color: var(--bw-stale)">{{ factsError }}</p>
+        </div>
       </div>
     </div>
 
-    <!-- Rechte Spalte: die sechs Regeln und die Übergänge -->
+    <!-- Rechte Spalte: die sechs Regeln, die Übergänge, die Notiz -->
     <aside class="space-y-4">
+      <div class="bw-card p-6">
+        <UButton
+          :label="t('insights.editor.save')" icon="i-ph-floppy-disk"
+          :loading="saving" :disabled="!dirty"
+          block class="rounded-full" @click="save"
+        />
+        <p class="bw-label mt-2 text-center" style="color: var(--bw-muted)">
+          {{ dirty ? t('insights.editor.dirty') : t('insights.editor.clean') }} ·
+          {{ t('insights.editor.readingMinutes', { count: readingMinutes }) }}
+        </p>
+      </div>
+
       <div class="bw-card p-6">
         <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.editor.rules') }}</p>
 
-        <p v-if="issues.length === 0" class="mt-3 flex items-center gap-2 text-sm" style="color: var(--bw-accent)">
+        <p v-if="shownIssues.length === 0" class="mt-3 flex items-center gap-2 text-sm" style="color: var(--bw-accent)">
           <UIcon name="i-ph-check-circle-fill" class="size-4" />
           {{ t('insights.editor.rulesOk') }}
         </p>
@@ -326,10 +783,12 @@ const readingMinutes = computed(() => insightsReadingMinutes(draft.baseLocale ==
         <template v-else>
           <p class="mt-3 flex items-center gap-2 text-sm" style="color: var(--bw-stale)">
             <UIcon name="i-ph-warning-circle-fill" class="size-4" />
-            {{ t('insights.editor.rulesBlocked', { count: issues.length }) }}
+            <!-- Plural über die ZAHL, nicht über ein benanntes Feld: nur so
+                 wählt vue-i18n die Form („Ein Punkt" gegen „{count} Punkte"). -->
+            {{ t('insights.editor.rulesBlocked', shownIssues.length) }}
           </p>
           <ul class="mt-3 space-y-2">
-            <li v-for="(issue, index) in issues" :key="index" class="text-sm leading-snug" style="color: var(--bw-ink-soft)">
+            <li v-for="(issue, index) in shownIssues" :key="index" class="text-sm leading-snug" style="color: var(--bw-ink-soft)">
               {{ issueText(issue) }}
               <span v-if="issueWhere(issue)" class="bw-label block" style="color: var(--bw-muted)">{{ issueWhere(issue) }}</span>
             </li>
@@ -338,25 +797,58 @@ const readingMinutes = computed(() => insightsReadingMinutes(draft.baseLocale ==
 
         <div class="mt-5 flex flex-col gap-2">
           <UButton
-            :label="t('insights.editor.toReview')" icon="i-ph-arrow-right"
-            :disabled="issues.length > 0 || draft.state !== 'draft'"
-            class="rounded-full" @click="toReview"
+            v-for="to in transitions" :key="to"
+            :label="transitionLabel(to)" :icon="transitionIcon(to)"
+            :loading="transitioning" :disabled="dirty"
+            :color="to === 'draft' ? 'neutral' : 'primary'"
+            :variant="to === 'draft' ? 'ghost' : 'solid'"
+            class="rounded-full"
+            :style="to === 'draft' ? 'background: var(--bw-surface)' : ''"
+            @click="emit('changeState', to)"
           />
+          <p v-if="dirty" class="bw-label" style="color: var(--bw-muted)">{{ t('insights.editor.saveFirst') }}</p>
           <UButton
-            :label="t('insights.editor.publish')" icon="i-ph-check"
-            :disabled="draft.state !== 'review'"
+            :label="t('insights.editor.preview')" icon="i-ph-eye"
             color="neutral" variant="ghost" class="rounded-full" style="background: var(--bw-surface)"
-            @click="publish"
+            @click="previewOpen = true"
           />
-          <slot name="preview" :draft="draft" />
         </div>
       </div>
 
       <div class="bw-card p-6">
         <UFormField :label="t('insights.editor.noteInternal')">
-          <UTextarea v-model="draft.noteInternal" :rows="3" class="w-full" />
+          <UTextarea v-model="draft.noteInternal" :rows="3" class="w-full" :maxlength="500" />
         </UFormField>
       </div>
     </aside>
+
+    <!-- Vorschau: derselbe Renderer wie die öffentliche Seite (core) -->
+    <USlideover v-model:open="previewOpen" :title="t('insights.editor.preview')">
+      <template #body>
+        <article class="prose prose-sm max-w-none dark:prose-invert">
+          <h1>{{ titleValue }}</h1>
+          <p class="lead">{{ dekValue }}</p>
+          <MarkdownContent :source="bodyValue" />
+        </article>
+      </template>
+    </USlideover>
+
+    <!-- Marken-Schnellanlage -->
+    <UModal v-model:open="brandDialogOpen" :title="t('insights.editor.brandAdd')">
+      <template #body>
+        <UForm :schema="brandSchema" :state="brandForm" class="space-y-3" @submit="submitBrand">
+          <UFormField :label="t('insights.editor.brandName')" name="name" required>
+            <UInput v-model="brandForm.name" class="w-full" :maxlength="200" />
+          </UFormField>
+          <UFormField :label="t('insights.editor.brandHomepage')" name="homepage">
+            <UInput v-model="brandForm.homepage" class="w-full" :maxlength="512" placeholder="https://" />
+          </UFormField>
+          <UFormField :label="t('insights.editor.brandIndustry')" name="industry">
+            <UInput v-model="brandForm.industry" class="w-full" :maxlength="40" />
+          </UFormField>
+          <UButton type="submit" :label="t('insights.editor.brandCreate')" class="rounded-full" />
+        </UForm>
+      </template>
+    </UModal>
   </div>
 </template>

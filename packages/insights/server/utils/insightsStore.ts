@@ -5,12 +5,12 @@ import { AppwriteException } from 'node-appwrite'
  * DER LESE-/SCHREIB-UNTERBAU DES insights-LAYERS (Muster: `marketStore.ts`,
  * `brandStore.ts`).
  *
- * STAND I1: nur die GRUNDZUGRIFFE — der Client, die Database-Id und die
- * Fehler-Frage „gibt es das nicht?". Es gibt noch KEINE Route, die sie ruft;
- * die kommen mit I2 (Redaktion) und I3 (öffentliche Seiten). Das ist Absicht
- * und dieselbe Reihenfolge wie im market-Layer: der Zugriffsweg soll
- * feststehen, BEVOR die erste Route ihn benutzt — sonst schreibt jede Route
- * ihren eigenen.
+ * NUR DIE GRUNDZUGRIFFE — der Client, die Database-Id, die Deckel und die
+ * Fehler-Frage „gibt es das nicht?". Die ARBEIT damit (Zeilen holen, Adressen
+ * finden, Zeilen schreiben) liegt seit I2 nebenan in
+ * `insightsPostsAdmin.ts` — dieselbe Trennung wie `brandStore.ts` ↔
+ * `brandWaitlistAdmin.ts`. Wer nur wissen will, WIE der Layer an seine Daten
+ * kommt, muss dafür nicht durch zehn Abfragen.
  *
  * ── KEIN `tenantDb`, UND DAS IST KEINE ABKÜRZUNG ─────────────────────────
  * Dieselbe Lage wie in `brand` und `market`: der Layer läuft ausschliesslich

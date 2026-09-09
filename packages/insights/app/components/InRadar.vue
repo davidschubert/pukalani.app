@@ -107,7 +107,7 @@ function formulaFor(opportunity: InsightsOpportunity): string {
 
     <CoreEmptyState
       v-if="rows.length === 0"
-      class="mt-6" icon="i-ph-radar"
+      class="mt-6" icon="i-ph-broadcast"
       :title="t('insights.radar.title')" :description="t('insights.radar.empty')"
     />
 

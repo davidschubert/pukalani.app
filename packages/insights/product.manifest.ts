@@ -6,15 +6,19 @@ import type { ProductManifest } from '../core/shared/types/manifest'
  * Plan: docs/plans/BRAND-INSIGHTS.md (Konzept ENTSCHIEDEN 2026-09-08, die acht
  * Entscheidungen in §11; Frage 1 = „eigener Layer `insights`").
  *
- * STAND: **PAKET I1** (§9.9) — der Layer ist MONTIERT und hat ein SCHEMA:
- * `apps/branding/site.manifest.ts` führt ihn zwischen `market` und `pages`,
- * die drei Tabellen (`insights_posts`, `insights_brands`,
- * `insights_corrections`) stehen als Migrationen insights-001…003 bereit, und
- * der Vertrag zum brand-Layer liegt in `server/contracts/brandContract.ts`.
- * Was I1 BEWUSST NICHT baut: eine Route, eine Seite, einen Modell-Aufruf —
- * sie kommen mit I2 (Redaktion) und I3 (öffentliche Seiten). Die Vorlagen des
- * Klickdummys (`app/components`, `In*`) und der Produktvertrag
- * (`shared/insightsPost.ts`) bleiben aus I0 stehen und werden dort übernommen.
+ * STAND: **PAKET I2** (§9.9) — der Layer ist MONTIERT, hat ein SCHEMA und
+ * seine REDAKTION. `apps/branding/site.manifest.ts` führt ihn zwischen
+ * `market` und `pages`, die drei Tabellen (`insights_posts`,
+ * `insights_brands`, `insights_corrections`) stehen als Migrationen
+ * insights-001…003, der Vertrag zum brand-Layer liegt in
+ * `server/contracts/brandContract.ts`, und seit I2 gibt es
+ * `/dashboard/insights` (Liste, Editor, Radar-Platzhalter) samt
+ * `/api/insights/**` — inklusive der zwei Modell-Läufe (Übersetzen, Entwurf)
+ * hinter Kill-Switch und Drossel.
+ * Was I2 BEWUSST NICHT baut: eine ÖFFENTLICHE Seite. `/insights`,
+ * `/brands/<slug>`, `/duels/…` und `/rankings` sind Paket I3 und hängen an
+ * den Anwaltsantworten BI1-3 und BI1-4 (§6, §11.3) — ohne sie geht kein
+ * Markenprofil live.
  *
  * `hasMigrations: true` seit I1: der Layer steht damit in der LAYER_ORDER von
  * `scripts/migrate.mjs` (`pnpm check:manifests` erzwingt beides zusammen) und

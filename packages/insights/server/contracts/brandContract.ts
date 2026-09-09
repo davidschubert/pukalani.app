@@ -191,3 +191,69 @@ export { BRAND_ROBOTS_ABSENT, brandRobotsAllows, parseBrandRobots } from '../../
 export type { BrandRobots } from '../../../brand/shared/brandRobots'
 export { brandTdmReserved } from '../../../brand/shared/brandTdm'
 export type { BrandTdmSignals } from '../../../brand/shared/brandTdm'
+
+/**
+ * DER ABRUF MIT ERLAUBNIS — und warum I2 nicht `fetchBrandSite` nimmt.
+ *
+ * §9.4 verlangt für die Beleg-Prüfung „den SSRF-festen Abruf des brand-Layers
+ * (inkl. `robots.txt` und TDM-Vorbehalt seit BS1 R2b)". `fetchBrandSite`
+ * leistet die erste Hälfte davon und die zweite ausdrücklich NICHT: es ist der
+ * Weg des WIZARDS, der die Website liest, die ihr eigener Betreiber selbst
+ * eingetragen hat — dort trägt die Begründung, `robots.txt` nicht zu fragen
+ * (Kopf von `brandCheckFetch.ts`).
+ *
+ * Die Redaktion ist der andere Fall, wörtlich der des Brand-Checks: sie liest
+ * eine BELIEBIGE fremde Adresse, die niemand ihr angeboten hat. Also gilt
+ * dieselbe Reihenfolge — erst fragen, dann lesen. `fetchBrandSiteForCheck`
+ * holt `robots.txt` und `.well-known/tdmrep.json` VOR der Seite und wirft
+ * `BrandSiteBlockedError` mit `reason: 'robots' | 'tdm'`; der Aufrufer fängt
+ * sie ZUERST (vor `BrandSiteFetchError`).
+ *
+ * ── DER ABSENDER BLEIBT DER DES CHECKS, UND ZWAR MIT GRUND ───────────────
+ * Abschnitt 6 stellte I2 die Frage, ob die Redaktion einen EIGENEN Absender
+ * bekommt (`PukalaniInsightsBot`). Antwort für I2: NEIN. Ein neuer Absender
+ * wäre eine Änderung im brand-Layer (Konstante, Bot-Token, Absenderliste,
+ * Prüfpfad) — und der Gewinn wäre nur ein Name im Log. Was ZÄHLT, ist die
+ * Zusage „wer eine `robots.txt` gegen einen anderen Namen prüft als den, mit
+ * dem er anfragt, prüft nichts", und die hält `fetchBrandSiteForCheck` von
+ * sich aus: es fragt und prüft mit demselben Token. Sobald ein Betreiber
+ * `PukalaniInsightsBot` in seiner `robots.txt` getrennt behandeln können soll,
+ * gehört der Absender dazu — dann aber im brand-Layer, wo die Liste lebt.
+ */
+export { BrandSiteBlockedError } from '../../../brand/server/utils/brandCheckFetch'
+export type { BrandCheckBlockedReason } from '../../../brand/server/utils/brandCheckFetch'
+export { fetchBrandSiteForCheck } from '../../../brand/server/utils/brandCheckFetch'
+
+// ── 7. Die KI-Klinke und das ZDR-Routing (§9.4, BI1 I2) ────────────────────
+/**
+ * ZWEI DINGE, OHNE DIE IM insights-LAYER KEIN MODELL GERUFEN WIRD.
+ *
+ * ── `readBrandAiEnabled` — DIE KLINKE, FAIL-CLOSED ───────────────────────
+ * `app_config.global.brandAiEnabled` ist die Not-Abschaltung ALLER Modell-
+ * Läufe dieser Instanz. Die Redaktion hängt bewusst an DERSELBEN Klinke und
+ * bekommt keine zweite: wer die KI auf `branding.supply` abschaltet, will sie
+ * abgeschaltet haben — ein Schalter, der die Hälfte der Läufe stehen lässt,
+ * ist keiner. Sie ist fail-closed (jeder Lesefehler heisst „aus"), und das ist
+ * die richtige Richtung: eine unlesbare Konfiguration darf keinen Anbieter-
+ * Aufruf auslösen.
+ *
+ * Der NAME bleibt `brandAiEnabled`, obwohl er jetzt zwei Layer bedient. Ihn
+ * umzubenennen hiesse, eine Spalte auf einer laufenden Instanz zu wandern —
+ * für ein Wort. Was er bedeutet, steht hier.
+ *
+ * ── `BRAND_PROVIDER_ROUTING` — DIE DATENSCHUTZ-BEDINGUNGEN ───────────────
+ * `zdr: true`, `dataCollection: 'deny'`, `allowFallbacks: false`. Ohne
+ * `allowFallbacks: false` weicht OpenRouter bei Last auf einen Anbieter
+ * AUSSERHALB dieser Bedingungen aus, und der Lauf gelänge — mit genau dem
+ * Ergebnis, das die zwei anderen Felder verhindern sollen. Der insights-Layer
+ * bekommt hier KEINE eigene Fassung: „wer auch immer ein Modell ruft, ruft es
+ * unter diesen Bedingungen" (Kopf von `brandProviderRouting.ts`).
+ *
+ * ── WAS NICHT MITKOMMT: die Modell-WAHL ──────────────────────────────────
+ * Der Brand-Check nimmt sie aus `getEffectiveAiConfig(event)` — und die liegt
+ * im CORE (`core/server/utils/aiComplete.ts`, Auto-Import in jedem Layer).
+ * Ein Re-Export hier wäre ein Umweg über den brand-Layer für etwas, das das
+ * Fundament ohnehin allen gibt.
+ */
+export { readBrandAiEnabled } from '../../../brand/server/utils/brandGenerators'
+export { BRAND_PROVIDER_ROUTING } from '../../../brand/server/utils/brandProviderRouting'

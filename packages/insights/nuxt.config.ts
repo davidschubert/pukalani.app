@@ -1,10 +1,12 @@
 /**
  * insights-Layer — Brand Insights (Plan: docs/plans/BRAND-INSIGHTS.md).
  *
- * STAND: **PROTOTYP I0**. Der Layer trägt die Komponenten-Vorlagen des
- * Klickdummys (`app/components`, `In*`) und den Produktvertrag
- * (`shared/insightsPost.ts`). Es gibt KEIN `server/`, KEINE Tabelle, KEINEN
- * Modell-Aufruf — sie kommen mit I1/I2.
+ * STAND: **PAKET I2**. Der Layer hat sein Schema (I1) UND seine Redaktion:
+ * `server/api/insights/**` (Liste, Editor-Kontext, Speichern, Zustands-Gate,
+ * Beleg-Ampel, Übersetzen, KI-Entwurf, Marken), `app/pages/dashboard/insights/**`
+ * (Liste, Editor, Radar-Platzhalter) und die zwei Modell-Läufe. Was hier
+ * BEWUSST noch fehlt: die ÖFFENTLICHEN Seiten (`/insights`, `/brands/…`, …) —
+ * sie sind Paket I3 und hängen an den Anwaltsantworten (§6, §11.3).
  *
  * ── KEIN `extends`, UND ZWAR AUCH NICHT AUF `brand` ──────────────────────
  * `requires: ['brand']` im Manifest heisst NICHT `extends`. Der Layer hängt am

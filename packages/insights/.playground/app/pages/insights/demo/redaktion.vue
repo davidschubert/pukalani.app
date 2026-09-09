@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import type { InsightsPost } from '../../../../../shared/insightsPost'
-import { insightsPublicFassung } from '../../../../../shared/insightsPost'
+import type { InsightsPost, InsightsReviewIssue } from '../../../../../shared/insightsPost'
+import { insightsMethodologyLinked, insightsPublicFassung, insightsReviewIssues } from '../../../../../shared/insightsPost'
+import type { InsightsBrandListItem } from '../../../../../shared/types/insightsApi'
 import {
   DEMO_BRANDS,
   DEMO_DRAFT,
@@ -52,6 +53,42 @@ const columns = computed<TableColumn<InsightsPost>[]>(() => [
 
 const rows = computed(() => [DEMO_DRAFT, ...DEMO_POSTS])
 const knownBrandIds = computed(() => DEMO_BRANDS.map(brand => brand.slug))
+
+/**
+ * SEIT BI1 I2 IST `InEditor` DIE ECHTE KOMPONENTE — der Prototyp füttert sie
+ * jetzt so, wie es die Dashboard-Seite tut: Beitrag, Marken, Prüfpunkte.
+ *
+ * Der Unterschied ist die NAHT, nicht die Form: die Komponente spricht mit
+ * keiner Route, und hier hängt an jedem Ereignis ein Hinweis statt eines
+ * Abrufs. Genau dafür ist sie so geschnitten — der freigegebene Klickdummy
+ * und die Umsetzung teilen dieselbe Fläche, statt auseinanderzulaufen.
+ *
+ * Die Marken-Ids sind hier die SLUGS (die Demo-Daten haben keine Zeilen-Ids);
+ * `brandRefs` im Entwurf zeigt auf dieselben Werte, und eine davon fehlt
+ * absichtlich — Prüfregel 6 muss sie melden.
+ */
+const demoBrands = computed<InsightsBrandListItem[]>(() => DEMO_BRANDS.map(brand => ({
+  id: brand.slug,
+  name: brand.name,
+  slug: brand.slug,
+  homepage: brand.homepage,
+  industry: brand.industry,
+  state: brand.state,
+})))
+
+const demoIssues = computed<InsightsReviewIssue[]>(() => insightsReviewIssues(DEMO_DRAFT, {
+  sourceTexts: DEMO_SOURCE_TEXTS,
+  flagText: text => DEMO_FLAG_WORDS.filter(word => text.toLowerCase().includes(word.toLowerCase())),
+  knownBrandIds: knownBrandIds.value,
+  methodologyLinked: insightsMethodologyLinked(DEMO_DRAFT),
+}))
+
+const toast = useToast()
+
+/** Ein Klickdummy speichert nicht, ruft kein Modell und holt keine Quelle. */
+function demoOnly(): void {
+  toast.add({ title: t('insights.editor.prototypeOnly'), duration: 2500 })
+}
 </script>
 
 <template>
@@ -98,19 +135,16 @@ const knownBrandIds = computed(() => DEMO_BRANDS.map(brand => brand.slug))
       <section class="mt-10">
         <InEditor
           :post="DEMO_DRAFT"
-          :source-texts="DEMO_SOURCE_TEXTS"
+          :brands="demoBrands"
           :known-brand-ids="knownBrandIds"
-          :methodology-linked="true"
-          :flag-words="DEMO_FLAG_WORDS"
-        >
-          <template #preview>
-            <UButton
-              :label="t('insights.editor.preview')" icon="i-ph-eye"
-              color="neutral" variant="ghost" class="rounded-full" style="background: var(--bw-surface)"
-              disabled
-            />
-          </template>
-        </InEditor>
+          :issues="demoIssues"
+          @save="demoOnly"
+          @change-state="demoOnly"
+          @check-evidence="demoOnly"
+          @translate="demoOnly"
+          @draft="demoOnly"
+          @create-brand="demoOnly"
+        />
       </section>
 
       <!-- 3. Der Radar -->
