@@ -7,6 +7,22 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Brand Wizard: ein ABGELEHNTER Befund kommt nicht wieder (Kehrtwende zu BW2 Paket 6)
+
+**Anlass:** Beim Kailua-Durchlauf (Discover D5) liess sich das Kapitel „Werte" nie abnehmen:
+ein Konflikt-Befund (b.conviction ↔ c.discovery2) wurde zweimal mit Grund abgelehnt
+(`POST …/findings/<id>` 200) und stand nach dem nächsten Kapitel-Blick wieder offen da — die
+Dedup in `writeBrandFindings` prüfte nur gegen OFFENE Befunde („ein entschiedener Befund
+blockiert keine neue Zeile", BW2 Paket 6). **Entscheidung:** Dedup gegen offene UND abgelehnte
+Befunde (Schlüssel Art + Felder); nur ANGENOMMENE bleiben draussen, weil ihre Korrektur das
+Feld ändert und ein neuer Konflikt danach ein echter Hinweis ist. Ein abgelehnter Befund ist
+eine Entscheidung des Menschen, die der Prüfblick nicht durch Wiederholung überstimmen darf.
+Preis: ändert sich ein beteiligtes Feld später wirklich, bleibt derselbe Konflikt-Typ über
+dieselben Felder stumm — bewusst hingenommen; ein Werte-Hash je Befund wäre der nächste Schritt,
+falls das je auffällt. Commit `53be8792`.
+
+---
+
 ## 2026-09-08 — Session-Token-Hygiene: CLAUDE.md wird KERN + pfadgebundene `.claude/rules/`
 
 **Anlass:** Eine Session stand bei 655k Tokens Kontext (Messages 547k, CLAUDE.md +
