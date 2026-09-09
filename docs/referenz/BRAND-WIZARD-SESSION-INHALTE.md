@@ -1660,193 +1660,6 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
-### `d.hypothesis` — Archetyp-Hypothese aus eurem heutigen Auftritt
-
-**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** say which archetype speaks out of their appearance TODAY — as a reading, not as a decision.
-
-**Woran man einen guten Wert erkennt:**
-
-- It names one or two archetypes by their catalogue name.
-- Each one carries a phrase from their own texts as evidence.
-- It reads as a reading of the appearance, never as a decision about them.
-- A mixed appearance is named as a finding instead of being smoothed over.
-
-**Was zurückgewiesen wird:**
-
-- "You are the Sage" — a verdict instead of a reading.
-- An archetype with no phrase behind it.
-- An appearance invented because no texts were given.
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · höchstens 70 Wörter
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** 47 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > Aus euren Texten spricht vor allem der Schöpfer: „Wir setzen jedes Buch neu, auch wenn es die vierte Auflage ist." Daneben klingt der Weise durch, wo ihr Papier und Bindung erklärt.
-  - en:
-  > What speaks out of your texts is mostly the Creator: "we typeset every book from scratch, even for a fourth edition". The Sage shows through where you explain paper and binding.
-- **Marken-Relaunch**
-  - de:
-  > Euer Auftritt zieht in zwei Richtungen: „Bilder, die bleiben" klingt nach dem Schöpfer, die Seite mit den Stornobedingungen nach dem Herrscher.
-  - en:
-  > Your appearance pulls two ways: "pictures that stay" sounds like the Creator, while the cancellation page sounds like the Ruler.
-
-### `d.pairs` — Welche der beiden fühlt sich mehr nach euch an?
-
-**Art:** Instrument · **Umfang:** ~3 Min, 1 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** settle which archetype of each pair feels more like this brand, until a first and a second place stand.
-
-**Woran man einen guten Wert erkennt:**
-
-- Every pair was decided, none skipped.
-- Each winner is one of the twelve catalogue archetypes.
-- The result has a first and a second place with a countable margin.
-- The decisions came from their own sense, not from a brand they admire.
-
-**Was zurückgewiesen wird:**
-
-- A pair answered with "both".
-- A choice justified by a famous brand instead of by their own feeling.
-- The result read as a personality test about the founder.
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** 46 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
-
-### `d.primary` — Primärer Archetyp
-
-**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** propose the PRIMARY archetype of this brand — the one that carries how they behave.
-
-**Woran man einen guten Wert erkennt:**
-
-- It names exactly one of the twelve catalogue archetypes.
-- The prose and the stored value name the same archetype.
-- The BASIS line quotes one of their own sentences as the reason.
-- Where their answers and their appearance disagree, the answers win and the text says so.
-
-**Was zurückgewiesen wird:**
-
-- An informal name stored instead of a catalogue archetype.
-- A draft where two archetypes are equally defensible.
-- A choice derived from the pitch alone.
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** 44 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > Der Schöpfer — „auch wenn es die vierte Auflage ist" ist euer Satz, nicht der einer Druckerei.
-  - en:
-  > The Creator — "even for a fourth edition" is your sentence, not a printer's.
-- **Marken-Relaunch**
-  - de:
-  > Der Fürsorgliche — ihr habt dreimal gesagt, dass ihr vorher anruft, wenn jemand zum ersten Mal vor einer Kamera steht.
-  - en:
-  > The Caregiver — you said three times that you call ahead when somebody stands in front of a camera for the first time.
-
-### `d.secondary` — Sekundärer Archetyp
-
-**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** propose the SECONDARY archetype — the one that keeps the primary from becoming a cliché.
-
-**Woran man einen guten Wert erkennt:**
-
-- It is a different archetype from the primary.
-- The BASIS line says what the pair does: how the second keeps the first bearable.
-- It explains a note in their answers that the primary does not.
-- It is a catalogue name, not an informal one.
-
-**Was zurückgewiesen wird:**
-
-- The same archetype as the primary, in other words.
-- A second name with no relationship to the first.
-- A secondary guessed while the primary is missing.
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** nennt nicht dasselbe wie `d.primary`
-
-**Fliesst später in:** 2 Felder in 1 Kapiteln (Archetyp und Stimme)
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > Der Weise als Zweiter — er hält den Schöpfer vom Schwärmen ab: ihr erklärt, warum ein Papier durchscheint, bevor ihr es empfehlt.
-  - en:
-  > The Sage second — it keeps the Creator from mere enthusiasm: you explain why a paper shows through before you recommend it.
-- **Marken-Relaunch**
-  - de:
-  > Der Entdecker als Zweiter — er hält den Fürsorglichen davon ab, betulich zu werden.
-  - en:
-  > The Explorer second — it keeps the Caregiver from turning fussy.
-
-### `d.gapReveal` — Selbstbild und Außenbild
-
-**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** put their self-image next to their outside image and name the difference.
-
-**Woran man einen guten Wert erkennt:**
-
-- It says in one sentence where the two agree.
-- It names the difference plainly, without softening it.
-- It points at the phrase in their texts that sounds like the other archetype.
-- It gives no advice — the finding is the value.
-
-**Was zurückgewiesen wird:**
-
-- A reassuring closing sentence.
-- "There are elements of both."
-- A gap invented because a finding was expected.
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > Ihr wollt als Schöpfer gelesen werden, eure Seite klingt aber an drei Stellen nach dem Herrscher: „Wir arbeiten ausschließlich mit Verlagen."
-  - en:
-  > You want to be read as the Creator, but in three places your site sounds like the Ruler: "we work exclusively with publishers".
-- **Marken-Relaunch**
-  - de:
-  > Selbstbild und Außenbild treffen sich beim Fürsorglichen — nur die Preisliste spricht wie ein Herrscher: „Absagen unter 48 Stunden werden voll berechnet."
-  - en:
-  > Self-image and outside image meet at the Caregiver — only the price list speaks like a Ruler: "cancellations within 48 hours are charged in full".
-
 ### `d.party` — Wenn eure Marke ein Mensch auf einer Party wäre — wie verhält sie sich?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
@@ -2036,6 +1849,193 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   > Ruhe. Ist der Termin bestätigt, soll niemand mehr überlegen, was er anziehen muss.
   - en:
   > Calm. Once the appointment is confirmed, nobody should still be wondering what to wear.
+
+### `d.hypothesis` — Archetyp-Hypothese aus eurem heutigen Auftritt
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** say which archetype speaks out of their appearance TODAY — as a reading, not as a decision.
+
+**Woran man einen guten Wert erkennt:**
+
+- It names one or two archetypes by their catalogue name.
+- Each one carries a phrase from their own texts as evidence.
+- It reads as a reading of the appearance, never as a decision about them.
+- A mixed appearance is named as a finding instead of being smoothed over.
+
+**Was zurückgewiesen wird:**
+
+- "You are the Sage" — a verdict instead of a reading.
+- An archetype with no phrase behind it.
+- An appearance invented because no texts were given.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · höchstens 70 Wörter
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 47 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Aus euren Texten spricht vor allem der Schöpfer: „Wir setzen jedes Buch neu, auch wenn es die vierte Auflage ist." Daneben klingt der Weise durch, wo ihr Papier und Bindung erklärt.
+  - en:
+  > What speaks out of your texts is mostly the Creator: "we typeset every book from scratch, even for a fourth edition". The Sage shows through where you explain paper and binding.
+- **Marken-Relaunch**
+  - de:
+  > Euer Auftritt zieht in zwei Richtungen: „Bilder, die bleiben" klingt nach dem Schöpfer, die Seite mit den Stornobedingungen nach dem Herrscher.
+  - en:
+  > Your appearance pulls two ways: "pictures that stay" sounds like the Creator, while the cancellation page sounds like the Ruler.
+
+### `d.pairs` — Welche der beiden fühlt sich mehr nach euch an?
+
+**Art:** Instrument · **Umfang:** ~3 Min, 1 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle which archetype of each pair feels more like this brand, until a first and a second place stand.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every pair was decided, none skipped.
+- Each winner is one of the twelve catalogue archetypes.
+- The result has a first and a second place with a countable margin.
+- The decisions came from their own sense, not from a brand they admire.
+
+**Was zurückgewiesen wird:**
+
+- A pair answered with "both".
+- A choice justified by a famous brand instead of by their own feeling.
+- The result read as a personality test about the founder.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 46 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+### `d.primary` — Primärer Archetyp
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** propose the PRIMARY archetype of this brand — the one that carries how they behave.
+
+**Woran man einen guten Wert erkennt:**
+
+- It names exactly one of the twelve catalogue archetypes.
+- The prose and the stored value name the same archetype.
+- The BASIS line quotes one of their own sentences as the reason.
+- Where their answers and their appearance disagree, the answers win and the text says so.
+
+**Was zurückgewiesen wird:**
+
+- An informal name stored instead of a catalogue archetype.
+- A draft where two archetypes are equally defensible.
+- A choice derived from the pitch alone.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 44 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Der Schöpfer — „auch wenn es die vierte Auflage ist" ist euer Satz, nicht der einer Druckerei.
+  - en:
+  > The Creator — "even for a fourth edition" is your sentence, not a printer's.
+- **Marken-Relaunch**
+  - de:
+  > Der Fürsorgliche — ihr habt dreimal gesagt, dass ihr vorher anruft, wenn jemand zum ersten Mal vor einer Kamera steht.
+  - en:
+  > The Caregiver — you said three times that you call ahead when somebody stands in front of a camera for the first time.
+
+### `d.secondary` — Sekundärer Archetyp
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** propose the SECONDARY archetype — the one that keeps the primary from becoming a cliché.
+
+**Woran man einen guten Wert erkennt:**
+
+- It is a different archetype from the primary.
+- The BASIS line says what the pair does: how the second keeps the first bearable.
+- It explains a note in their answers that the primary does not.
+- It is a catalogue name, not an informal one.
+
+**Was zurückgewiesen wird:**
+
+- The same archetype as the primary, in other words.
+- A second name with no relationship to the first.
+- A secondary guessed while the primary is missing.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** nennt nicht dasselbe wie `d.primary`
+
+**Fliesst später in:** 2 Felder in 1 Kapiteln (Archetyp und Stimme)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Der Weise als Zweiter — er hält den Schöpfer vom Schwärmen ab: ihr erklärt, warum ein Papier durchscheint, bevor ihr es empfehlt.
+  - en:
+  > The Sage second — it keeps the Creator from mere enthusiasm: you explain why a paper shows through before you recommend it.
+- **Marken-Relaunch**
+  - de:
+  > Der Entdecker als Zweiter — er hält den Fürsorglichen davon ab, betulich zu werden.
+  - en:
+  > The Explorer second — it keeps the Caregiver from turning fussy.
+
+### `d.gapReveal` — Selbstbild und Außenbild
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** put their self-image next to their outside image and name the difference.
+
+**Woran man einen guten Wert erkennt:**
+
+- It says in one sentence where the two agree.
+- It names the difference plainly, without softening it.
+- It points at the phrase in their texts that sounds like the other archetype.
+- It gives no advice — the finding is the value.
+
+**Was zurückgewiesen wird:**
+
+- A reassuring closing sentence.
+- "There are elements of both."
+- A gap invented because a finding was expected.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Ihr wollt als Schöpfer gelesen werden, eure Seite klingt aber an drei Stellen nach dem Herrscher: „Wir arbeiten ausschließlich mit Verlagen."
+  - en:
+  > You want to be read as the Creator, but in three places your site sounds like the Ruler: "we work exclusively with publishers".
+- **Marken-Relaunch**
+  - de:
+  > Selbstbild und Außenbild treffen sich beim Fürsorglichen — nur die Preisliste spricht wie ein Herrscher: „Absagen unter 48 Stunden werden voll berechnet."
+  - en:
+  > Self-image and outside image meet at the Caregiver — only the price list speaks like a Ruler: "cancellations within 48 hours are charged in full".
 
 ### `d.voiceSamples` — Welcher dieser Sätze klingt am meisten nach euch?
 
@@ -2306,51 +2306,6 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
   - en:
   > That the first six weeks have nothing to do with creativity and everything to do with whether somebody understands the client's numbers.
 
-### `e.statements` — Die Satzanfänge
-
-**Art:** Entwurf · **Umfang:** ~5 Min, 4 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** draft all 23 statement openers the manifesto will be built from — one line per opener, in the five groups of the instrument (belief, commitment, energy, stance, promise), filled from what they have already said.
-
-**Woran man einen guten Wert erkennt:**
-
-- There are 23 lines, and every group of the instrument is represented.
-- Every statement takes a side somebody could refuse.
-- Each one is traceable to an answer they gave.
-- They are sentences somebody would say, not headlines.
-- The strongest ones stand out without needing a marker.
-
-**Was zurückgewiesen wird:**
-
-- Statements everybody in the industry would sign.
-- A statement that only praises the brand.
-- A filled-in opener with nothing behind it.
-
-**Form des Werts:** Person: wir · Zeit: Präsens · kein Wortdeckel
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** 31 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > - Wir glauben, dass die teuerste Runde die ist, die niemand gebraucht hätte.
-  > - Wir weigern uns, einen Entwurf zu zeigen, bevor die Frage feststeht.
-  - en:
-  > - We believe the most expensive round is the one nobody needed.
-  > - We refuse to show a draft before the question has been settled.
-- **Marken-Relaunch**
-  - de:
-  > - Wir glauben, dass Bleiben wichtiger ist als Auffallen.
-  > - Wir weigern uns, Verträge zu verlängern, die niemand nutzt.
-  - en:
-  > - We believe staying matters more than standing out.
-  > - We refuse to renew a contract nobody is using.
-
 ### `e.composition` — Ton, Länge und Verwendung des Manifests
 
 **Art:** Auswahl · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
@@ -2397,6 +2352,51 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
   > Ton: direkt · Länge: mittel · Verwendung: das Plakat im Besprechungsraum und die Seite „Über uns"
   - en:
   > Tone: direct · Length: medium · Use: the poster in the meeting room and the About page
+
+### `e.statements` — Die Satzanfänge
+
+**Art:** Entwurf · **Umfang:** ~5 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** draft all 23 statement openers the manifesto will be built from — one line per opener, in the five groups of the instrument (belief, commitment, energy, stance, promise), filled from what they have already said.
+
+**Woran man einen guten Wert erkennt:**
+
+- There are 23 lines, and every group of the instrument is represented.
+- Every statement takes a side somebody could refuse.
+- Each one is traceable to an answer they gave.
+- They are sentences somebody would say, not headlines.
+- The strongest ones stand out without needing a marker.
+
+**Was zurückgewiesen wird:**
+
+- Statements everybody in the industry would sign.
+- A statement that only praises the brand.
+- A filled-in opener with nothing behind it.
+
+**Form des Werts:** Person: wir · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 31 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > - Wir glauben, dass die teuerste Runde die ist, die niemand gebraucht hätte.
+  > - Wir weigern uns, einen Entwurf zu zeigen, bevor die Frage feststeht.
+  - en:
+  > - We believe the most expensive round is the one nobody needed.
+  > - We refuse to show a draft before the question has been settled.
+- **Marken-Relaunch**
+  - de:
+  > - Wir glauben, dass Bleiben wichtiger ist als Auffallen.
+  > - Wir weigern uns, Verträge zu verlängern, die niemand nutzt.
+  - en:
+  > - We believe staying matters more than standing out.
+  > - We refuse to renew a contract nobody is using.
 
 ### `e.manifesto` — Manifest
 

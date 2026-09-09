@@ -824,15 +824,22 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // ABWEICHUNG von der Zählung „D: 11": `d.primary/d.secondary` stehen im
   // Katalog in einer Zeile, sind aber zwei berechnete Werte („Der Weise ·
   // Rest Schöpfer", §12.2) und damit zwei Ids.
+  //
+  // MENSCHENFRAGEN ZUERST (Davids Entscheidung 2026-09-09): die vier
+  // abhängigkeitsfreien Provokationen stehen VOR den fünf Ableitungen — vorher
+  // sprang George an d.hypothesis…d.gapReveal vorbei und begann bei der
+  // sechsten Zeile der Leiste. Das Kapitel bleibt trotzdem GEMISCHT und
+  // bekommt deshalb KEINEN Trenner: `d.voiceSamples`, `d.toneWords` und
+  // `d.vocabulary` schöpfen aus `d.primary` und müssen dahinter bleiben.
+  defineSession({ id: 'd.party', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
+  defineSession({ id: 'd.never', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
+  defineSession({ id: 'd.admired', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
+  defineSession({ id: 'd.emotion', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
   defineSession({ id: 'd.hypothesis', stepId: 'archetype', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'none', generator: 'derive', dependencies: ['a.pitch', 'a.toneAnalysis', 'a.customerPraise'] }),
   defineSession({ id: 'd.pairs', stepId: 'archetype', type: 'special', required: true, kind: 'structured', maxLength: LONG, editor: 'cards', generator: 'none', help: true, dependencies: ['d.hypothesis'] }),
   defineSession({ id: 'd.primary', stepId: 'archetype', type: 'derivation', required: true, kind: 'choice', maxLength: SHORT, editor: 'none', generator: 'derive', help: true, dependencies: ['d.pairs'] }),
   defineSession({ id: 'd.secondary', stepId: 'archetype', type: 'derivation', required: true, kind: 'choice', maxLength: SHORT, editor: 'none', generator: 'derive', dependencies: ['d.pairs'] }),
   defineSession({ id: 'd.gapReveal', stepId: 'archetype', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'none', generator: 'derive', help: true, dependencies: ['d.hypothesis', 'd.primary', 'd.secondary'], pathVariants: { relaunch: true } }),
-  defineSession({ id: 'd.party', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'd.never', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'd.admired', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'd.emotion', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
   defineSession({ id: 'd.voiceSamples', stepId: 'archetype', type: 'choice', required: true, kind: 'list', maxLength: LONG, editor: 'cards', generator: 'draft', dependencies: ['c.final', 'd.primary', 'd.secondary', 'd.party', 'd.emotion'] }),
   defineSession({ id: 'd.toneWords', stepId: 'archetype', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'chips', generator: 'derive', dependencies: ['a.toneAnalysis', 'd.primary', 'd.emotion'] }),
   // F→K: der Mensch nennt die NIE-Wörter, George ergänzt Benutzen/Meiden.
@@ -846,8 +853,11 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // inputHash-Quellen für dasselbe Ereignis.
   defineSession({ id: 'e.warmup1', stepId: 'manifesto', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
   defineSession({ id: 'e.warmup2', stepId: 'manifesto', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'e.statements', stepId: 'manifesto', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft', help: true, dependencies: ['b.purpose', 'b.vision', 'b.mission', 'c.final', 'c.definitions', 'd.primary', 'd.toneWords', 'e.warmup1', 'e.warmup2'] }),
+  // MENSCHENFRAGEN ZUERST (2026-09-09): `e.composition` hängt von nichts ab und
+  // steht deshalb VOR dem ersten Entwurf. `e.anchorLine` wählt eine Zeile aus
+  // `e.manifesto` und bleibt hinten — das Kapitel bleibt gemischt, ohne Trenner.
   defineSession({ id: 'e.composition', stepId: 'manifesto', type: 'choice', required: true, kind: 'structured', maxLength: SHORT, editor: 'chips', generator: 'none' }),
+  defineSession({ id: 'e.statements', stepId: 'manifesto', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft', help: true, dependencies: ['b.purpose', 'b.vision', 'b.mission', 'c.final', 'c.definitions', 'd.primary', 'd.toneWords', 'e.warmup1', 'e.warmup2'] }),
   // Der EINE Markdown-Slot (Plan §3e „Editor- & Inhaltsformat").
   defineSession({ id: 'e.manifesto', stepId: 'manifesto', type: 'stage-edit', required: true, kind: 'richtext', maxLength: LONG, editor: 'stage', generator: 'draft', help: true, dependencies: ['d.toneWords', 'e.statements', 'e.composition'] }),
   defineSession({ id: 'e.anchorLine', stepId: 'manifesto', type: 'choice', required: true, kind: 'text', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['e.manifesto'] }),
@@ -904,6 +914,12 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   defineSession({ id: 'g.mix', stepId: 'dna', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['g.dna', 'g.board'] }),
 
   // ── H · Farbwelt (§2.3) — 6 ─────────────────────────────────────────────
+  // MENSCHENFRAGEN ZUERST (2026-09-09): hier bewegt sich NICHTS. Die beiden
+  // Wahlen des Kapitels (`h.neutral`, `h.accent`) rechnen BEIDE auf `h.base`,
+  // einer Ableitung DIESES Kapitels — sie sind damit abhängig und müssen hinter
+  // ihr bleiben. Eine abhängigkeitsfreie Menschenfrage hat die Farbwelt nicht,
+  // also gibt es nichts nach vorn zu rücken; das Kapitel bleibt gemischt und
+  // ohne Trenner.
   // `generator: 'none'` (D3): die drei Kandidaten sind eine DETERMINISTISCHE
   // Rechnung aus Richtung und Farbwelt (`brandBaseCandidates`), kein
   // Modell-Lauf. Mit `candidates` trüge die Bühne einen Entwurfs-Knopf, und der

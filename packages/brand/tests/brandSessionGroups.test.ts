@@ -15,6 +15,7 @@ import {
   BRAND_STEP_KEYS,
   type BrandSlot,
   type BrandStepKey,
+  dependencyClosure,
   slotById,
   slotsForStep,
 } from '../shared/slotRegistry'
@@ -169,17 +170,100 @@ describe('Die Folge für den Weg durch das Kapitel', () => {
     }
   })
 
-  it('und die beiden Kapitel, die mit einer Ableitung beginnen, müssen es', () => {
-    // `archetype` und `color` sind die zwei Ausnahmen — und sie sind keine
-    // Nachlässigkeit: dort schöpft die erste Frage des Kapitels aus einer
-    // Ableitung desselben Kapitels (`d.toneWords` aus `d.primary`,
-    // `h.neutral` aus `h.base`). Ohne diese Zeile wäre die Ausnahme unbemerkt
-    // erweiterbar.
+  it('und das eine Kapitel, das mit einer Ableitung beginnt, muss es', () => {
+    // Seit dem Nachzug vom 2026-09-09 ist `color` die EINZIGE Ausnahme — und
+    // sie ist keine Nachlässigkeit: die Farbwelt hat gar keine
+    // abhängigkeitsfreie Menschenfrage, ihre beiden Wahlen (`h.neutral`,
+    // `h.accent`) rechnen BEIDE auf `h.base`. `archetype` fiel aus dieser
+    // Liste, weil `d.party`/`d.never`/`d.admired`/`d.emotion` nach vorn
+    // gerückt sind. Ohne diese Zeile wäre die Ausnahme unbemerkt erweiterbar.
     const startsDerived = BRAND_STEP_KEYS
       .filter(stepKey => brandSessionIsDerived(slotsForStep(stepKey)[0]!))
-    expect(startsDerived).toEqual(['archetype', 'color'])
+    expect(startsDerived).toEqual(['color'])
     for (const stepKey of startsDerived) {
       expect(brandChapterIsSplit(stepKey), stepKey).toBe(false)
     }
+  })
+})
+
+/**
+ * DER NACHZUG (Davids Entscheidung 2026-09-09): abhängigkeitsfreie
+ * Menschenfragen zuerst — auch in den gemischten Kapiteln.
+ *
+ * Die Kapitel bleiben gemischt (kein Trenner, `brandChapterIsSplit` false), aber
+ * George beginnt nicht mehr mit einer Ableitung, an der er stumm vorbeispringt.
+ */
+describe('Gemischt mit Nachweis: archetype · manifesto · color', () => {
+  /**
+   * Je Kapitel: womit George anfängt, was vorn steht, und WELCHE Frage aus
+   * WELCHER Ableitung desselben Kapitels schöpft — der Nachweis, der die
+   * Mischung deckt.
+   */
+  const CASES: readonly {
+    stepKey: BrandStepKey
+    /** Die Fragen ohne Abhängigkeit, in genau dieser Reihenfolge, ganz vorn. */
+    leading: readonly string[]
+    /** Die Fragen, die hinten bleiben MÜSSEN, mit ihrer Quelle im Kapitel. */
+    forced: readonly (readonly [question: string, source: string])[]
+  }[] = [
+    {
+      stepKey: 'archetype',
+      leading: ['d.party', 'd.never', 'd.admired', 'd.emotion'],
+      forced: [
+        ['d.voiceSamples', 'd.primary'],
+        ['d.toneWords', 'd.primary'],
+        ['d.vocabulary', 'd.primary'],
+      ],
+    },
+    {
+      stepKey: 'manifesto',
+      leading: ['e.warmup1', 'e.warmup2', 'e.composition'],
+      forced: [['e.anchorLine', 'e.manifesto']],
+    },
+    {
+      // Die Farbwelt hat NICHTS zu rücken: beide Wahlen sind abhängig.
+      stepKey: 'color',
+      leading: [],
+      forced: [['h.neutral', 'h.base'], ['h.accent', 'h.base']],
+    },
+  ]
+
+  it.each(CASES)('$stepKey bleibt gemischt und weist es nach', ({ stepKey, leading, forced }) => {
+    const order = slotsForStep(stepKey).map(session => session.id)
+
+    // 1. Vorn stehen genau die abhängigkeitsfreien Fragen — und zwar zuerst.
+    expect(order.slice(0, leading.length)).toEqual([...leading])
+    for (const id of leading) {
+      expect(brandSessionIsAskable(slotById(id)!), id).toBe(true)
+      expect(slotById(id)!.inputs.slots, id).toEqual([])
+    }
+
+    // 2. Jede hinten stehende Frage schöpft (transitiv) aus einer Ableitung
+    //    DIESES Kapitels — das ist der Grund, warum sie nicht mit nach vorn kann.
+    const derivedHere = new Set(brandSessionGroups(stepKey).derived)
+    for (const [question, source] of forced) {
+      const closure = dependencyClosure(question)
+      expect(closure, question).toContain(source)
+      expect(derivedHere.has(source), `${question} → ${source}`).toBe(true)
+      expect(order.indexOf(question), question).toBeGreaterThan(order.indexOf(source))
+    }
+
+    // 3. Deshalb: kein Trenner, und der Wächter bleibt trotzdem grün.
+    expect(brandChapterIsSplit(stepKey), stepKey).toBe(false)
+    expect(brandDerivedDividerSlot(stepKey), stepKey).toBeNull()
+    expect(validateSessionOrder()).toEqual([])
+  })
+
+  it('George beginnt in archetype und manifesto jetzt mit einer Menschenfrage', () => {
+    // Vorher sprang `resolveNextSession` an fünf bzw. einer Ableitung vorbei.
+    expect(resolveNextSession('archetype', {})?.slotId).toBe('d.party')
+    expect(resolveNextSession('manifesto', {})?.slotId).toBe('e.warmup1')
+    // `color` hat nichts zu rücken — und zeigt genau deshalb das Gegenbild:
+    // mit leerem Stand ist dort GAR KEINE Frage erreichbar (beide warten auf
+    // `h.base`), erst mit der bestätigten Ableitung geht es weiter.
+    expect(resolveNextSession('color', {})).toBeNull()
+    expect(resolveNextSession('color', {
+      'h.base': { hasValue: true, confirmed: true, value: '#0a7d55' },
+    })?.slotId).toBe('h.neutral')
   })
 })

@@ -595,9 +595,12 @@ describe('Session-Vertrag', () => {
       'c.livedExamples',
       'c.conflictRule',
       'c.teamFilter',
+      // Nachzug 2026-09-09: `d.emotion` ist eine der vier abhängigkeitsfreien
+      // Menschenfragen, die in `archetype` vor die Ableitungen gerückt sind —
+      // deshalb steht sie hier jetzt vor `d.hypothesis`/`d.gapReveal`.
+      'd.emotion',
       'd.hypothesis',
       'd.gapReveal',
-      'd.emotion',
       'd.vocabulary',
       'e.statements',
       'f.nameType',
