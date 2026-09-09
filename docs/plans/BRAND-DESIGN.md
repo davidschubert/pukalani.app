@@ -931,6 +931,15 @@ oder trägt ein Marken-Knopf immer hellen Text? (2) Design-Werte doppelt im
 Snapshot (Preset + rohe Slot-Werte)? (3) Klickdummy mitziehen oder
 einfrieren? (4) §2.14 nennt `step.completed (mit `stepKey` eines Design-Kapitels — kein eigener Typ, Davids Entscheidung 2026-09-09)`, gebaut ist der
 generische `step.completed` mit `stepKey` — Konzept nachziehen?
+**Entschieden 2026-09-09 (David, DECISION-LOG):** (1) adaptive Knopf-
+Schriftfarbe bleibt; (2) Snapshot ohne rohe Design-Werte — gebaut als
+NACHSCHNITT (Commit 2e0321b7) in der schärferen Fassung: Design-Kapitel
+reisen NIE roh (`isBrandChapterShareable` in `brandSharing.ts`, Schreibweg
+UND Lesepfad des Share-Links), auch nicht in die Discover-Veröffentlichung
+(die kein Preset trägt) und nicht bei halbfertiger Schicht; v1-Links
+unverändert. Beweise: Share 51/51 (Gegenprobe 36/51), Design 130/130
+(Gegenprobe 108/130), Sessions 383/383, 2 664 Tests. (3) Prototyp
+eingefroren; (4) Ereignis bleibt `step.completed` mit `stepKey`.
 
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
