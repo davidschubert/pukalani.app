@@ -7,6 +7,36 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Session-Token-Hygiene: CLAUDE.md wird KERN + pfadgebundene `.claude/rules/`
+
+**Anlass:** Eine Session stand bei 655k Tokens Kontext (Messages 547k, CLAUDE.md +
+Memory-Index 53k je Runde, 445 MCP-Werkzeuge). CLAUDE.md war auf 88 KB ≈ 44k Tokens
+gewachsen und liegt in JEDER Runde und in JEDEM Subagenten (außer Explore/Plan) im
+Kontext — bei fünf Subagenten also 220k nur für die Konstitution.
+
+**Entscheidung (David, Option A von drei):** CLAUDE.md bleibt die eine Quelle, wird aber
+KERN (Projekt, Architektur, Config-Gates, Produkte, Coding Rules, Git, Doku-Ordnung —
+24 KB) plus neun Domänen-Dateien unter `.claude/rules/<name>.md`, die WORTGLEICH aus
+CLAUDE.md gezogen sind und per `paths:`-Frontmatter nur laden, wenn eine passende
+Datei gelesen wird (appwrite, themes, hosts-ops, onboarding, ki-mail-embed-moderation,
+tenant-isolation, editor, tests, ai-runner). Beweis: eine frische `claude -p`-Session
+liest `packages/themes/package.json` und hat danach die Themes-Regel im Kontext, die
+Isolations-Regel nicht.
+
+**Verworfen:** (B) nur die drei größten Abschnitte auslagern — halber Effekt, gleiche
+Konfliktkosten; (C) so lassen — der Kontext wäre weiter der größte Posten.
+
+**Regeln daraus:** neue Domänen-Regel gehört in die passende rules-Datei, nicht in den
+Kern; Kern-Zuwachs nur als Regel + ein Satz Warum + Verweis (Geschichte nach docs/).
+Wer per Bash liest (cat/sed) oder nur berät, öffnet die rules-Datei bewusst per Read —
+der Pfad-Trigger hängt am Read-Tool. Dazu (Memory `session-token-hygiene`): Session pro
+Paket neu starten statt bei 500k+ weiterfahren, Erkundung an Explore statt an
+allgemeine Subagenten, nie `TaskOutput` auf einen laufenden Agenten (Transkript-Dump),
+Connectoren ohne Repo-Bezug in der Desktop-App abgeschaltet (Blender, Trello, Gmail,
+Kalender, Drive, Obsidian, Figma, Linear + Marketing-/PM-/Productivity-/Design-Plugins).
+
+---
+
 ## 2026-09-08 — Brand Insights (BI1): Konzeptrunde — acht Entscheidungen
 
 **Anlass:** Die Konzeptrunde vom 2026-09-08 hat aus den zehn offenen Fragen des Redaktions-

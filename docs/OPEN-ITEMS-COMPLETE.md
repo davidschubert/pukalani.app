@@ -30,6 +30,28 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Session-Token-Hygiene: CLAUDE.md als Kern + pfadgebundene `.claude/rules/` ✅ 2026-09-08
+
+**Was:** Davids Auftrag „optimierter fahren, gleiches Ergebnis, weniger Nutzung". Gemessen
+an einer 655k-Session: Verlauf 547k, CLAUDE.md + Memory-Index 53k je Runde, 445
+MCP-Werkzeuge (19k geladen, 189k deferred — auch die Namen kosten). Umgesetzt:
+CLAUDE.md 88 KB → 24 KB Kern, neun wortgleiche Domänen-Dateien in `.claude/rules/`
+mit `paths:`-Frontmatter (Verlust-Prüfung: jede Zeile des Originals steht in genau
+einer der neuen Dateien), Memory-Index 18 KB → 10,7 KB (80 Einträge erhalten),
+Feedback-Memory `session-token-hygiene`, Connectoren/Plugins ohne Repo-Bezug in der
+Desktop-App abgeschaltet (David). Entscheidung: DECISION-LOG 2026-09-08.
+
+**Beweis:** `claude -p --model haiku` liest `packages/themes/package.json` → antwortet
+`RULE_LOADED=yes` (Themes-Regel im Kontext) und `TENANT_RULE=no` (Isolations-Regel
+nicht geladen).
+
+**Gelernt:** Der Pfad-Trigger hängt am Read-Tool — wer per Bash liest (cat/sed), lädt
+keine Regel; deshalb steht die Domänen-Liste mit Read-Hinweis oben im Kern. Subagenten
+(außer Explore/Plan) bekommen die komplette CLAUDE.md-Hierarchie mit — jeder Aufruf
+zahlte 44k, jetzt ~12k. Und: `TaskOutput` auf einen laufenden Agenten kippt sein
+JSONL-Transkript in den Kontext (zweimal ~20k in derselben Session) — auf die
+Benachrichtigung warten.
+
 ### Discover Brands (DB1 D0–D3): Galerie, Anatomie, Veröffentlichen mit Freigabe, Betreiber-Seite ✅ 2026-09-08
 
 **Was:** Davids Vorziehen von DB1 („mach mit discover brands weiter"). Strategie + Konzept
