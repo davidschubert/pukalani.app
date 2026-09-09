@@ -40,6 +40,29 @@ mit; die Nav-Registry bekommt dafür ein optionales `descriptionKey` (core).
 **Verworfen:** Langform je Produkt (mehr Text, der bei BK1/Z1 nachgezogen werden
 müsste); „nur die vier, die es gibt" (Supply-Ebene fehlte); ein gemeinsamer
 Preisblock „Ableitung" auf der Übersicht.
+
+---
+
+## 2026-09-09 — Brand Insights (BI1): Ja zur Prod-Migration I1, Paket gebaut
+
+**Entscheidung (David):** „Ja, fahren" — die drei I1-Migrationen (`insights_posts`,
+`insights_brands`, `insights_corrections`) laufen auf der Prod-Instanz `branding`, VOR dem
+Code-Deploy (Regel aus BS1 §2.3). Damit ist I1 aus docs/plans/BRAND-INSIGHTS.md §9.9 durch;
+nächstes Paket ist **I2 (Dashboard + KI-Entwurf)**, es braucht kein Gate.
+
+**Drei Zuschnitte beim Bau, die der Plan offen liess** (im Code begründet, hier nur als
+Beschluss): (1) der Datentür-Backstop (`tablesDB`-Sperre in ESLint) nimmt `insights` NICHT
+auf — die Tabellen tragen kein `communityId`, der Layer läuft im Silo `branding`, dieselbe
+Lage wie `brand` und `market`; (2) `facts` wird MEDIUMTEXT, weil der freigegebene
+I0-Vertrag Zeilen zulässt, die varchar 4000 sprengen; (3) `insights_corrections` bekommt
+`retentionAt` als gespeichertes Datum statt einer Rechnung im Sweep — ein späterer Wechsel
+der Frist verlängert nicht rückwirkend, was zugesagt wurde.
+
+**Unverändert:** kein Markenprofil geht ohne die Anwaltsantworten BI1-3/BI1-4 live — I1 ist
+Schema und Code, keine öffentliche Seite (die kommen mit I3).
+
+---
+
 ## 2026-09-09 — Sucheintrag: die Owner-Beschreibung gilt auch im Silo
 
 **Anlass:** Nebenbefund aus NAV1 (letzte offene Entscheidung der Zeile `13 · NAV1`): den

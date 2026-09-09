@@ -10649,3 +10649,70 @@ naheliegend aus, `pristineBody` leer zu lassen — „es gibt ja nichts zu
 schonen". Genau das hätte beim Öffnen-und-Speichern einen LEEREN Text
 gespeichert. Wer an einer Stelle mit Sonderregel etwas Neues anhängt, muss die
 Sonderregel erst zu Ende lesen.
+
+---
+
+## BI1 I1 — Brand Insights: Layer + Schema + Vertrag (2026-09-09)
+
+**Was gebaut wurde** (drei Commits, Live-Build `bb1f9102` auf branding.supply, per /api/health bewiesen): Paket I1 aus
+docs/plans/BRAND-INSIGHTS.md §9.9, die „volle Rechnung" aus §9.1 (5) ohne Abkürzung.
+
+- **`insights.manage`** (`41a84637`, eigener Commit): nur im Admin-Wildcard, bewusst
+  nicht bei `moderator` — die Redaktion ist Betreiber-Sache, die Silo-App hat keine
+  Community-Rollen (Vorlage `runner.manage`).
+- **Layer montiert** (`b5d284f1`): `product.manifest.ts` (`hasMigrations: true`,
+  `apiPrefixes: ['/api/insights']`), `apps/branding/site.manifest.ts` + `nuxt.config.ts`
+  (nach `market`, vor `pages` — pages muss mit seiner `/[slug]`-Route zuletzt stehen),
+  `@pukalani/insights` in der App, `pukalani.insights.enabled: true`, `LAYER_ORDER`
+  in `scripts/migrate.mjs` nach `market`, Bilanz regeneriert, `INSIGHTS_TABLES` im
+  BRANDING_SOLL des Paritäts-Wächters.
+- **Drei Tabellen** `insights_posts` (26 Spalten) · `insights_brands` (21) ·
+  `insights_corrections` (12), server-only, Indizes nur über `createIndexSteps`.
+  Abweichungen von §9.3, alle im Migrationskopf vorgerechnet: `facts` MEDIUMTEXT
+  statt varchar 4000 (12 Duell-Zeilen ≈ 7.400 Zeichen, 10 Ranking-Plätze ≈ 8.300),
+  `brandRefs` 4000 statt 2000, `history` 5000 statt 4000, `topics` als JSON-Liste
+  statt Kommaliste (ein Parser; `Query.contains` trifft bei Kommalisten Präfixe).
+  Zusatz gegenüber §9.3: `insights_corrections.retentionAt` (Datum, ab dem
+  `contactEmail`/`ipHash` geleert werden, 12 Monate als EINE Konstante) mit Index
+  `idx_retention`, und `idx_contact_email` als Lesepfad des GDPR-Contributors
+  (Adresse wird getrimmt + kleingeschrieben gespeichert).
+- **Der EINE Vertrag** `packages/insights/server/contracts/brandContract.ts`
+  (genau §9.1 (2)): `brand_checks`-Lesezugriff + Kategorien, Farbwelt,
+  Archetyp-Katalog, Branchen-Katalog, Slug-Regel, SSRF-fester Abruf samt
+  robots/TDM. ESLint-Block `packages/insights/**` erlaubt nur `brand`; der
+  Datentür-Block (`tablesDB`-Sperre) nimmt insights BEWUSST NICHT auf: kein
+  `communityId`, Silo auf `branding` — Begründung steht im ESLint-Block.
+- **GDPR-Contributor** (`registerUserDataContributor`, id `insights`): Export der
+  Korrekturen mit der Konto-Adresse (ohne `ipHash`), Ids der geprüften Beiträge und
+  beanspruchten Marken; Löschung leert `contactEmail`/`ipHash`/`retentionAt`,
+  `reviewedBy`, `claimedBy` — idempotent, die Zeile bleibt (Nachweis, §9.3).
+- **Fristen-Sweep** (`insightsCorrectionsSweep.ts`, Plugin alle 24 h, Produkt-Gate)
+  nach dem Muster `brandEventsSweep.ts` — leert, löscht nicht.
+- **Shared-Vertrag erweitert:** `insightsCorrectionSchema`, `insightsSlugHistoryPush`
+  (≤ 5, ohne Duplikate), Row ⇄ Vertrag fail-soft (`shared/insightsRows.ts`); 87 Tests.
+
+**Beweise:** Migration lokal gegen die Dev-Appwrite zweimal gefahren (Lauf 2: 75 ×
+„existiert bereits"), **Prod `branding` mit Davids Ja 2026-09-09 gefahren** (3 Tabellen,
+13 Indizes), `pnpm ops:schema-parity` branding 38/38 grün; `check:manifests`,
+`check:i18n-keys`, `check:single-copy`, `check:bilanz`, `lint:scripts`, Lint
+insights/core/brand/market/branding, Typecheck branding, Unit-Tests insights 87 / core
+1618 / brand 2820 / market 206.
+
+**Nebenbefund, behoben** (`bb1f9102`): `packages/market` hatte seit M1 KEIN
+`server/plugins/product-manifest.ts` — als einziger Produkt-Layer mit `apiPrefixes`.
+Folge: die Notabschaltung `app_config.products.market.enabled = false` traf
+`/api/market/**` nie, und der Rohtext-Sweep stieg an `getProductRegistry().has('market')`
+bei jedem Lauf aus — der gefilterte Text fremder Websites blieb über die zugesagten
+24 Stunden hinaus liegen. Vier Zeilen Plugin, jetzt registriert. Ebenfalls ohne Plugin,
+aber NICHT angefasst (eigene Entscheidung nötig): `domains`, `onboarding`, `runner`.
+
+**Gelernt:** Ein Manifest mit `apiPrefixes` ist ein Versprechen, das erst ein
+Laufzeit-Plugin einlöst — `check:manifests` prüft die DATEI, nicht die Registrierung.
+Beim nächsten Layer gehört das Plugin in dieselbe Checkliste wie LAYER_ORDER und
+Paritäts-Soll; ein Wächter „Layer mit `apiPrefixes` braucht
+`server/plugins/product-manifest.ts`" wäre die dauerhafte Antwort (offen: OPEN-ITEMS Zeile `PM1`). **Zweite Lehre:** ein Fristen-Sweep, der Felder LEERT statt Zeilen zu löschen,
+muss auch sein Fälligkeits-Datum leeren — sonst füllen die schon geleerten Zeilen
+jeden Batch (`retentionAt <= now`, Limit 200) und neue fällige Zeilen werden nie mehr
+erreicht. Bei der Prüfung erwischt, vor dem Deploy behoben. **Dritte:** Appwrite 2.0
+lehnt einen Index über varchar > 768 Zeichen ab (`column_index_invalid`, MariaDB
+3072 B ÷ 4) — `idx_slug_history` auf einer 1000er-Spalte braucht `lengths: [768]`.
