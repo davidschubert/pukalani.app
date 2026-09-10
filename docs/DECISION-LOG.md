@@ -7,6 +7,43 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-10 — Brand Insights (BI1) I4 Themenradar: vier Beschlüsse aus dem Bau und dem ersten Prod-Lauf
+
+**Entscheidungen:** (1) **Aufbewahrung = täglich neu + 30-Tage-Netz** (Plan §9.6 liess beides
+zu, Policies III.E.4): der tägliche Lauf überschreibt je Video, das Netz löscht als GANZE Zeile,
+was der Lauf nicht mehr erreicht hat — auch unsere Opportunity-Zahl, denn eine 30 Tage alte Zahl
+zu einem Video, das wir nicht mehr beobachten, hilft der Redaktion nicht (Begründung im Kopf von
+Migration insights-004). (2) **Der YouTube-Schlüssel liegt in der Server-.env, NICHT in
+`instance_secrets`** — abweichend vom KI-Schlüssel-Muster (DB schlägt Env), und zwar aus einem
+Grund, nicht aus Bequemlichkeit: `apps/branding` hat den `admin`-Layer bewusst nicht, also keinen
+Reiter „Integrationen"; eine Ablage, die niemand über eine Oberfläche füllen kann, wäre nur ein
+zweiter Ort für dasselbe Geheimnis. Der Env-Wächter mahnt die Zeile an (F44-Sorte Loch: ein
+stiller Sweep). Kommt der `admin`-Layer je nach branding, zieht der Schlüssel um. (3) **Ja zur
+Prod-Migration insights-004** (David, 2026-09-10, VOR dem Code-Deploy; Parität branding 39/39).
+(4) **Alters-Deckel je Video: 180 Tage** ab Veröffentlichung, je App überschreibbar
+(`pukalani.insights.radar.maxVideoAgeDays`, Deckel 365) — Schärfung nach dem ersten Prod-Lauf,
+bei dem Ogilvy, „pentagramdesign" und Harry Dry Uploads von 2012–2024 mit Opportunity 17–50 in
+die Morgenliste stellten: das 30-Tage-Netz rechnet mit dem ABRUF-Datum. 180 Tage sind zwei
+Halbwertszeiten des Alters-Signals (das Signal steht dann bei 5 von 20 — der Radar sagt selbst,
+dass so ein Video nicht mehr „läuft"). **Davids Gegenlesen offen** — die Zahl ist eine
+Redaktions-Vorgabe, keine Rechtsfrage.
+
+**Verworfen:** die alten Zeilen bis zum Ablauf des 30-Tage-Netzes stehen zu lassen (bis zu 30
+Tage Altbestand in der Liste) · ein Index auf `publishedAt` per Migration (der Filter läuft auf
+Appwrite 2.0 ohne, lesend gegen Prod geprüft; sortiert wird über den indizierten `fetchedAt`) ·
+die Kanäle statt der Videos zu deckeln (ein Kanal, der halbjährlich etwas Gutes lädt, gehört in
+die Liste).
+
+**Nebenbefund, behoben:** `@PentagramDesign` (UCTXgprkT2GFY9eKZiz5Egew) ist ein Privatkonto
+namens „pentagramdesign" mit einem Dublin-Video von 2012, `@pentagram` eine Metal-Band — die Id
+war echt, die Identität nicht; Eintrag entfernt. Lehre für jede weitere Kanal-Aufnahme: TITEL
+und JÜNGSTER UPLOAD müssen zur Erwartung passen, nicht nur die Id.
+
+**Bei David:** Kanalliste durchsehen (Ogilvy, Harry Dry liefern nichts mehr — raus oder
+ersetzen) · Gegenlesen der 180 Tage.
+
+---
+
 ## 2026-09-09 — Products-Seite auf branding.supply (PS1): Konzept entschieden
 
 **Anlass:** Vorhaben PS1 (Nebenbefund aus BI1, 2026-09-08) — Übersicht plus je

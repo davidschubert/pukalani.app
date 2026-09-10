@@ -11078,3 +11078,39 @@ Wirkung verpuffen (kein Request, kein Toast) — Beweis ist der Server: `fetch` 
 das pm2-Log, nie „ich habe geklickt". (3) Der 90-s-Erstlauf des Sweeps nach dem Deploy lief
 VOR der Migration und endete still am fehlenden Tisch — ein leeres Log nach dem Neustart ist
 also kein Beweis für „nichts passiert", sondern ein Hinweis auf einen stillen Rückweg.
+
+## BI1 I4-Schärfung — Alters-Deckel je Video, Pentagram raus (2026-09-10)
+
+**Anlass:** der Befund der Nachbarsitzung aus dem ersten Prod-Lauf (COMPLETE „BI1 I4 — Gates auf
+Prod geschlossen"): Ogilvy, „pentagramdesign" und Harry Dry lieferten Uploads von 2012–2024 mit
+Opportunity 17–50 — die Uploads-Playlist gibt die JÜNGSTEN Videos eines Kanals, und bei einem
+Kanal ohne neue Uploads sind das Jahre alte; das 30-Tage-Netz rechnet mit dem Abruf-Datum.
+
+**Was gebaut wurde:** (1) `INSIGHTS_RADAR_MAX_VIDEO_AGE_DEFAULT = 180` / `…_CAP = 365`,
+`readInsightsRadarConfig` liest `pukalani.insights.radar.maxVideoAgeDays` (Unsinn ⇒ Vorgabe,
+über 365 ⇒ 365). (2) Der Sweep überspringt ältere Videos VOR dem Schreiben und zählt sie
+(`tooOld` im Ergebnis, im Log und im Toast) — ein Video ohne lesbares Datum bleibt drin. (3) Das
+Netz läuft zweimal: über `fetchedAt` (30 Tage) und über `publishedAt` (Deckel), damit die schon
+gespeicherten alten Zeilen sofort fallen und nicht erst nach 30 Tagen. `publishedAt` hat keinen
+Index; der Filter läuft auf Appwrite 2.0 ohne (lesend gegen Prod geprüft: 32 Zeilen älter als
+180 Tage, genau die drei Kanäle plus ein Google-Search-Central-Video von vor 245 Tagen),
+sortiert wird über den indizierten `fetchedAt`. (4) `GET /api/insights/radar` meldet
+`maxVideoAgeDays`, `InRadar` sagt es als dritte Hinweiszeile (de+en). (5) „Pentagram" aus der
+Kanalliste: `@PentagramDesign` ist ein Privatkonto, `@pentagram` eine Metal-Band — das Designbüro
+hat keinen YouTube-Kanal unter seinem Namen. Drei neue Tests (Deckel beim Schreiben, Deckel im
+Netz inkl. Kappung auf 365, Config-Leser), Sweep-Fake liest die Spalte aus der Abfrage.
+Beschlüsse im DECISION-LOG (2026-09-10, vier Punkte, darunter Env statt `instance_secrets` mit
+Grund).
+
+**Beweise:** 202 Tests insights, Lint insights/branding, Typecheck branding, check:i18n-keys
+(309 Nennungen), check:manifests, check:bilanz, check:doc-links, `pnpm --filter branding build`;
+Prod: Live-Build-SHA + eigener Klick auf `/dashboard/insights/radar` (Zahlen s. u.).
+
+**Gelernt:** (1) Eine Seite mit `useFetch({ lazy: true, server: false })` zeigt nach dem Laden
+erst ihre VORGABEN („Schlüssel fehlt", „kein Kanal", „noch kein Lauf") — wer sie sofort ausliest,
+liest einen Zustand, den es nie gab; der Beweis liest die Antwort der Route (`fetch` in der
+Seite) oder wartet auf `status === 'success'`. Zwanzig Minuten Fehlersuche an einem gesunden
+Server. (2) Eine Kanal-Id ist erst geprüft, wenn Titel UND jüngster Upload zur Erwartung passen —
+`@PentagramDesign` löst sauber auf, nur eben auf jemand anderen. (3) Ein Wächter, der etwas
+„bei David" nennt, muss gelesen werden, BEVOR man Fragen bündelt: Schlüssel und Migration waren
+schon durch (Env-Wächter grün, Parität 39/39), während OPEN-ITEMS sie noch als offen führte.
