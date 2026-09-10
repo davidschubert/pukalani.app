@@ -54,10 +54,17 @@
       "loadFailedHint": "Der Editor ist leer geblieben — was du hier speicherst, würde den vorhandenen Inhalt überschreiben. Prüf die Verbindung und öffne die Seite noch einmal.",
       "titleRequired": "Bitte einen Titel eingeben",
       "titleRequiredHint": "Jede Sprachversion hat ihren eigenen Titel — trag ihn im aktiven Reiter ein.",
-      "locale": {
-        "en": "Englisch",
-        "de": "Deutsch"
-      }
+      "localeState": {
+        "published": "{language}: veröffentlicht",
+        "draft": "{language}: Entwurf",
+        "missing": "{language}: fehlt"
+      },
+      "translateWithAi": "Aus {language} übersetzen",
+      "translated": "Vorschlag eingefügt",
+      "translatedHint": "Er ist noch nicht gespeichert und noch nicht veröffentlicht — lies ihn durch, ändere was nötig ist, dann speichern.",
+      "translateFailed": "Übersetzen hat nicht geklappt",
+      "translateFailedHint": "Bitte versuch es gleich noch einmal. Bleibt es dabei, übersetze den Text von Hand.",
+      "translateTooLong": "Zu lang für den Vorschlag (höchstens {max} Zeichen) — dieser Text gehört in Menschenhand."
     },
     "draftNotice": {
       "title": "Entwurf, in anwaltlicher Prüfung",
@@ -69,7 +76,8 @@
       "titleRequired": "Titel ist erforderlich",
       "titleMax": "Titel ist zu lang",
       "bodyMax": "Inhalt ist zu lang",
-      "statusInvalid": "Ungültiger Status"
+      "statusInvalid": "Ungültiger Status",
+      "translateBodyMax": "Text ist zu lang für einen Übersetzungsvorschlag"
     },
     "navigation": {
       "navLabel": "Navigation",
@@ -206,6 +214,13 @@
         "tooMany": "Es sind zu viele Weiterleitungen.",
         "tooLarge": "Die Liste ist insgesamt zu lang."
       }
+    },
+    "language": {
+      "en": "Englisch",
+      "de": "Deutsch"
+    },
+    "public": {
+      "otherLanguage": "Diese Seite gibt es noch nicht auf {requested} — angezeigt wird die Fassung auf {delivered}."
     }
   }
 }

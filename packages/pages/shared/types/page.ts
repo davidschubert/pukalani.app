@@ -115,6 +115,46 @@ export interface PublicPage {
   title: string
   body: string
   updatedAt: string
+  /**
+   * In welchen Sprachen es diese Seite VERÖFFENTLICHT gibt (F60).
+   *
+   * Zwei Leser, ein Feld: die Seite sagt damit „du liest gerade eine
+   * Ersatzsprache" (Vergleich mit `locale`), und sie meldet dem EINEN SEO-Kopf,
+   * welche `hreflang`-Alternates überhaupt wahr sind
+   * (`usePageLocaleAlternates()` im core). Kostet keine zweite Abfrage — die
+   * Route hat die Zeilen aller Sprachen ohnehin geladen, um die passende
+   * auszuwählen.
+   */
+  availableLocales: string[]
+}
+
+/** Antwort des KI-Übersetzungsvorschlags (F60) — die Route SPEICHERT NICHTS. */
+export interface PageTranslateResponse {
+  /** Zielsprache, wie angefragt. */
+  locale: string
+  /** Leer = kein Vorschlag; die Oberfläche lässt das Feld dann in Ruhe. */
+  title: string
+  body: string
+  /** Welches Modell geantwortet hat — für die Nachvollziehbarkeit im Log. */
+  model: string
+}
+
+/** Antwort von `GET /api/pages` (Liste im Dashboard). */
+export interface PagesListResponse {
+  groups: PageGroup[]
+  /**
+   * Ist ein KI-Schlüssel hinterlegt? Der Übersetzen-Knopf erscheint nur dann
+   * (und nur mit dem Produkt `ai` im Tarif) — ein Knopf, der beim Drücken 503
+   * antwortet, wäre ein Versprechen, das die Seite nicht halten kann. Die
+   * Route prüft es trotzdem selbst; sie ist die Grenze, dies die Höflichkeit.
+   */
+  aiTranslate: boolean
+}
+
+/** Antwort von `GET /api/pages/:slug` (alle Sprachfassungen zum Bearbeiten). */
+export interface PageDetailResponse {
+  rows: PageEditorRow[]
+  isTemplate: boolean
 }
 
 /** Admin-Gruppierung: ein slug mit allen seinen Sprachversionen. */

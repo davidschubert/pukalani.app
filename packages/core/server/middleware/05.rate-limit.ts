@@ -797,6 +797,16 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   { re: /^POST \/api\/events\/[^/]+\/translate$/, bucket: 'events:translate', max: TOKEN_MAX },
   { re: /^POST \/api\/courses\/[^/]+\/translate$/, bucket: 'courses:translate', max: TOKEN_MAX },
   { re: /^POST \/api\/lessons\/[^/]+\/translate$/, bucket: 'courses:lesson-translate', max: TOKEN_MAX },
+  /**
+   * BETREIBER-SEITEN ÜBERSETZEN (F60, 2026-09-10) — dieselbe Kostenklasse,
+   * andere Person: hier klickt der OWNER, und was an den Anbieter geht, ist
+   * ein Rechtstext von bis zu 12.000 Zeichen. Anders als die fünf Zeilen
+   * darüber hat diese Route KEINE feinere Drossel in sich: sie liegt schon
+   * hinter `pages.manage` und zwei Produkt-Gates, und ein Owner, der seine
+   * eigene Impressumsseite übersetzt, ist kein Massenlauf. Diese Zeile ist
+   * deshalb der einzige Deckel — und sie zählt je IP, VOR der Arbeit.
+   */
+  { re: /^POST \/api\/pages\/translate$/, bucket: 'pages:translate', max: TOKEN_MAX },
   // Early-Access-Anfrage: die EINZIGE session-lose Schreibroute des Trichters,
   // und sie verschickt Mail an den Betreiber → engstes Budget.
   { re: /^POST \/api\/onboarding\/request$/, bucket: 'onboarding:request', max: 3 },

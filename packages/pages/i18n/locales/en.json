@@ -54,10 +54,17 @@
       "loadFailedHint": "The editor stayed empty — saving from here would overwrite the existing content. Check your connection and open the page again.",
       "titleRequired": "Please enter a title",
       "titleRequiredHint": "Every language version has its own title — enter it in the active tab.",
-      "locale": {
-        "en": "English",
-        "de": "German"
-      }
+      "localeState": {
+        "published": "{language}: published",
+        "draft": "{language}: draft",
+        "missing": "{language}: missing"
+      },
+      "translateWithAi": "Translate from {language}",
+      "translated": "Suggestion inserted",
+      "translatedHint": "It is not saved and not published yet — read it through, change what needs changing, then save.",
+      "translateFailed": "Translation failed",
+      "translateFailedHint": "Please try again in a moment. If it keeps failing, translate the text by hand.",
+      "translateTooLong": "Too long for a suggestion (up to {max} characters) — this text belongs in human hands."
     },
     "draftNotice": {
       "title": "Draft, under review by our lawyers",
@@ -69,7 +76,8 @@
       "titleRequired": "Title is required",
       "titleMax": "Title is too long",
       "bodyMax": "Content is too long",
-      "statusInvalid": "Invalid status"
+      "statusInvalid": "Invalid status",
+      "translateBodyMax": "Text is too long for a translation suggestion"
     },
     "navigation": {
       "navLabel": "Navigation",
@@ -206,6 +214,13 @@
         "tooMany": "There are too many redirects.",
         "tooLarge": "The list is too long overall."
       }
+    },
+    "language": {
+      "en": "English",
+      "de": "German"
+    },
+    "public": {
+      "otherLanguage": "This page is not available in {requested} yet — showing the {delivered} version."
     }
   }
 }

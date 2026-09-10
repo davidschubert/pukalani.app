@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { pageExcerpt } from '../../shared/pageExcerpt'
+import { isFallbackLocale } from '../../shared/pageLocales'
 import { PAGE_DRAFT_ROBOTS, pageHasDraftNotice } from '../../shared/pageDraftNotice'
 import type { PublicPage } from '../../shared/types/page'
 
@@ -38,6 +39,34 @@ if (error.value || !page.value) {
   throw createError({ status: 404, statusText: 'Page not found' })
 }
 
+/**
+ * DIE SEITE GIBT ES NICHT IN DER SPRACHE DES LESERS (F60).
+ *
+ * Die Route fällt auf eine vorhandene Fassung zurück — richtig so, sonst wären
+ * Impressum und Datenschutz weg, sobald der Owner nur eine Sprache pflegt
+ * (Davids Entscheidung 2026-09-10). Bis heute geschah das STUMM. Drei Dinge
+ * ändern sich, und alle drei sind dieselbe Aussage an drei Publikumsgruppen:
+ *
+ *  1. der LESER bekommt eine Zeile, die sagt, was er da liest;
+ *  2. der VORLESER bekommt `lang` am Text — ohne das liest ein Screenreader
+ *     deutschen Text mit englischer Aussprache vor (das Dokument sagt `en`);
+ *  3. die SUCHMASCHINE bekommt nur noch die `hreflang`-Alternates, die es
+ *     wirklich gibt (`usePageLocaleAlternates()` — der Kopf im core streicht
+ *     den Rest).
+ *
+ * Der Eintrag trägt den Pfad mit, damit ihn die nächste Seite nicht erbt;
+ * Begründung im Kopf des Composables.
+ */
+const deliveredLocale = computed(() => page.value?.locale ?? '')
+const isFallbackLanguage = computed(() => isFallbackLocale(locale.value, deliveredLocale.value))
+const languageName = usePageLanguageName()
+
+const pageAlternates = usePageLocaleAlternates()
+watchEffect(() => {
+  const available = page.value?.availableLocales ?? []
+  pageAlternates.value = available.length ? { path: route.path, locales: [...available] } : null
+})
+
 // „<Seitenname> · <Brand>" + Beschreibung aus dem ersten Textabsatz der Seite
 // (Audit-Befunde S8/S5) — geteilte Links waren vorher markenlos und nackt.
 useBrandTitle(() => page.value?.title ?? '', {
@@ -58,7 +87,7 @@ useSeoMeta({ robots: () => (isDraftNotice.value ? PAGE_DRAFT_ROBOTS : undefined)
 <template>
   <UContainer class="py-8 sm:py-12">
     <article v-if="page" class="mx-auto max-w-3xl space-y-3">
-      <h1 class="text-2xl font-bold">{{ page.title }}</h1>
+      <h1 class="text-2xl font-bold" :lang="page.locale">{{ page.title }}</h1>
       <!-- Der Hinweis ist der ERSTE Block, nicht das Kleingedruckte. -->
       <UAlert
         v-if="isDraftNotice"
@@ -69,7 +98,21 @@ useSeoMeta({ robots: () => (isDraftNotice.value ? PAGE_DRAFT_ROBOTS : undefined)
         :description="t('pages.draftNotice.body')"
         data-page-draft-notice
       />
-      <MarkdownContent :source="page.body" />
+      <!-- Steht in der Sprache des LESERS und darf deshalb kein `lang` erben. -->
+      <UAlert
+        v-if="isFallbackLanguage"
+        color="neutral"
+        variant="subtle"
+        icon="i-ph-translate"
+        :description="t('pages.public.otherLanguage', {
+          requested: languageName(locale),
+          delivered: languageName(deliveredLocale),
+        })"
+        data-page-language-notice
+      />
+      <div :lang="page.locale">
+        <MarkdownContent :source="page.body" />
+      </div>
     </article>
   </UContainer>
 </template>
