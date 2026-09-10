@@ -8,13 +8,14 @@
  * in dieser Liste GESUCHT. Was hier nicht steht, ist 404. Damit gibt es keinen
  * Weg, über `..` oder einen Bindestrich irgendwo hinzukommen.
  *
- * ── SIE IST DER ANDOCKPUNKT VON K3 UND K6 ────────────────────────────────
- * `brand.md`, `brand.json` (K3) und `README.md` (K6) stehen HEUTE schon in der
- * Liste — mit `available: false` und Grund `not_built_yet`. Das ist Absicht:
- * das Manifest sagt einem Menschen, was es geben WIRD, statt so zu tun, als
- * gäbe es das Kit nur aus drei Dateien; und die späteren Pakete hängen ihren
- * Erzeuger in dieselbe Karte, statt eine zweite Liste danebenzustellen (§2.6
- * nennt sieben Dateien, nicht drei).
+ * ── SIE IST DER ANDOCKPUNKT DER SPÄTEREN PAKETE ──────────────────────────
+ * `brand.md`, `brand.json` und `README.md` standen seit K2 in dieser Liste —
+ * mit `available: false` und Grund `not_built_yet`, damit das Manifest sagt,
+ * was es geben WIRD, statt so zu tun, als bestünde das Kit aus drei Dateien.
+ * K3 hat genau das eingelöst: DREI `null` sind zu Funktionen geworden, und
+ * Route, Manifest und Bündel zogen ohne eine weitere Änderung nach. Wer K6
+ * baut (`marks/*.svg`, Zip), hängt seinen Erzeuger in dieselbe Karte, statt
+ * eine zweite Liste danebenzustellen.
  *
  * ── DER DATEINAME KOMMT AUS DEM SLUG, NIE AUS DER EINGABE ────────────────
  * Der Markenname ist Nutzertext. Für den Download wird daraus ein Slug aus
@@ -25,10 +26,18 @@
  * DIESE DATEI IST PUR: kein H3, kein Appwrite, kein i18n-Modul.
  */
 
+import { buildBrandContextJson, renderBrandContextJson, renderBrandContextMarkdown } from './brandContext'
+import type { BrandFoundationView } from './brandFoundation'
 import { renderBrandLicenses } from './brandKitLicenses'
+import { renderBrandKitReadme } from './brandKitReadme'
 import { buildBrandTokens, renderBrandTokensJson } from './brandTokens'
 import { renderBrandTokensCss } from './brandTokensCss'
-import type { BrandKitFile, BrandKitFileId } from './types/brandKit'
+import type {
+  BrandKitFile,
+  BrandKitFileId,
+  BrandKitReadmeFile,
+  BrandKitReadmeManifest,
+} from './types/brandKit'
 import type { BrandDesignSnapshotPreset } from './types/brand'
 
 /**
@@ -57,10 +66,20 @@ export function isBrandKitFileId(value: unknown): value is BrandKitFileId {
   return typeof value === 'string' && BY_ID.has(value as BrandKitFileId)
 }
 
-/** Was ein Erzeuger braucht. K3 erweitert die Form um die Foundation-Ansicht. */
+/**
+ * Was ein Erzeuger braucht.
+ *
+ * `view` ist seit K3 dabei und PFLICHT: der Brand Context liest die FERTIGE
+ * Leseansicht und nie rohe Slots — die Reise-Regel ist damit die Export-Regel
+ * (§2.12 Nr. 1), und zwar für jeden künftigen Erzeuger, ohne dass er daran
+ * denken muss. Eine Marke ohne einen einzigen bestätigten Wert hat eine
+ * Ansicht ohne Kapitel (`{ chapters: [] }`), nicht `undefined`.
+ */
 export interface BrandKitBuildInput {
   /** `null`, solange Schicht 2 nicht steht. */
   preset: BrandDesignSnapshotPreset | null
+  /** Die Leseansicht des Fundaments — dieselbe, die das Book rendert. */
+  view: BrandFoundationView
   title: string
   /** ISO-Stempel des jüngsten beteiligten Kapitels; '' ist erlaubt. */
   stand: string
@@ -72,12 +91,13 @@ export interface BrandKitBuildInput {
 export type BrandKitBuilder = (input: BrandKitBuildInput) => string | null
 
 /**
- * ERZEUGER JE DATEI — in K2 gefüllt für die drei, die aus dem Preset kommen.
+ * ERZEUGER JE DATEI — K2 füllte die drei aus dem Preset, K3 die drei aus der
+ * Leseansicht. Seither ist keine Zeile mehr `null`.
  *
- * `null` ist die EHRLICHE Auskunft „noch nicht gebaut" und keine Lücke: das
- * Manifest liest genau dieses `null` und schreibt `reason: 'not_built_yet'`.
- * Wer K3 baut, ersetzt hier ein `null` durch eine Funktion — und die Route,
- * das Manifest und das Bündel ziehen ohne eine weitere Änderung nach.
+ * `null` bleibt trotzdem im Typ: es ist die EHRLICHE Auskunft „noch nicht
+ * gebaut" und keine Lücke — das Manifest liest genau dieses `null` und
+ * schreibt `reason: 'not_built_yet'`. Wer eine achte Datei anlegt, darf sie
+ * eintragen, bevor er sie bauen kann.
  */
 export const BRAND_KIT_BUILDERS: Readonly<Record<BrandKitFileId, BrandKitBuilder | null>> = {
   'tokens.json': ({ preset, title, stand, locale }) =>
@@ -85,10 +105,42 @@ export const BRAND_KIT_BUILDERS: Readonly<Record<BrandKitFileId, BrandKitBuilder
   'tokens.css': ({ preset, title, stand, locale }) =>
     (preset ? renderBrandTokensCss(buildBrandTokens(preset, { title, stand, locale })) : null),
   'licenses.md': ({ preset, locale }) => renderBrandLicenses(preset, locale),
-  // K3 (Brand Context) und K6 (Bündel) hängen sich hier ein.
-  'brand.md': null,
-  'brand.json': null,
-  'readme.md': null,
+  /*
+   * K3 — DER BRAND CONTEXT. Beide Dateien fahren DENSELBEN Renderer wie das
+   * Book (§2.6: „ein Renderer für Book und Kit"): sie bekommen die fertige
+   * `view` und sehen keinen rohen Slot. `needsDesign: false` — ohne Preset
+   * fehlt in `brand.md` der visuelle Abschnitt und in `brand.json` steht
+   * `design: null`; alles andere steht.
+   */
+  'brand.md': ({ view, preset, title, stand, locale }) =>
+    renderBrandContextMarkdown(view, { title, stand, locale }, preset),
+  'brand.json': ({ view, preset, title, stand, locale }) =>
+    renderBrandContextJson(buildBrandContextJson(view, { title, stand, locale }, preset)),
+  'readme.md': input => renderBrandKitReadme(brandKitReadmeManifest(input), input.locale),
+}
+
+/**
+ * DAS MANIFEST FÜR DIE README — dieselbe Verfügbarkeits-Rechnung wie die Route,
+ * nur ohne die Dateien zu BAUEN.
+ *
+ * Genau das ist der Punkt: `brandKitManifestFiles` (server) rechnet die GRÖSSE
+ * und baut dafür jede Datei — auch die README. Riefe die README dieselbe
+ * Funktion, bauten sich die beiden gegenseitig. Hier steht deshalb die
+ * Verfügbarkeit ohne Inhalt; die Dateinamen sind die im BÜNDEL (`tokens.json`),
+ * nicht die des Downloads (`kailua-coffee-co-tokens-2026-09-09.json`) — im Zip
+ * heisst eine Datei, wie sie heisst.
+ */
+export function brandKitReadmeManifest(input: BrandKitBuildInput): BrandKitReadmeManifest {
+  const files: BrandKitReadmeFile[] = BRAND_KIT_FILES.map((file) => {
+    const availability = brandKitAvailability(file, !!input.preset)
+    return {
+      id: file.id,
+      filename: file.filename,
+      available: availability.available,
+      ...(availability.available ? {} : { reason: availability.reason }),
+    }
+  })
+  return { title: input.title, stand: input.stand, files }
 }
 
 /** Ist diese Datei heute abrufbar — und wenn nein, warum nicht? */

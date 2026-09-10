@@ -808,6 +808,23 @@ gewählten Skala gerechnet werden; und das Preset trägt Gewicht/Laufweite nur
 als Textzeilen, ohne Rückweg (`brandTypeRulesFromLines`) fielen die Tokens
 still auf den D4-Vorschlag.
 
+**Stand K3 (GEBAUT 2026-09-09, main 2a170767; Davids Blick auf Kailuas
+`brand.md` offen):** `renderBrandContextMarkdown` (Aufbau §2.6 Nr. 1–8, 88
+Zeilen für Kailua, Werte Markdown-escaped, Beschriftungen als bewachte Kopie
+des Locale-Katalogs de/en mit Test), `buildBrandContextJson` (schemaVersion 1,
+jedes Kapitel der Ansicht, Preset ohne Entwürfe), `renderBrandKitReadme`;
+die Erzeuger sehen NUR die fertige `BrandFoundationView` — Gegenprobe:
+`a.competitors`/`a.facts`/`a.complaints` stehen in keiner der drei Dateien.
+`verify:context` (H5) als Dry-Run; der echte Lauf braucht den KI-Schlüssel.
+Beweis: 2956 Tests (+29), Lint, Typecheck 0, SSR 404 ohne Login.
+**Gelernt:** (1) `check:bilanz` (Produkt-Bilanz) ist Teil von CI-Lint — neue
+Routen/Seiten ⇒ `pnpm bilanz` vor dem Push, sonst rot (K1/K2 hatten es
+vergessen). (2) Der Dokument-Check-Judge fragt nach der Vollständigkeit
+eines Fundaments, nicht nach dem Ton eines Absatzes — der H5-Beweis braucht
+einen eigenen kurzen Richter-Prompt. Offen für K6: ohne Preset trägt
+`context.stand` kein Datum (Design-Stand), ein Foundation-Stand je Datei
+gehört zur Lieferseite.
+
 ### 2.19 Offene Entscheidungen für die Freigabe
 
 | # | Frage | Empfehlung |

@@ -49,14 +49,16 @@ describe('die Registry', () => {
     }
   })
 
-  it('sagt ehrlich, was noch nicht gebaut ist', () => {
-    const gebaut: BrandKitFileId[] = ['tokens.json', 'tokens.css', 'licenses.md']
+  it('hat seit K3 für JEDE Datei einen Erzeuger', () => {
+    // Bis K2 waren `brand.md`, `brand.json` und `README.md` `null` und damit
+    // ehrlich `not_built_yet`; K3 hat sie eingelöst. Die Zusage dahinter gilt
+    // weiter und steht in `brandContext.test.ts`: ein Eintrag OHNE Erzeuger
+    // ist `available: false` mit Grund, nicht eine Datei mit null Bytes.
     for (const file of BRAND_KIT_FILES) {
-      const builder = BRAND_KIT_BUILDERS[file.id]
-      expect(!!builder, file.id).toBe(gebaut.includes(file.id))
-      if (builder) continue
-      expect(brandKitAvailability(file, true)).toEqual({ available: false, reason: 'not_built_yet' })
+      expect(BRAND_KIT_BUILDERS[file.id], file.id).toBeTruthy()
     }
+    const erfunden = { id: 'x.md' as BrandKitFileId, filename: 'x.md', mime: 'text/markdown', needsDesign: false }
+    expect(brandKitAvailability(erfunden, true)).toEqual({ available: false, reason: 'not_built_yet' })
   })
 
   it('sperrt die Design-Dateien ohne Preset — und gibt sie mit frei', () => {
@@ -68,7 +70,15 @@ describe('die Registry', () => {
   })
 
   it('erzeugt mit Preset Inhalt, ohne Preset nichts', () => {
-    const input = { preset: KAILUA, title: 'Kailua Coffee Co.', stand: '2026-09-09T10:20:00.000Z', locale: 'de' }
+    // Die Ansicht ist seit K3 Pflicht — die drei Token-Dateien lesen sie nicht,
+    // eine leere reicht ihnen (`brandContext.test.ts` prüft die andere Seite).
+    const input = {
+      preset: KAILUA,
+      view: { chapters: [] },
+      title: 'Kailua Coffee Co.',
+      stand: '2026-09-09T10:20:00.000Z',
+      locale: 'de',
+    }
     expect(BRAND_KIT_BUILDERS['tokens.json']!(input)).toContain('"$type": "color"')
     expect(BRAND_KIT_BUILDERS['tokens.css']!(input)).toContain('--ui-color-primary-600')
     expect(BRAND_KIT_BUILDERS['tokens.json']!({ ...input, preset: null })).toBeNull()

@@ -28,8 +28,12 @@
  * String ist. Wer eine solche Gruppe liest, überspringt Schlüssel mit `$` und
  * prüft mit `typeof` — beides steht in `brandTokensCss.ts` genau einmal.
  *
- * DIESE DATEI IST PUR: nur Typen, kein Code, kein i18n, kein H3.
+ * DIESE DATEI IST PUR: nur Typen, kein Code, kein i18n, kein H3. Der EINE
+ * Import ist ein Typ-Import (`BrandDesignSnapshotPreset`) — er wird beim
+ * Übersetzen gelöscht und macht aus der Datei kein Modul mit Verhalten.
  */
+
+import type { BrandDesignSnapshotPreset } from './brand'
 
 // ── DTCG-Werte ─────────────────────────────────────────────────────────────
 
@@ -306,4 +310,82 @@ export interface BrandKitManifest {
   stand: string
   designReady: boolean
   files: BrandKitManifestFile[]
+}
+
+// ── Der Brand Context (§2.6, Paket K3) ────────────────────────────────────
+
+/** Was die zwei Context-Erzeuger ausser der Ansicht brauchen. */
+export interface BrandContextInput {
+  title: string
+  /** Inhaltssprache der Marke — die Datei ist in IHR geschrieben. */
+  locale: string
+  /** ISO-Stempel; die Datei zeigt daraus das Datum, '' bleibt leer. */
+  stand: string
+}
+
+/**
+ * EIN BLOCK IN `brand.json` — dieselben Arten wie in der Leseansicht, ohne
+ * die vier des Kapitels 10 (`locked`, `direction`, `swatches`, `design`).
+ *
+ * Beschriftungen reisen als SCHLÜSSEL (`labelKey`, `columnKeys`) und nicht als
+ * Sätze: die Datei ist maschinenlesbar, und ein Bezeichner überlebt eine
+ * Textrunde (Begründung im Kopf von `shared/brandContext.ts`).
+ */
+export type BrandContextJsonBlock =
+  | { kind: 'lead' | 'text', labelKey?: string, text: string }
+  | { kind: 'list', labelKey?: string, items: string[] }
+  | { kind: 'cards', labelKey?: string, items: { title: string, text: string, note?: string }[] }
+  | { kind: 'chips', labelKey?: string, items: { word: string, sample: string }[] }
+  | { kind: 'dodont', labelKey?: string, pairs: { doText: string, dontText: string }[] }
+  | { kind: 'table', labelKey?: string, columnKeys: string[], rows: string[][] }
+  | { kind: 'choice', labelKey?: string, slotId: string, optionIds: string[] }
+  | { kind: 'aiRules', tone: string[], avoid: string[], stands: string[] }
+
+export interface BrandContextJsonChapter {
+  /** Kapitel-Id der Leseansicht — zugleich die Sprungmarke im Book. */
+  id: string
+  anchor: string
+  /** i18n-Schlüssel der Überschrift; aufgelöst wird sie beim LESER. */
+  titleKey: string
+  blocks: BrandContextJsonBlock[]
+}
+
+/**
+ * `brand.json` — `schemaVersion` ist die Fassung UNSERES Aufbaus.
+ *
+ * `design` ist `null`, solange Schicht 2 nicht steht, und sonst das
+ * SNAPSHOT-Preset: `BrandDesignSnapshotPreset` kennt `mark.keptDrafts` nicht,
+ * die behaltenen KI-Entwürfe können also nicht mitreisen (§1.11 b).
+ */
+export interface BrandContextJson {
+  schemaVersion: 1
+  brand: { title: string, locale: string, stand: string }
+  foundation: {
+    /** Georges Synthese als Text; '' wenn es sie nicht gibt. */
+    story: string
+    chapters: BrandContextJsonChapter[]
+  }
+  /** Nur auf dem B2-Weg (§2.20 Nr. 4). */
+  nomenclature?: BrandContextJsonChapter
+  aiGuidelines?: BrandContextJsonChapter
+  presskit?: BrandContextJsonChapter
+  design: BrandDesignSnapshotPreset | null
+}
+
+// ── `README.md` (§2.6, Paket K3) ──────────────────────────────────────────
+
+/** Eine Zeile der README — dieselbe Auskunft wie im Manifest der Route. */
+export interface BrandKitReadmeFile {
+  id: BrandKitFileId
+  /** Der Dateiname IM BÜNDEL (`tokens.json`), nicht der des Downloads. */
+  filename: string
+  available: boolean
+  reason?: BrandKitFileReason
+}
+
+/** Was die README über dieses Bündel weiss. */
+export interface BrandKitReadmeManifest {
+  title: string
+  stand: string
+  files: readonly BrandKitReadmeFile[]
 }
