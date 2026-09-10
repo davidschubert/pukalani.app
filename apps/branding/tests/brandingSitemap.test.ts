@@ -28,6 +28,7 @@ describe('branding: die feste Routen-Liste', () => {
       '/',
       '/brand-check',
       '/discover',
+      '/insights',
       '/erstgespraech',
       '/brand-check/ranking',
       '/brand-check/methodik',
@@ -43,6 +44,11 @@ describe('branding: die feste Routen-Liste', () => {
     // und antwortet 301 auf die Anatomie — eine Redirect-Quelle gehört in
     // keine Sitemap.
     for (const excluded of [
+      // `/rankings` hängt am Riegel `publicFormats` und kommt deshalb
+      // DYNAMISCH aus dem insights-Layer (BI1 I3) — eine feste Zeile hier
+      // böte einem Crawler eine leere Seite an.
+      '/rankings',
+      '/topics/rebranding',
       '/beispiel/kailua-coffee',
       '/brand-check/vergleich',
       '/invite',
@@ -159,5 +165,51 @@ describe('branding: XML-Escape', () => {
     expect(escapeXmlText('&<>"')).toBe('&amp;&lt;&gt;&quot;')
     // `&` zuerst — sonst würden die eigenen Entities noch einmal escaped.
     expect(escapeXmlText('a&amp;b')).toBe('a&amp;amp;b')
+  })
+})
+
+/**
+ * NUR DIE SPRACHEN, DIE ES GIBT (BI1 I3, Plan BRAND-INSIGHTS §9.5:
+ * „hreflang nur auf vorhandene Fassungen").
+ *
+ * Die Gegenprobe ist hier die wichtigere Hälfte: ein Zuschnitt, der IMMER
+ * greift, nähme jeder gewöhnlichen Seite ihre zweite Sprache — und das fiele
+ * erst auf, wenn die halbe Site aus dem deutschen Index fällt.
+ */
+describe('branding: Sitemap-Einträge mit nur EINER Sprache', () => {
+  it('ein Beitrag ohne redigierte Übersetzung steht nur EINMAL drin', () => {
+    const xml = brandingSitemapXml('https://branding.supply', [
+      { path: '/insights/only-english', priority: 0.5, locales: ['en'] },
+    ])
+    expect(xml).toContain('<loc>https://branding.supply/insights/only-english</loc>')
+    expect(xml).not.toContain('<loc>https://branding.supply/de/insights/only-english</loc>')
+    expect(xml.match(/<url>/g)).toHaveLength(1)
+    expect(xml.match(/hreflang="de"/g)).toBeNull()
+    expect(xml.match(/hreflang="en"/g)).toHaveLength(1)
+  })
+
+  it('x-default zeigt auf DE, wenn es EN gar nicht gibt', () => {
+    const xml = brandingSitemapXml('https://branding.supply', [
+      { path: '/insights/nur-deutsch', priority: 0.5, locales: ['de'] },
+    ])
+    expect(xml).toContain('<loc>https://branding.supply/de/insights/nur-deutsch</loc>')
+    expect(xml).not.toContain('<loc>https://branding.supply/insights/nur-deutsch</loc>')
+    expect(xml).toContain('<xhtml:link rel="alternate" hreflang="x-default" href="https://branding.supply/de/insights/nur-deutsch"/>')
+    expect(xml.match(/hreflang="en"/g)).toBeNull()
+  })
+
+  it('GEGENPROBE: ohne `locales` bleibt alles zweisprachig', () => {
+    const xml = brandingSitemapXml('https://branding.supply', [
+      { path: '/about', priority: 0.5 },
+    ])
+    expect(xml.match(/<url>/g)).toHaveLength(2)
+    expect(xml.match(/hreflang="en"/g)).toHaveLength(2)
+    expect(xml.match(/hreflang="de"/g)).toHaveLength(2)
+  })
+
+  it('GEGENPROBE: `locales: [en, de]` ist dasselbe wie kein Eintrag', () => {
+    const withBoth = brandingSitemapXml('https://x', [{ path: '/about', priority: 0.5, locales: ['en', 'de'] }])
+    const without = brandingSitemapXml('https://x', [{ path: '/about', priority: 0.5 }])
+    expect(withBoth).toBe(without)
   })
 })

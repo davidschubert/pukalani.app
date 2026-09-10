@@ -969,6 +969,16 @@ nicht die Suchnachfrage.)
 geschärften Form — sie ist Gate für **alles über Metadaten hinaus**, nicht für
 den Radar als solchen + ein **Google-Cloud-Projekt mit API-Schlüssel (David)**.
 
+#### Fortsetzung: Kuration, Merkliste, Artikel aus Video (BI2)
+
+Davids Blick auf den ersten Prod-Lauf (2026-09-09) hat sieben Wünsche ergeben,
+die über den Zuschnitt von I4 hinausgehen: die Kanalliste einsehen und
+bearbeiten, die Cluster erweitern, filtern und sortieren, eine eigene
+Fundstück-Liste per YouTube-Link, ein Dreifach-Urteil je Video, und aus einem
+Video einen Artikel. Sie stehen als eigener Plan in
+**[BRAND-INSIGHTS-KURATION.md](BRAND-INSIGHTS-KURATION.md)** (Pakete K1–K7,
+drei Entscheidungsfragen offen) — dieses Dokument bleibt der Stand von BI1.
+
 ### 9.7 Messung — drei Ziele, drei Zahlen
 
 Entscheidung 9 gewichtet die drei Ziele gleich. Je Ziel EINE Kennzahl, und
@@ -1077,7 +1087,19 @@ mit vier Stücken — einem je Format —, nicht mit neunzehn.
 | **I1** ✅ | **Layer + Schema + Vertrag — GEBAUT 2026-09-09, Prod-Migration mit Davids Ja gefahren (Details OPEN-ITEMS-COMPLETE „BI1 I1")** | Layer `insights` mit Manifest, Eintrag in `apps/branding/site.manifest.ts`, `LAYER_ORDER`, Bilanz-Block, ESLint-Block; Migration (`insights_posts`, `insights_brands`, `insights_corrections`); Vertrag zum brand-Layer; `insights.manage` in `core/shared/authz.ts` (eigener Commit); GDPR-Contributor; Schema-Parität-Soll | **Davids Ja GEGEBEN 2026-09-09** · Zuschnitt entschieden: §11 Frage 1 |
 | **I2** ✅ | **Dashboard + KI-Entwurf — GEBAUT + LIVE 2026-09-09 (Details OPEN-ITEMS-COMPLETE „BI1 I2")** | Liste (`UTable`), Editor mit `UEditor` und zwei Sprach-Reitern, Quellen-Panel mit deterministischer Beleg-Prüfung, die sechs Prüfregeln vor `review` als Server-Gate mit Quellen-Abruf, Zustands-Umschalter, Vorschau, Übersetzen-Endpunkt mit Drossel, `aiCompleteJson`-Entwurf mit `insights-d-1`. Noch nicht: Marken-Seite, Korrekturen-Liste, Fakten-Zeilen-Editor (JSON mit Zod) | I1 · Zuschnitt entschieden: §11 Fragen 4 und 7 |
 | **I4** ✅ | **Themenradar — GEBAUT 2026-09-09 (Details OPEN-ITEMS-COMPLETE „BI1 I4"), ohne Schlüssel stumm** | kuratierte Kanalliste (zwölf verifizierte Kanäle in `apps/branding`), `playlistItems.list` + `videos.list` + `channels.list`, `insights_topics` (insights-004, nur die API-Zahlen je Video, täglich neu + 30-Tage-Netz), Sweep 24 h + Knopf, Opportunity aus drei Signalen mit Fussnote, `/dashboard/insights/radar` mit Status-Karte; **keine Kommentar-Texte, keine Nutzernamen** — dafür gibt es keinen Adress-Bauer | **Gates GESCHLOSSEN 2026-09-10** (Schlüssel in der Server-.env, insights-004 auf Prod gefahren, erster Lauf 205 Videos) · **Alters-Deckel je Video seit 2026-09-10** (180 Tage, s. §9.6) · die Anwaltsantwort BI1-2 gilt weiter für **alles über Metadaten hinaus** (§9.6) |
-| **I3** | **Öffentliche Seiten** | `/insights`, `/insights/<slug>`, `/brands/<slug>`, `/duels/<a>-vs-<b>`, `/rankings`, `/topics/<slug>`; Korrektur-/Entfernungs-Formular; SEO (og:image, JSON-LD, hreflang, `noindex` für Entwürfe), Sitemap, Nav-Punkt, 301 aus `slugHistory` | I2 · **Anwaltsantworten BI1-3 und BI1-4** (ohne sie geht kein Markenprofil live, §6) |
+| **I3** ✅ | **Öffentliche Seiten — GEBAUT 2026-09-10 (Details OPEN-ITEMS-COMPLETE „BI1 I3")** | `/insights`, `/insights/<slug>`, `/topics/<slug>`, `/brands/<slug>`, `/duels/<a>-vs-<b>`, `/rankings`, `/rankings/<slug>`; sieben Leserouten `/api/insights/public/**` mit Microcache 60 s und Betreiber-Vorschau; Korrektur-/Entfernungs-Formular (Honigtopf, 3/Std + 10/Tag); SEO (og:image `/og/insights/<slug>.png`, JSON-LD Article/Breadcrumb/ItemList, hreflang nur auf vorhandene Fassungen, `noindex` für alles ausser published/updated), Sitemap mit `lastmod` und Sprachen je Beitrag, Nav-Punkt, 301 aus `slugHistory` und für die Duell-Gegenrichtung, 410 für die entfernte Marke | I2 ✅ · **Anwaltsantworten BI1-3 und BI1-4 stehen weiter aus** — sie sind jetzt ein **Config-Riegel** statt eines Baustopps (s. unten) |
+
+**Der Riegel `pukalani.insights.publicFormats` (I3, 2026-09-10).** Das Gate aus
+§6 („ohne die Antworten zu 3 und 4 geht kein Markenprofil live") ist gebaut,
+nicht umgangen: der Layer-Default ist `['article']`, und ein gesperrtes Format
+antwortet **an beiden Türen 404** — Seite UND Leseroute, wie die Datentür, nie
+nur in der Navigation. Die Sitemap bietet gesperrte Adressen nicht an, das
+og-Bild eines gesperrten Beitrags ebenso wenig. Die pure Regel
+`readInsightsPublicFormats` ist **fail-closed**: was kein Array bekannter
+Format-Schlüssel ist, erlaubt nichts. **Davids Handgriff nach der
+Anwaltsantwort ist damit EINE Zeile** in `packages/insights/app/app.config.ts`
+(oder, enger, in `apps/branding/app/app.config.ts`) — kein Code, kein Deploy
+von Neuem. Artikel und Themen-Seiten sind seit I3 live-fähig.
 | **I5** | **Newsletter** | `insights_subscribers` mit Double-Opt-in nach dem Warteliste-Muster, Bestätigungs- und Abmelde-Weg, Eintrags-Formular je Format und zentral, Versand | **eigenes Gate:** Rechtstexte (A1/BS1 R2) · Zuschnitt entschieden: §11 Frage 5 |
 | **I6** | **Launch-Paket** | die vier Beispiel-Beiträge (einer je Format), dann die restlichen fünfzehn Stücke aus §9.8; danach der Wochentakt | I3 · Davids Redaktionszeit |
 

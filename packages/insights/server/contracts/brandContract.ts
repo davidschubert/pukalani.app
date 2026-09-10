@@ -77,14 +77,23 @@
  *
  * `BRAND_CHECKS_TABLE` reist mit, weil `verify-schema-parity` und spätere
  * Lese-Abfragen denselben Namen meinen müssen wie der brand-Layer.
+ *
+ * `brandCheckCategoryScores` kam mit I3 dazu: die Spalte `brand_checks.categories`
+ * trägt ROHWERTE (`raw` von `assessable` Kriterien), nicht Prozente — die
+ * Umrechnung auf 0–100 ist eine Regel des Brand-Checks und keine Division, die
+ * ein zweiter Layer nachbaut. Genau dieselbe Funktion liest schon
+ * `toDiscoverCategories` im brand-Layer; zwei Rechnungen ergäben für dieselbe
+ * Marke zwei Balken unterschiedlicher Länge auf `/discover/<slug>` und
+ * `/brands/<slug>`. `score: null` heisst dort „nicht bewertbar" (die Kategorie
+ * war gesperrt) und NICHT „null Punkte" — der Aufrufer lässt sie weg.
  */
 export { loadBrandCheckRow } from '../../../brand/server/utils/brandCheckAdmin'
 export { BRAND_CHECKS_TABLE } from '../../../brand/server/utils/brandStore'
 export type { BrandCheckRow } from '../../../brand/server/utils/brandStore'
 export { findBrandCheckForUrl } from '../../../brand/server/utils/brandCheckLookup'
 export type { BrandCheckLookupResult } from '../../../brand/server/utils/brandCheckLookup'
-export { BRAND_CHECK_CATEGORIES } from '../../../brand/shared/brandCheck'
-export type { BrandCheckCategory, BrandCheckCategoryKey } from '../../../brand/shared/brandCheck'
+export { BRAND_CHECK_CATEGORIES, brandCheckCategoryScores } from '../../../brand/shared/brandCheck'
+export type { BrandCheckCategory, BrandCheckCategoryKey, BrandCheckCategoryScore } from '../../../brand/shared/brandCheck'
 
 // ── 2. Die Farbwelt (§9.1 Nr. 2 b) ─────────────────────────────────────────
 /**

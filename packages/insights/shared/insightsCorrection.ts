@@ -151,7 +151,14 @@ export function insightsCorrectionSweepDue(row: InsightsCorrectionRetentionRow, 
  * ein Entfernungs-Wunsch schlägt keinen anderen Wert vor, er nennt einen
  * Grund. Das Schema verlangt deshalb genau dort eine Begründung.
  */
-export const insightsCorrectionSchema = z.object({
+/**
+ * DIE FELDER — EINMAL, weil es seit I3 ZWEI Schemas darüber gibt: den vollen
+ * Vertrag (wie eine Zeile aussieht) und die ÖFFENTLICHE Eingabe (was ein
+ * fremder Mensch schicken darf). Zwei abgeschriebene Feldlisten wären zwei
+ * Deckel über derselben Spalte, von denen einer beim nächsten Umbau grösser
+ * wird — wörtlich dasselbe Argument wie bei `insightsPostFields`.
+ */
+const insightsCorrectionFields = {
   targetKind: z.enum(INSIGHTS_CORRECTION_TARGET_KINDS),
   targetId: z.string().min(1).max(INSIGHTS_CORRECTION_TARGET_ID_MAX),
   kind: z.enum(INSIGHTS_CORRECTION_KINDS),
@@ -165,8 +172,23 @@ export const insightsCorrectionSchema = z.object({
   ]).default(''),
   status: z.enum(INSIGHTS_CORRECTION_STATUSES).default('open'),
   decisionNote: z.string().trim().max(INSIGHTS_CORRECTION_NOTE_MAX).default(''),
-}).superRefine((correction, ctx) => {
-  if (correction.kind === 'removal' && !correction.reason) {
+}
+
+/**
+ * EIN ENTFERNUNGS-WUNSCH BRAUCHT EINEN GRUND — die Regel als FUNKTION, damit
+ * beide Schemas sie LESEN statt sie abzuschreiben.
+ *
+ * Sie gilt in beide Richtungen gleich: was die Redaktion speichert und was
+ * ein Fremder schickt, muss dieselbe Bedingung erfüllen. Eine mildere Regel
+ * im öffentlichen Formular ergäbe Zeilen, die der volle Vertrag nicht mehr
+ * liest.
+ */
+export function insightsCorrectionNeedsReason(kind: InsightsCorrectionKind, reason: string): boolean {
+  return kind === 'removal' && !reason.trim()
+}
+
+export const insightsCorrectionSchema = z.object(insightsCorrectionFields).superRefine((correction, ctx) => {
+  if (insightsCorrectionNeedsReason(correction.kind, correction.reason)) {
     ctx.addIssue({ code: 'custom', path: ['reason'], message: 'Entfernungs-Wunsch ohne Begründung' })
   }
   // Eine Ablehnung ohne Notiz wäre ein „nein" ohne Antwort — und genau danach
@@ -222,4 +244,105 @@ export function insightsCorrectionDecisionAllowed(
   if (current !== 'open') return { ok: false, code: 'already_decided' }
   if (next === 'declined' && !note.trim()) return { ok: false, code: 'note_required' }
   return { ok: true }
+}
+
+// ── Der öffentliche Weg (BI1 I3, §9.5) ─────────────────────────────────────
+
+/** Der Honigtopf — ein Feld, das nur ein Skript ausfüllt. */
+export const INSIGHTS_CORRECTION_HONEYPOT_MAX = 200
+
+/**
+ * DAS ZIEL IST EINE ZEILEN-ID UND SONST NICHTS.
+ *
+ * Appwrite-Ids sind `[A-Za-z0-9_-]` und höchstens 36 Zeichen lang; der Deckel
+ * hier ist die SPALTE (64). Das Muster steht im Schema und nicht in der Route,
+ * weil eine Id, die keine sein kann, gar nicht erst in eine Abfrage gehört.
+ */
+const INSIGHTS_CORRECTION_TARGET_ID_RE = /^[A-Za-z0-9_-]{1,64}$/
+
+/**
+ * WAS EIN FREMDER MENSCH SCHICKEN DARF (§9.5, Muster:
+ * `createBrandPublicationReportSchema`).
+ *
+ * Drei Unterschiede zum vollen Vertrag, jeder mit Grund:
+ *
+ *  · `status` und `decisionNote` FEHLEN. Beides ist die Entscheidung der
+ *    Redaktion; ein durchgereichtes `status: 'accepted'` wäre eine Annahme,
+ *    die niemand getroffen hat.
+ *  · `hp` (Honigtopf) kommt DAZU — und zwar immer mit, nicht erst bei
+ *    Verdacht: das Schema ist `.strict()`, und ein Feld, das nur manchmal
+ *    mitreist, wäre eine Falle, die sich selbst ankündigt.
+ *  · `.strict()` statt Zods nachsichtiger Vorgabe. Bei der Redaktion ist
+ *    Wegwerfen richtig (das Formular schickt mit, was es nicht ändern darf);
+ *    hier ist ein unbekannter Schlüssel entweder ein Versuch oder ein
+ *    Missverständnis — beides soll auffallen.
+ *
+ * Die Fabrik nimmt `t` entgegen, damit dasselbe Schema das FORMULAR prüfen
+ * kann (übersetzte Meldungen, Muster `insightsForms.ts`); die Route ruft sie
+ * ohne Argument, weil ein Server keine Anzeigesprache hat.
+ */
+export function createInsightsCorrectionSubmitSchema(t: (key: string) => string = key => key) {
+  return z.object({
+    targetKind: insightsCorrectionFields.targetKind,
+    targetId: z.string().regex(INSIGHTS_CORRECTION_TARGET_ID_RE),
+    kind: insightsCorrectionFields.kind,
+    field: insightsCorrectionFields.field,
+    proposed: insightsCorrectionFields.proposed,
+    reason: insightsCorrectionFields.reason,
+    contactEmail: insightsCorrectionFields.contactEmail,
+    hp: z.string().max(INSIGHTS_CORRECTION_HONEYPOT_MAX).optional(),
+  }).strict().superRefine((correction, ctx) => {
+    if (insightsCorrectionNeedsReason(correction.kind, correction.reason)) {
+      ctx.addIssue({ code: 'custom', path: ['reason'], message: t('insights.correction.reasonRequired') })
+    }
+  })
+}
+
+export type InsightsCorrectionSubmitInput
+  = z.output<ReturnType<typeof createInsightsCorrectionSubmitSchema>>
+
+/**
+ * DIE DROSSEL DES ÖFFENTLICHEN WEGES (§9.5: „Honeypot und Drossel — 3/Std je
+ * IP, Tages-Eimer").
+ *
+ * ZWEI EIMER, ENG VOR WEIT. Die Stunde fängt den Menschen, der aus Ärger
+ * dreimal dasselbe schickt; der Tag fängt das Skript, das die Stunde
+ * aussitzt. Beide zählen je ANSCHLUSS (`ipHash`) und nicht je Konto — wer
+ * eine fremde Marke beanstandet, hat hier keines.
+ *
+ * Die Zahlen sind aus dem Gebrauch abgeleitet: wer mehr als drei Korrekturen
+ * pro Stunde oder zehn am Tag schickt, korrigiert nicht mehr, sondern flutet
+ * die Arbeitsliste — und genau die soll der Nachweis bleiben, dass der
+ * Korrekturweg funktioniert (Anwaltsfrage 3).
+ */
+export const INSIGHTS_CORRECTION_HOUR_LIMIT = 3
+export const INSIGHTS_CORRECTION_DAY_LIMIT = 10
+export const INSIGHTS_CORRECTION_HOUR_WINDOW_MS = 60 * 60_000
+export const INSIGHTS_CORRECTION_DAY_WINDOW_MS = 24 * 60 * 60_000
+
+export type InsightsCorrectionQuotaCode = 'rate_limited_hour' | 'rate_limited_day'
+
+/** Die Schlüssel der zwei Eimer — eigener Namensraum, nie der des brand-Layers. */
+export function insightsCorrectionHourKey(ipHash: string): string {
+  return `insights:correction:h:${ipHash}`
+}
+
+export function insightsCorrectionDayKey(ipHash: string): string {
+  return `insights:correction:d:${ipHash}`
+}
+
+/**
+ * `>` statt `>=` — `store.hit()` zählt diesen Versuch schon mit. Der DRITTE
+ * Vorschlag einer Stunde geht also durch, der vierte nicht.
+ *
+ * Die STUNDE gewinnt bei Gleichstand: sie ist der engere Deckel, und ihr
+ * `Retry-After` ist die kürzere und damit ehrlichere Auskunft.
+ */
+export function decideInsightsCorrectionQuota(
+  hourCount: number,
+  dayCount: number,
+): InsightsCorrectionQuotaCode | null {
+  if (hourCount > INSIGHTS_CORRECTION_HOUR_LIMIT) return 'rate_limited_hour'
+  if (dayCount > INSIGHTS_CORRECTION_DAY_LIMIT) return 'rate_limited_day'
+  return null
 }

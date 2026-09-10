@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { InsightsLocale, InsightsPost } from '../../../../../shared/insightsPost'
+import type { InsightsPublicPostListItem } from '../../../../../shared/insightsPublic'
 import { DEMO_GRADIENTS, DEMO_POSTS } from '../../../utils/demoInsights'
 
 /**
@@ -29,19 +30,26 @@ const localePath = useLocalePath()
 
 const readerLocale = computed<InsightsLocale>(() => (locale.value === 'de' ? 'de' : 'en'))
 
-/** Im Produkt: `/insights/<slug>` · `/brands/<slug>` · `/duels/…` · `/rankings/…`. */
-function resolveHref(post: InsightsPost): string {
-  if (post.format === 'profile') return localePath('/insights/demo/profil')
-  if (post.format === 'duel') return localePath('/insights/demo/duell')
-  if (post.format === 'ranking') return localePath('/insights/demo/ranking')
-  return localePath('/insights/demo/artikel')
+/**
+ * Im Produkt (BI1 I3) baut der SERVER Adresse und Farbwelt und liefert sie am
+ * Listen-Item mit (`href`, `gradient`) — der Pfad eines Markenprofils braucht
+ * den Slug der MARKE, und der Verlauf gehört dem brand-Layer. Der Prototyp
+ * hat weder das eine noch das andere und setzt beides hier von Hand; die FORM
+ * ist dieselbe, damit `InPostList` in beiden Welten dasselbe bekommt.
+ */
+function demoHref(post: InsightsPost): string {
+  if (post.format === 'profile') return '/insights/demo/profil'
+  if (post.format === 'duel') return '/insights/demo/duell'
+  if (post.format === 'ranking') return '/insights/demo/ranking'
+  return '/insights/demo/artikel'
 }
 
-/** Die Farbwelt gehört dem brand-Layer; hier eine Nachschlagetabelle. */
-function resolveGradient(post: InsightsPost): readonly [string, string] {
-  const brandId = post.brandRefs[0]?.brandId ?? ''
-  return DEMO_GRADIENTS[brandId] ?? ['#e6e2da', '#8f867a']
-}
+const items = computed<InsightsPublicPostListItem[]>(() => DEMO_POSTS.map((post, index) => ({
+  ...post,
+  id: `demo-${index}`,
+  href: demoHref(post),
+  gradient: DEMO_GRADIENTS[post.brandRefs[0]?.brandId ?? ''] ?? ['#e6e2da', '#8f867a'],
+})))
 </script>
 
 <template>
@@ -62,10 +70,9 @@ function resolveGradient(post: InsightsPost): readonly [string, string] {
 
       <div class="mt-8">
         <InPostList
-          :posts="DEMO_POSTS"
+          :posts="items"
           :locale="readerLocale"
-          :resolve-href="resolveHref"
-          :resolve-gradient="resolveGradient"
+          :localize="localePath"
         />
       </div>
 

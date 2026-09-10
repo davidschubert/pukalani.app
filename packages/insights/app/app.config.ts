@@ -25,6 +25,45 @@ export default defineAppConfig({
       enabled: false,
 
       /**
+       * DER RIEGEL DER ÖFFENTLICHEN SEITEN (BI1 I3 — §6, §11.3, Plan
+       * docs/plans/BRAND-INSIGHTS.md).
+       *
+       * ── WAS ER IST ─────────────────────────────────────────────────────
+       * Die Liste der Formate, die WIRKLICH öffentlich stehen. Alles andere
+       * antwortet 404 — Route UND Seite —, und zwar mit demselben Code wie ein
+       * unbekannter Slug (`post_not_found`): ein eigener Grund verriete, dass
+       * es die Seite gibt und sie nur gesperrt ist, und das ist eine Auskunft
+       * über eine FREMDE Marke.
+       *
+       * ── WARUM NUR `article` ────────────────────────────────────────────
+       * §6 ist eindeutig: „ohne die Antworten zu 3 (Score fremder Marken) und
+       * 4 (Verantwortlicher) geht KEIN Markenprofil live". Genau das sind
+       * Markenprofil, Duell und Ranking — sie alle zeigen den Score einer
+       * fremden Marke. Der Artikel tut das nicht: er ordnet ein, mit Quelle
+       * und Zitatschranke, und dafür liegt die Rechtslage vor.
+       *
+       * Die drei anderen sind GEBAUT und warten hinter dieser Zeile. Sie
+       * freizuschalten ist DAVIDS Handgriff nach der Anwaltsantwort: ein
+       * Eintrag mehr in dieser Liste, kein Code. Genau deshalb steht der
+       * Riegel im LAYER und nicht in der App — die App sagt „ich betreibe die
+       * Redaktion", der Layer sagt „so weit ist sie draussen", und die zweite
+       * Aussage soll nicht in jeder künftigen Brand-Site neu getroffen werden
+       * müssen. `apps/branding` setzt deshalb NICHTS; es gilt dieser Default.
+       *
+       * ── FAIL-CLOSED ────────────────────────────────────────────────────
+       * Gelesen wird über `readInsightsPublicFormats()`
+       * (`shared/insightsPublic.ts`): was keine Liste gültiger Schlüssel ist,
+       * ergibt LEER. Ein Tippfehler nimmt die Seiten vom Netz, statt eine
+       * Rechtsfrage zu eröffnen — das ist die richtige Richtung, und es fällt
+       * beim ersten Aufruf auf.
+       *
+       * `as string[]` und nicht `as const`: der tiefe Config-Merge muss eine
+       * längere Liste überhaupt zulassen, sonst wäre der Typ der einen
+       * erlaubten Zeile die Sperre für Davids Freischaltung.
+       */
+      publicFormats: ['article'] as string[],
+
+      /**
        * DER THEMENRADAR (BI1 I4, §9.6) — seine KANALLISTE ist Konfiguration.
        *
        * ── WARUM EINE LISTE UND KEINE SUCHE (Leitplanke c) ────────────────

@@ -11151,6 +11151,12 @@ das Manifest deklariert apiPrefixes [/api/site/domain] …"; (B) Plugin ohne Auf
 (D) Ausnahme + kein Plugin ⇒ grün. Gates: check:manifests, lint:scripts, -r lint,
 -r typecheck, -r test, check:i18n-keys, check:single-copy, check:bilanz.
 
+**Live-Beweis nach dem Deploy** (Build `b976197d` auf beiden Hosts, CI Test/Lint/
+Typecheck/E2E grün): `/api/platform/products` listet auf pukalani.studio jetzt
+`domains`, auf admin.pukalani.app `runner`; `GET /api/site/domain` und
+`GET /api/runner/runs` antworten weiter 401 (nicht 404) — kein Entitlement-Dokument
+hat die neu registrierten Produkte abgeschaltet.
+
 **Gelernt:** Der Wächter prüft die DATEI, deshalb prüft er auch den INHALT — ein
 leeres `defineNitroPlugin(() => {})` hätte die Regel formal erfüllt und nichts
 registriert. Zweitens: `/api/platform/products` ist der schnellste Live-Beweis,
@@ -11159,3 +11165,87 @@ Plugin). Drittens (Arbeitsweise): `git checkout -- <datei>` als „Aufräumen" n
 einer Gegenprobe wirft auch die eigene uncommittete Änderung weg — Gegenproben an
 einer Kopie im Scratchpad fahren oder die Änderung vorher als WIP committen.
 
+
+---
+
+## BI1 I3 — Brand Insights: die öffentlichen Seiten (2026-09-10)
+
+**Was gebaut wurde** (zwei Commits — Core eigens, wie die Git-Regel es verlangt; gebaut von
+einem Opus-Lauf nach Auftrag, geprüft und nachgeschärft im Hauptloop): Paket I3 aus
+docs/plans/BRAND-INSIGHTS.md §9.5 — Journal, Artikel, Themen, Markenprofil, Duell und Ranking
+sind öffentlich lesbar, ohne Konto, über eigene Leserouten mit Microcache.
+
+- **DER RIEGEL IST DIE HAUPTSACHE.** Das Gate aus §6 (Anwaltsantworten BI1-3/BI1-4) ist
+  GEBAUT, nicht umgangen: `pukalani.insights.publicFormats` steht im Layer auf `['article']`,
+  und ein gesperrtes Format antwortet an BEIDEN Türen 404 — Seite UND Leseroute, wie die
+  Datentür. Auch Sitemap und og-Bild lassen es weg. Die pure Regel
+  `readInsightsPublicFormats` ist fail-closed (kein Array bekannter Schlüssel ⇒ nichts
+  erlaubt). Davids Handgriff nach der Anwaltsantwort ist EINE Zeile, kein Code.
+- **Sieben Leserouten** `/api/insights/public/**` (Liste, Artikel, Marke, Duell, Rankings ×2,
+  Korrektur-POST), je 60 s Microcache; `?preview=1` hinter `insights.manage` und NIE im Cache.
+- **Was öffentlich wird, entscheidet die Route:** `state ∈ {published, updated}`, interne
+  Felder (`noteInternal`, `reviewedBy`, Modell-Stempel) gestrichen — und eine NICHT redigierte
+  Maschinenübersetzung verlässt den Server gar nicht (§3.2). Die Seite zeigt dann die
+  Grundfassung mit Hinweis, `noindex, follow`, und meldet die fehlende Sprache NICHT als
+  hreflang-Alternate.
+- **Sieben Seiten**; Filter, Sortierung und Ansicht stehen in der Adresse (teilbarer Link).
+  301 aus `slugHistory` und für die Duell-Gegenrichtung (Slug alphabetisch), 410 für die auf
+  Wunsch entfernte Marke — mit Hinweis und ohne ihre Inhalte.
+- **Korrekturweg** auf Profil, Duell und Ranking: EIN Formular, Honigtopf, 3/Std + 10/Tag je
+  Anschluss, Ziel muss öffentlich sein, Dublette 409, kein Double-Opt-in, Frist 12 Monate als
+  Datum in der Zeile.
+- **SEO:** JSON-LD Article + BreadcrumbList (+ ItemList am Ranking), og:image je Artikel,
+  Sitemap mit `lastmod` und nur den Sprachen, die es WIRKLICH gibt. Bewusst kein
+  `Organization` und kein `Review`/`AggregateRating` über fremde Marken. Nav-Punkt
+  „Brand Insights" (Eigenname, unübersetzt).
+- **Drei Core-Bausteine** (eigener Commit `4c45ca2a`): `markdownHeadings` + Prop
+  `headingAnchors` an `MarkdownContent` (Verzeichnis und Text rechnen DIESELBE Id an EINER
+  Stelle), `shared/seoAlternates.ts` + `useSeoHiddenLocales()` in `useLocaleSeoHead()`,
+  Minuten-Eimer `insights:correction`. 14 neue Fälle, je mit Gegenprobe.
+
+**Klick-Beweis** (Dev-Server aus dem Worktree, Port 3020, Dev-Instanz `portfolio-g4ml`,
+Admin-Session per `users.createSession` als Cookie, Daten per Server-SDK gesät und danach
+wieder entfernt): Riegel zu ⇒ Marke/Duell/Rankings 404, Liste nur Artikel, Entwurf 404,
+`?preview=1` ohne Konto 401 und mit Admin-Cookie 200 + noindex + Vorschau-Marke · alter Slug ⇒
+echte 301 mit richtigem Ziel · Honigtopf schreibt KEINE Zeile (in der Tabelle gegengeprüft),
+Adresse kleingeschrieben gespeichert, Frist auf 2027 · Entwurf als Ziel und Marke bei
+gesperrtem Format je 404, `removal` ohne Grund und unbekanntes Feld je 400, 4. Korrektur in der
+Stunde 429 `rate_limited_hour` (der Minuten-Eimer des Core greift schon beim 4. in der Minute)
+· og-Bild 1200×630 PNG, für ein gesperrtes Format 404 · Sitemap bietet den Artikel NUR auf
+Deutsch an (hreflang `x-default,de`), ohne `/brands` und `/rankings` · die unredigierte
+englische Fassung steht nirgends in der Antwort. Riegel testweise offen ⇒ Profil mit
+Steckbrief/Zeichen/Historie/Beziehung/Quellen, Duell mit 301 der Gegenrichtung, Ranking mit
+ausgewiesener Lücke „auf Wunsch entfernt", entfernte Marke 410 ohne ihre Inhalte; danach
+zurückgesetzt. Browser: keine Hydration-Meldung, ein geteilter Link stellt Thema, Sortierung
+und Ansicht wieder her, die englische Fassung zeigt „This language has not been edited yet".
+Wächter: 249 Tests insights, 1637 core, 32 branding, Lint insights/core/branding/scripts,
+Typecheck branding exit 0, check:i18n-keys 310, check:manifests 26/9, check:bilanz,
+check:single-copy, check:doc-links.
+
+**Drei Befunde aus dem eigenen Klick-Beweis, alle vor dem Push behoben:** (a) `/rankings` war
+bei gesperrtem Format eine erreichbare, indexierbare Seite („Rankings", `index, follow`) — der
+Riegel hatte dort bewusst NICHT geschlossen, mit der Begründung „eine 404 in der Navigation
+wäre Davids 404-Audit"; die trägt nicht, denn bei gesperrtem Format steht die Adresse in keiner
+Navigation und in keiner Sitemap. (b) Ein Duell ohne Brand-Check antwortete 404, obwohl die
+Prüfregeln vor `review` keinen verlangen (`showsScore` fragt `brandRefs.some(ref => ref.checkId)`)
+— Sitemap, Journal-Karte und die 301 der Gegenrichtung zeigten damit auf einen toten Punkt. Die
+Statistik-Tafel entfällt jetzt (wie `score` am Profil seit dem Prototyp optional ist), Fakten,
+Einordnung und Quellen bleiben. (c) Auf JEDER Karte und im Artikel-Kopf stand der rohe
+Zeitstempel `2026-09-08T10:00:00.000+00:00` statt „8. Sept. 2026".
+
+**Gelernt:** (1) **Ein Prototyp ist eine Form, keine Datenprobe.** `insightsDay` war an
+Demo-Daten mit reinen Datums-Strings gebaut (`publishedAt: '2026-09-04'`); die echten Spalten
+sind Appwrite-`datetime` und liefern einen vollen Zeitstempel, den die Funktion als „ungültig"
+zurückgab — und ihr Ausweg „gib die Eingabe zurück" machte den Fehler zu etwas, das wie Absicht
+aussah. Der Editor hatte sich längst mit `.slice(0, 10)` an der Aufrufstelle beholfen: genau die
+Sorte Wissen, die an der zweiten Aufrufstelle fehlt. Normalisierung gehört IN die Funktion.
+(2) **Ein Riegel, der eine Adresse übrig lässt, ist keiner.** Die Liste eines gesperrten Formats
+darf nicht mit einer leeren Liste antworten — „diesen Bereich gibt es, er ist nur leer" ist eine
+Auskunft, und die Seite darüber wird indexiert. 404 an beiden Türen, wie die Datentür.
+(3) **Zwei Sicherungen für dieselbe Sache müssen dieselbe Frage stellen.** Die Prüfregeln vor
+`review` und die Leseroute waren sich über das Duell uneins; das Ergebnis war ein freigegebener
+Beitrag, den die Sitemap anbot und die Route mit 404 beantwortete. Wer eine Bedingung in die
+Leseroute schreibt, muss sie in der Redaktion durchsetzen — oder sie fallen lassen.
+(4) **Textsuche im HTML ist kein Render-Beweis:** der i18n-Katalog und der Nuxt-Payload stehen
+im Dokument, und Vue rendert Template-Kommentare mit aus. Dreimal hintereinander ein falsches
+„JA" gemessen; erst `<script>`-Blöcke UND Kommentare herausschneiden misst, was ein Mensch sieht.

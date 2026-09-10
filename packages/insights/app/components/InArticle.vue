@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { ContentTocLink } from '@nuxt/ui'
-import type { InsightsLocale, InsightsPost } from '../../shared/insightsPost'
+import type { InsightsLocale } from '../../shared/insightsPost'
 import { insightsPublicFassung, insightsTopicLabel } from '../../shared/insightsPost'
+import type { InsightsPublicPostView } from '../../shared/insightsPublic'
 import { insightsDay } from '../utils/insightsFormat'
 
 /**
@@ -27,9 +28,14 @@ import { insightsDay } from '../utils/insightsFormat'
  * Der Klickdummy trug noch „Lena K." und „Jonas T." — genau das ist hier weg.
  */
 const props = defineProps<{
-  post: InsightsPost
+  /**
+   * Der ÖFFENTLICHE Beitrag (ohne die sechs internen Felder, BI1 I3). Die
+   * Komponente braucht die Zeilen-Id nicht — die ist eine Sache der Route
+   * (Korrekturziel) — und darf sie deshalb nicht verlangen.
+   */
+  post: InsightsPublicPostView
   locale: InsightsLocale
-  /** Überschriften des Textes (Tiefe 2 und 3) — in I3 aus dem Markdown. */
+  /** Überschriften des Textes (Tiefe 2 und 3) — aus `markdownHeadings()` (core). */
   toc: readonly { id: string, text: string, depth: 2 | 3 }[]
 }>()
 
