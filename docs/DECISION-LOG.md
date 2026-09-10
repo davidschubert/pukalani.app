@@ -304,6 +304,19 @@ den Haken trug — Rückfrage und Bestätigung wussten nichts voneinander. GEBAU
 entfällt (er feuerte, sobald ein Wert im Feld stand, und hätte die Knöpfe unklickbar gemacht); nur
 die Eröffnung einer Entwurfs-Session springt weiter (8). Neu gefunden: ohne `?s=` rechnete die
 Bühne nach der Bestätigung still die nächste Session — `pinSession` hält sie in der Adresse.
+(11) **SOLO-FASSUNG JE KATALOG-FRAGE** (zweiter Agenten-Testlauf 2026-09-10, nach Empfehlung): die
+abgenommenen Fragetexte sagen „ihr/euch" („Was sagen deine glücklichsten Kunden über euch?", „Welche
+Kritik bekommt ihr?") — bei „Nur ich" falsch. Für jede Frage mit ihr/euch kommt eine du-Variante in
+den Katalog; die Weiche `{ solo, team }` gibt es für Labels schon (`brandSlotPromptLabel`,
+`questionKeyFor`). Inhaltsarbeit über alle Kapitel, David liest die neuen Fassungen gegen (Gate).
+Verworfen: Katalog bleibt „ihr" und George formuliert um; alles konsequent „du" ohne Team-Variante
+(für Teams sprachlich falsch). (12) **DIE SOLO-WEICHE GILT AUCH FÜR MARKENTEXTE** (nach Empfehlung):
+der Elevator-Pitch sprach „Wir drehen und brennen … in unserer Werkstatt" bei „Nur ich". Der
+Entwurfs-Auftrag bekommt die Regel: solo ⇒ Ich-Form („Ich drehe … in meiner Werkstatt"), team ⇒
+Wir-Form. Verworfen: Markentexte sprechen immer als „wir"; eigener Schalter je Marke. Beides als
+eigene Läufe nach den Rest-Befunden des zweiten Testlaufs (Abschlusszug kennt den Feld-Zustand,
+keine fremde Frage vor der Bestätigung, keine rohen Frage-Zitate, neutrale Labels/Modal, Zielliste
+nur enthaltene Kapitel, rechnender Kapitel-Kopf).
 
 ---
 
