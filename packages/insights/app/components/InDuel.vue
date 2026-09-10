@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { InsightsBrand, InsightsBrandScore, InsightsDuelFact, InsightsLocale, InsightsSource } from '../../shared/insightsPost'
+import type { InsightsBrandScore, InsightsDuelFact, InsightsLocale, InsightsSource } from '../../shared/insightsPost'
 
 /**
  * PROTOTYP (I0) — DAS BRAND-DUELL ALS STATISTIK-TAFEL (§2.2; Vorlage: der
@@ -18,11 +18,39 @@ import type { InsightsBrand, InsightsBrandScore, InsightsDuelFact, InsightsLocal
  * sich nicht speichern." Die Tafel ZEIGT die Beleg-Nummer; ohne sie wäre die
  * Pflicht erfüllt und unsichtbar, und die Zeile sähe aus wie eine Behauptung.
  */
+/**
+ * DIE ZWEI SEITEN — nur Name und Archetyp (BI1 I3).
+ *
+ * Der Kopf zeigt sonst nichts von der Marke, und ein volles Markenprofil je
+ * Seite hereinzuverlangen hiesse, in jeder Duell-Antwort zwei Dossiers samt
+ * Quellen mitzuschicken. Der ÖFFENTLICHE Verweis (`InsightsPublicDuelSide`)
+ * erfüllt diesen Typ, das volle Profil des Prototyps ebenso.
+ */
+interface DuelSideView {
+  name: string
+  archetype: string
+}
+
+/**
+ * DER SCORE IST OPTIONAL — dasselbe Muster wie `InBrandProfile` (dort steht
+ * `score?: … | null` seit dem Prototyp), und aus einem beim Klick-Beweis
+ * gefundenen Grund (2026-09-10):
+ *
+ * Die Prüfregeln vor `review` verlangen für ein Duell KEINEN Brand-Check
+ * (`showsScore` fragt `brandRefs.some(ref => ref.checkId)`) — die Redaktion
+ * kann also ein Duell zweier Marken freigeben, für die es noch keine geprüfte
+ * Website gibt. Verlangte diese Komponente beide Scores, müsste die Leseroute
+ * ein freigegebenes Duell mit 404 beantworten — während die Sitemap es
+ * anbietet, die Journal-Karte darauf zeigt und die 301 der Gegenrichtung genau
+ * dorthin führt. Ein Beitrag, den die Redaktion freigegeben hat, muss LESBAR
+ * sein; die Statistik-Tafel ist ein ABSCHNITT davon, nicht seine Bedingung.
+ * Fakten-Zeilen, Einordnung und Quellen stehen ohnehin für sich.
+ */
 const props = defineProps<{
-  left: InsightsBrand
-  right: InsightsBrand
-  leftScore: InsightsBrandScore
-  rightScore: InsightsBrandScore
+  left: DuelSideView
+  right: DuelSideView
+  leftScore?: InsightsBrandScore | null
+  rightScore?: InsightsBrandScore | null
   facts: readonly InsightsDuelFact[]
   sources: readonly InsightsSource[]
   locale: InsightsLocale
@@ -30,13 +58,23 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
-/** Die acht Dimensionen nebeneinander — dieselbe Reihenfolge auf beiden Seiten. */
-const dimensions = computed(() => props.leftScore.dimensions.map((dimension, index) => ({
-  key: dimension.key,
-  label: dimension.label,
-  a: dimension.value,
-  b: props.rightScore.dimensions[index]?.value ?? 0,
-})))
+/**
+ * Die acht Dimensionen nebeneinander — dieselbe Reihenfolge auf beiden Seiten.
+ * Fehlt EINER der beiden Scores, gibt es keinen Vergleich: eine Tafel, die
+ * eine Seite gegen lauter Nullen stellt, wäre keine fehlende Angabe, sondern
+ * eine falsche.
+ */
+const dimensions = computed(() => {
+  const left = props.leftScore
+  const right = props.rightScore
+  if (!left || !right) return []
+  return left.dimensions.map((dimension, index) => ({
+    key: dimension.key,
+    label: dimension.label,
+    a: dimension.value,
+    b: right.dimensions[index]?.value ?? 0,
+  }))
+})
 
 const leftWins = computed(() => dimensions.value.filter(dimension => dimension.a > dimension.b).length)
 const rightWins = computed(() => dimensions.value.filter(dimension => dimension.b > dimension.a).length)
@@ -64,13 +102,17 @@ function factLabel(fact: InsightsDuelFact): string {
           <p class="bw-label" style="color: var(--bw-muted)">{{ right.archetype }}</p>
         </div>
       </div>
-      <p class="bw-label mt-6 text-center" style="color: var(--bw-muted)">
+      <!-- Die Bilanz-Zeile zählt gewonnene Dimensionen — ohne beide Scores
+           gibt es nichts zu zählen, und „0 zu 0" wäre eine Aussage. -->
+      <p v-if="dimensions.length" class="bw-label mt-6 text-center" style="color: var(--bw-muted)">
         {{ t('insights.duel.standing', { left: left.name, leftCount: leftWins, right: right.name, rightCount: rightWins }) }}
       </p>
     </div>
 
-    <!-- Dimension für Dimension, gespiegelte Balken, Sieger im Akzent. -->
-    <div class="bw-card mt-4 p-8">
+    <!-- Dimension für Dimension, gespiegelte Balken, Sieger im Akzent. Der
+         ganze Abschnitt entfällt ohne beide Scores (s. Kopf) — die Tafel ist
+         ein Abschnitt des Beitrags, nicht seine Bedingung. -->
+    <div v-if="dimensions.length" class="bw-card mt-4 p-8">
       <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.duel.dimensions') }}</p>
       <div class="mt-6 space-y-4">
         <div v-for="dimension in dimensions" :key="dimension.key">
@@ -131,6 +173,18 @@ function factLabel(fact: InsightsDuelFact): string {
       <p class="text-sm" style="color: var(--bw-ink-soft)">{{ t('insights.duel.ctaTitle') }}</p>
       <slot name="cta">
         <UButton :label="t('insights.duel.ctaLabel')" icon="i-ph-arrows-left-right" class="rounded-full" />
+      </slot>
+    </div>
+
+    <!-- Der Korrekturweg gehört auf JEDE Profil-, Duell- und Ranking-Seite
+         (§9.5, §11.2 Frage 5) — dieselbe Karte, dieselbe Stelle wie im
+         Markenprofil. Ein Duell behauptet über ZWEI fremde Marken etwas; der
+         Weg zum Widerspruch darf dort nicht fehlen, nur weil die Seite ein
+         anderes Format hat. -->
+    <div class="bw-card mt-4 flex flex-wrap items-center justify-between gap-4 p-8">
+      <p class="max-w-xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('insights.profile.correctionNote') }}</p>
+      <slot name="correction">
+        <UButton :label="t('insights.profile.correction')" color="neutral" variant="ghost" class="rounded-full" style="background: var(--bw-surface)" />
       </slot>
     </div>
   </div>

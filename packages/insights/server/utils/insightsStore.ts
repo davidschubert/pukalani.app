@@ -81,6 +81,19 @@ export const INSIGHTS_BRANDS_LIMIT = 200
 /** Wie viele Korrekturvorschläge die Arbeitsliste höchstens zeigt (I3). */
 export const INSIGHTS_CORRECTIONS_LIMIT = 200
 /**
+ * Wie viele Beiträge die ÖFFENTLICHE Liste höchstens holt (I3, §9.5).
+ *
+ * Dieselbe Zahl wie die Redaktionsliste, aber aus einem anderen Grund: dort
+ * ist sie ein Arbeitsfenster, hier ist sie das JOURNAL. Es trägt keinen
+ * Fliesstext (`InsightsPublicPostListItem`), und die Filter rechnet der
+ * Browser auf genau dieser Menge — ein zweiter Ladeschritt mitten in einer
+ * Filterzeile wäre eine Liste, die sich beim Klicken ändert.
+ *
+ * Sie deckelt auch die öffentlichen Markenprofile und die Sitemap: was die
+ * Liste nicht zeigt, bietet die Sitemap nicht an.
+ */
+export const INSIGHTS_PUBLIC_LIST_LIMIT = 200
+/**
  * Wie viele Radar-Zeilen die Betreiber-Ansicht höchstens holt (I4).
  *
  * Grosszügiger als die anderen drei, weil die Tabelle anders entsteht: ein

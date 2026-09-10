@@ -44,14 +44,25 @@ export default defineAppConfig({
      * `descriptionKey` ist seit PS1 Teil des Vertrags (core/shared/types/
      * chrome.ts) und wird von `pnpm check:i18n-keys` gedeckt.
      *
-     * `insights` fehlt weiterhin bewusst: die Seite gibt es noch nicht, und
-     * ein Registry-Eintrag ist ein Menüpunkt, der sofort erscheint (Davids
-     * 404-Audit 2026-09-03). Ebenso fehlen Brand Experience und Brand
-     * Monitoring: sie stehen als abgeblendete „kommt"-Karten auf der
-     * Übersicht, haben aber keine Seite (Plan §3).
+     * `insights` STEHT SEIT BI1 I3 DRIN (2026-09-10) — bis dahin fehlte es
+     * bewusst, weil ein Registry-Eintrag ein Menüpunkt ist, der SOFORT
+     * erscheint (Davids 404-Audit 2026-09-03), und die Seite es noch nicht
+     * gab. Jetzt gibt es sie: `/insights` ist die Journal-Liste des
+     * insights-Layers, und sie antwortet auch bei gesperrtem Riegel nicht 404
+     * (sie zeigt dann ihren leeren Zustand — genau deshalb darf sie in die
+     * Navigation). Der Schlüssel `brand.nav.insights` liegt seit dem
+     * Klickdummy in beiden Sprachen im brand-Layer.
      *
-     * `order` 11–15 hält die fünf beieinander und in der Reihenfolge des
-     * Kundenwegs (Audit → Build → Compare → Build → Supply); die nächsten
+     * `order: 25` setzt ihn NACH dem Products-Aufklapper (10–15) und vor
+     * kommende Hauptpunkte: Insights ist der redaktionelle Bereich neben den
+     * Produkten, nicht eines davon — er hat deshalb auch kein `parent`.
+     *
+     * Ebenso fehlen Brand Experience und Brand Monitoring: sie stehen als
+     * abgeblendete „kommt"-Karten auf der Übersicht, haben aber keine Seite
+     * (Plan §3).
+     *
+     * `order` 11–15 hält die fünf Produkte beieinander und in der Reihenfolge
+     * des Kundenwegs (Audit → Build → Compare → Build → Supply); die nächsten
      * Zehner bleiben für weitere Hauptpunkte frei.
      */
     chrome: {
@@ -97,6 +108,7 @@ export default defineAppConfig({
           parent: 'products',
           order: 15,
         },
+        insights: { labelKey: 'brand.nav.insights', to: '/insights', order: 25 },
       },
     },
     /**

@@ -37,7 +37,23 @@ export interface BrandingSitemapEntry {
    * eines, weil `brand_publications` es wirklich führt.
    */
   lastmod?: string
+  /**
+   * WELCHE SPRACHFASSUNGEN ES WIRKLICH GIBT (BI1 I3, Plan BRAND-INSIGHTS §9.5:
+   * „hreflang nur auf vorhandene Fassungen").
+   *
+   * Ohne Angabe: BEIDE — das ist der Normalfall dieser Site, denn ihre Seiten
+   * sind vollständig zweisprachig. Ein INSIGHTS-Beitrag ist es nicht
+   * zwangsläufig: solange die zweite Fassung nicht redigiert ist, zeigt seine
+   * Adresse in der anderen Sprache denselben Text (§3.2). Eine Sitemap, die
+   * dort trotzdem beide Adressen und beide hreflang-Alternates anbietet, gibt
+   * demselben Crawler dieselbe falsche Zusage, die der Seitenkopf gerade
+   * vermeidet — nur an einer zweiten Stelle.
+   */
+  locales?: readonly ('en' | 'de')[]
 }
+
+/** Beide Sprachen — der Normalfall und der Default eines Eintrags. */
+export const BRANDING_SITEMAP_LOCALES: readonly ('en' | 'de')[] = ['en', 'de']
 
 /**
  * DIE FESTEN SEITEN — alle ohne `noindex` (nachgesehen 2026-09-08).
@@ -70,6 +86,17 @@ export const BRANDING_ROUTES: readonly BrandingSitemapEntry[] = [
   { path: '/', priority: 1.0 },
   { path: '/brand-check', priority: 0.9 },
   { path: '/discover', priority: 0.9 },
+  /**
+   * DAS JOURNAL (BI1 I3). Es steht FEST in dieser Liste, weil es die Adresse
+   * des Nav-Punktes „Brand Insights" ist und auch bei leerem Riegel keine 404
+   * antwortet (dann zeigt es seinen leeren Zustand).
+   *
+   * `/rankings` steht NICHT hier: die Übersicht gibt es nur, wenn `ranking`
+   * im Riegel steht — sie kommt deshalb DYNAMISCH aus
+   * `listInsightsSitemapEntries()` (`sitemap.xml.get.ts`), zusammen mit den
+   * Beiträgen, den Themen und den Markenprofilen.
+   */
+  { path: '/insights', priority: 0.8 },
   { path: '/erstgespraech', priority: 0.8 },
   { path: '/brand-check/ranking', priority: 0.7 },
   { path: '/brand-check/methodik', priority: 0.6 },
@@ -79,6 +106,16 @@ export const BRANDING_ROUTES: readonly BrandingSitemapEntry[] = [
 
 /** Priorität der Anatomien — sie sind der Zweck der Ebene „Discover" (§1). */
 export const BRANDING_DISCOVER_PRIORITY = 0.6
+
+/**
+ * Priorität der Insights-Adressen (BI1 I3).
+ *
+ * Die Ranking-ÜBERSICHT liegt bei 0.6 wie die Anatomien; die einzelnen
+ * Beiträge, Themen und Markenprofile darunter bei 0.5 — sie sind viele, und
+ * eine Sitemap, in der alles gleich wichtig ist, sagt über Wichtigkeit nichts.
+ */
+export const BRANDING_RANKINGS_PRIORITY = 0.6
+export const BRANDING_INSIGHTS_ENTRY_PRIORITY = 0.5
 
 /**
  * EN-Pfad → DE-Pfad (i18n-Strategie 'prefix_except_default': en ohne Prefix,
@@ -143,14 +180,24 @@ export function brandingSitemapXml(origin: string, entries: readonly BrandingSit
   const urls = entries.flatMap((entry) => {
     const enUrl = `${base}${entry.path === '/' ? '' : escapeXmlText(entry.path)}`
     const deUrl = `${base}${escapeXmlText(dePathFor(entry.path))}`
+
+    /**
+     * Nur die Sprachen, die es GIBT (s. `locales`). `x-default` zeigt auf EN,
+     * solange EN dabei ist — sonst auf DE: es ist die Ansage „nimm diese, wenn
+     * keine passt", und sie darf nicht auf eine Adresse zeigen, die diese
+     * Sitemap selbst nicht anbietet.
+     */
+    const locales = entry.locales ?? BRANDING_SITEMAP_LOCALES
+    const hasEn = locales.includes('en')
+    const hasDe = locales.includes('de')
     const alternates = [
-      `    <xhtml:link rel="alternate" hreflang="x-default" href="${enUrl}"/>`,
-      `    <xhtml:link rel="alternate" hreflang="en" href="${enUrl}"/>`,
-      `    <xhtml:link rel="alternate" hreflang="de" href="${deUrl}"/>`,
+      `    <xhtml:link rel="alternate" hreflang="x-default" href="${hasEn ? enUrl : deUrl}"/>`,
+      ...(hasEn ? [`    <xhtml:link rel="alternate" hreflang="en" href="${enUrl}"/>`] : []),
+      ...(hasDe ? [`    <xhtml:link rel="alternate" hreflang="de" href="${deUrl}"/>`] : []),
     ].join('\n')
     const lastmod = sitemapLastmod(entry.lastmod)
 
-    return [enUrl, deUrl].map(loc => [
+    return [...(hasEn ? [enUrl] : []), ...(hasDe ? [deUrl] : [])].map(loc => [
       '  <url>',
       `    <loc>${loc}</loc>`,
       alternates,
