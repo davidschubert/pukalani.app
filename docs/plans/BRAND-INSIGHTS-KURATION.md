@@ -323,17 +323,18 @@ deshalb ein eigenes Paket **nach I3**, nicht Teil dieser Runde.
 
 | # | Paket | Braucht | Aufwand |
 |---|---|---|---|
-| **K1** | **Cluster-Katalog erweitern** — `seo`/`geo` trennen, `brand-ai` neu, Label „Brand Design"; Schlagwortlisten + Tests | Entscheidung B | S |
-| **K2** | **Filtern und sortieren** im Radar — Spaltensortierung, Cluster-/Kanal-/Zeitraum-Filter, Trefferzeile | K1 | S |
+| ~~K1~~ | ~~Cluster-Katalog erweitern~~ — **entfällt** (Davids Entscheidung B, 2026-09-09: erst mal so lassen) | — | — |
+| ✅ **K2** | **Filtern und sortieren** im Radar — **GEBAUT 2026-09-09** (reine Regeln in `packages/insights/shared/insightsRadarView.ts`, 27 Tests, Klick-Beweis im Playground) | — | S |
 | **K3** | **Kanal-Seite** — Migration `insights-005`, `/dashboard/insights/channels`, Handle-Auflösung, Prüf-Vorschau, aktiv/inaktiv, Notiz; Übernahme der elf Config-Zeilen | Entscheidung A · Davids Ja zur Prod-Migration | M |
-| **K4** | **Fundstücke + Schalter** — Migration `insights-006`, Link-Wurf, Urteil in beiden Listen, YouTube-Link je Zeile, Filter „nur Interessante"; Sweep zieht die Zahlen mit | K1 · Davids Ja zur Prod-Migration | M |
-| **K5** | **Brief aus Video** — Prompt `insights-b-1`, Knopf auf den Fundstücken, Beitrag als Entwurf mit Video-Quelle | Entscheidung C · K4 | S |
+| **K4** | **Fundstücke + Schalter** — Migration `insights-006`, Link-Wurf, Urteil in beiden Listen, YouTube-Link je Zeile, Filter „nur Interessante"; Sweep zieht die Zahlen mit | Davids Ja zur Prod-Migration | M |
+| **K5** | **Brief aus Video** — Prompt `insights-b-1`, Knopf auf den Fundstücken, Beitrag als Entwurf mit Video-Quelle | Entscheidung C (§9) · K4 · **Routen-Probe** | S–M |
 | **K6** | **SEO/GEO-Artikelregeln** — Prompt `insights-d-2`, siebte Prüfregel | — | S |
 | **K7** | **Kommentare unter Artikeln** — `comments` in `apps/branding` montieren | **nach I3** (Gate Anwalt) | M |
 
-K1 und K2 haben kein Gate und keine Migration — sie können sofort laufen und
-liefern schon den größten Teil von Davids Punkten 2 und 3. K3 und K4 brauchen
-je ein Ja zur Prod-Migration. K7 wartet auf die Anwaltsantworten, wie I3.
+**Nach Davids Entscheidungen vom 2026-09-09 (§9):** K1 entfällt, K2 läuft
+sofort (kein Gate, keine Migration), K3 ist beauftragt und braucht ein Ja zur
+Prod-Migration, K5 wartet auf die Routen-Probe aus §9. K7 wartet auf die
+Anwaltsantworten, wie I3.
 
 ## 8. Was dieses Vorhaben NICHT tut
 
@@ -347,3 +348,139 @@ je ein Ja zur Prod-Migration. K7 wartet auf die Anwaltsantworten, wie I3.
   Kanal-Tabelle mit Summen.
 * **Keine Transkripte**, solange C2 nicht ausdrücklich entschieden und
   anwaltlich gedeckt ist.
+
+---
+
+## 9. Entscheidungen (David, 2026-09-09)
+
+**Frage A — Kanalliste: `A2`, Tabelle + Dashboard-Seite.** Die elf Zeilen
+ziehen aus `apps/branding/app/app.config.ts` in `insights_channels` um; die
+Config wird einmalig übernommen und danach nicht mehr gelesen. Damit ist Paket
+**K3** beauftragt (Migration `insights-005`, Handle-Auflösung, Prüf-Vorschau,
+aktiv/inaktiv, Notiz). Die Begründung von 2026-09-09 im Kopf von
+`insightsRadar.ts` („die Liste ändert sich seltener als ein Deploy") wird damit
+**bewusst aufgehoben** — sie war nicht falsch, sie rechnete mit einer Annahme,
+die der erste Prod-Lauf widerlegt hat.
+
+**Frage B — Cluster: `erst mal so lassen`.** Die acht Themen bleiben, wie sie
+sind. `seo` und `geo` bleiben ein Schlüssel, „Branding & KI" kommt nicht dazu,
+`visual-identity` behält sein Etikett. **Paket K1 entfällt** — und mit ihm die
+Vorbedingung von K2 und K4, die beide mit den acht bestehenden Clustern
+auskommen. Wenn der Radar im Betrieb zeigt, dass GEO-Videos unter SEO
+untergehen, ist die Trennung eine eigene, kleine Runde; das Konzept dafür steht
+in §2 und bleibt gültig.
+
+**Frage D — Reihenfolge: K1 + K2 sofort.** Weil K1 entfällt, ist das **K2
+allein**: filtern und sortieren. Ohne Migration, ohne Gate.
+
+### Frage C bleibt offen — und die Antwort ist besser als gedacht
+
+Davids Rückfrage war: *„können heutige KIs nicht die Videos ansehen, verstehen,
+analysieren und wissen dann was im Video inhaltlich passiert?"*
+
+**Ja, das können sie — und §6 dieses Plans war an dem Punkt zu vorsichtig.** Was
+dort steht, gilt weiterhin für die *YouTube Data API*: sie liefert keine
+Transkripte. Aber der Weg führt gar nicht über sie. **Die Gemini-API nimmt eine
+YouTube-Adresse direkt entgegen** und wertet **Bild- UND Tonspur** aus; man kann
+im Prompt auf Zeitmarken zeigen („was passiert bei 04:12?"). Die belegten
+Grenzen (Google-Doku, Stand 2026-09):
+
+* **nur öffentliche Videos** — keine privaten, keine ungelisteten;
+* **bis zu 10 Videos je Anfrage** ab Gemini 2.5, davor eines;
+* **kostenloser Tarif: 8 Stunden Video am Tag**, im bezahlten Tarif keine
+  Längenbegrenzung;
+* die Funktion läuft als Vorschau und wird derzeit nicht gesondert berechnet.
+
+**Und unser Stack erreicht sie im Grundsatz.** Alle Modell-Aufrufe gehen über
+OpenRouter, und OpenRouter kennt einen Inhaltstyp `video_url`, der eine
+YouTube-Adresse annimmt. **Aber nur über den Anbieter „Google AI Studio"** —
+die Doku sagt es wörtlich: Vertex AI nimmt keine YouTube-Links, dort müsste das
+Video als Base64 mitgeschickt werden, und an die Datei kommen wir legal nicht.
+
+**Genau hier liegt der Haken, und er ist ein anderer als der vermutete.** Er ist
+nicht urheberrechtlich, er ist datenschutzrechtlich:
+
+`BRAND_PROVIDER_ROUTING` pinnt jeden Lauf auf `zdr: true`,
+`data_collection: 'deny'` und **`allow_fallbacks: false`**. Ein Blick auf die
+heutigen Endpunkte von `gemini-2.5-flash` zeigt sieben Routen, davon drei über
+**`google-vertex/eu`** — der EU-Weg, über den unsere Läufe heute gehen — und
+vier über **`google-ai-studio`** (Sitz US). Der Weg, der Videos kann, ist also
+nicht der Weg, den wir heute fahren. Zwei Fragen entscheiden das Paket, und
+beide sind billig zu beantworten:
+
+1. **Ist `google-ai-studio` unter `zdr: true` + `data_collection: 'deny'`
+   überhaupt erreichbar?** Mit `allow_fallbacks: false` gibt es kein Ausweichen
+   — entweder die Route ist erlaubt, oder der Lauf schlägt fehl. Das ist **eine
+   Probe-Anfrage mit unserem Schlüssel**, kein Konzept.
+2. **Wenn ja: Wollen wir für diesen einen Zweck den EU-Weg verlassen?** Das
+   berührt BS1 (AVV, Datenschutzerklärung, Anwaltsrunde) — allerdings mit einem
+   milden Gegenstand: hineingereicht wird eine **öffentliche YouTube-Adresse**,
+   keine Kundendaten, keine Marken-Unterlagen.
+
+**Daraus wird eine vierte Option zu Frage C:**
+
+| | Weg | Rechtslage | Aufwand |
+|---|---|---|---|
+| C1 | Brief aus Titel, Beschreibung, Tags | sauber, keine neue Frage | S |
+| C2 | Transkript über Dritte | ToS-Verstoß | — |
+| C3 | Du schreibst den Brief | geht heute | — |
+| **C4** | **Gemini sieht das Video** (YouTube-Adresse über OpenRouter an Google AI Studio, Bild + Ton) | keine ToS-Frage — es ist Googles eigener, dokumentierter Weg. Offen ist die **Route** (ZDR/EU), nicht der Inhalt | **S–M nach der Probe** |
+
+**Empfehlung: C4, mit C1 als Rückfall.** Wenn die Probe zeigt, dass die Route
+unter unseren Bedingungen läuft, ist C4 in derselben Größenordnung wie C1 zu
+bauen und liefert ungleich mehr: echte Thesen aus dem, was im Video gesagt
+wird, statt aus dem, was in der Beschreibung steht. Läuft sie nicht, bleibt C1
+— und der Knopf heißt weiter ehrlich „Brief aus diesem Video".
+
+**Was sich dadurch NICHT ändert:** der Artikel bleibt unser eigener Text. Auch
+mit vollem Videoverständnis wird nicht nacherzählt — §4.1 gilt unverändert
+(Zitat höchstens 200 Zeichen, Quelle mit Datum, keine erfundenen Zitate). Ein
+Modell, das ein Video gesehen hat, macht den Brief besser; es macht ihn nicht
+zum Ersatz für einen eigenen Standpunkt.
+
+
+---
+
+## 10. K2 gebaut (2026-09-09)
+
+Was jetzt auf `/dashboard/insights/radar` steht:
+
+* **Jede Zahlenspalte ist ein Knopf** — Aufrufe, Likes, Kommentare, Alter,
+  Opportunity. Zweiter Klick dreht um. Das **Alter fängt beim Jüngsten an**,
+  alle anderen beim Grössten: „das älteste Video zuerst" will niemand sehen.
+* **Drei Filter** — Thema, Kanal (beide Mehrfachauswahl), Zeitraum (alle · 7 ·
+  30 · 90 Tage). Die Auswahllisten kommen aus den DATEN, nicht aus dem Katalog:
+  angeboten wird nur, was ein Lauf tatsächlich geholt hat.
+* **Eine Trefferzeile** („37 von 205 Videos") und ein
+  **„Filter zurücksetzen"**, das nur erscheint, wenn etwas eingeschränkt ist.
+* **Die Vorgabe ist unverändert Opportunity absteigend** — die Seite zeigt sich
+  beim Öffnen genau wie vorher.
+
+**Die Regeln liegen pur** in `shared/insightsRadarView.ts` und haben 27 Tests.
+Drei davon halten Zusagen fest, die man sonst beim nächsten Umbau verliert:
+
+1. **`null` steht in BEIDEN Richtungen am Ende.** Eine Zeile ohne Opportunity
+   heisst „kein Signal", nicht „schlechtes Video" — aufsteigend nach vorn
+   sortiert stünde sie dort, wo „am wenigsten aussichtsreich" steht.
+2. **Gleichstand entscheidet die Video-Id.** Ohne diesen Riegel zeigten zwei
+   Aufrufe derselben Ansicht dieselben Videos in zwei Reihenfolgen — bei 205
+   Zeilen mit vielen gleichen Werten (Likes 0, Alter 3) kein Randfall.
+3. **Leere Auswahl heisst ALLE, nicht keines.** Die andere Lesart ist die, bei
+   der die Seite beim Öffnen leer ist.
+
+**Gelernt (Klick-Beweis):** der leere Filter ist eine **Funktion**, keine
+Konstante. `{ ...KONSTANTE }` hätte das Objekt kopiert und die **Arrays darin
+geteilt** — eine Mehrfachauswahl, die ihre Liste an Ort und Stelle ändert,
+schriebe damit in den Modul-Zustand, und „Zurücksetzen" gäbe beim zweiten Mal
+die Auswahl von eben zurück. Ein Test hält das fest.
+
+**Gelernt (Werkzeug, nicht Code):** ein Klick des Browser-Werkzeugs auf einen
+Eintrag in einem Reka-Aufklapper kann folgenlos verpuffen — die Auswahl blieb
+stehen, ohne Fehler in Konsole, Lint oder Typecheck. Das sah nach einem Fehler
+in `USelect` aus (Rekas `SelectItem` deklariert `value` als `type: String`, der
+Zeitraum ist eine Zahl), und die Erklärung war schon halb geschrieben. **Sie
+war falsch.** Mit einer vollständigen Zeigerfolge (`pointermove` →
+`pointerdown` → `pointerup` → `click`) greift `USelect` mit Zahlen einwandfrei;
+die 30 kam als Zahl zurück, ohne eine einzige Warnung. Lehre: eine Diagnose,
+die aus dem Verhalten des WERKZEUGS stammt, ist erst eine, wenn sie gegen die
+Gegenprobe steht — sonst landet eine erfundene Falle als Kommentar im Code.
