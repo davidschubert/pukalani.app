@@ -4,6 +4,8 @@ import {
   type BrandTeamKind,
   partKeyFor,
   partLabelKeyFor,
+  slotById,
+  slotLabelKeyFor,
 } from '../../shared/slotRegistry'
 import de from '../../i18n/locales/de.json'
 import en from '../../i18n/locales/en.json'
@@ -25,17 +27,14 @@ import en from '../../i18n/locales/en.json'
 
 type CatalogNode = string | { [key: string]: CatalogNode }
 
-const CATALOGS: Record<string, CatalogNode> = {
-  de: (de as { brand: { q: CatalogNode } }).brand.q,
-  en: (en as { brand: { q: CatalogNode } }).brand.q,
-}
-
 /**
- * DIE GANZEN KATALOGE — für die Teile einer Sammel-Session (Paket 3a), die
- * NICHT unter `brand.q` liegen: die Frage eines Teils steht unter
- * `brand.part.<id>.<teil>`, sein kurzes Etikett unter `brand.partLabel.…`
- * (`slotRegistry.ts`, Begründung dort). Ein zweiter Zugriffspfad auf dieselbe
- * Datei, keine zweite Datei.
+ * DIE GANZEN KATALOGE — von der Wurzel her gelesen, weil hier drei
+ * Konventionen zusammenkommen: die Frage einer Session unter `brand.q.<id>`,
+ * die Frage eines TEILS einer Sammel-Session unter `brand.part.<id>.<teil>`
+ * und sein kurzes Etikett unter `brand.partLabel.…` (`slotRegistry.ts`,
+ * Begründung dort). Ein zweiter Zugriffspfad auf dieselbe Datei, keine zweite
+ * Datei — und seit der Anrede-Runde auch kein zweiter Einstiegspunkt mehr
+ * (`brand.q` als eigener Wurzel-Knoten ist entfallen).
  */
 const ROOTS: Record<string, CatalogNode> = {
   de: de as unknown as CatalogNode,
@@ -173,14 +172,26 @@ export function labelSlotDependencies<T extends { slotId: string }>(
  *
  * `brand.q.<id>` kann ein Kind-Objekt sein, und es gibt ZWEI Gründe dafür:
  * die Pfad-Weiche W1 (`{ new, relaunch }`) und die Team-Weiche W3
- * (`{ solo, team }`, heute nur `c.discovery3`). Der alte Rückfall
+ * (`{ solo, team }`). Der alte Rückfall
  * `node[pathKind] ?? node.new ?? Object.values(node)[0]` traf beim
  * Team-Objekt zwangsläufig `solo` — im Prompt stand für ein Team-Branding
  * also das Etikett der Solo-Frage („Nie geduldet …") über einem Wert, der
  * die Entscheidungsregel des Teams beschreibt. George redet dann über das
  * falsche Feld.
  *
- * `team` ist deshalb ein PFLICHT-Argument, nicht eines mit Default: die
+ * ── DIE FORM WIRD NICHT MEHR ERRATEN (Anrede-Runde 2026-09-09) ────────────
+ * Der Nachfolger dieses Rückfalls war ein Absteigen durch den Katalog-Knoten:
+ * er musste raten, ob `{ solo, team }` eine Team-Weiche ist oder ein Kapitel
+ * namens „solo". Seit `a.origin` BEIDE Achsen trägt
+ * (`{ new: { solo, team }, relaunch: { … } }`) wäre daraus eine zweite,
+ * mitwachsende Regel geworden — und die zweite Regel ist immer die, die
+ * hinterherhinkt. Gefragt wird jetzt die REGISTRY (`slotLabelKeyFor`, dieselbe
+ * Rechnung wie Bühne, Log und Abnahme), und der Katalog wird nur noch an
+ * genau diesem Schlüssel gelesen. Ein unbekannter Slot (deaktivierte
+ * Alt-Slots) fällt weiter auf `brand.q.<id>` und zuletzt auf die Id zurück —
+ * besser ein interner Name als ein erfundenes Label.
+ *
+ * `team` ist ein PFLICHT-Argument, nicht eines mit Default: die
  * Aufrufstellen sind alle Server-Routen, die `profileFacts(profile)` ohnehin
  * lesen — ein stiller Default hätte genau diesen Fehler wieder eingebaut,
  * und die Typprüfung ist hier der einzige Wächter, der ihn findet.
@@ -193,16 +204,8 @@ export function brandSlotPromptLabel(
   pathKind: BrandPathKind,
   team: BrandTeamKind,
 ): string {
-  const catalog = CATALOGS[contentLocale] ?? CATALOGS.en!
-  let node: CatalogNode | undefined = catalog
-  for (const segment of slotId.split('.')) {
-    if (typeof node !== 'object' || node === null) { node = undefined; break }
-    node = node[segment]
-  }
-  if (typeof node === 'string') return node
-  if (node && typeof node === 'object') {
-    const variant = node[team] ?? node[pathKind] ?? node.new ?? Object.values(node)[0]
-    if (typeof variant === 'string') return variant
-  }
-  return slotId
+  const root = ROOTS[contentLocale] ?? ROOTS.en
+  const slot = slotById(slotId)
+  const key = slot ? slotLabelKeyFor(slot, pathKind, team) : `brand.q.${slotId}`
+  return lookup(root, key) ?? lookup(root, `brand.q.${slotId}`) ?? slotId
 }

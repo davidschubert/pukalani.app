@@ -330,7 +330,11 @@ describe('GET …/steps/:stepKey/acceptance', () => {
       // VOLLSTÄNDIG, nicht gekürzt (§5a Schritt 1).
       value: '- Mut\n- Klarheit\n- Geduld',
       labelKey: 'brand.labels.c.final',
-      questionKey: 'brand.q.c.final',
+      // MIT der Weiche W3: das Profil dieses Laufs ist solo, und die Frage
+      // hat seit dem 2026-09-09 eine eigene Anrede-Fassung („würdest du
+      // verteidigen" statt „würdet ihr"). Der Basis-Schlüssel steht nicht mehr
+      // im Katalog — käme er hier heraus, stünde er wörtlich in der Abnahme.
+      questionKey: 'brand.q.c.final.solo',
     })
     // Beispiele reisen in BEIDEN Sprachen — die Oberfläche wählt.
     expect((final.example as { de: string[], en: string[] }).de.length).toBeGreaterThan(0)

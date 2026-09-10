@@ -425,149 +425,299 @@
         "audienceSketch": "Audience sketch",
         "toneAnalysis": "Tone of your existing texts",
         "origin": {
-          "new": "Why did you start this — what was the trigger, what problem couldn't you ignore?",
-          "relaunch": "What about your current brand MUST stay — the things people recognize you by, the things loyal customers would miss?"
+          "new": {
+            "solo": "Why did you start this — what was the trigger, what problem couldn't you ignore?",
+            "team": "Why did you start this — what was the trigger, what problem couldn't you ignore?"
+          },
+          "relaunch": {
+            "solo": "What about your current brand MUST stay — the things people recognize you by, the things loyal customers would miss?",
+            "team": "What about your current brand MUST stay — the things people recognize you by, the things loyal customers would miss?"
+          }
         },
-        "customerPraise": "What do your happiest customers say about you — the words THEY use?",
-        "complaints": "What complaints or negative feedback do you get? Be honest — this is as valuable as the praise.",
-        "oneThing": "What's the one thing you wish every customer knew about you?",
-        "challenge": "What's the biggest obstacle in front of you right now?",
-        "facts": "A few quick numbers: how big is the team, how long have you existed, which markets?"
+        "customerPraise": {
+          "solo": "What do your happiest customers say about you — the words THEY use?",
+          "team": "What do your happiest customers say about you — the words THEY use?"
+        },
+        "complaints": {
+          "solo": "What complaints or negative feedback do you get? Be honest — this is as valuable as the praise.",
+          "team": "What complaints or negative feedback do you get? Be honest — this is as valuable as the praise."
+        },
+        "oneThing": {
+          "solo": "What's the one thing you wish every customer knew about you?",
+          "team": "What's the one thing you wish every customer knew about you?"
+        },
+        "challenge": {
+          "solo": "What's the biggest obstacle in front of you right now?",
+          "team": "What's the biggest obstacle in front of you right now?"
+        },
+        "facts": {
+          "solo": "A few quick numbers: how long have you been doing this, how big is the team, which markets?",
+          "team": "A few quick numbers: how big is the team, how long have you existed, which markets?"
+        }
       },
       "b": {
         "whyStarted": {
-          "new": "You already told me how it began. In one sentence: why does that still matter today?",
-          "relaunch": "Forget the founding story for a second: why do you still exist TODAY — what would your customers lose tomorrow?"
+          "new": {
+            "solo": "You already told me how it began. In one sentence: why does that still matter today?",
+            "team": "You already told me how it began. In one sentence: why does that still matter today?"
+          },
+          "relaunch": {
+            "solo": "Forget the founding story for a second: why do you still exist TODAY — what would your customers lose tomorrow?",
+            "team": "Forget the founding story for a second: why do you still exist TODAY — what would your customers lose tomorrow?"
+          }
         },
-        "worldLoses": "What would the world lose if you shut down tomorrow? Impact, not revenue.",
-        "conviction": "What belief drives this company — the one you'd defend even when it costs you?",
-        "tenYears": "Ten years from now: what looks different in the world because you existed?",
-        "legacy": "When people talk about you in 20 years, what should they say?",
+        "worldLoses": {
+          "solo": "What would the world lose if you shut down tomorrow? Impact, not revenue.",
+          "team": "What would the world lose if you shut down tomorrow? Impact, not revenue."
+        },
+        "conviction": {
+          "solo": "What belief drives you — the one you'd defend even when it costs you?",
+          "team": "What belief drives this company — the one you'd defend even when it costs you?"
+        },
+        "tenYears": {
+          "solo": "Ten years from now: what looks different in the world because you existed?",
+          "team": "Ten years from now: what looks different in the world because you existed?"
+        },
+        "legacy": {
+          "solo": "When people talk about you in 20 years, what should they say?",
+          "team": "When people talk about you in 20 years, what should they say?"
+        },
         "purpose": "Purpose",
         "vision": "Vision",
         "mission": "Mission",
-        "positioningCategory": "Which category are you playing in?",
-        "positioningFirstChoice": "And within that category: for whom are you the FIRST choice — and against whom?"
+        "positioningCategory": {
+          "solo": "Which category are you playing in?",
+          "team": "Which category are you playing in?"
+        },
+        "positioningFirstChoice": {
+          "solo": "And within that category: for whom are you the FIRST choice — and against whom?",
+          "team": "And within that category: for whom are you the FIRST choice — and against whom?"
+        }
       },
       "b2": {
-        "visibility": "Should your product brands visibly belong to the main brand — or stand on their own?",
+        "visibility": {
+          "solo": "Should your product brands visibly belong to the main brand — or stand on their own?",
+          "team": "Should your product brands visibly belong to the main brand — or stand on their own?"
+        },
         "roleOfMaster": "Should the main brand lend them trust — or should they be free to reach audiences the main brand can't?",
         "namingPattern": "How should they be ALLOWED to be named — \"Brand Product\", or names of their own?",
-        "model": "Which architecture model fits you?",
+        "model": {
+          "solo": "Which architecture model fits you?",
+          "team": "Which architecture model fits you?"
+        },
         "rule": "Your naming rule"
       },
       "c": {
-        "discovery1": "Think of a moment when your business was at its best. What was happening?",
+        "discovery1": {
+          "solo": "Think of a moment when your business was at its best. What was happening?",
+          "team": "Think of a moment when your business was at its best. What was happening?"
+        },
         "discovery2": "Think of a moment when something felt deeply wrong. What happened?",
         "discovery3": {
           "solo": "What behavior would you never tolerate — not even from your best-paying client?",
           "team": "How should your team decide when you are not in the room?"
         },
         "candidates": "Value candidates",
-        "final": "Which three to five would you defend, even when it costs you?",
+        "final": {
+          "solo": "Which three to five would you defend, even when it costs you?",
+          "team": "Which three to five would you defend, even when it costs you?"
+        },
         "definitions": "What each value means here",
-        "livedExamples": "For each value: one REAL example where you already lived it.",
-        "conflictRule": "Where do two of your values collide — and which one wins?",
-        "teamFilter": "If you hired someone tomorrow: which value is the non-negotiable filter?"
+        "livedExamples": {
+          "solo": "For each value: one REAL example where you already lived it.",
+          "team": "For each value: one REAL example where you already lived it."
+        },
+        "conflictRule": {
+          "solo": "Where do two of your values collide — and which one wins?",
+          "team": "Where do two of your values collide — and which one wins?"
+        },
+        "teamFilter": {
+          "solo": "If you hired someone tomorrow: which value is the non-negotiable filter?",
+          "team": "If you hired someone tomorrow: which value is the non-negotiable filter?"
+        }
       },
       "d": {
         "hypothesis": "Archetype hypothesis from your current appearance",
-        "pairs": "Which of the two feels more like you?",
+        "pairs": {
+          "solo": "Which of the two feels more like you?",
+          "team": "Which of the two feels more like you?"
+        },
         "primary": "Primary archetype",
         "secondary": "Secondary archetype",
         "gapReveal": "Self-image and outside view",
-        "party": "If your brand were a person at a party — how would they behave?",
-        "never": "Which trait should your brand NEVER have?",
+        "party": {
+          "solo": "If your brand were a person at a party — how would they behave?",
+          "team": "If your brand were a person at a party — how would they behave?"
+        },
+        "never": {
+          "solo": "Which trait should your brand NEVER have?",
+          "team": "Which trait should your brand NEVER have?"
+        },
         "admired": "Name a brand whose personality you admire — what is it about them?",
-        "emotion": "What should people FEEL when they interact with you?",
-        "voiceSamples": "Which of these sentences sounds most like you?",
-        "toneWords": "Which words describe your tone?",
-        "vocabulary": "Which words would you NEVER use?"
+        "emotion": {
+          "solo": "What should people FEEL when they interact with you?",
+          "team": "What should people FEEL when they interact with you?"
+        },
+        "voiceSamples": {
+          "solo": "Which of these sentences sounds most like you?",
+          "team": "Which of these sentences sounds most like you?"
+        },
+        "toneWords": {
+          "solo": "Which words describe your tone?",
+          "team": "Which words describe your tone?"
+        },
+        "vocabulary": {
+          "solo": "Which words would you NEVER use?",
+          "team": "Which words would you NEVER use?"
+        }
       },
       "e": {
         "warmup1": "What pisses you off about your industry?",
-        "warmup2": "What do you wish more people understood about your work?",
+        "warmup2": {
+          "solo": "What do you wish more people understood about your work?",
+          "team": "What do you wish more people understood about your work?"
+        },
         "statements": "The statement openers",
         "composition": "Tone, length and use of the manifesto",
         "manifesto": "Manifesto",
-        "anchorLine": "Which line is the one you would put on a wall?"
+        "anchorLine": {
+          "solo": "Which line is the one you would put on a wall?",
+          "team": "Which line is the one you would put on a wall?"
+        }
       },
       "ep": {
         "taglines": "Which tagline carries it?",
         "boilerplates": "Boilerplates — bio, short paragraph, paragraph",
         "keyMessages": "Key messages per audience",
         "vocabulary": "Words to use, words to avoid",
-        "distinctiveAsset": "Which line becomes your verbal signature?"
+        "distinctiveAsset": {
+          "solo": "Which line becomes your verbal signature?",
+          "team": "Which line becomes your verbal signature?"
+        }
       },
       "f": {
-        "nameType": "Which kind of name fits you?",
+        "nameType": {
+          "solo": "Which kind of name fits you?",
+          "team": "Which kind of name fits you?"
+        },
         "taste": "Name three to five brand names you love — any industry — and say why.",
         "noGos": "Any words, styles or lengths that are off-limits?",
         "candidates": "Name candidates",
         "shortlist": "Which candidates make the shortlist?",
         "checks": "Availability checks",
-        "criteria": "Rate the finalists against the eight criteria.",
-        "decision": "Your top three, in order."
+        "criteria": {
+          "solo": "Rate the finalists against the eight criteria.",
+          "team": "Rate the finalists against the eight criteria."
+        },
+        "decision": {
+          "solo": "Your top three, in order.",
+          "team": "Your top three, in order."
+        }
       },
       "result": {
-        "direction": "Which direction fits your brand?",
+        "direction": {
+          "solo": "Which direction fits your brand?",
+          "team": "Which direction fits your brand?"
+        },
         "rating": "How helpful was this result?"
       },
       "g": {
-        "source": "Do you have references — screenshots, a pinboard, three sites you like?",
+        "source": {
+          "solo": "Do you have references — screenshots, a pinboard, three sites you like?",
+          "team": "Do you have references — screenshots, a pinboard, three sites you like?"
+        },
         "inspiration": "Your references",
         "reading": "Reading against your foundation",
         "dna": "Your visual DNA",
         "boards": "Three moodboards",
-        "board": "Which board is your starting point?",
+        "board": {
+          "solo": "Which board is your starting point?",
+          "team": "Which board is your starting point?"
+        },
         "mix": "Mix and match"
       },
       "h": {
         "base": "Your base colour",
         "ramp": "Light and dark ramp",
-        "neutral": "What ground tone should your surfaces have?",
-        "accent": "Which colour is your signal?",
+        "neutral": {
+          "solo": "What ground tone should your surfaces have?",
+          "team": "What ground tone should your surfaces have?"
+        },
+        "accent": {
+          "solo": "Which colour is your signal?",
+          "team": "Which colour is your signal?"
+        },
         "roles": "Colour roles",
         "contrast": "Contrast check"
       },
       "i": {
-        "pair": "Which type pair suits you?",
+        "pair": {
+          "solo": "Which type pair suits you?",
+          "team": "Which type pair suits you?"
+        },
         "scale": "Size hierarchy",
         "rules": "Typographic rules"
       },
       "j": {
-        "kind": "What kind of mark do you need?",
+        "kind": {
+          "solo": "What kind of mark do you need?",
+          "team": "What kind of mark do you need?"
+        },
         "brief": "Briefing for the mark",
         "examples": "Settings as examples",
-        "pick": "Which setting do you take as the preferred example?",
+        "pick": {
+          "solo": "Which setting do you take as the preferred example?",
+          "team": "Which setting do you take as the preferred example?"
+        },
         "drafts": "Image drafts"
       },
       "k": {
         "photo": "Your picture principles",
-        "illustration": "Do you want illustration — and if so, which kind?",
-        "icons": "Which icon set suits your type?",
+        "illustration": {
+          "solo": "Do you want illustration — and if so, which kind?",
+          "team": "Do you want illustration — and if so, which kind?"
+        },
+        "icons": {
+          "solo": "Which icon set suits your type?",
+          "team": "Which icon set suits your type?"
+        },
         "dodont": "Do and do not of the picture language"
       },
       "l": {
-        "tempo": "How fast should your brand move?",
+        "tempo": {
+          "solo": "How fast should your brand move?",
+          "team": "How fast should your brand move?"
+        },
         "transitions": "Transition tokens",
-        "logo": "Should your mark move?",
+        "logo": {
+          "solo": "Should your mark move?",
+          "team": "Should your mark move?"
+        },
         "rules": "Motion rules"
       },
       "m": {
-        "types": "What do you need names for — products, services, formats, places, digital things?",
+        "types": {
+          "solo": "What do you need names for — products, services, formats, places, digital things?",
+          "team": "What do you need names for — products, services, formats, places, digital things?"
+        },
         "patterns": "Naming pattern per kind",
         "rules": "Your naming rules"
       },
       "n": {
-        "scope": "What may AI produce in your name?",
+        "scope": {
+          "solo": "What may AI produce in your name?",
+          "team": "What may AI produce in your name?"
+        },
         "review": "Who approves before anything goes out?",
         "guardrails": "Your guardrails for AI",
         "prompts": "Prompt templates"
       },
       "p": {
         "facts": "Which facts may go into the press kit?",
-        "contact": "Who is your press contact?",
+        "contact": {
+          "solo": "Who is your press contact?",
+          "team": "Who is your press contact?"
+        },
         "summary": "Preview of your press kit"
       }
     },
@@ -685,7 +835,10 @@
           "new": "As a customer I could never find it done right — so I built it myself.",
           "relaunch": "Our name and the personal service have to stay — that is what people know us for."
         },
-        "customerPraise": "You never feel like a number here — and the result simply fits.",
+        "customerPraise": {
+          "solo": "You never feel like a number here — and the result simply fits.",
+          "team": "You never feel like a number here — and the result simply fits."
+        },
         "complaints": "Sometimes we take longer than promised, and at first glance our prices look high.",
         "oneThing": "That real craft goes into every order — nothing off the shelf.",
         "challenge": "We barely win new customers, even though our regulars love us."

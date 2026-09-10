@@ -57,11 +57,31 @@ describe('brandSlotPromptLabel', () => {
     expect(team).toContain('Team')
     expect(solo).not.toBe(team)
     expect(brandSlotPromptLabel('c.discovery3', 'en', 'new', 'team')).toContain('team')
+  })
 
-    // GEGENPROBE: ein Slot mit PFAD-Varianten darf sich von `team` nicht
-    // umstimmen lassen — sonst griffe `node[team]` in die falsche Weiche.
-    expect(brandSlotPromptLabel('a.origin', 'de', 'relaunch', 'team'))
-      .toBe(brandSlotPromptLabel('a.origin', 'de', 'relaunch', 'solo'))
+  /**
+   * BEIDE ACHSEN AN EINEM SLOT (Anrede-Runde 2026-09-09): `a.origin` fragt auf
+   * dem Relaunch-Pfad etwas anderes UND redet die Marke an. Der Pfad muss den
+   * Ausschlag geben, die Weiche danach — nicht umgekehrt.
+   */
+  it('löst Pfad UND Weiche auf, wenn ein Slot beides trägt', () => {
+    expect(brandSlotPromptLabel('a.origin', 'de', 'relaunch', 'team')).toContain('woran man euch')
+    expect(brandSlotPromptLabel('a.origin', 'de', 'relaunch', 'solo')).toContain('woran man dich')
+    // Der Gründer-Pfad fragt etwas ANDERES — die Weiche allein darf ihn nicht
+    // erreichen (sonst stünde im Prompt die Relaunch-Frage).
+    expect(brandSlotPromptLabel('a.origin', 'de', 'new', 'team')).toContain('Warum hast du angefangen')
+    expect(brandSlotPromptLabel('a.origin', 'de', 'new', 'solo')).toContain('Warum hast du angefangen')
+  })
+
+  /**
+   * DIE ABLEITUNG BLEIBT BEIM BASIS-SCHLÜSSEL. `d.gapReveal` MELDET eine
+   * Relaunch-Fassung an, im Katalog steht sie nicht — die alte Auflösung
+   * fischte deshalb im Knoten herum, die neue fragt die Registry
+   * (`slotLabelKeyFor`) und bekommt dieselbe Antwort ohne Raten.
+   */
+  it('gibt einer Ableitung mit unbelegter Pfad-Variante ihr Etikett', () => {
+    expect(brandSlotPromptLabel('d.gapReveal', 'de', 'relaunch', 'team')).toBe('Selbstbild und Außenbild')
+    expect(brandSlotPromptLabel('d.gapReveal', 'de', 'new', 'solo')).toBe('Selbstbild und Außenbild')
   })
 })
 

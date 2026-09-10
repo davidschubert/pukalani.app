@@ -38,6 +38,7 @@ import {
   partLabelKeyFor,
   questionKeyFor,
   slotById,
+  slotLabelKeyFor,
   slotIsConfirmable,
   slotsForStep,
 } from '../../../../shared/slotRegistry'
@@ -249,10 +250,13 @@ const stepKey = computed<BrandStepKey | null>(() =>
 const pathKind = computed<BrandPathKind>(() => store.profile?.pathKind ?? 'new')
 
 /**
- * DIE WEICHE W3 (Solo/Team) — sie tauscht bei `c.discovery3` die Fragefassung
- * (Paket 2b, Davids Entscheidung 2026-09-04: D7 statt D3, sobald jemand ein
- * Team hat). `'solo'` ist der Rückfall, solange das Profil nicht geladen ist:
- * die persönliche Fassung passt immer, die Team-Fassung nur mit Team.
+ * DIE WEICHE W3 (Solo/Team) — sie tauscht die Fragefassung. Angefangen hat das
+ * bei `c.discovery3` mit einer ANDEREN Frage (Paket 2b, Davids Entscheidung
+ * 2026-09-04: D7 statt D3, sobald jemand ein Team hat); seit dem 2026-09-09
+ * tauscht sie zusätzlich an 48 Fragen die ANREDE — die abgenommenen Texte
+ * sagen „ihr/euch/euer", und für „Nur ich" ist das falsch. `'solo'` ist der
+ * Rückfall, solange das Profil nicht geladen ist: die persönliche Fassung
+ * passt immer, die Team-Fassung nur mit Team.
  */
 const teamKind = computed<BrandTeamKind>(() => store.profile?.team ?? 'solo')
 
@@ -264,14 +268,15 @@ const slots = computed<readonly BrandSlot[]>(() => (stepKey.value ? slotsForStep
  * Frage-Slots dokumentartige Substantive („Gründungsimpuls" statt „Warum
  * hast du angefangen — …?"); wo die Frage schon kurz ist (Ableitungen wie
  * „Elevator-Pitch"), gibt es bewusst KEINEN Label-Schlüssel und der
- * Rückfall greift. Gefragt wird weiter pfadabhängig — das Label nicht.
+ * Rückfall greift. Gefragt wird weiter pfad- und team-abhängig — das Label
+ * nicht. WELCHEN Fragetext der Rückfall nimmt, rechnet `slotLabelKeyFor`
+ * (shared) für alle drei Orte zugleich: Bühne, `useBrandFieldLabel` und den
+ * Prompt-Aufbau des Servers.
  */
 function slotLabel(slot: BrandSlot): string {
   const labelKey = `brand.labels.${slot.id}`
   if (te(labelKey)) return t(labelKey)
-  return slot.type === 'question' || slot.type === 'choice'
-    ? t(questionKeyFor(slot, pathKind.value, teamKind.value))
-    : t(slot.questionKey)
+  return t(slotLabelKeyFor(slot, pathKind.value, teamKind.value))
 }
 
 /**
@@ -984,7 +989,11 @@ async function answerFromGeorge(text: string): Promise<void> {
   // DIE AKTIVE SESSION, NIE DIE NÄCHSTE FRAGE (Testlauf-Befund A) — s.
   // `answerSlot`/`brandAnswerTarget`. `null` heisst: ein Gesprächszug ohne Feld.
   const slot = readsLikeQuestion(text) ? null : answerSlot.value
-  const question = slot ? t(questionKeyFor(slot, pathKind.value, teamKind.value)) : ''
+  // `slotLabelKeyFor` und nicht `questionKeyFor`: die AKTIVE Session ist jede
+  // Session, die der Mensch angeklickt hat — auch eine Ableitung oder der
+  // Paarvergleich (`special`). Nur die geteilte Regel weiss für alle, welcher
+  // Katalog-Schlüssel wirklich existiert.
+  const question = slot ? t(slotLabelKeyFor(slot, pathKind.value, teamKind.value)) : ''
   /**
    * DER SAMMEL-WERT GEHÖRT DEM SERVER (Kailua-Befund 4) — die Regel steht pur
    * nebenan (`brandAnswerWritesSlot`), samt Begründung. Der Zug reist trotzdem

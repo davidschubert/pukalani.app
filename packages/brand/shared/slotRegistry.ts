@@ -115,7 +115,7 @@
  * `questionKeyFor()` ist die EINE Stelle, die das rechnet.
  *
  * ── TEAM-VARIANTEN (Paket 2b, Davids Entscheidung 2026-09-04) ─────────────
- * Dieselbe Mechanik für die Weiche W3 (Solo/Team), aber an EINEM Slot:
+ * Dieselbe Mechanik für die Weiche W3 (Solo/Team). Sie fing an EINEM Slot an:
  * `c.discovery3` fragt im Team nach der Entscheidungsregel für den Fall, dass
  * der Inhaber nicht im Raum ist (D7 der Content-Spec §6), solo nach dem
  * Verhalten, das niemals geduldet wird (D3). `teamVariant: true` markiert
@@ -124,9 +124,20 @@
  * EINEM Schlüssel nicht gleichzeitig eine Zeichenkette und ein Kind-Objekt
  * halten (dieselbe Grenze wie bei `d.gapReveal`, s. `tests/i18nCatalog.test.ts`),
  * also sind beide Fassungen Kinder.
- * Pfad- und Team-Variante schliessen sich aus: vier Fassungen je Frage wären
- * vier Texte, die niemand mehr gegenliest — `validateSlotRegistry` weist die
- * Kombination ab.
+ *
+ * ── DIE ANREDE IST DERSELBE SCHALTER (Davids Entscheidung 2026-09-09) ──────
+ * Aus dem einen Slot sind 48 geworden. Grund ist kein neuer Mechanismus,
+ * sondern ein Inhalts-Befund: die abgenommenen Fragetexte reden die Marke als
+ * MEHRZAHL an („Welche Beschwerden oder Kritik bekommt ihr?"), und auf der
+ * Weiche „Nur ich" ist das schlicht falsch. Die Team-Fassung bleibt WÖRTLICH
+ * wie abgenommen, die Solo-Fassung sagt dasselbe in der Wizard-Anrede „du".
+ * Weil das dieselbe Weiche ist, ist es dasselbe Feld — eine zweite Markierung
+ * neben `teamVariant` hiesse zwei Regeln für eine Frage.
+ *
+ * Pfad- und Team-Variante schliessen sich seither NICHT mehr aus: `a.origin`
+ * und `b.whyStarted` fragen auf dem Relaunch-Pfad etwas anderes UND reden die
+ * Marke an, also tragen sie beide Achsen (`brand.q.a.origin.relaunch.solo`).
+ * Zwei Slots, vier Fassungen — mehr wird es nur mit einem Grund.
  *
  * ── WAS HIER BEWUSST NICHT STEHT ──────────────────────────────────────────
  * Die Weiche W3 (Solo/Team) gatet keinen Step, sondern EINEN Slot
@@ -370,6 +381,8 @@ export interface BrandSessionConfig {
   readonly pathVariants?: BrandSlotPathVariants
   /** Eigene Fragefassung je Weiche W3 (Solo/Team) — s. Kopf „Team-Varianten". */
   readonly teamVariant?: true
+  /** Eigene BEISPIEL-Antwort je Weiche W3 — s. `exampleKeyFor` (selten). */
+  readonly teamExample?: true
   /** Migrationsvertrag: nicht mehr gefragt, aber weiter lesbar. Nie löschen. */
   readonly deactivated?: true
 
@@ -481,6 +494,8 @@ interface BrandSlotDefinition {
   pathVariants?: BrandSlotPathVariants
   /** Eigene Fragefassung je Weiche W3 (Solo/Team) — s. Kopf „Team-Varianten". */
   teamVariant?: true
+  /** Eigene BEISPIEL-Antwort je Weiche W3 — s. `exampleKeyFor` (selten). */
+  teamExample?: true
   deactivated?: true
 }
 
@@ -722,6 +737,7 @@ function defineSession(definition: BrandSlotDefinition): BrandSessionConfig {
     maxLength: definition.maxLength,
     ...(definition.pathVariants ? { pathVariants: definition.pathVariants } : {}),
     ...(definition.teamVariant ? { teamVariant: definition.teamVariant } : {}),
+    ...(definition.teamExample ? { teamExample: definition.teamExample } : {}),
     ...(definition.deactivated ? { deactivated: definition.deactivated } : {}),
 
     kind,
@@ -798,12 +814,12 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // fragt nur `ask`/`collect`/`choose`) — im Klick-Test las sich das, als
   // übersprünge die Werkstatt die halbe Leiste.
   // W1 tauscht die Fassung: Ursprungsgeschichte (neu) bzw. R1–R4 (Relaunch, Katalog §2.3).
-  defineSession({ id: 'a.origin', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: LONG, editor: 'textarea', generator: 'none', pathVariants: { new: true, relaunch: true } }),
-  defineSession({ id: 'a.customerPraise', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'a.complaints', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'a.oneThing', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'a.challenge', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'a.facts', stepId: 'context', type: 'choice', required: true, kind: 'structured', maxLength: SHORT, editor: 'chips', generator: 'none' }),
+  defineSession({ id: 'a.origin', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: LONG, editor: 'textarea', generator: 'none', pathVariants: { new: true, relaunch: true }, teamVariant: true }),
+  defineSession({ id: 'a.customerPraise', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true, teamExample: true }),
+  defineSession({ id: 'a.complaints', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
+  defineSession({ id: 'a.oneThing', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
+  defineSession({ id: 'a.challenge', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
+  defineSession({ id: 'a.facts', stepId: 'context', type: 'choice', required: true, kind: 'structured', maxLength: SHORT, editor: 'chips', generator: 'none', teamVariant: true }),
   defineSession({ id: 'a.pitch', stepId: 'context', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'derive' }),
   defineSession({ id: 'a.category', stepId: 'context', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'derive' }),
   defineSession({ id: 'a.competitors', stepId: 'context', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft' }),
@@ -818,13 +834,13 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // (Abdeckungs-Matrix §15, Formular 02 §6/§8/§10 — drei getrennte
   // „Draft + Konfidenz"-Paare). Eine gemeinsame Id wäre im Speicher ein
   // Klumpen, den man nicht einzeln neu entwerfen kann.
-  defineSession({ id: 'b.whyStarted', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'derive', dependencies: ['a.origin'], pathVariants: { new: true, relaunch: true } }),
-  defineSession({ id: 'b.worldLoses', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'b.conviction', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'b.tenYears', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'b.legacy', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'b.positioningCategory', stepId: 'pvm', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'derive', help: true, dependencies: ['a.pitch', 'a.category', 'a.competitors'] }),
-  defineSession({ id: 'b.positioningFirstChoice', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
+  defineSession({ id: 'b.whyStarted', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'derive', dependencies: ['a.origin'], pathVariants: { new: true, relaunch: true }, teamVariant: true }),
+  defineSession({ id: 'b.worldLoses', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
+  defineSession({ id: 'b.conviction', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
+  defineSession({ id: 'b.tenYears', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
+  defineSession({ id: 'b.legacy', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
+  defineSession({ id: 'b.positioningCategory', stepId: 'pvm', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'derive', help: true, dependencies: ['a.pitch', 'a.category', 'a.competitors'], teamVariant: true }),
+  defineSession({ id: 'b.positioningFirstChoice', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
   defineSession({ id: 'b.purpose', stepId: 'pvm', type: 'stage-edit', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'draft', help: true, dependencies: ['a.pitch', 'b.whyStarted', 'b.worldLoses', 'b.conviction'] }),
   defineSession({ id: 'b.vision', stepId: 'pvm', type: 'stage-edit', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'draft', help: true, dependencies: ['a.oneThing', 'b.tenYears', 'b.legacy'] }),
   defineSession({ id: 'b.mission', stepId: 'pvm', type: 'stage-edit', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'draft', help: true, dependencies: ['a.pitch', 'a.audienceSketch', 'a.oneThing', 'a.customerPraise', 'b.purpose'] }),
@@ -832,10 +848,10 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // ── B2 · Markenarchitektur (Katalog §5a, nur bei W4 = ja) — 5 ───────────
   // `required: true` INNERHALB des Bausteins; ob er überhaupt läuft,
   // entscheidet die Weiche in brandJourney.ts.
-  defineSession({ id: 'b2.visibility', stepId: 'architecture', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'text', generator: 'none' }),
+  defineSession({ id: 'b2.visibility', stepId: 'architecture', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'text', generator: 'none', teamVariant: true }),
   defineSession({ id: 'b2.roleOfMaster', stepId: 'architecture', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'text', generator: 'none' }),
   defineSession({ id: 'b2.namingPattern', stepId: 'architecture', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'text', generator: 'none' }),
-  defineSession({ id: 'b2.model', stepId: 'architecture', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'derive', help: true, dependencies: ['a.category', 'b.positioningCategory', 'b2.visibility', 'b2.roleOfMaster', 'b2.namingPattern'] }),
+  defineSession({ id: 'b2.model', stepId: 'architecture', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'derive', help: true, dependencies: ['a.category', 'b.positioningCategory', 'b2.visibility', 'b2.roleOfMaster', 'b2.namingPattern'], teamVariant: true }),
   defineSession({ id: 'b2.rule', stepId: 'architecture', type: 'stage-edit', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'draft', dependencies: ['b2.model', 'b2.namingPattern'] }),
 
   // ── C · Werte (Katalog §6) — 9 ──────────────────────────────────────────
@@ -843,16 +859,16 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // KI wählt drei aus dem Sieben-Pool (§6) — welche, steht im gefüllten
   // Slot; eine gemeinsame Id könnte nicht sagen, welche Frage beantwortet
   // wurde. Dieselbe Auflösung wie bei `e.warmup1/2`.
-  defineSession({ id: 'c.discovery1', stepId: 'values', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
+  defineSession({ id: 'c.discovery1', stepId: 'values', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
   defineSession({ id: 'c.discovery2', stepId: 'values', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'c.discovery3', stepId: 'values', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
+  defineSession({ id: 'c.discovery3', stepId: 'values', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true, teamExample: true }),
   defineSession({ id: 'c.candidates', stepId: 'values', type: 'derivation', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'candidates', help: true, dependencies: ['a.origin', 'a.customerPraise', 'a.complaints', 'b.conviction', 'c.discovery1', 'c.discovery2', 'c.discovery3'] }),
-  defineSession({ id: 'c.final', stepId: 'values', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'chips', generator: 'none', help: true, dependencies: ['c.candidates'] }),
+  defineSession({ id: 'c.final', stepId: 'values', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'chips', generator: 'none', help: true, dependencies: ['c.candidates'], teamVariant: true }),
   defineSession({ id: 'c.definitions', stepId: 'values', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['c.discovery1', 'c.discovery2', 'c.discovery3', 'c.final'] }),
-  defineSession({ id: 'c.livedExamples', stepId: 'values', type: 'question', required: true, kind: 'list', maxLength: LONG, editor: 'textarea', generator: 'none', dependencies: ['c.final'] }),
-  defineSession({ id: 'c.conflictRule', stepId: 'values', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', dependencies: ['c.final'] }),
+  defineSession({ id: 'c.livedExamples', stepId: 'values', type: 'question', required: true, kind: 'list', maxLength: LONG, editor: 'textarea', generator: 'none', dependencies: ['c.final'], teamVariant: true }),
+  defineSession({ id: 'c.conflictRule', stepId: 'values', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', dependencies: ['c.final'], teamVariant: true }),
   // Nur die Team-Fassung stellt diese Frage (W3) — deshalb nicht Pflicht.
-  defineSession({ id: 'c.teamFilter', stepId: 'values', type: 'question', required: false, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', dependencies: ['c.final'] }),
+  defineSession({ id: 'c.teamFilter', stepId: 'values', type: 'question', required: false, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', dependencies: ['c.final'], teamVariant: true }),
 
   // ── D · Archetyp & Stimme (Katalog §7 + §12) — 12 ───────────────────────
   // ABWEICHUNG von der Zählung „D: 11": `d.primary/d.secondary` stehen im
@@ -865,19 +881,19 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // sechsten Zeile der Leiste. Das Kapitel bleibt trotzdem GEMISCHT und
   // bekommt deshalb KEINEN Trenner: `d.voiceSamples`, `d.toneWords` und
   // `d.vocabulary` schöpfen aus `d.primary` und müssen dahinter bleiben.
-  defineSession({ id: 'd.party', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'd.never', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
+  defineSession({ id: 'd.party', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
+  defineSession({ id: 'd.never', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
   defineSession({ id: 'd.admired', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'd.emotion', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
+  defineSession({ id: 'd.emotion', stepId: 'archetype', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
   defineSession({ id: 'd.hypothesis', stepId: 'archetype', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'none', generator: 'derive', dependencies: ['a.pitch', 'a.toneAnalysis', 'a.customerPraise'] }),
-  defineSession({ id: 'd.pairs', stepId: 'archetype', type: 'special', required: true, kind: 'structured', maxLength: LONG, editor: 'cards', generator: 'none', help: true, dependencies: ['d.hypothesis'] }),
+  defineSession({ id: 'd.pairs', stepId: 'archetype', type: 'special', required: true, kind: 'structured', maxLength: LONG, editor: 'cards', generator: 'none', help: true, dependencies: ['d.hypothesis'], teamVariant: true }),
   defineSession({ id: 'd.primary', stepId: 'archetype', type: 'derivation', required: true, kind: 'choice', maxLength: SHORT, editor: 'none', generator: 'derive', help: true, dependencies: ['d.pairs'] }),
   defineSession({ id: 'd.secondary', stepId: 'archetype', type: 'derivation', required: true, kind: 'choice', maxLength: SHORT, editor: 'none', generator: 'derive', dependencies: ['d.pairs'] }),
   defineSession({ id: 'd.gapReveal', stepId: 'archetype', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'none', generator: 'derive', help: true, dependencies: ['d.hypothesis', 'd.primary', 'd.secondary'], pathVariants: { relaunch: true } }),
-  defineSession({ id: 'd.voiceSamples', stepId: 'archetype', type: 'choice', required: true, kind: 'list', maxLength: LONG, editor: 'cards', generator: 'draft', dependencies: ['c.final', 'd.primary', 'd.secondary', 'd.party', 'd.emotion'] }),
-  defineSession({ id: 'd.toneWords', stepId: 'archetype', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'chips', generator: 'derive', dependencies: ['a.toneAnalysis', 'd.primary', 'd.emotion'] }),
+  defineSession({ id: 'd.voiceSamples', stepId: 'archetype', type: 'choice', required: true, kind: 'list', maxLength: LONG, editor: 'cards', generator: 'draft', dependencies: ['c.final', 'd.primary', 'd.secondary', 'd.party', 'd.emotion'], teamVariant: true }),
+  defineSession({ id: 'd.toneWords', stepId: 'archetype', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'chips', generator: 'derive', dependencies: ['a.toneAnalysis', 'd.primary', 'd.emotion'], teamVariant: true }),
   // F→K: der Mensch nennt die NIE-Wörter, George ergänzt Benutzen/Meiden.
-  defineSession({ id: 'd.vocabulary', stepId: 'archetype', type: 'question', required: true, kind: 'list', maxLength: LONG, editor: 'textarea', generator: 'derive', dependencies: ['d.primary', 'd.toneWords'] }),
+  defineSession({ id: 'd.vocabulary', stepId: 'archetype', type: 'question', required: true, kind: 'list', maxLength: LONG, editor: 'textarea', generator: 'derive', dependencies: ['d.primary', 'd.toneWords'], teamVariant: true }),
 
   // ── E · Manifest (Katalog §8) — 6 ───────────────────────────────────────
   // ABWEICHUNG von der Katalog-Auflistung: `e.compositionTone / e.length /
@@ -886,7 +902,7 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // Komposition und werden nie einzeln neu entworfen; drei Ids hiessen drei
   // inputHash-Quellen für dasselbe Ereignis.
   defineSession({ id: 'e.warmup1', stepId: 'manifesto', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'e.warmup2', stepId: 'manifesto', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
+  defineSession({ id: 'e.warmup2', stepId: 'manifesto', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
   // MENSCHENFRAGEN ZUERST (2026-09-09): `e.composition` hängt von nichts ab und
   // steht deshalb VOR dem ersten Entwurf. `e.anchorLine` wählt eine Zeile aus
   // `e.manifesto` und bleibt hinten — das Kapitel bleibt gemischt, ohne Trenner.
@@ -894,27 +910,27 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   defineSession({ id: 'e.statements', stepId: 'manifesto', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft', help: true, dependencies: ['b.purpose', 'b.vision', 'b.mission', 'c.final', 'c.definitions', 'd.primary', 'd.toneWords', 'e.warmup1', 'e.warmup2'] }),
   // Der EINE Markdown-Slot (Plan §3e „Editor- & Inhaltsformat").
   defineSession({ id: 'e.manifesto', stepId: 'manifesto', type: 'stage-edit', required: true, kind: 'richtext', maxLength: LONG, editor: 'stage', generator: 'draft', help: true, dependencies: ['d.toneWords', 'e.statements', 'e.composition'] }),
-  defineSession({ id: 'e.anchorLine', stepId: 'manifesto', type: 'choice', required: true, kind: 'text', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['e.manifesto'] }),
+  defineSession({ id: 'e.anchorLine', stepId: 'manifesto', type: 'choice', required: true, kind: 'text', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['e.manifesto'], teamVariant: true }),
 
   // ── E+ · Verbale Identität (Katalog §9) — 5 ─────────────────────────────
   defineSession({ id: 'ep.taglines', stepId: 'verbal', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'cards', generator: 'candidates', dependencies: ['b.purpose', 'b.positioningFirstChoice', 'c.final', 'd.primary', 'e.anchorLine'] }),
-  defineSession({ id: 'ep.distinctiveAsset', stepId: 'verbal', type: 'choice', required: true, kind: 'text', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['e.anchorLine'] }),
+  defineSession({ id: 'ep.distinctiveAsset', stepId: 'verbal', type: 'choice', required: true, kind: 'text', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['e.anchorLine'], teamVariant: true }),
   defineSession({ id: 'ep.boilerplates', stepId: 'verbal', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['a.pitch', 'b.purpose', 'b.vision', 'b.mission', 'b.positioningCategory', 'd.toneWords'] }),
   defineSession({ id: 'ep.keyMessages', stepId: 'verbal', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['a.audienceSketch', 'b.mission', 'c.final', 'd.toneWords'] }),
   defineSession({ id: 'ep.vocabulary', stepId: 'verbal', type: 'derivation', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'derive', dependencies: ['d.toneWords', 'd.vocabulary'] }),
 
   // ── F · Name (Katalog §10, nur per W2/Neuschnitt) — 8 ───────────────────
-  defineSession({ id: 'f.nameType', stepId: 'naming', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', help: true }),
+  defineSession({ id: 'f.nameType', stepId: 'naming', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', help: true, teamVariant: true }),
   defineSession({ id: 'f.taste', stepId: 'naming', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', help: true }),
   defineSession({ id: 'f.noGos', stepId: 'naming', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
   defineSession({ id: 'f.candidates', stepId: 'naming', type: 'derivation', required: true, kind: 'list', maxLength: LONG, editor: 'cards', generator: 'candidates', dependencies: ['a.category', 'a.audienceSketch', 'a.competitors', 'b.purpose', 'c.final', 'd.primary', 'd.emotion', 'f.nameType', 'f.taste', 'f.noGos'] }),
   defineSession({ id: 'f.shortlist', stepId: 'naming', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['f.candidates'] }),
   defineSession({ id: 'f.checks', stepId: 'naming', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'derive', help: true, dependencies: ['f.shortlist'] }),
-  defineSession({ id: 'f.criteria', stepId: 'naming', type: 'choice', required: true, kind: 'structured', maxLength: LONG, editor: 'chips', generator: 'none', dependencies: ['f.shortlist', 'f.checks'] }),
-  defineSession({ id: 'f.decision', stepId: 'naming', type: 'choice', required: true, kind: 'structured', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['f.shortlist', 'f.checks', 'f.criteria'] }),
+  defineSession({ id: 'f.criteria', stepId: 'naming', type: 'choice', required: true, kind: 'structured', maxLength: LONG, editor: 'chips', generator: 'none', dependencies: ['f.shortlist', 'f.checks'], teamVariant: true }),
+  defineSession({ id: 'f.decision', stepId: 'naming', type: 'choice', required: true, kind: 'structured', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['f.shortlist', 'f.checks', 'f.criteria'], teamVariant: true }),
 
   // ── Ergebnis (Katalog §11) — 2 ──────────────────────────────────────────
-  defineSession({ id: 'result.direction', stepId: 'result', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['d.primary', 'd.toneWords', 'e.anchorLine'] }),
+  defineSession({ id: 'result.direction', stepId: 'result', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['d.primary', 'd.toneWords', 'e.anchorLine'], teamVariant: true }),
   // „freiwillige Abschlussfrage" (Katalog §11) — nie Pflicht.
   defineSession({ id: 'result.rating', stepId: 'result', type: 'choice', required: false, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none' }),
 
@@ -936,7 +952,7 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // (`brandChoiceOptions.ts`), und `choiceCardsFor` in der Werkstatt verlangt
   // beides — Vertrag UND `cards`. Mit `chips` stand hier ein Textfeld, in das
   // der Mensch die rohe Id `inspiration` hätte tippen müssen.
-  defineSession({ id: 'g.source', stepId: 'dna', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none' }),
+  defineSession({ id: 'g.source', stepId: 'dna', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', teamVariant: true }),
   // Vorbilder sind FREMDWERKE und bleiben privat (§2.13) — `sensitivity:
   // 'internal'` in `sessionContent.ts`, `audience` folgt daraus.
   defineSession({ id: 'g.inspiration', stepId: 'dna', type: 'special', required: false, kind: 'structured', maxLength: LONG, editor: 'uploads', generator: 'none', dependencies: ['g.source'] }),
@@ -944,7 +960,7 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   defineSession({ id: 'g.dna', stepId: 'dna', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'derive', dependencies: ['c.final', 'd.primary', 'd.toneWords', 'result.direction', 'g.reading'] }),
   // PURE Regel, kein KI-Aufruf (§2.2): drei Varianten derselben Belegung.
   defineSession({ id: 'g.boards', stepId: 'dna', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'cards', generator: 'none', dependencies: ['g.dna'] }),
-  defineSession({ id: 'g.board', stepId: 'dna', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['g.boards'] }),
+  defineSession({ id: 'g.board', stepId: 'dna', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['g.boards'], teamVariant: true }),
   defineSession({ id: 'g.mix', stepId: 'dna', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['g.dna', 'g.board'] }),
 
   // ── H · Farbwelt (§2.3) — 6 ─────────────────────────────────────────────
@@ -961,8 +977,8 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   defineSession({ id: 'h.base', stepId: 'color', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'text', generator: 'none', dependencies: ['g.mix'] }),
   // PUR: die Ramp-Mathematik der Themes-Engine (`buildBrandDesign`), kein Modell.
   defineSession({ id: 'h.ramp', stepId: 'color', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['h.base'] }),
-  defineSession({ id: 'h.neutral', stepId: 'color', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['h.base'] }),
-  defineSession({ id: 'h.accent', stepId: 'color', type: 'choice', required: true, kind: 'text', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['h.base'] }),
+  defineSession({ id: 'h.neutral', stepId: 'color', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['h.base'], teamVariant: true }),
+  defineSession({ id: 'h.accent', stepId: 'color', type: 'choice', required: true, kind: 'text', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['h.base'], teamVariant: true }),
   defineSession({ id: 'h.roles', stepId: 'color', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['h.ramp', 'h.neutral', 'h.accent'] }),
   // PUR: Kontrast-Paare mit WCAG-Urteil, gerechnet aus den Hex-Werten.
   defineSession({ id: 'h.contrast', stepId: 'color', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['h.ramp', 'h.roles'] }),
@@ -973,17 +989,17 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // der Werkbank — mit `derive`/`draft` trüge die Bühne einen Entwurfs-Knopf,
   // und der schriebe Prosa in Felder, die eine Katalog-Id, eine zweite
   // Katalog-Id und vier beschriftete Blöcke halten.
-  defineSession({ id: 'i.pair', stepId: 'type', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['g.mix'] }),
+  defineSession({ id: 'i.pair', stepId: 'type', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['g.mix'], teamVariant: true }),
   // PUR: die Hierarchie folgt aus DNA „Typografie" und „Komposition".
   defineSession({ id: 'i.scale', stepId: 'type', type: 'derivation', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['g.mix', 'i.pair'] }),
   defineSession({ id: 'i.rules', stepId: 'type', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'none', dependencies: ['i.pair', 'i.scale'] }),
 
   // ── J · Zeichen (§2.5, drei Stufen) — 5 ─────────────────────────────────
-  defineSession({ id: 'j.kind', stepId: 'mark', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'derive', dependencies: ['g.mix'] }),
+  defineSession({ id: 'j.kind', stepId: 'mark', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'derive', dependencies: ['g.mix'], teamVariant: true }),
   defineSession({ id: 'j.brief', stepId: 'mark', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['g.mix', 'h.roles', 'i.pair', 'j.kind'] }),
   // PUR: Wortmarke und Monogramm als SVG aus Schriftpaar und Farbwelt.
   defineSession({ id: 'j.examples', stepId: 'mark', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['h.base', 'i.pair', 'j.kind'] }),
-  defineSession({ id: 'j.pick', stepId: 'mark', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['j.examples'] }),
+  defineSession({ id: 'j.pick', stepId: 'mark', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['j.examples'], teamVariant: true }),
   // Entwürfe reisen NIE in Snapshot oder Share (§1.11 b) — `internal`.
   defineSession({ id: 'j.drafts', stepId: 'mark', type: 'special', required: false, kind: 'structured', maxLength: LONG, editor: 'drafts', generator: 'none', dependencies: ['j.brief'] }),
 
@@ -995,8 +1011,8 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // einen Entwurfs-Knopf, und der schriebe Prosa in Felder, die fünf
   // beschriftete Blöcke, zwei Katalog-Ids und sechs geprüfte Paare halten.
   // §1.4 gilt hier doppelt: Bildsprache sind REGELN, kein Modell-Text.
-  defineSession({ id: 'k.illustration', stepId: 'imagery', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['g.mix'] }),
-  defineSession({ id: 'k.icons', stepId: 'imagery', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['i.pair'] }),
+  defineSession({ id: 'k.illustration', stepId: 'imagery', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['g.mix'], teamVariant: true }),
+  defineSession({ id: 'k.icons', stepId: 'imagery', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['i.pair'], teamVariant: true }),
   defineSession({ id: 'k.photo', stepId: 'imagery', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'cards', generator: 'none', dependencies: ['g.mix'] }),
   // PUR: vier Achsen des Prinzips plus je ein Paar aus Illustration und Icons.
   defineSession({ id: 'k.dodont', stepId: 'imagery', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'none', dependencies: ['k.photo', 'k.illustration', 'k.icons'] }),
@@ -1008,8 +1024,8 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // (`shared/brandDesignMotion.ts`). Mit `derive`/`draft` trüge die Bühne einen
   // Entwurfs-Knopf, und der schriebe Prosa in Felder, die eine Katalog-Id, vier
   // Tokens und sechs prüfbare Sätze halten.
-  defineSession({ id: 'l.tempo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['g.mix'] }),
-  defineSession({ id: 'l.logo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['j.kind', 'l.tempo'] }),
+  defineSession({ id: 'l.tempo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['g.mix'], teamVariant: true }),
+  defineSession({ id: 'l.logo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['j.kind', 'l.tempo'], teamVariant: true }),
   // PUR: Dauern, Easing und Versatz als Token-Satz aus dem Tempo.
   defineSession({ id: 'l.transitions', stepId: 'motion', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['l.tempo'] }),
   defineSession({ id: 'l.rules', stepId: 'motion', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'none', dependencies: ['l.tempo', 'l.transitions', 'l.logo'] }),
@@ -1035,12 +1051,12 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // ── M · Nomenklatur (§2.2, Otto) — 3 ────────────────────────────────────
   // MEHRFACHWAHL aus `BRAND_NAME_TYPES`; `kind: 'list'`, weil mehrere Ids im
   // Feld stehen — eine `choice` hielte genau eine.
-  defineSession({ id: 'm.types', stepId: 'nomenclature', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'chips', generator: 'none' }),
+  defineSession({ id: 'm.types', stepId: 'nomenclature', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'chips', generator: 'none', teamVariant: true }),
   defineSession({ id: 'm.patterns', stepId: 'nomenclature', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['b2.model', 'b2.rule', 'f.decision', 'd.toneWords', 'm.types'] }),
   defineSession({ id: 'm.rules', stepId: 'nomenclature', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'none', dependencies: ['m.patterns'] }),
 
   // ── N · AI-Guidelines (§2.3, Nika) — 4 ──────────────────────────────────
-  defineSession({ id: 'n.scope', stepId: 'aiguide', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none' }),
+  defineSession({ id: 'n.scope', stepId: 'aiguide', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', teamVariant: true }),
   defineSession({ id: 'n.review', stepId: 'aiguide', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none' }),
   // `m.rules` steht als Quelle drin und ist trotzdem OPTIONAL erreichbar: ohne
   // Markenarchitektur läuft `nomenclature` nicht (§2.20 Nr. 4), und dann
@@ -1067,7 +1083,7 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // OPTIONAL (§2.19 Nr. 3): ein Pressekit ohne Ansprechperson ist ärmer, aber
   // kein halbes — ein `required: true` hielte das Kapitel für jede Marke auf,
   // die die Zuständigkeit erst klären muss.
-  defineSession({ id: 'p.contact', stepId: 'presskit', type: 'question', required: false, kind: 'structured', maxLength: SHORT, editor: 'text', generator: 'none' }),
+  defineSession({ id: 'p.contact', stepId: 'presskit', type: 'question', required: false, kind: 'structured', maxLength: SHORT, editor: 'text', generator: 'none', teamVariant: true }),
   // PUR (§2.11): die Vorschau ist eine Zusammenstellung, kein Entwurf.
   defineSession({ id: 'p.summary', stepId: 'presskit', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['ep.taglines', 'ep.boilerplates', 'p.facts', 'p.contact'] }),
 ]
@@ -1311,9 +1327,18 @@ export function validateSlotRegistry(slots: readonly BrandSlot[] = BRAND_SLOTS):
     if (slot.sensitivity !== 'public' && slot.audience !== 'internal') {
       problems.push(`${slot.id}: sensitivity "${slot.sensitivity}" verlangt audience "internal"`)
     }
-    // Vier Fragefassungen je Slot (Pfad × Weiche W3) liest niemand mehr gegen.
-    if (slot.teamVariant && slot.pathVariants) {
-      problems.push(`${slot.id}: teamVariant und pathVariants zugleich`)
+    // VIER FASSUNGEN SIND SEIT DEM 2026-09-09 ERLAUBT — und zwar nur, weil sie
+    // an zwei Slots (`a.origin`, `b.whyStarted`) unvermeidlich sind: der
+    // Relaunch-Wortlaut redet die Marke an („woran man euch erkennt"), und für
+    // „Nur ich" ist das falsch (Davids Entscheidung, DECISION-LOG 2026-09-09).
+    // Der alte Wächter verbot die Kombination mit dem Argument „vier Texte
+    // liest niemand mehr gegen"; das Argument bleibt richtig, taugt aber nicht
+    // als Verbot, wenn die Frage selbst zwei Achsen hat. Was BLEIBT, ist die
+    // Kopplung: ein eigenes Beispiel je Weiche gibt es nur, wo auch die Frage
+    // eine eigene Fassung hat — sonst zeigte `exampleKeyFor` auf ein Kind
+    // unter einem Schlüssel, den `questionKeyFor` als Zeichenkette liest.
+    if (slot.teamExample && !slot.teamVariant) {
+      problems.push(`${slot.id}: teamExample ohne teamVariant`)
     }
     // SPITZE KLAMMERN NUR IN DEN VERARBEITUNGSREGELN (die Formeln brauchen ihre
     // Platzhalter, „We exist so that <who> …"). Alles andere hier liest ein
@@ -1460,6 +1485,14 @@ export function slotIsFilled(state: BrandSlotStateFacts | undefined): boolean {
  * Suffix: die eine Stelle, die die Konventionen `brand.q.<id>.<pfad>` und
  * `brand.q.<id>.<solo|team>` kennt (s. Kopf).
  *
+ * ── ERST DER PFAD, DANN DIE WEICHE (2026-09-09) ───────────────────────────
+ * Ein Slot darf seit Davids Entscheidung BEIDE Achsen tragen, und dann ist der
+ * Schlüssel `brand.q.<id>.<pfad>.<solo|team>` — die Reihenfolge steht hier
+ * EINMAL und nirgends sonst. Sie ist nicht beliebig: der Pfad wählt, WELCHE
+ * Frage gestellt wird (Gründung gegen Relaunch), die Weiche nur, WIE sie
+ * angeredet wird. Die gröbere Unterscheidung gehört nach oben, sonst stünden
+ * dieselben zwei Fragen unter `solo` und unter `team` doppelt im Katalog.
+ *
  * `team` ist OPTIONAL und fällt auf `'solo'` zurück: eine Aufrufstelle, die
  * die Weiche nicht kennt, bekommt die Fassung für den Einzelnen — nie einen
  * Schlüssel, den der Katalog nicht führt.
@@ -1469,8 +1502,38 @@ export function questionKeyFor(
   pathKind: BrandPathKind,
   team: BrandTeamKind = 'solo',
 ): string {
-  if (slot.teamVariant) return `${slot.questionKey}.${team === 'team' ? 'team' : 'solo'}`
-  return slot.pathVariants?.[pathKind] ? `${slot.questionKey}.${pathKind}` : slot.questionKey
+  const base = slot.pathVariants?.[pathKind] ? `${slot.questionKey}.${pathKind}` : slot.questionKey
+  return slot.teamVariant ? `${base}.${team === 'team' ? 'team' : 'solo'}` : base
+}
+
+/**
+ * DER SCHLÜSSEL, MIT DEM EIN FELD BESCHRIFTET WIRD — die Bühne, das Log, die
+ * Abnahme und jeder Befund-Chip lösen ihn über dieselbe Regel auf.
+ *
+ * ── WARUM NICHT EINFACH `questionKeyFor` ──────────────────────────────────
+ * Weil `d.gapReveal` eine Variante ANMELDET, die der Katalog nicht führt:
+ * `pathVariants: { relaunch: true }` war als eigener Relaunch-Wortlaut
+ * gedacht, geschrieben wurde er nie (Begründung in `tests/i18nCatalog.test.ts`).
+ * Für eine ABLEITUNG fällt das nicht auf — sie wird nie gefragt, und die
+ * Oberfläche beschriftet sie mit dem Basis-Schlüssel. Genau diese Ausnahme
+ * stand bis 2026-09-09 dreimal im Code (Bühne, `useBrandFieldLabel`,
+ * `BwAcceptance`) — als Aufzählung der Typen `question`/`choice`, und die
+ * hielt exakt so lange, bis `d.pairs` (Typ `special`) eine Solo-Fassung bekam.
+ *
+ * DIE REGEL IST DESHALB NICHT MEHR DER TYP, SONDERN DIE ANMELDUNG: wer eine
+ * Team-Fassung führt, wird über sie beschriftet; sonst gilt weiter der alte
+ * Weg über den gefragten Typ. Ein Slot ohne jede Variante bekommt in beiden
+ * Fällen denselben Basis-Schlüssel — die Regel ändert für ihn nichts.
+ */
+export function slotLabelKeyFor(
+  slot: BrandSlot,
+  pathKind: BrandPathKind,
+  team: BrandTeamKind = 'solo',
+): string {
+  if (slot.teamVariant) return questionKeyFor(slot, pathKind, team)
+  return slot.type === 'question' || slot.type === 'choice'
+    ? questionKeyFor(slot, pathKind, team)
+    : slot.questionKey
 }
 
 /**
@@ -1488,15 +1551,25 @@ export function questionKeyFor(
  * „Wie soll dein Team entscheiden, wenn du nicht im Raum bist?" das
  * Solo-Beispiel („Dass jemand Kollegen vor Kunden schlecht macht."). `team`
  * ist wie bei `questionKeyFor` optional und fällt auf `'solo'` zurück.
+ *
+ * ── SIE HÄNGT AN `teamExample`, NICHT AN `teamVariant` (2026-09-09) ────────
+ * Seit der Anrede-Runde tragen 48 Fragen eine Solo-Fassung — die FRAGE spricht
+ * George, und er redet solo mit „du" und im Team mit „ihr". Das BEISPIEL
+ * spricht der NUTZER („Wir gewinnen kaum Neukunden …"), und diese Stimme
+ * ändert sich durch die Weiche nicht. Hinge das Beispiel an `teamVariant`,
+ * stünde derselbe Satz 48-mal doppelt im Katalog, und beim ersten Nachziehen
+ * würde eine der beiden Hälften vergessen. Eigenes Feld also, gesetzt an genau
+ * den zwei Stellen, wo sich das Beispiel WIRKLICH unterscheidet: `c.discovery3`
+ * (andere Frage) und `a.customerPraise` (der Kunde sagt „bei euch"/„bei dir").
  */
 export function exampleKeyFor(
   slot: BrandSlot,
   pathKind: BrandPathKind,
   team: BrandTeamKind = 'solo',
 ): string {
-  const base = `brand.example.${slot.id}`
-  if (slot.teamVariant) return `${base}.${team === 'team' ? 'team' : 'solo'}`
-  return slot.pathVariants?.[pathKind] ? `${base}.${pathKind}` : base
+  const root = `brand.example.${slot.id}`
+  const base = slot.pathVariants?.[pathKind] ? `${root}.${pathKind}` : root
+  return slot.teamExample ? `${base}.${team === 'team' ? 'team' : 'solo'}` : base
 }
 
 /**

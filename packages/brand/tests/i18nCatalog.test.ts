@@ -11,7 +11,7 @@ import {
   exampleKeyFor,
   partKeyFor,
   partLabelKeyFor,
-  questionKeyFor,
+  slotLabelKeyFor,
 } from '../shared/slotRegistry'
 
 /**
@@ -70,21 +70,42 @@ function missingIn(key: string): string[] {
   return LOCALES.filter(locale => !catalogs[locale].has(key))
 }
 
+/** Die deutschen TEXTE, flach — der Anrede-Wächter unten liest sie. */
+function flattenValues(node: unknown, prefix: string, into: Map<string, string>): Map<string, string> {
+  if (node === null || typeof node !== 'object' || Array.isArray(node)) return into
+  for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+    const path = prefix ? `${prefix}.${key}` : key
+    if (typeof value === 'string') into.set(path, value)
+    else flattenValues(value, path, into)
+  }
+  return into
+}
+
+const deTexts = flattenValues(
+  JSON.parse(readFileSync(join(localesDir, 'de.json'), 'utf8')),
+  '',
+  new Map<string, string>(),
+)
+
 /**
  * Die Schlüssel, die die Oberfläche für DIESEN Slot wirklich auflöst — über
  * BEIDE Pfade und, wo es eine Team-Fassung gibt, über beide Seiten der Weiche
- * W3 (Paket 2b: `c.discovery3` fragt im Team D7 statt D3).
+ * W3 (Paket 2b: `c.discovery3` fragt im Team D7 statt D3; seit 2026-09-09
+ * tauschen 48 weitere Fragen dort die Anrede).
+ *
+ * GERECHNET WIRD MIT `slotLabelKeyFor` und nicht mit einer eigenen
+ * Typ-Aufzählung: das ist die Regel, die Bühne, Log, Abnahme und der
+ * Prompt-Aufbau des Servers wirklich benutzen. Die Kopie, die hier stand
+ * (`question`/`choice` gegen den Rest), hätte `d.pairs` durchgelassen — einen
+ * `special`-Slot MIT Solo-Fassung.
  */
 function keysFor(slot: BrandSlot): string[] {
-  if (slot.type === 'question' || slot.type === 'choice') {
-    return [...new Set([
-      questionKeyFor(slot, 'new', 'solo'),
-      questionKeyFor(slot, 'relaunch', 'solo'),
-      questionKeyFor(slot, 'new', 'team'),
-      questionKeyFor(slot, 'relaunch', 'team'),
-    ])]
-  }
-  return [slot.questionKey]
+  return [...new Set([
+    slotLabelKeyFor(slot, 'new', 'solo'),
+    slotLabelKeyFor(slot, 'relaunch', 'solo'),
+    slotLabelKeyFor(slot, 'new', 'team'),
+    slotLabelKeyFor(slot, 'relaunch', 'team'),
+  ])]
 }
 
 const activeSlots = BRAND_SLOTS.filter(slot => !slot.deactivated)
@@ -120,6 +141,71 @@ describe('brand i18n-Katalog', () => {
     expect(missingIn('brand.q.c.discovery3').length).toBeGreaterThan(0)
   })
 
+  it('führt zu JEDER Team-Fassung auch eine Solo-Fassung — in de UND en', () => {
+    // 49 Sessions tragen die Weiche W3: `c.discovery3` fragt solo etwas
+    // ANDERES (Paket 2b), die übrigen 48 fragen dasselbe in der Anrede „du"
+    // (Davids Entscheidung 2026-09-09). Die Zahl steht hier, damit ein stilles
+    // Wegfallen auffällt.
+    const withTeam = activeSlots.filter(slot => slot.teamVariant)
+    expect(withTeam).toHaveLength(49)
+
+    const gaps: string[] = []
+    for (const slot of withTeam) {
+      for (const pathKind of ['new', 'relaunch'] as const) {
+        for (const team of ['solo', 'team'] as const) {
+          const key = slotLabelKeyFor(slot, pathKind, team)
+          if (missingIn(key).length) gaps.push(`${slot.id}: ${key} fehlt`)
+          // Der BASIS-Schlüssel darf es nicht mehr geben — er stünde sonst
+          // wörtlich in der Oberfläche, sobald jemand ihn ohne die Weiche
+          // auflöst (ein JSON-Katalog kann unter EINEM Schlüssel nicht
+          // gleichzeitig Text und Kind-Objekt halten).
+          if (!missingIn(slot.questionKey).length) gaps.push(`${slot.id}: Basis-Schlüssel steht noch da`)
+        }
+      }
+    }
+    expect(gaps).toEqual([])
+  })
+
+  it('lässt in KEINER Solo-Fassung eine Mehrzahl-Anrede stehen', () => {
+    /**
+     * DER WÄCHTER ZU DAVIDS ENTSCHEIDUNG (DECISION-LOG 2026-09-09): auf der
+     * Weiche „Nur ich" redet George mit „du". Eine Frage, die dort „ihr/euch/
+     * euer" sagt, ist der Fehler, der die ganze Runde ausgelöst hat — und der
+     * einzige, den weder Typecheck noch Lint noch die Schlüssel-Prüfung sehen
+     * (der Schlüssel EXISTIERT ja, er trägt nur den falschen Satz).
+     *
+     * Geprüft wird die SOLO-Seite jeder Session, auch die der Sessions OHNE
+     * Weiche: dort liefert `slotLabelKeyFor` den Basis-Schlüssel, und genau so
+     * fällt eine Frage auf, die man beim Umstellen übersehen hat.
+     */
+    // Nur EINDEUTIGE Formen: „macht" stünde hier falsch („schlecht macht" ist
+    // dritte Person), „ihre" ebenso („die sagen ihre Meinung"). Die Endung -t
+    // allein trägt nicht — der Ausdruck nennt deshalb die Verben, die es im
+    // Katalog wirklich gibt, statt ein Muster zu raten.
+    const plural = /(^|[^a-zäöüß])(ihr|euch|euer|eure|eurem|euren|eures|eurer|habt|seid|wollt|könnt|müsst|sollt|würdet|hättet|nehmt|bewertet)([^a-zäöüß]|$)/i
+    const keysToRead = (slot: BrandSlot): string[] => [
+      slotLabelKeyFor(slot, 'new', 'solo'),
+      slotLabelKeyFor(slot, 'relaunch', 'solo'),
+      ...(slot.type === 'question'
+        ? [exampleKeyFor(slot, 'new', 'solo'), exampleKeyFor(slot, 'relaunch', 'solo')]
+        : []),
+    ]
+
+    const offenders: string[] = []
+    for (const slot of activeSlots) {
+      for (const key of new Set(keysToRead(slot))) {
+        const text = deTexts.get(key)
+        if (text && plural.test(text)) offenders.push(`${key}: ${text}`)
+      }
+    }
+    expect(offenders).toEqual([])
+
+    // GEGENPROBE, zweifach: der Ausdruck greift überhaupt, und die
+    // TEAM-Fassung darf die Mehrzahl behalten — sie ist die abgenommene.
+    expect(deTexts.get('brand.q.a.complaints.team')).toMatch(plural)
+    expect(deTexts.get('brand.q.a.origin.relaunch.team')).toMatch(plural)
+  })
+
   it('hat für JEDEN Teil einer Sammel-Session eine eigene Frage', () => {
     // `a.facts` fragt drei Dinge nacheinander (Paket 3). Sie liegen unter
     // `brand.part.<id>.<teil>` und NICHT unter `brand.q.a.facts.<teil>`: dort
@@ -128,8 +214,13 @@ describe('brand i18n-Katalog', () => {
     // dieselbe Grenze wie bei `d.gapReveal` (s. Kopf).
     const gaps: string[] = []
     for (const slot of activeSlots.filter(slot => slot.parts.length > 0)) {
-      // Die Klammer-Frage bleibt und wird weiter gerendert.
-      if (missingIn(slot.questionKey).length) gaps.push(`${slot.id}: ${slot.questionKey} fehlt`)
+      // Die Klammer-Frage bleibt und wird weiter gerendert — seit der
+      // Anrede-Runde in zwei Fassungen (`a.facts` fragt solo „wie lange machst
+      // du das schon", im Team „wie lange gibt es euch"), also über dieselbe
+      // Regel wie oben statt über den Basis-Schlüssel.
+      for (const key of keysFor(slot)) {
+        if (missingIn(key).length) gaps.push(`${slot.id}: ${key} fehlt`)
+      }
       for (const part of slot.parts) {
         const key = partKeyFor(slot, part)
         const missing = missingIn(key)

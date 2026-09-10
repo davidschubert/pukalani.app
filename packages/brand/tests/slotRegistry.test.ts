@@ -25,6 +25,7 @@ import {
   slotById,
   slotIsConfirmable,
   slotIsFilled,
+  slotLabelKeyFor,
   slotsForStep,
   stepProgress,
   validateSlotRegistry,
@@ -440,9 +441,9 @@ describe('exampleKeyFor — dieselben Konventionen unter brand.example', () => {
     const origin = slotById('a.origin')!
     expect(exampleKeyFor(origin, 'new')).toBe('brand.example.a.origin.new')
     expect(exampleKeyFor(origin, 'relaunch')).toBe('brand.example.a.origin.relaunch')
-    const praise = slotById('a.customerPraise')!
-    expect(exampleKeyFor(praise, 'new')).toBe('brand.example.a.customerPraise')
-    expect(exampleKeyFor(praise, 'relaunch')).toBe('brand.example.a.customerPraise')
+    const worldLoses = slotById('b.worldLoses')!
+    expect(exampleKeyFor(worldLoses, 'new')).toBe('brand.example.b.worldLoses')
+    expect(exampleKeyFor(worldLoses, 'relaunch')).toBe('brand.example.b.worldLoses')
   })
 
   /**
@@ -457,13 +458,50 @@ describe('exampleKeyFor — dieselben Konventionen unter brand.example', () => {
     expect(exampleKeyFor(discovery, 'new', 'solo')).toBe('brand.example.c.discovery3.solo')
     expect(exampleKeyFor(discovery, 'relaunch', 'team')).toBe('brand.example.c.discovery3.team')
   })
+
+  /**
+   * DAS BEISPIEL FOLGT DER FRAGE NICHT AUTOMATISCH (Anrede-Runde 2026-09-09):
+   * die FRAGE spricht George („bekommt ihr" / „bekommst du"), das BEISPIEL
+   * spricht der Nutzer („Wir gewinnen kaum Neukunden") — und diese Stimme
+   * ändert die Weiche nicht. Deshalb ein eigenes Feld `teamExample`, gesetzt
+   * an genau zwei Stellen.
+   */
+  it('teilt nur die zwei Beispiele, die sich wirklich unterscheiden', () => {
+    expect(BRAND_SLOTS.filter(session => session.teamExample).map(session => session.id))
+      .toEqual(['a.customerPraise', 'c.discovery3'])
+    const praise = slotById('a.customerPraise')!
+    expect(exampleKeyFor(praise, 'new', 'solo')).toBe('brand.example.a.customerPraise.solo')
+    expect(exampleKeyFor(praise, 'new', 'team')).toBe('brand.example.a.customerPraise.team')
+    // Die Frage von `a.complaints` hat eine Solo-Fassung, das Beispiel nicht.
+    const complaints = slotById('a.complaints')!
+    expect(complaints.teamVariant).toBe(true)
+    expect(exampleKeyFor(complaints, 'new', 'team')).toBe('brand.example.a.complaints')
+  })
+
+  it('lässt ein eigenes Beispiel nur zu einer eigenen Frage zu', () => {
+    // `c.discovery2` fragt beide Seiten der Weiche dasselbe — ein eigenes
+    // Beispiel je Weiche zeigte dort auf ein Kind unter einem Schlüssel, den
+    // `questionKeyFor` als Zeichenkette liest.
+    expect(slotById('c.discovery2')!.teamVariant).toBeUndefined()
+    expect(validateSlotRegistry(mutate('c.discovery2', { teamExample: true })))
+      .toContain('c.discovery2: teamExample ohne teamVariant')
+  })
 })
 
 describe('questionKeyFor — die Pfad-Konvention', () => {
-  it('hängt den Pfad nur an, wo es eine eigene Fassung gibt', () => {
+  /**
+   * ERST DER PFAD, DANN DIE WEICHE. `a.origin` trägt seit dem 2026-09-09
+   * BEIDE Achsen: der Relaunch-Pfad fragt etwas anderes, und er redet die
+   * Marke an. Die Reihenfolge im Schlüssel ist nicht beliebig — sie sortiert
+   * die gröbere Unterscheidung nach oben, sonst stünden dieselben zwei Fragen
+   * unter `solo` und unter `team` doppelt im Katalog.
+   */
+  it('hängt den Pfad nur an, wo es eine eigene Fassung gibt — und die Weiche danach', () => {
     const origin = slotById('a.origin')!
-    expect(questionKeyFor(origin, 'new')).toBe('brand.q.a.origin.new')
-    expect(questionKeyFor(origin, 'relaunch')).toBe('brand.q.a.origin.relaunch')
+    expect(questionKeyFor(origin, 'new')).toBe('brand.q.a.origin.new.solo')
+    expect(questionKeyFor(origin, 'new', 'team')).toBe('brand.q.a.origin.new.team')
+    expect(questionKeyFor(origin, 'relaunch')).toBe('brand.q.a.origin.relaunch.solo')
+    expect(questionKeyFor(origin, 'relaunch', 'team')).toBe('brand.q.a.origin.relaunch.team')
   })
 
   it('lässt einen Pfad ohne Variante auf dem Basis-Schlüssel', () => {
@@ -473,14 +511,50 @@ describe('questionKeyFor — die Pfad-Konvention', () => {
   })
 
   it('gibt bei Slots ohne Varianten immer den Basis-Schlüssel', () => {
-    const praise = slotById('a.customerPraise')!
-    expect(questionKeyFor(praise, 'new')).toBe('brand.q.a.customerPraise')
-    expect(questionKeyFor(praise, 'relaunch')).toBe('brand.q.a.customerPraise')
+    const discovery2 = slotById('c.discovery2')!
+    expect(questionKeyFor(discovery2, 'new')).toBe('brand.q.c.discovery2')
+    expect(questionKeyFor(discovery2, 'relaunch', 'team')).toBe('brand.q.c.discovery2')
   })
 
   it('kennt genau die drei pfad-abhängigen Slots des Katalogs', () => {
     expect(BRAND_SLOTS.filter(slot => slot.pathVariants).map(slot => slot.id))
       .toEqual(['a.origin', 'b.whyStarted', 'd.gapReveal'])
+  })
+})
+
+/**
+ * DIE BESCHRIFTUNGS-REGEL — eine Rechnung für Bühne, Log, Abnahme und den
+ * Prompt-Aufbau des Servers (`slotLabelKeyFor`).
+ */
+describe('slotLabelKeyFor — welcher Fragetext ein Feld beschriftet', () => {
+  it('nimmt die Weiche mit, auch wenn der Slot nicht gefragt wird', () => {
+    // `d.pairs` ist `special` (der Paarvergleich baut seine eigene Oberfläche)
+    // und hat trotzdem eine Solo-Fassung. Die alte Typ-Aufzählung
+    // („question oder choice") hätte hier den Basis-Schlüssel geliefert — und
+    // der steht seit der Anrede-Runde nicht mehr im Katalog.
+    const pairs = slotById('d.pairs')!
+    expect(pairs.type).toBe('special')
+    expect(slotLabelKeyFor(pairs, 'new', 'solo')).toBe('brand.q.d.pairs.solo')
+    expect(slotLabelKeyFor(pairs, 'new', 'team')).toBe('brand.q.d.pairs.team')
+  })
+
+  it('hält `d.gapReveal` beim Basis-Schlüssel', () => {
+    // Der Slot MELDET eine Relaunch-Fassung an, im Katalog steht sie bis heute
+    // nicht (s. `tests/i18nCatalog.test.ts`). Er wird nie gefragt, also
+    // beschriftet ihn der Basis-Schlüssel — auf BEIDEN Pfaden.
+    const gap = slotById('d.gapReveal')!
+    expect(slotLabelKeyFor(gap, 'relaunch', 'team')).toBe('brand.q.d.gapReveal')
+    expect(slotLabelKeyFor(gap, 'new', 'solo')).toBe('brand.q.d.gapReveal')
+  })
+
+  it('bleibt für gefragte Slots wörtlich `questionKeyFor`', () => {
+    for (const slot of BRAND_SLOTS.filter(s => s.type === 'question' || s.type === 'choice')) {
+      for (const pathKind of ['new', 'relaunch'] as const) {
+        for (const team of ['solo', 'team'] as const) {
+          expect(slotLabelKeyFor(slot, pathKind, team)).toBe(questionKeyFor(slot, pathKind, team))
+        }
+      }
+    }
   })
 })
 
@@ -901,19 +975,31 @@ describe('Session-Vertrag', () => {
     expect(BRAND_SPEAKS.every(id => slotById(id) !== undefined)).toBe(true)
   })
 
-  it('gibt c.discovery3 eine Team-Fassung und sonst keiner Session', () => {
-    expect(BRAND_SLOTS.filter(session => session.teamVariant).map(session => session.id))
-      .toEqual(['c.discovery3'])
+  it('führt die Weiche W3 an 49 Sessions — eine andere Frage, 48-mal eine andere Anrede', () => {
+    /**
+     * ZWEI GRÜNDE, EIN FELD. `c.discovery3` fragt solo etwas ANDERES (Paket
+     * 2b: D3 statt D7). Die anderen 48 fragen dasselbe und reden nur anders:
+     * die abgenommenen Texte sagen „ihr/euch/euer", und auf der Weiche
+     * „Nur ich" ist das falsch (Davids Entscheidung 2026-09-09).
+     *
+     * Die ZAHL steht hier, damit ein stilles Wegfallen auffällt; WELCHE Texte
+     * es sind, prüft `tests/i18nCatalog.test.ts` gegen den Katalog.
+     */
+    const withTeam = BRAND_SLOTS.filter(session => session.teamVariant)
+    expect(withTeam).toHaveLength(49)
+    expect(withTeam.map(session => session.id)).toContain('c.discovery3')
+
     const discovery3 = slotById('c.discovery3')!
     expect(questionKeyFor(discovery3, 'new', 'solo')).toBe('brand.q.c.discovery3.solo')
     expect(questionKeyFor(discovery3, 'relaunch', 'team')).toBe('brand.q.c.discovery3.team')
     // Ohne Angabe gilt die persönliche Fassung — sie passt immer.
     expect(questionKeyFor(discovery3, 'new')).toBe('brand.q.c.discovery3.solo')
     // Eine Session OHNE Team-Fassung bleibt unberührt.
-    expect(questionKeyFor(slotById('c.discovery1')!, 'new', 'team')).toBe('brand.q.c.discovery1')
-    // Pfad- und Team-Variante zugleich wären vier Fassungen je Frage.
-    expect(validateSlotRegistry(mutate('c.discovery3', { pathVariants: { new: true } })))
-      .toContain('c.discovery3: teamVariant und pathVariants zugleich')
+    expect(questionKeyFor(slotById('c.discovery2')!, 'new', 'team')).toBe('brand.q.c.discovery2')
+    // Pfad- und Team-Variante zugleich sind seit dem 2026-09-09 erlaubt — und
+    // zwar an genau zwei Slots, weil ihr Relaunch-Wortlaut die Marke anredet.
+    expect(BRAND_SLOTS.filter(session => session.teamVariant && session.pathVariants).map(s => s.id))
+      .toEqual(['a.origin', 'b.whyStarted'])
   })
 
   it('trägt die beiden Invarianten-Entscheidungen aus Paket 2', () => {

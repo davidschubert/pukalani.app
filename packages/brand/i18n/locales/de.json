@@ -425,149 +425,299 @@
         "audienceSketch": "Zielgruppen-Skizze",
         "toneAnalysis": "Tonalität bestehender Texte",
         "origin": {
-          "new": "Warum hast du angefangen — was war der Auslöser, welches Problem konntest du nicht ignorieren?",
-          "relaunch": "Was am bestehenden Auftritt MUSS bleiben — woran man euch erkennt, was Stammkunden vermissen würden?"
+          "new": {
+            "solo": "Warum hast du angefangen — was war der Auslöser, welches Problem konntest du nicht ignorieren?",
+            "team": "Warum hast du angefangen — was war der Auslöser, welches Problem konntest du nicht ignorieren?"
+          },
+          "relaunch": {
+            "solo": "Was am bestehenden Auftritt MUSS bleiben — woran man dich erkennt, was Stammkunden vermissen würden?",
+            "team": "Was am bestehenden Auftritt MUSS bleiben — woran man euch erkennt, was Stammkunden vermissen würden?"
+          }
         },
-        "customerPraise": "Was sagen deine glücklichsten Kunden über euch — in DEREN Worten?",
-        "complaints": "Welche Beschwerden oder Kritik bekommt ihr? Ehrlich — das ist so wertvoll wie das Lob.",
-        "oneThing": "Was ist das eine, von dem du dir wünschst, dass es jeder Kunde über euch wüsste?",
-        "challenge": "Was ist gerade das größte Hindernis vor euch?",
-        "facts": "Ein paar schnelle Zahlen: Wie groß ist das Team, wie lange gibt es euch, welche Märkte?"
+        "customerPraise": {
+          "solo": "Was sagen deine glücklichsten Kunden über dich — in DEREN Worten?",
+          "team": "Was sagen deine glücklichsten Kunden über euch — in DEREN Worten?"
+        },
+        "complaints": {
+          "solo": "Welche Beschwerden oder Kritik bekommst du? Ehrlich — das ist so wertvoll wie das Lob.",
+          "team": "Welche Beschwerden oder Kritik bekommt ihr? Ehrlich — das ist so wertvoll wie das Lob."
+        },
+        "oneThing": {
+          "solo": "Was ist das eine, von dem du dir wünschst, dass es jeder Kunde über dich wüsste?",
+          "team": "Was ist das eine, von dem du dir wünschst, dass es jeder Kunde über euch wüsste?"
+        },
+        "challenge": {
+          "solo": "Was ist gerade das größte Hindernis vor dir?",
+          "team": "Was ist gerade das größte Hindernis vor euch?"
+        },
+        "facts": {
+          "solo": "Ein paar schnelle Zahlen: Wie groß ist das Team, wie lange machst du das schon, welche Märkte?",
+          "team": "Ein paar schnelle Zahlen: Wie groß ist das Team, wie lange gibt es euch, welche Märkte?"
+        }
       },
       "b": {
         "whyStarted": {
-          "new": "Du hast mir schon erzählt, wie es angefangen hat. In einem Satz: Warum zählt das heute noch?",
-          "relaunch": "Vergiss kurz die Gründungsgeschichte: Warum gibt es euch HEUTE noch — was würde euren Kunden morgen fehlen?"
+          "new": {
+            "solo": "Du hast mir schon erzählt, wie es angefangen hat. In einem Satz: Warum zählt das heute noch?",
+            "team": "Du hast mir schon erzählt, wie es angefangen hat. In einem Satz: Warum zählt das heute noch?"
+          },
+          "relaunch": {
+            "solo": "Vergiss kurz die Gründungsgeschichte: Warum gibt es dich HEUTE noch — was würde deinen Kunden morgen fehlen?",
+            "team": "Vergiss kurz die Gründungsgeschichte: Warum gibt es euch HEUTE noch — was würde euren Kunden morgen fehlen?"
+          }
         },
-        "worldLoses": "Was ginge der Welt verloren, wenn ihr morgen zumacht? Wirkung, nicht Umsatz.",
-        "conviction": "Welche Überzeugung treibt euch — die, die ihr auch verteidigt, wenn sie euch etwas kostet?",
-        "tenYears": "In zehn Jahren: Was sieht in der Welt anders aus, weil es euch gab?",
-        "legacy": "Wenn man in 20 Jahren über euch spricht — was sollen die Leute sagen?",
+        "worldLoses": {
+          "solo": "Was ginge der Welt verloren, wenn du morgen zumachst? Wirkung, nicht Umsatz.",
+          "team": "Was ginge der Welt verloren, wenn ihr morgen zumacht? Wirkung, nicht Umsatz."
+        },
+        "conviction": {
+          "solo": "Welche Überzeugung treibt dich — die, die du auch verteidigst, wenn sie dich etwas kostet?",
+          "team": "Welche Überzeugung treibt euch — die, die ihr auch verteidigt, wenn sie euch etwas kostet?"
+        },
+        "tenYears": {
+          "solo": "In zehn Jahren: Was sieht in der Welt anders aus, weil es dich gab?",
+          "team": "In zehn Jahren: Was sieht in der Welt anders aus, weil es euch gab?"
+        },
+        "legacy": {
+          "solo": "Wenn man in 20 Jahren über dich spricht — was sollen die Leute sagen?",
+          "team": "Wenn man in 20 Jahren über euch spricht — was sollen die Leute sagen?"
+        },
         "purpose": "Purpose",
         "vision": "Vision",
         "mission": "Mission",
-        "positioningCategory": "In welcher Kategorie spielt ihr?",
-        "positioningFirstChoice": "Und in dieser Kategorie: Für wen seid ihr die ERSTE Wahl — und gegen wen?"
+        "positioningCategory": {
+          "solo": "In welcher Kategorie spielst du?",
+          "team": "In welcher Kategorie spielt ihr?"
+        },
+        "positioningFirstChoice": {
+          "solo": "Und in dieser Kategorie: Für wen bist du die ERSTE Wahl — und gegen wen?",
+          "team": "Und in dieser Kategorie: Für wen seid ihr die ERSTE Wahl — und gegen wen?"
+        }
       },
       "b2": {
-        "visibility": "Sollen eure Produktmarken sichtbar zur Hauptmarke gehören — oder eigenständig auftreten?",
+        "visibility": {
+          "solo": "Sollen deine Produktmarken sichtbar zur Hauptmarke gehören — oder eigenständig auftreten?",
+          "team": "Sollen eure Produktmarken sichtbar zur Hauptmarke gehören — oder eigenständig auftreten?"
+        },
         "roleOfMaster": "Soll die Hauptmarke ihnen Vertrauen leihen — oder dürfen sie Publika erreichen, die die Hauptmarke nicht erreicht?",
         "namingPattern": "Wie dürfen sie HEISSEN — „Marke Produkt\", oder eigene Namen?",
-        "model": "Welches Architektur-Modell passt zu euch?",
+        "model": {
+          "solo": "Welches Architektur-Modell passt zu dir?",
+          "team": "Welches Architektur-Modell passt zu euch?"
+        },
         "rule": "Die Namensregel"
       },
       "c": {
-        "discovery1": "Denk an einen Moment, in dem euer Geschäft am besten war. Was ist da passiert?",
+        "discovery1": {
+          "solo": "Denk an einen Moment, in dem dein Geschäft am besten war. Was ist da passiert?",
+          "team": "Denk an einen Moment, in dem euer Geschäft am besten war. Was ist da passiert?"
+        },
         "discovery2": "Denk an einen Moment, in dem sich etwas zutiefst falsch angefühlt hat. Was war da los?",
         "discovery3": {
           "solo": "Welches Verhalten würdest du nie dulden — auch nicht vom bestzahlenden Kunden?",
           "team": "Wie soll dein Team entscheiden, wenn du nicht im Raum bist?"
         },
         "candidates": "Wertekandidaten",
-        "final": "Welche drei bis fünf würdet ihr verteidigen, auch wenn es euch etwas kostet?",
+        "final": {
+          "solo": "Welche drei bis fünf würdest du verteidigen, auch wenn es dich etwas kostet?",
+          "team": "Welche drei bis fünf würdet ihr verteidigen, auch wenn es euch etwas kostet?"
+        },
         "definitions": "Was jeder Wert konkret heißt",
-        "livedExamples": "Zu jedem Wert: EIN echtes Beispiel, wo ihr ihn schon gelebt habt.",
-        "conflictRule": "Wo geraten zwei eurer Werte in Konflikt — und welcher gewinnt?",
-        "teamFilter": "Wenn ihr morgen jemanden einstellt: Welcher Wert ist der unverhandelbare Filter?"
+        "livedExamples": {
+          "solo": "Zu jedem Wert: EIN echtes Beispiel, wo du ihn schon gelebt hast.",
+          "team": "Zu jedem Wert: EIN echtes Beispiel, wo ihr ihn schon gelebt habt."
+        },
+        "conflictRule": {
+          "solo": "Wo geraten zwei deiner Werte in Konflikt — und welcher gewinnt?",
+          "team": "Wo geraten zwei eurer Werte in Konflikt — und welcher gewinnt?"
+        },
+        "teamFilter": {
+          "solo": "Wenn du morgen jemanden einstellst: Welcher Wert ist der unverhandelbare Filter?",
+          "team": "Wenn ihr morgen jemanden einstellt: Welcher Wert ist der unverhandelbare Filter?"
+        }
       },
       "d": {
         "hypothesis": "Archetyp-Hypothese aus dem heutigen Auftritt",
-        "pairs": "Welche der beiden fühlt sich mehr nach euch an?",
+        "pairs": {
+          "solo": "Welche der beiden fühlt sich mehr nach dir an?",
+          "team": "Welche der beiden fühlt sich mehr nach euch an?"
+        },
         "primary": "Primärer Archetyp",
         "secondary": "Sekundärer Archetyp",
         "gapReveal": "Selbstbild und Außenbild",
-        "party": "Wenn eure Marke ein Mensch auf einer Party wäre — wie verhält sie sich?",
-        "never": "Welche Eigenschaft sollte eure Marke NIEMALS haben?",
+        "party": {
+          "solo": "Wenn deine Marke ein Mensch auf einer Party wäre — wie verhält sie sich?",
+          "team": "Wenn eure Marke ein Mensch auf einer Party wäre — wie verhält sie sich?"
+        },
+        "never": {
+          "solo": "Welche Eigenschaft sollte deine Marke NIEMALS haben?",
+          "team": "Welche Eigenschaft sollte eure Marke NIEMALS haben?"
+        },
         "admired": "Nenn eine Marke, deren Persönlichkeit du bewunderst — was genau ist es bei denen?",
-        "emotion": "Was sollen Leute FÜHLEN, wenn sie mit euch zu tun haben?",
-        "voiceSamples": "Welcher dieser Sätze klingt am meisten nach euch?",
-        "toneWords": "Welche Wörter beschreiben euren Ton?",
-        "vocabulary": "Welche Wörter würdet ihr NIE benutzen?"
+        "emotion": {
+          "solo": "Was sollen Leute FÜHLEN, wenn sie mit dir zu tun haben?",
+          "team": "Was sollen Leute FÜHLEN, wenn sie mit euch zu tun haben?"
+        },
+        "voiceSamples": {
+          "solo": "Welcher dieser Sätze klingt am meisten nach dir?",
+          "team": "Welcher dieser Sätze klingt am meisten nach euch?"
+        },
+        "toneWords": {
+          "solo": "Welche Wörter beschreiben deinen Ton?",
+          "team": "Welche Wörter beschreiben euren Ton?"
+        },
+        "vocabulary": {
+          "solo": "Welche Wörter würdest du NIE benutzen?",
+          "team": "Welche Wörter würdet ihr NIE benutzen?"
+        }
       },
       "e": {
         "warmup1": "Was regt dich an deiner Branche auf?",
-        "warmup2": "Was sollten mehr Leute über eure Arbeit verstehen?",
+        "warmup2": {
+          "solo": "Was sollten mehr Leute über deine Arbeit verstehen?",
+          "team": "Was sollten mehr Leute über eure Arbeit verstehen?"
+        },
         "statements": "Die Satzanfänge",
         "composition": "Ton, Länge und Verwendung des Manifests",
         "manifesto": "Manifest",
-        "anchorLine": "Welche Zeile ist die, die ihr an eine Wand hängen würdet?"
+        "anchorLine": {
+          "solo": "Welche Zeile ist die, die du an eine Wand hängen würdest?",
+          "team": "Welche Zeile ist die, die ihr an eine Wand hängen würdet?"
+        }
       },
       "ep": {
         "taglines": "Welche Tagline trägt es?",
         "boilerplates": "Boilerplates — Bio, Kurzabsatz, Absatz",
         "keyMessages": "Kernbotschaften je Zielgruppe",
         "vocabulary": "Wörter zum Benutzen, Wörter zum Meiden",
-        "distinctiveAsset": "Welche Zeile wird euer verbales Erkennungszeichen?"
+        "distinctiveAsset": {
+          "solo": "Welche Zeile wird dein verbales Erkennungszeichen?",
+          "team": "Welche Zeile wird euer verbales Erkennungszeichen?"
+        }
       },
       "f": {
-        "nameType": "Welche Sorte Name passt zu euch?",
+        "nameType": {
+          "solo": "Welche Sorte Name passt zu dir?",
+          "team": "Welche Sorte Name passt zu euch?"
+        },
         "taste": "Nenn drei bis fünf Markennamen, die du liebst — egal welche Branche — und sag warum.",
         "noGos": "Gibt es Wörter, Stile oder Längen, die tabu sind?",
         "candidates": "Namens-Kandidaten",
         "shortlist": "Welche Kandidaten kommen auf die Shortlist?",
         "checks": "Vorprüfung der Verfügbarkeit",
-        "criteria": "Bewertet die Finalisten an den acht Kriterien.",
-        "decision": "Eure Top drei, in Reihenfolge."
+        "criteria": {
+          "solo": "Bewerte die Finalisten an den acht Kriterien.",
+          "team": "Bewertet die Finalisten an den acht Kriterien."
+        },
+        "decision": {
+          "solo": "Deine Top drei, in Reihenfolge.",
+          "team": "Eure Top drei, in Reihenfolge."
+        }
       },
       "result": {
-        "direction": "Welche Richtung passt zu eurer Marke?",
+        "direction": {
+          "solo": "Welche Richtung passt zu deiner Marke?",
+          "team": "Welche Richtung passt zu eurer Marke?"
+        },
         "rating": "Wie hilfreich war das Ergebnis?"
       },
       "g": {
-        "source": "Habt ihr Vorbilder — Screenshots, ein Pinnwand-Board, drei Seiten, die euch gefallen?",
+        "source": {
+          "solo": "Hast du Vorbilder — Screenshots, ein Pinnwand-Board, drei Seiten, die dir gefallen?",
+          "team": "Habt ihr Vorbilder — Screenshots, ein Pinnwand-Board, drei Seiten, die euch gefallen?"
+        },
         "inspiration": "Die Vorbilder",
         "reading": "Lesung gegen die Foundation",
         "dna": "Die Visual DNA",
         "boards": "Drei Moodboards",
-        "board": "Welches Board ist euer Ausgangspunkt?",
+        "board": {
+          "solo": "Welches Board ist dein Ausgangspunkt?",
+          "team": "Welches Board ist euer Ausgangspunkt?"
+        },
         "mix": "Mix und Match"
       },
       "h": {
         "base": "Die Basisfarbe",
         "ramp": "Hell- und Dunkel-Rampe",
-        "neutral": "Welchen Grundton sollen eure Flächen haben?",
-        "accent": "Welche Farbe ist euer Signal?",
+        "neutral": {
+          "solo": "Welchen Grundton sollen deine Flächen haben?",
+          "team": "Welchen Grundton sollen eure Flächen haben?"
+        },
+        "accent": {
+          "solo": "Welche Farbe ist dein Signal?",
+          "team": "Welche Farbe ist euer Signal?"
+        },
         "roles": "Farb-Rollen",
         "contrast": "Kontrast-Prüfung"
       },
       "i": {
-        "pair": "Welches Schriftpaar passt zu euch?",
+        "pair": {
+          "solo": "Welches Schriftpaar passt zu dir?",
+          "team": "Welches Schriftpaar passt zu euch?"
+        },
         "scale": "Grössen-Hierarchie",
         "rules": "Schrift-Regeln"
       },
       "j": {
-        "kind": "Welche Art Zeichen braucht ihr?",
+        "kind": {
+          "solo": "Welche Art Zeichen brauchst du?",
+          "team": "Welche Art Zeichen braucht ihr?"
+        },
         "brief": "Briefing für das Zeichen",
         "examples": "Gesetzte Beispiele",
-        "pick": "Welche Setzung nehmt ihr als Vorzugs-Beispiel?",
+        "pick": {
+          "solo": "Welche Setzung nimmst du als Vorzugs-Beispiel?",
+          "team": "Welche Setzung nehmt ihr als Vorzugs-Beispiel?"
+        },
         "drafts": "KI-Entwürfe"
       },
       "k": {
         "photo": "Die Bild-Prinzipien",
-        "illustration": "Wollt ihr Illustration — und wenn ja, welche?",
-        "icons": "Welcher Icon-Satz passt zu eurer Schrift?",
+        "illustration": {
+          "solo": "Willst du Illustration — und wenn ja, welche?",
+          "team": "Wollt ihr Illustration — und wenn ja, welche?"
+        },
+        "icons": {
+          "solo": "Welcher Icon-Satz passt zu deiner Schrift?",
+          "team": "Welcher Icon-Satz passt zu eurer Schrift?"
+        },
         "dodont": "Do und Don’t der Bildsprache"
       },
       "l": {
-        "tempo": "Wie schnell soll sich eure Marke bewegen?",
+        "tempo": {
+          "solo": "Wie schnell soll sich deine Marke bewegen?",
+          "team": "Wie schnell soll sich eure Marke bewegen?"
+        },
         "transitions": "Übergangs-Tokens",
-        "logo": "Soll sich euer Zeichen bewegen?",
+        "logo": {
+          "solo": "Soll sich dein Zeichen bewegen?",
+          "team": "Soll sich euer Zeichen bewegen?"
+        },
         "rules": "Bewegungs-Regeln"
       },
       "m": {
-        "types": "Wofür braucht ihr Namen — Produkte, Leistungen, Formate, Orte, Digitales?",
+        "types": {
+          "solo": "Wofür brauchst du Namen — Produkte, Leistungen, Formate, Orte, Digitales?",
+          "team": "Wofür braucht ihr Namen — Produkte, Leistungen, Formate, Orte, Digitales?"
+        },
         "patterns": "Namensmuster je Typ",
         "rules": "Die Namens-Regeln"
       },
       "n": {
-        "scope": "Was darf KI in eurem Namen erzeugen?",
+        "scope": {
+          "solo": "Was darf KI in deinem Namen erzeugen?",
+          "team": "Was darf KI in eurem Namen erzeugen?"
+        },
         "review": "Wer gibt frei, bevor etwas rausgeht?",
         "guardrails": "Die Leitplanken für KI",
         "prompts": "Prompt-Vorlagen"
       },
       "p": {
         "facts": "Welche Fakten dürfen ins Pressekit?",
-        "contact": "Wer ist eure Ansprechperson für Presse?",
+        "contact": {
+          "solo": "Wer ist deine Ansprechperson für Presse?",
+          "team": "Wer ist eure Ansprechperson für Presse?"
+        },
         "summary": "Vorschau des Pressekits"
       }
     },
@@ -685,7 +835,10 @@
           "new": "Ich habe als Kunde nie gefunden, was ich gesucht habe — also habe ich es selbst gebaut.",
           "relaunch": "Unser Name und die persönliche Beratung müssen bleiben — dafür kennt man uns seit Jahren."
         },
-        "customerPraise": "Bei euch fühlt man sich nicht wie eine Nummer — und das Ergebnis passt einfach.",
+        "customerPraise": {
+          "solo": "Bei dir fühlt man sich nicht wie eine Nummer — und das Ergebnis passt einfach.",
+          "team": "Bei euch fühlt man sich nicht wie eine Nummer — und das Ergebnis passt einfach."
+        },
         "complaints": "Manchmal dauert es länger als versprochen, und die Preise wirken erst mal hoch.",
         "oneThing": "Dass hinter jedem Auftrag echtes Handwerk steckt — nichts von der Stange.",
         "challenge": "Wir gewinnen kaum Neukunden, obwohl unsere Stammkunden uns lieben."

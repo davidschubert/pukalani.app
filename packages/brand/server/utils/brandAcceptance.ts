@@ -22,8 +22,8 @@ import {
   type BrandStepKey,
   type BrandTeamKind,
   exampleKeyFor,
-  questionKeyFor,
   slotById,
+  slotLabelKeyFor,
   slotsForStep,
 } from '../../shared/slotRegistry'
 import type { BrandAcceptanceSessionView, BrandFindingView } from '../../shared/types/brand'
@@ -215,7 +215,14 @@ export function brandAcceptanceSessions(
       // entscheidet ihn für beide.
       findings: input.findings.filter(view => view.slots.includes(session.id)),
       labelKey: `brand.labels.${session.id}`,
-      questionKey: questionKeyFor(session, input.pathKind, input.team),
+      // `slotLabelKeyFor` und nicht `questionKeyFor`: dieselbe Rechnung, die
+      // Bühne und Log für den Rückfall „kein Kurz-Label" machen. Sie hält
+      // `d.gapReveal` beim Basis-Schlüssel (die angemeldete Relaunch-Fassung
+      // steht bis heute nicht im Katalog) und nimmt umgekehrt auch die
+      // Solo-Fassung eines Slots mit, der nicht `question`/`choice` ist
+      // (`d.pairs`). Vorher konnte hier ein Schlüssel entstehen, den nur der
+      // Rückfall auf `labelKey` unsichtbar hielt.
+      questionKey: slotLabelKeyFor(session, input.pathKind, input.team),
       // Nur Menschenfragen haben eine Beispiel-ANTWORT im Katalog; Auswahlen
       // haben Chips statt Freitext (s. `exampleKeyFor`).
       exampleKey: session.type === 'question' ? exampleKeyFor(session, input.pathKind, input.team) : null,

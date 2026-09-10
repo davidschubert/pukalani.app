@@ -40,6 +40,7 @@ import {
   type BrandSlot,
   type BrandStepKey,
   partKeyFor,
+  slotLabelKeyFor,
 } from '../shared/slotRegistry'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -55,23 +56,27 @@ const de = JSON.parse(
 ) as { brand: Record<string, LocaleNode> }
 
 /**
- * Der deutsche Text zu einem Schlüssel. Pfad-Varianten sind ein OBJEKT
- * (`brand.q.a.origin.new`) — dann gilt die Gründer-Fassung, weil sie in der
- * Registry der Basis-Fall ist und die Relaunch-Fassung darunter eigens steht.
+ * Der deutsche Text zu einem Schlüssel — ohne jedes Raten: was ein Knoten mit
+ * Kindern bedeutet, weiss die Registry (`slotLabelKeyFor`), und die Aufrufer
+ * unten reichen bereits den fertigen Schlüssel herein.
  */
 function localeText(key: string): string {
-  const parts = key.split('.')
   let node: LocaleNode | undefined = de as unknown as LocaleNode
-  for (const part of parts) {
+  for (const part of key.split('.')) {
     if (typeof node !== 'object' || node === null) return ''
     node = node[part]
   }
-  if (typeof node === 'string') return node
-  if (node && typeof node === 'object') {
-    const nested = node.new ?? Object.values(node)[0]
-    if (typeof nested === 'string') return nested
-  }
-  return ''
+  return typeof node === 'string' ? node : ''
+}
+
+/**
+ * DIE FASSUNG, DIE IM BAUM OBEN STEHT: Gründer-Pfad, „Nur ich". Beides ist der
+ * Basis-Fall der Registry — die Relaunch-Fassung steht in der Content-Referenz
+ * ohnehin nicht (sie hing nie im Baum), und die Team-Fassung bekommt seit der
+ * Anrede-Runde ihre eigene Zeile darunter.
+ */
+function soloQuestion(session: BrandSlot): string {
+  return localeText(slotLabelKeyFor(session, 'new', 'solo'))
 }
 
 const KIND_LABEL: Readonly<Record<BrandSlot['kind'], string>> = {
@@ -178,7 +183,7 @@ function downstreamText(session: BrandSlot): string {
 }
 
 function sessionBlock(session: BrandSlot): string {
-  const label = localeText(session.questionKey)
+  const label = soloQuestion(session)
   const lines: string[] = [
     `### \`${session.id}\`${label ? ` — ${label}` : ''}`,
     '',
@@ -194,7 +199,7 @@ function sessionBlock(session: BrandSlot): string {
   // Überschrift zeigt nur den ersten. Wer gegenliest, muss beide sehen.
   if (session.teamVariant) {
     lines.push(
-      `**Fassung im Team:** ${localeText(`${session.questionKey}.team`)}`,
+      `**Fassung im Team:** ${localeText(slotLabelKeyFor(session, 'new', 'team'))}`,
       '',
     )
   }

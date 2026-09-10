@@ -21,6 +21,8 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Ziel:** capture why this brand was started — or, on a relaunch, what about the current brand must survive the relaunch.
 
+**Fassung im Team:** Warum hast du angefangen — was war der Auslöser, welches Problem konntest du nicht ignorieren?
+
 **Woran man einen guten Wert erkennt:**
 
 - It names a concrete trigger: a moment, a job, a person, a year.
@@ -63,11 +65,13 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
   - en:
   > The name stays, and the blue board next to the door — the neighbourhood has found us by it since 1998. What goes is the word "Gaststätte": nobody under forty walks in because of it.
 
-### `a.customerPraise` — Was sagen deine glücklichsten Kunden über euch — in DEREN Worten?
+### `a.customerPraise` — Was sagen deine glücklichsten Kunden über dich — in DEREN Worten?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture the sentence their happiest customers say about them, in the words the customers use.
+
+**Fassung im Team:** Was sagen deine glücklichsten Kunden über euch — in DEREN Worten?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -111,11 +115,13 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
   - en:
   > "With you I know at half past twelve that I will be back on site by one."
 
-### `a.complaints` — Welche Beschwerden oder Kritik bekommt ihr? Ehrlich — das ist so wertvoll wie das Lob.
+### `a.complaints` — Welche Beschwerden oder Kritik bekommst du? Ehrlich — das ist so wertvoll wie das Lob.
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
 
 **Ziel:** capture the complaints and negative feedback this brand actually gets, unvarnished.
+
+**Fassung im Team:** Welche Beschwerden oder Kritik bekommt ihr? Ehrlich — das ist so wertvoll wie das Lob.
 
 **Woran man einen guten Wert erkennt:**
 
@@ -159,11 +165,13 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
   - en:
   > "Since the menu changed there is nothing my father can eat, and nobody told us in advance."
 
-### `a.oneThing` — Was ist das eine, von dem du dir wünschst, dass es jeder Kunde über euch wüsste?
+### `a.oneThing` — Was ist das eine, von dem du dir wünschst, dass es jeder Kunde über dich wüsste?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture the one thing they wish every customer knew about them.
+
+**Fassung im Team:** Was ist das eine, von dem du dir wünschst, dass es jeder Kunde über euch wüsste?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -207,11 +215,13 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
   - en:
   > That every second dish is meat-free — the board has never said so in twenty years.
 
-### `a.challenge` — Was ist gerade das größte Hindernis vor euch?
+### `a.challenge` — Was ist gerade das größte Hindernis vor dir?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
 
 **Ziel:** capture the biggest obstacle standing in front of this brand right now.
+
+**Fassung im Team:** Was ist gerade das größte Hindernis vor euch?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -255,11 +265,13 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
   - en:
   > Our regulars retired when we got older. The new offices in the quarter order lunch from a delivery service.
 
-### `a.facts` — Ein paar schnelle Zahlen: Wie groß ist das Team, wie lange gibt es euch, welche Märkte?
+### `a.facts` — Ein paar schnelle Zahlen: Wie groß ist das Team, wie lange machst du das schon, welche Märkte?
 
 **Art:** Sammlung · **Umfang:** ~1 Min, 3 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
 
 **Ziel:** collect the plain facts of this brand: how big the team is, how long it has existed and which markets it serves.
+
+**Fassung im Team:** Ein paar schnelle Zahlen: Wie groß ist das Team, wie lange gibt es euch, welche Märkte?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -547,6 +559,8 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Ziel:** turn what this person already told you about the beginning of this brand into ONE sentence about why that still matters TODAY.
 
+**Fassung im Team:** Du hast mir schon erzählt, wie es angefangen hat. In einem Satz: Warum zählt das heute noch?
+
 **Woran man einen guten Wert erkennt:**
 
 - One sentence, two at the very most.
@@ -587,11 +601,13 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
   - en:
   > Because an hour nobody understands brings no calm, only a bad conscience.
 
-### `b.worldLoses` — Was ginge der Welt verloren, wenn ihr morgen zumacht? Wirkung, nicht Umsatz.
+### `b.worldLoses` — Was ginge der Welt verloren, wenn du morgen zumachst? Wirkung, nicht Umsatz.
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture what the world would lose if this brand shut down tomorrow — impact, not revenue.
+
+**Fassung im Team:** Was ginge der Welt verloren, wenn ihr morgen zumacht? Wirkung, nicht Umsatz.
 
 **Woran man einen guten Wert erkennt:**
 
@@ -635,11 +651,13 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
   - en:
   > Twelve people who have come at seven on Tuesdays for years would lose the one fixed hour where somebody knows their name.
 
-### `b.conviction` — Welche Überzeugung treibt euch — die, die ihr auch verteidigt, wenn sie euch etwas kostet?
+### `b.conviction` — Welche Überzeugung treibt dich — die, die du auch verteidigst, wenn sie dich etwas kostet?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture the belief that drives this company — the one they would defend even when it costs them.
+
+**Fassung im Team:** Welche Überzeugung treibt euch — die, die ihr auch verteidigt, wenn sie euch etwas kostet?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -683,11 +701,13 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
   - en:
   > Yoga is not wellness. We dropped the candles and the singing bowl and lost a third of the sign-ups doing it.
 
-### `b.tenYears` — In zehn Jahren: Was sieht in der Welt anders aus, weil es euch gab?
+### `b.tenYears` — In zehn Jahren: Was sieht in der Welt anders aus, weil es dich gab?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture what looks different in the world ten years from now because this brand existed.
+
+**Fassung im Team:** In zehn Jahren: Was sieht in der Welt anders aus, weil es euch gab?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -731,11 +751,13 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
   - en:
   > By then a practice hour is as ordinary as swimming: people go without wanting to become anything.
 
-### `b.legacy` — Wenn man in 20 Jahren über euch spricht — was sollen die Leute sagen?
+### `b.legacy` — Wenn man in 20 Jahren über dich spricht — was sollen die Leute sagen?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture what people should be saying about this brand in twenty years.
+
+**Fassung im Team:** Wenn man in 20 Jahren über euch spricht — was sollen die Leute sagen?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -779,11 +801,13 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
   - en:
   > "They never claimed an hour would change your life, and everybody came back anyway."
 
-### `b.positioningCategory` — In welcher Kategorie spielt ihr?
+### `b.positioningCategory` — In welcher Kategorie spielst du?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** propose the CATEGORY this brand plays in — the shelf people mentally put it on.
+
+**Fassung im Team:** In welcher Kategorie spielt ihr?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -825,11 +849,13 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
   - en:
   > A practice room, not "wellness"
 
-### `b.positioningFirstChoice` — Und in dieser Kategorie: Für wen seid ihr die ERSTE Wahl — und gegen wen?
+### `b.positioningFirstChoice` — Und in dieser Kategorie: Für wen bist du die ERSTE Wahl — und gegen wen?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture for whom this brand is the FIRST choice inside its category, and against whom.
+
+**Fassung im Team:** Und in dieser Kategorie: Für wen seid ihr die ERSTE Wahl — und gegen wen?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -998,11 +1024,13 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
-### `b2.visibility` — Sollen eure Produktmarken sichtbar zur Hauptmarke gehören — oder eigenständig auftreten?
+### `b2.visibility` — Sollen deine Produktmarken sichtbar zur Hauptmarke gehören — oder eigenständig auftreten?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle whether the other brands should visibly belong to the main brand or stand on their own.
+
+**Fassung im Team:** Sollen eure Produktmarken sichtbar zur Hauptmarke gehören — oder eigenständig auftreten?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -1136,11 +1164,13 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
   - en:
   > Names of their own are allowed, but never with our initials in front — otherwise everyone reads it as an add-on module.
 
-### `b2.model` — Welches Architektur-Modell passt zu euch?
+### `b2.model` — Welches Architektur-Modell passt zu dir?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** propose the brand ARCHITECTURE model for this brand.
+
+**Fassung im Team:** Welches Architektur-Modell passt zu euch?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -1226,11 +1256,13 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
-### `c.discovery1` — Denk an einen Moment, in dem euer Geschäft am besten war. Was ist da passiert?
+### `c.discovery1` — Denk an einen Moment, in dem dein Geschäft am besten war. Was ist da passiert?
 
 **Art:** Frage · **Umfang:** ~2 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture a moment when this business was at its best, told as a scene and not as an adjective.
+
+**Fassung im Team:** Denk an einen Moment, in dem euer Geschäft am besten war. Was ist da passiert?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -1416,11 +1448,13 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   > - Honesty — no training on a shoulder that belongs at a doctor
   > - Reliability — when a trainer is ill the session is cancelled, not handed over
 
-### `c.final` — Welche drei bis fünf würdet ihr verteidigen, auch wenn es euch etwas kostet?
+### `c.final` — Welche drei bis fünf würdest du verteidigen, auch wenn es dich etwas kostet?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle the three to five values this brand would defend even when they cost it something.
+
+**Fassung im Team:** Welche drei bis fünf würdet ihr verteidigen, auch wenn es euch etwas kostet?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -1512,11 +1546,13 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   - en:
   > - Reliability — if a trainer drops out we cancel and refund the slot instead of sending in a stand-in.
 
-### `c.livedExamples` — Zu jedem Wert: EIN echtes Beispiel, wo ihr ihn schon gelebt habt.
+### `c.livedExamples` — Zu jedem Wert: EIN echtes Beispiel, wo du ihn schon gelebt hast.
 
 **Art:** Frage · **Umfang:** ~2 Min, 5 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture one real example per chosen value where this brand already lived it.
+
+**Fassung im Team:** Zu jedem Wert: EIN echtes Beispiel, wo ihr ihn schon gelebt habt.
 
 **Woran man einen guten Wert erkennt:**
 
@@ -1560,11 +1596,13 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   - en:
   > - Calm — in July we called off the competition because two people were ill, and the entry fees went back.
 
-### `c.conflictRule` — Wo geraten zwei eurer Werte in Konflikt — und welcher gewinnt?
+### `c.conflictRule` — Wo geraten zwei deiner Werte in Konflikt — und welcher gewinnt?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle which of the chosen values wins when two of them collide, and why.
+
+**Fassung im Team:** Wo geraten zwei eurer Werte in Konflikt — und welcher gewinnt?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -1608,11 +1646,13 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   - en:
   > Reliability against honesty: if somebody is not fit, honesty wins — we cancel the session we promised.
 
-### `c.teamFilter` — Wenn ihr morgen jemanden einstellt: Welcher Wert ist der unverhandelbare Filter?
+### `c.teamFilter` — Wenn du morgen jemanden einstellst: Welcher Wert ist der unverhandelbare Filter?
 
 **Art:** Frage (optional) · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle which value is the non-negotiable filter when this brand hires someone.
+
+**Fassung im Team:** Wenn ihr morgen jemanden einstellt: Welcher Wert ist der unverhandelbare Filter?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -1660,11 +1700,13 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
-### `d.party` — Wenn eure Marke ein Mensch auf einer Party wäre — wie verhält sie sich?
+### `d.party` — Wenn deine Marke ein Mensch auf einer Party wäre — wie verhält sie sich?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture how this brand would behave as a person at a party.
+
+**Fassung im Team:** Wenn eure Marke ein Mensch auf einer Party wäre — wie verhält sie sich?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -1708,11 +1750,13 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   - en:
   > Notices who does not want to be photographed and does not ask twice — but never makes a speech. Notices who does not want to be photographed and does not ask twice — but never makes a speech.
 
-### `d.never` — Welche Eigenschaft sollte eure Marke NIEMALS haben?
+### `d.never` — Welche Eigenschaft sollte deine Marke NIEMALS haben?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture the one trait this brand must never have.
+
+**Fassung im Team:** Welche Eigenschaft sollte eure Marke NIEMALS haben?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -1802,11 +1846,13 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   - en:
   > A roaster who prints on every bag what the farmer was paid. The lecturing tone would be too much for us.
 
-### `d.emotion` — Was sollen Leute FÜHLEN, wenn sie mit euch zu tun haben?
+### `d.emotion` — Was sollen Leute FÜHLEN, wenn sie mit dir zu tun haben?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture what people should feel when they interact with this brand.
+
+**Fassung im Team:** Was sollen Leute FÜHLEN, wenn sie mit euch zu tun haben?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -1890,11 +1936,13 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   - en:
   > Your appearance pulls two ways: "pictures that stay" sounds like the Creator, while the cancellation page sounds like the Ruler.
 
-### `d.pairs` — Welche der beiden fühlt sich mehr nach euch an?
+### `d.pairs` — Welche der beiden fühlt sich mehr nach dir an?
 
 **Art:** Instrument · **Umfang:** ~3 Min, 1 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle which archetype of each pair feels more like this brand, until a first and a second place stand.
+
+**Fassung im Team:** Welche der beiden fühlt sich mehr nach euch an?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -2037,11 +2085,13 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   - en:
   > Self-image and outside image meet at the Caregiver — only the price list speaks like a Ruler: "cancellations within 48 hours are charged in full".
 
-### `d.voiceSamples` — Welcher dieser Sätze klingt am meisten nach euch?
+### `d.voiceSamples` — Welcher dieser Sätze klingt am meisten nach dir?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** write EXACTLY THREE example sentences in the voice of this brand — three lines, no more and no fewer.
+
+**Fassung im Team:** Welcher dieser Sätze klingt am meisten nach euch?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -2091,11 +2141,13 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   > - The light is good, the background is not — better said now than afterwards.
   > - The new price starts on Friday, which is why we are getting in touch today.
 
-### `d.toneWords` — Welche Wörter beschreiben euren Ton?
+### `d.toneWords` — Welche Wörter beschreiben deinen Ton?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** name FOUR to SIX tone words for this brand — the words someone would use to describe how it sounds.
+
+**Fassung im Team:** Welche Wörter beschreiben euren Ton?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -2149,11 +2201,13 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   > - warm without sugar
   > - brief
 
-### `d.vocabulary` — Welche Wörter würdet ihr NIE benutzen?
+### `d.vocabulary` — Welche Wörter würdest du NIE benutzen?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** build their vocabulary list — the words they use and the words they avoid.
+
+**Fassung im Team:** Welche Wörter würdet ihr NIE benutzen?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -2259,11 +2313,13 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
   - en:
   > Retainers that renew if you miss the notice period by two days. That is not a business model, it is a trap.
 
-### `e.warmup2` — Was sollten mehr Leute über eure Arbeit verstehen?
+### `e.warmup2` — Was sollten mehr Leute über deine Arbeit verstehen?
 
 **Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture what they wish more people understood about their work.
+
+**Fassung im Team:** Was sollten mehr Leute über eure Arbeit verstehen?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -2446,11 +2502,13 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
   > We do not count awards.
   > We count what is left.
 
-### `e.anchorLine` — Welche Zeile ist die, die ihr an eine Wand hängen würdet?
+### `e.anchorLine` — Welche Zeile ist die, die du an eine Wand hängen würdest?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle which single line of the manifesto is the one they would put on a wall.
+
+**Fassung im Team:** Welche Zeile ist die, die ihr an eine Wand hängen würdet?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -2542,11 +2600,13 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
   - en:
   > We plan for the Monday.
 
-### `ep.distinctiveAsset` — Welche Zeile wird euer verbales Erkennungszeichen?
+### `ep.distinctiveAsset` — Welche Zeile wird dein verbales Erkennungszeichen?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle which line becomes the verbal signature of this brand.
+
+**Fassung im Team:** Welche Zeile wird euer verbales Erkennungszeichen?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -2739,11 +2799,13 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
-### `f.nameType` — Welche Sorte Name passt zu euch?
+### `f.nameType` — Welche Sorte Name passt zu dir?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle which kind of name fits this brand.
+
+**Fassung im Team:** Welche Sorte Name passt zu euch?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -3025,11 +3087,13 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
   > ## Kiesel
   > Domain: kiesel.de taken, kiesel-code.de free · Handles: unverified · Trademark: guided search still open · Other languages: nothing conspicuous
 
-### `f.criteria` — Bewertet die Finalisten an den acht Kriterien.
+### `f.criteria` — Bewerte die Finalisten an den acht Kriterien.
 
 **Art:** Auswahl · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** rate the shortlisted names against the eight criteria.
+
+**Fassung im Team:** Bewertet die Finalisten an den acht Kriterien.
 
 **Woran man einen guten Wert erkennt:**
 
@@ -3075,11 +3139,13 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
   > ## Kiesel
   > Sayable: good · Spellable: good · Memorable: medium · Protectable: medium · Fitting: good · Extendable: good · Available: open · Timeless: good
 
-### `f.decision` — Eure Top drei, in Reihenfolge.
+### `f.decision` — Deine Top drei, in Reihenfolge.
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle their top three names, in order — first choice first, then the two fallbacks.
+
+**Fassung im Team:** Eure Top drei, in Reihenfolge.
 
 **Woran man einen guten Wert erkennt:**
 
@@ -3133,11 +3199,13 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
-### `result.direction` — Welche Richtung passt zu eurer Marke?
+### `result.direction` — Welche Richtung passt zu deiner Marke?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle which direction fits this brand.
+
+**Fassung im Team:** Welche Richtung passt zu eurer Marke?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -3213,11 +3281,13 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
 
-### `g.source` — Habt ihr Vorbilder — Screenshots, ein Pinnwand-Board, drei Seiten, die euch gefallen?
+### `g.source` — Hast du Vorbilder — Screenshots, ein Pinnwand-Board, drei Seiten, die dir gefallen?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle where the visual direction comes from: from the foundation alone, or from the foundation plus reference images the customer brings.
+
+**Fassung im Team:** Habt ihr Vorbilder — Screenshots, ein Pinnwand-Board, drei Seiten, die euch gefallen?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -3388,11 +3458,13 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
   - en:
   > One step bolder: the second colour as the carrying surface, a high-contrast type mix, a denser composition.
 
-### `g.board` — Welches Board ist euer Ausgangspunkt?
+### `g.board` — Welches Board ist dein Ausgangspunkt?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** pick one of the three boards as the starting point.
+
+**Fassung im Team:** Welches Board ist euer Ausgangspunkt?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -3540,11 +3612,13 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
   - en:
   > The same calculation as before, only with the new base colour: the old in-between tones fall away.
 
-### `h.neutral` — Welchen Grundton sollen eure Flächen haben?
+### `h.neutral` — Welchen Grundton sollen deine Flächen haben?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle the tint of the neutral ramp: tinted from the base colour, warm or cool.
+
+**Fassung im Team:** Welchen Grundton sollen eure Flächen haben?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -3570,11 +3644,13 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Fliesst später in:** 4 Felder in 2 Kapiteln (Farbwelt · Zeichen)
 
-### `h.accent` — Welche Farbe ist euer Signal?
+### `h.accent` — Welche Farbe ist dein Signal?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle one accent colour: the signal, not a second ground.
+
+**Fassung im Team:** Welche Farbe ist euer Signal?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -3685,11 +3761,13 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
 
-### `i.pair` — Welches Schriftpaar passt zu euch?
+### `i.pair` — Welches Schriftpaar passt zu dir?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle the type pair: one family for headings, one for body text, with the fixed mono role beside them.
+
+**Fassung im Team:** Welches Schriftpaar passt zu euch?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -3800,11 +3878,13 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
 
-### `j.kind` — Welche Art Zeichen braucht ihr?
+### `j.kind` — Welche Art Zeichen brauchst du?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle the kind of mark: wordmark, pictorial mark, combination or monogram.
+
+**Fassung im Team:** Welche Art Zeichen braucht ihr?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -3912,11 +3992,13 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
   - en:
   > The same wordmark in a single colour for embossing and stamps — there is no second colour there.
 
-### `j.pick` — Welche Setzung nehmt ihr als Vorzugs-Beispiel?
+### `j.pick` — Welche Setzung nimmst du als Vorzugs-Beispiel?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** pick one setting as the preferred example for the briefing.
+
+**Fassung im Team:** Welche Setzung nehmt ihr als Vorzugs-Beispiel?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -3973,11 +4055,13 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
 
-### `k.illustration` — Wollt ihr Illustration — und wenn ja, welche?
+### `k.illustration` — Willst du Illustration — und wenn ja, welche?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle whether there is illustration at all, and if so in which language: line, area or organic.
+
+**Fassung im Team:** Wollt ihr Illustration — und wenn ja, welche?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -4003,11 +4087,13 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Fliesst später in:** 1 Felder in 1 Kapiteln (Bildsprache)
 
-### `k.icons` — Welcher Icon-Satz passt zu eurer Schrift?
+### `k.icons` — Welcher Icon-Satz passt zu deiner Schrift?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle the icon set: line or filled, and the stroke weight beside the body type.
+
+**Fassung im Team:** Welcher Icon-Satz passt zu eurer Schrift?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -4116,11 +4202,13 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
 
-### `l.tempo` — Wie schnell soll sich eure Marke bewegen?
+### `l.tempo` — Wie schnell soll sich deine Marke bewegen?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle the tempo of movement: calm, lively or snappy.
+
+**Fassung im Team:** Wie schnell soll sich eure Marke bewegen?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -4146,11 +4234,13 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Fliesst später in:** 3 Felder in 1 Kapiteln (Bewegung)
 
-### `l.logo` — Soll sich euer Zeichen bewegen?
+### `l.logo` — Soll sich dein Zeichen bewegen?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle whether the mark moves at all, and under which rule.
+
+**Fassung im Team:** Soll sich euer Zeichen bewegen?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -4258,11 +4348,13 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
-### `m.types` — Wofür braucht ihr Namen — Produkte, Leistungen, Formate, Orte, Digitales?
+### `m.types` — Wofür brauchst du Namen — Produkte, Leistungen, Formate, Orte, Digitales?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle which kinds of things this brand actually needs names for, chosen from the catalogue of five — products, services, programmes, places, digital.
+
+**Fassung im Team:** Wofür braucht ihr Namen — Produkte, Leistungen, Formate, Orte, Digitales?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -4372,11 +4464,13 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George.
 
-### `n.scope` — Was darf KI in eurem Namen erzeugen?
+### `n.scope` — Was darf KI in deinem Namen erzeugen?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle what AI may produce in the name of this brand: drafts for everything, text only, internal only, or nothing customer-facing.
+
+**Fassung im Team:** Was darf KI in eurem Namen erzeugen?
 
 **Woran man einen guten Wert erkennt:**
 
@@ -4548,11 +4642,13 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Fliesst später in:** 1 Felder in 1 Kapiteln (Pressekit)
 
-### `p.contact` — Wer ist eure Ansprechperson für Presse?
+### `p.contact` — Wer ist deine Ansprechperson für Presse?
 
 **Art:** Frage (optional) · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle the press contact — name, role and email of one person the press may write to.
+
+**Fassung im Team:** Wer ist eure Ansprechperson für Presse?
 
 **Woran man einen guten Wert erkennt:**
 

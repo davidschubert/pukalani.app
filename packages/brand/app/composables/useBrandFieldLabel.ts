@@ -1,4 +1,4 @@
-import { type BrandSlot, questionKeyFor, slotById } from '../../shared/slotRegistry'
+import { type BrandSlot, slotById, slotLabelKeyFor } from '../../shared/slotRegistry'
 import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
 
 /**
@@ -9,6 +9,11 @@ import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
  * Substantive; wo die Frage schon kurz ist, gibt es bewusst KEINEN
  * Label-Schlüssel und der Rückfall greift. Gefragt wird pfad- und
  * team-abhängig (Weichen W1/W3) — das Label nicht.
+ *
+ * WELCHER Fragetext der Rückfall nimmt, rechnet `slotLabelKeyFor` (shared):
+ * dieselbe Rechnung wie auf der Bühne und im Prompt-Aufbau des Servers. Die
+ * Typ-Aufzählung, die hier bis 2026-09-09 stand, war eine Kopie davon — und
+ * eine Kopie, die `d.pairs` verpasste, als der Slot eine Solo-Fassung bekam.
  *
  * ── WARUM SIE HIER STEHT UND NICHT IN `shared/` ──────────────────────────
  * Sie braucht `t`/`te` und den Pfad des Brandings, ist also keine reine
@@ -30,9 +35,7 @@ export function useBrandFieldLabel(): (slotId: string) => string {
   function label(slot: BrandSlot): string {
     const labelKey = `brand.labels.${slot.id}`
     if (te(labelKey)) return t(labelKey)
-    return slot.type === 'question' || slot.type === 'choice'
-      ? t(questionKeyFor(slot, store.profile?.pathKind ?? 'new', store.profile?.team ?? 'solo'))
-      : t(slot.questionKey)
+    return t(slotLabelKeyFor(slot, store.profile?.pathKind ?? 'new', store.profile?.team ?? 'solo'))
   }
 
   return (slotId: string): string => {

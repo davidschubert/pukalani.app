@@ -11,7 +11,6 @@ import {
 } from '../../shared/brandWorkspaceNav'
 import {
   type BrandStepKey,
-  slotById,
   slotsForStep,
 } from '../../shared/slotRegistry'
 import type {
@@ -24,6 +23,7 @@ import type {
   BrandStepRestartResponse,
   BrandStepReviewResponse,
 } from '../../shared/types/brand'
+import { useBrandFieldLabel } from '../composables/useBrandFieldLabel'
 import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
 
 /**
@@ -114,10 +114,23 @@ const emit = defineEmits<{
   restarted: [target: { sessionKey: string }]
 }>()
 
-const { t, te } = useI18n()
+const { t } = useI18n()
 const toast = useToast()
 const store = useBrandWorkspaceStore()
 const request = useRequestFetch()
+
+/**
+ * DIE BESCHRIFTUNG EINES FELDES — dieselbe Regel wie in Werkstatt, Log und
+ * Befund-Chip (`useBrandFieldLabel`).
+ *
+ * Sie stand bis 2026-09-09 als eigene Funktion hier, mit dem Rückfall
+ * `t(slot.questionKey)` — dem BASIS-Schlüssel, ohne Pfad und ohne Weiche W3.
+ * Das ging gut, solange nur `c.discovery3` zwei Fassungen hatte; seit 48
+ * Fragen eine Solo-Fassung tragen, stünde in der Liste der berührten Felder
+ * für jedes ohne `brand.labels`-Eintrag (die halbe Schicht 2) wörtlich
+ * `brand.q.h.accent`. Ein zweiter Wortlaut für dasselbe Feld war es ohnehin.
+ */
+const fieldLabel = useBrandFieldLabel()
 
 /**
  * SSR-FÄHIG, wie der Rest der Werkstatt: `useAsyncData` mit dem
@@ -487,13 +500,6 @@ const downstreamSteps = computed(() => Object.entries(impact.value?.downstream.b
   }))
   .filter(entry => entry.fields.length > 0))
 
-/** Ein Feld eines SPÄTEREN Kapitels — dort liegt keine Antwort-Zeile vor. */
-function fieldLabel(slotId: string): string {
-  const labelKey = `brand.labels.${slotId}`
-  if (te(labelKey)) return t(labelKey)
-  const slot = slotById(slotId)
-  return slot ? t(slot.questionKey) : slotId
-}
 
 /**
  * DIE HÜLLE HOLEN — ohne KI und ohne einen einzigen Schreibvorgang. Sie trägt
