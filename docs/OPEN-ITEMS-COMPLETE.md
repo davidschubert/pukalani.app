@@ -11120,3 +11120,42 @@ Server. (2) Eine Kanal-Id ist erst geprüft, wenn Titel UND jüngster Upload zur
 `@PentagramDesign` löst sauber auf, nur eben auf jemand anderen. (3) Ein Wächter, der etwas
 „bei David" nennt, muss gelesen werden, BEVOR man Fragen bündelt: Schlüssel und Migration waren
 schon durch (Env-Wächter grün, Parität 39/39), während OPEN-ITEMS sie noch als offen führte.
+
+## PM1 — Produkt-Manifest-Wächter: `apiPrefixes` ⇒ Laufzeit-Plugin (2026-09-09)
+
+**Ausgangslage:** Ein `product.manifest.ts` ist `import type`-only; was es unter
+`apiPrefixes` verspricht, löst erst ein `server/plugins/product-manifest.ts` mit
+`registerProductManifest(manifest)` ein. Die Produkt-Middleware
+(`core/server/middleware/04.product-gate.ts`), `isProductEnabled()`, der Betreiber-
+Katalog und `/api/platform/products` kennen nur die Registry. `market` fuhr so seit
+M1 (behoben `bb1f9102`, COMPLETE „BI1 I1"); drei Layer blieben ohne Plugin.
+
+**Live-Befund vor dem Bau** (`/api/platform/products`): pukalani.studio listete
+`admin, analytics, core, pages, system, themes` — **`domains` fehlte**, obwohl
+einkompiliert; admin.pukalani.app listete neun Produkte — **`runner` fehlte**.
+Folge: Notabschaltung über `app_config.products.<key>.enabled=false` traf
+`/api/site/domain/**` und `/api/runner/**` nie, beide fehlten im Katalog.
+`onboarding` (`tier: foundation`) war nur inkonsistent zu core/system/admin/themes.
+
+**Davids Entscheidung** (strukturierte Frage je Layer, alle drei Empfehlungen
+angenommen, daher kein DECISION-LOG-Eintrag): **Plugin nachrüsten** für `domains`,
+`runner` und `onboarding`. Ausnahmeliste bleibt leer.
+
+**Gebaut:**
+- Drei Plugins nach dem insights-Muster (`packages/{domains,runner,onboarding}/server/plugins/product-manifest.ts`), Kopfkommentar nennt die Wirkung und das Datum.
+- `scripts/check-manifests.mjs` Prüfung 6: jeder Layer mit `apiPrefixes` braucht das Plugin, und das Plugin muss wörtlich `import manifest from '../../product.manifest'` + `registerProductManifest(manifest)` enthalten (eine leere Plugin-Datei zählt nicht). `MANIFEST_PLUGIN_EXCEPTIONS` (Map Layer → Begründung, heute leer) — steht ein Layer dort UND hat ein Plugin, ist das ebenfalls rot („Ausnahme streichen").
+
+**Gegenproben** (Wächter rot, Plugin zurückgelegt): (A) Plugin entfernt ⇒ „fehlt —
+das Manifest deklariert apiPrefixes [/api/site/domain] …"; (B) Plugin ohne Aufruf ⇒
+„muss … enthalten"; (C) Ausnahme eingetragen trotz Plugin ⇒ „Ausnahme streichen";
+(D) Ausnahme + kein Plugin ⇒ grün. Gates: check:manifests, lint:scripts, -r lint,
+-r typecheck, -r test, check:i18n-keys, check:single-copy, check:bilanz.
+
+**Gelernt:** Der Wächter prüft die DATEI, deshalb prüft er auch den INHALT — ein
+leeres `defineNitroPlugin(() => {})` hätte die Regel formal erfüllt und nichts
+registriert. Zweitens: `/api/platform/products` ist der schnellste Live-Beweis,
+ob ein Layer wirklich registriert ist (fehlt der Key trotz Site-Manifest, fehlt das
+Plugin). Drittens (Arbeitsweise): `git checkout -- <datei>` als „Aufräumen" nach
+einer Gegenprobe wirft auch die eigene uncommittete Änderung weg — Gegenproben an
+einer Kopie im Scratchpad fahren oder die Änderung vorher als WIP committen.
+
