@@ -87,8 +87,8 @@ import {
 const SCHEMA_CODES = new Set(['unknown_slot', 'slot_foreign', 'slot_too_long'])
 
 export default defineEventHandler(async (event): Promise<BrandStepSaveResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const { profile, stepKey, stepRow, stepRows, journey: enteredJourney } = await loadBrandStepContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile, stepKey, stepRow, stepRows, journey: enteredJourney } = await loadBrandStepContext(event, userId, betaAccount)
 
   // Bewusst `safeParse` statt `readValidatedBody`: die drei Registry-Gründe
   // sollen als `data.code` beim Client ankommen (createError-Regel), und ein
@@ -400,7 +400,7 @@ export default defineEventHandler(async (event): Promise<BrandStepSaveResponse> 
   const mergedRows = stepRows.map(row => (row.$id === stepRow.$id
     ? { ...row, state: facts.state, confidence: facts.confidence ?? null, slots: JSON.stringify(next) }
     : row))
-  const journey = resolveBrandJourney(profileFacts(profile), toStepFacts(mergedRows))
+  const journey = resolveBrandJourney(profileFacts(profile, betaAccount), toStepFacts(mergedRows))
   const progress = resolveProfileProgress(journey)
   await touchProfile(event, profile.$id, {
     progressPct: progress.progressPct,

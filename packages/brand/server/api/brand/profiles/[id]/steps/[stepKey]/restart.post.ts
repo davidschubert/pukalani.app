@@ -66,8 +66,8 @@ import {
  * ein Gespräch, das der Mensch gerade verworfen hat.
  */
 export default defineEventHandler(async (event): Promise<BrandStepRestartResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const context = await loadBrandAcceptanceContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const context = await loadBrandAcceptanceContext(event, userId, betaAccount)
   const { profile, stepKey, stepRow, stepRows, records, allFacts, stepFacts } = context
   const body = await readValidatedBody(event, createBrandStepRestartSchema().parse)
 
@@ -158,7 +158,7 @@ export default defineEventHandler(async (event): Promise<BrandStepRestartRespons
   const mergedRows = stepRows.map(row => (row.$id === stepRow.$id
     ? { ...row, state: restarted.step.state, confidence: null, slots: '{}' }
     : row))
-  const journey = resolveBrandJourney(profileFacts(profile), toStepFacts(mergedRows))
+  const journey = resolveBrandJourney(profileFacts(profile, betaAccount), toStepFacts(mergedRows))
   const progress = resolveProfileProgress(journey)
   await touchProfile(event, profile.$id, {
     progressPct: progress.progressPct,

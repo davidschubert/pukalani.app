@@ -74,7 +74,7 @@ import {
  * sich später fragen lässt, ob sich überhaupt etwas geändert hat.
  */
 export default defineEventHandler(async (event): Promise<BrandCheckStartResponse> => {
-  const { userId } = await requireBrandAccess(event)
+  const { userId, betaAccount } = await requireBrandAccess(event)
   const profileId = requireProfileIdParam(event)
   const profile = await loadOwnedProfile(event, userId, profileId)
 
@@ -124,7 +124,7 @@ export default defineEventHandler(async (event): Promise<BrandCheckStartResponse
 
   // (3) Das Material — bestätigte Felder, in Kapitel-Reihenfolge.
   const stepRows = await loadStepRows(event, profileId)
-  const fields = brandDocumentCheckFields(profile, stepRows)
+  const fields = brandDocumentCheckFields(profile, stepRows, betaAccount)
   if (!fields.length) {
     // 409 und nicht 400: der Rumpf war in Ordnung, der ZUSTAND passt nicht.
     // Der Mensch kann das ändern (Felder bestätigen), und der Satz dazu steht

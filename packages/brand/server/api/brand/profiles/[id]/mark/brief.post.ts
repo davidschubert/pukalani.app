@@ -41,8 +41,8 @@ import {
  * Kopf von `brandEvents.ts`).
  */
 export default defineEventHandler(async (event): Promise<BrandMarkBriefResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const { profile, stepRows } = await requireBrandMarkContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile, stepRows } = await requireBrandMarkContext(event, userId, betaAccount)
 
   const stub = brandMarkBriefStubEnabled()
   if (!stub) {

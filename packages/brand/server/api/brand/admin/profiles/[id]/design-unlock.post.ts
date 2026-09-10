@@ -4,8 +4,8 @@ import {
   brandFoundationIsComplete,
   ensureBrandDesignStepRows,
   loadBrandProfileForOperator,
-  requireBrandDesignOperator,
-  requireBrandDesignProfileId,
+  requireBrandUnlockOperator,
+  requireBrandUnlockProfileId,
   toBrandDesignUnlockItem,
 } from '../../../../../utils/brandDesignUnlock'
 import { BRAND_PROFILES_TABLE, brandDb, type BrandProfileRow } from '../../../../../utils/brandStore'
@@ -42,8 +42,8 @@ import { recordBrandEvent } from '../../../../../utils/brandEvents'
  * Journey ohnehin sperrt; das kostet nichts und heilt der nächste Klick.
  */
 export default defineEventHandler(async (event): Promise<BrandDesignUnlockResponse> => {
-  const operator = requireBrandDesignOperator(event)
-  const profileId = requireBrandDesignProfileId(event)
+  const operator = requireBrandUnlockOperator(event)
+  const profileId = requireBrandUnlockProfileId(event)
   const profile = await loadBrandProfileForOperator(event, profileId)
 
   const foundationDone = await brandFoundationIsComplete(event, profile)

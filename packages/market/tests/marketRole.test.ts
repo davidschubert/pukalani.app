@@ -74,10 +74,27 @@ describe('marketFieldCandidates', () => {
  */
 describe('resolveMarketPaywall', () => {
   it('Beta-Konto ⇒ frei, mit benannter Herkunft', () => {
-    expect(resolveMarketPaywall({ betaAccess: true })).toEqual({ unlocked: true, grant: 'beta' })
+    expect(resolveMarketPaywall({ betaAccess: true, derivationUnlocked: false }))
+      .toEqual({ unlocked: true, grant: 'beta' })
   })
 
-  it('GEGENPROBE: ohne Beta-Zugang steht die Schranke', () => {
-    expect(resolveMarketPaywall({ betaAccess: false })).toEqual({ unlocked: false, grant: 'none' })
+  it('GEGENPROBE: ohne Beta-Zugang UND ohne Ableitung steht die Schranke', () => {
+    expect(resolveMarketPaywall({ betaAccess: false, derivationUnlocked: false }))
+      .toEqual({ unlocked: false, grant: 'none' })
+  })
+
+  /**
+   * DIE ZWEITE EINGABE (BK1 K1, BS1 §4.1 b): die Ableitung gehört der MARKE
+   * und trägt allein — das ist der Weg jedes Kaufs ab BS1 Z1, wenn es keine
+   * Beta mehr gibt.
+   */
+  it('Ableitung freigeschaltet ⇒ frei, auch ohne Beta-Konto', () => {
+    expect(resolveMarketPaywall({ betaAccess: false, derivationUnlocked: true }))
+      .toEqual({ unlocked: true, grant: 'derivation' })
+  })
+
+  it('beides ⇒ frei; die Herkunft nennt die Beta (sie trägt schon für sich)', () => {
+    expect(resolveMarketPaywall({ betaAccess: true, derivationUnlocked: true }))
+      .toEqual({ unlocked: true, grant: 'beta' })
   })
 })

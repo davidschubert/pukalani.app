@@ -13,6 +13,7 @@ import type {
 } from '../../shared/types/brand'
 import { BRAND_INDUSTRY_UNKNOWN } from '../../shared/brandIndustries'
 import { siteAnalysisIsStale } from '../../shared/brandSiteAnalysis'
+import { resolveDerivationAccess } from '../../shared/brandDerivation'
 import {
   type BrandConfidence,
   type BrandJourneyStep,
@@ -163,6 +164,15 @@ export type BrandProfileRow = Models.Row & {
    * Migration VOR Code, aber der Code darf nicht darauf bestehen).
    */
   derivationUnlockedAt?: string | null
+  /**
+   * WOHER die Freischaltung kommt (`'operator' | 'purchase'`, brand-025) und
+   * WER sie gesetzt hat (Betreiber-Id bzw. ab BS1 Z1 die Stripe-Event-Id).
+   * Beide optional getypt aus demselben Grund wie das Datum darüber; sie
+   * stehen NEBEN dem Ereignis `derivation.unlocked`, nicht statt seiner (die
+   * Begründung steht bei `designUnlockedBy` und gilt hier wörtlich).
+   */
+  derivationUnlockedVia?: string | null
+  derivationUnlockedBy?: string | null
   /**
    * DAS OPT-IN „diese Marke darf als öffentliche Seite in der Galerie stehen"
    * (Migration brand-020, Discover D1). EIGENE Spalte neben `marketVisibility`
@@ -755,8 +765,31 @@ export const BRAND_EMPTY_GENERATIONS = '{"items":[],"count":0}'
 
 // ── Profil ──────────────────────────────────────────────────────────────────
 
-/** Die Weichen-Tatsachen des Profils, so wie die pure Regel sie erwartet. */
-export function profileFacts(row: BrandProfileRow): BrandProfileFacts {
+/**
+ * DIE WEICHEN-TATSACHEN DES PROFILS, so wie die pure Regel sie erwartet.
+ *
+ * ── WARUM `betaAccount` EIN PFLICHT-ARGUMENT IST (K1) ────────────────────
+ * Seit Schicht 3 hängt eine der Tatsachen NICHT mehr allein an der Zeile: „ist
+ * die Ableitung offen?" ist Feld ODER Beta-Konto (§2.8). Die Beta-Zulassung
+ * gehört dem KONTO, nicht der Marke — sie kann hier also gar nicht abgelesen
+ * werden, und sie hier nachzuschlagen wäre der zweite Leser der Beta-Wahrheit,
+ * den §2.17 ausdrücklich verbietet.
+ *
+ * Ein Vorgabewert `false` wäre bequem und falsch: er verstünde sich als „nein"
+ * und würde einem Beta-Konto still die dritte Schicht wegnehmen, ohne dass
+ * irgendwo etwas rot wird. Das PFLICHT-Argument zwingt jede Aufrufstelle, die
+ * Frage zu beantworten — dieselbe Leitplanke wie beim `scope` von `notify()`
+ * (CLAUDE.md, C15): der Typfehler ersetzt hier den Wächter, den es für diese
+ * Klasse Fehler sonst nicht gibt.
+ *
+ * DREI ANTWORTEN KOMMEN VOR:
+ *   · `access.betaAccount` — jede Eigentümer-Route (der Wert aus dem Gate).
+ *   · ein Wert aus `loadBrandBetaAccounts` — die Betreiber-Liste über FREMDE
+ *     Marken (dort zählt der Eigentümer, nicht der Betreiber).
+ *   · `false` — Rechnungen, die keine Person haben (Sweeps, Snapshot-Bau,
+ *     Prüf-Rechnungen). Jede solche Stelle sagt an Ort und Stelle, warum.
+ */
+export function profileFacts(row: BrandProfileRow, betaAccount: boolean): BrandProfileFacts {
   return {
     pathKind: row.pathKind === 'relaunch' ? 'relaunch' : 'new',
     relaunchScope: row.relaunchScope === 'refine' || row.relaunchScope === 'recut' ? row.relaunchScope : null,
@@ -769,15 +802,17 @@ export function profileFacts(row: BrandProfileRow): BrandProfileFacts {
     // Default „nicht freigeschaltet". Der Leser läuft bewusst weiter ohne die
     // Spalte — sonst wäre der Code vor der Migration nicht deploybar.
     designUnlockedAt: row.designUnlockedAt ?? null,
-    // BRAND BOOK & KIT, SCHICHT 3 (Konzept §2.8, Migration brand-025): heute
-    // IMMER `false` — die Spalte gibt es noch nicht, und `undefined` ist der
-    // richtige Default. FAIL-SOFT mit Absicht: die drei Kapitel liegen damit
-    // nicht auf dem Weg, was für jede Bestands-Marke der Zustand ist.
-    //
-    // K1 legt hier die pure Regel `resolveDerivationAccess` darüber (Beta-Konto
-    // ODER Zeitstempel) — die Journey bekommt weiterhin nur ihr ERGEBNIS, nie
-    // die Einzelteile.
-    derivationUnlocked: Boolean(row.derivationUnlockedAt),
+    // BRAND BOOK & KIT, SCHICHT 3 (Konzept §2.8, Migration brand-025, K1):
+    // Beta-Konto ODER Feld — die pure Regel legt beides zusammen, die Journey
+    // bekommt nur ihr ERGEBNIS und nie die Einzelteile. Eine Zeile aus der Zeit
+    // vor brand-025 liest `undefined`, und das ist genau der Default „nicht
+    // freigeschaltet" (fail-soft; der Code muss vor der Migration deploybar
+    // bleiben, D1-Lehre).
+    derivationUnlocked: resolveDerivationAccess({
+      betaAccount,
+      unlockedAt: row.derivationUnlockedAt,
+      via: row.derivationUnlockedVia,
+    }).unlocked,
   }
 }
 
@@ -818,8 +853,12 @@ export function profileSiteAnalysis(row: BrandProfileRow): BrandSiteAnalysisView
   }
 }
 
-export function toProfileSummary(row: BrandProfileRow, hasActiveShare: boolean): BrandProfileSummary {
-  const facts = profileFacts(row)
+export function toProfileSummary(
+  row: BrandProfileRow,
+  hasActiveShare: boolean,
+  betaAccount: boolean,
+): BrandProfileSummary {
+  const facts = profileFacts(row, betaAccount)
   return {
     id: row.$id,
     title: row.title ?? '',
@@ -845,6 +884,14 @@ export function toProfileSummary(row: BrandProfileRow, hasActiveShare: boolean):
     // — es hätte ein zweites Feld daneben verlangt, das dasselbe noch einmal
     // behauptet. Wer nur die Frage stellt, fragt `Boolean(...)`.
     designUnlockedAt: facts.designUnlockedAt ?? null,
+    /**
+     * DIE ABLEITUNG ALS JA/NEIN, anders als die Zeile darüber (K1, §2.8): sie
+     * hat DREI Quellen, und nur zwei davon sind Spalten dieser Zeile. Ein
+     * Zeitstempel hier wäre die halbe Wahrheit — er fehlte ausgerechnet dem
+     * Beta-Konto, das gar keinen hat. Wer das DATUM braucht (Betreiber-Liste),
+     * liest die Spalte; wer die FRAGE stellt, liest dieses Feld.
+     */
+    derivationUnlocked: facts.derivationUnlocked === true,
   }
 }
 
@@ -1075,9 +1122,22 @@ export interface BrandStepContext {
   stepRow: BrandStepRow
   stepRows: BrandStepRow[]
   journey: readonly BrandJourneyStep[]
+  /**
+   * DIE BETA-TATSACHE DES AUFRUFERS (K1) — sie reist im Kontext mit, damit
+   * jede Rechnung DAHINTER (Abnahme, Session-Zustände, ein zweites
+   * `resolveBrandJourney`) dieselbe Antwort auf „ist die Ableitung offen?"
+   * bekommt wie der Eintritts-Beschluss davor. Ohne sie müsste jede dieser
+   * Rechnungen sie erneut anfordern — und die erste, die es vergisst, sperrt
+   * einem Beta-Konto still die dritte Schicht.
+   */
+  betaAccount: boolean
 }
 
-export async function loadBrandStepContext(event: H3Event, userId: string): Promise<BrandStepContext> {
+export async function loadBrandStepContext(
+  event: H3Event,
+  userId: string,
+  betaAccount: boolean,
+): Promise<BrandStepContext> {
   const profileId = requireProfileIdParam(event)
   const profile = await loadOwnedProfile(event, userId, profileId)
 
@@ -1085,7 +1145,7 @@ export async function loadBrandStepContext(event: H3Event, userId: string): Prom
   if (!stepKey) throw createError({ status: 404, statusText: 'Not Found' })
 
   const stepRows = await loadStepRows(event, profileId)
-  const journey = resolveBrandJourney(profileFacts(profile), toStepFacts(stepRows))
+  const journey = resolveBrandJourney(profileFacts(profile, betaAccount), toStepFacts(stepRows))
 
   const entry = canEnterBrandStep(journey, stepKey)
   if (!entry.allowed) {
@@ -1103,7 +1163,7 @@ export async function loadBrandStepContext(event: H3Event, userId: string): Prom
   // Verlust zu verdecken.
   if (!stepRow) throw createError({ status: 404, statusText: 'Not Found' })
 
-  return { profile, stepKey, stepRow, stepRows, journey }
+  return { profile, stepKey, stepRow, stepRows, journey, betaAccount }
 }
 
 // ── Fortschritt am Profil (DENORM-Cache) ────────────────────────────────────

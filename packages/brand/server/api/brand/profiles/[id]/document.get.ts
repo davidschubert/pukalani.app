@@ -52,8 +52,8 @@ import { brandSlotRecordConfirmed, parseSlotRecords } from '../../../../utils/br
  * sind, an denen der Rest hängt.
  */
 export default defineEventHandler(async (event): Promise<BrandDocumentResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const context = await loadBrandDocumentContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const context = await loadBrandDocumentContext(event, userId, betaAccount)
   const { profile, stepRows, journey, allFacts, sessionStates, findings } = context
 
   const pathKind = profile.pathKind === 'relaunch' ? 'relaunch' : 'new'

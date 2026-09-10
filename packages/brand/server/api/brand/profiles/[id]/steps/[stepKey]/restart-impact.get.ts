@@ -23,8 +23,8 @@ import {
  * der Server prüft `acknowledge` und diesen Hash (§5a Schritt 2).
  */
 export default defineEventHandler(async (event): Promise<BrandRestartImpactResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const { stepKey, stepRow, records, allFacts } = await loadBrandAcceptanceContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { stepKey, stepRow, records, allFacts } = await loadBrandAcceptanceContext(event, userId, betaAccount)
 
   return brandRestartImpactView(stepKey, stepRow.revision ?? 0, records, allFacts)
 })

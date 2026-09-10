@@ -51,9 +51,9 @@ import { confirmedSlotValues, toStoryView } from '../../../../utils/brandStore'
  * nicht einmal einen Zähler bewegen.
  */
 export default defineEventHandler(async (event): Promise<BrandFoundationResponse> => {
-  const { userId } = await requireBrandAccess(event)
+  const { userId, betaAccount } = await requireBrandAccess(event)
   const { profile, stepRows, journey, allFacts, sessionStates, findings }
-    = await loadBrandDocumentContext(event, userId)
+    = await loadBrandDocumentContext(event, userId, betaAccount)
 
   const byStepKey = new Map(stepRows.map(row => [row.stepKey, row]))
 

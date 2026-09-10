@@ -50,8 +50,8 @@ import {
  * Kopf von `brandEvents.ts`).
  */
 export default defineEventHandler(async (event): Promise<BrandInspirationWriteResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const { profile, stepRows } = await requireBrandInspirationContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile, stepRows } = await requireBrandInspirationContext(event, userId, betaAccount)
 
   const form = await readMultipartFormData(event)
   const field = (name: string): string => {

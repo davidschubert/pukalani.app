@@ -83,12 +83,12 @@ import {
  * Blick ein zweites Mal zu.
  */
 export default defineEventHandler(async (event): Promise<BrandDocumentReviewResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const context = await loadBrandDocumentContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const context = await loadBrandDocumentContext(event, userId, betaAccount)
   const { profile, stepRows, journey, sessionStates } = context
 
   const contentLocale = profile.contentLocale
-  const { pathKind, team } = profileFacts(profile)
+  const { pathKind, team } = profileFacts(profile, betaAccount)
 
   /** Die Kapitel des WEGES — übersprungene gehören nicht zum Dokument (§10). */
   const included = journey.filter(entry => entry.state !== 'skipped').map(entry => entry.stepKey)

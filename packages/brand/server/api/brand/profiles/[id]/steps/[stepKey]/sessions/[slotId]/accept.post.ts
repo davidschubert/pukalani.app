@@ -26,8 +26,8 @@ import { writeBrandSessionFlag } from '../../../../../../../../utils/brandSessio
  * lädt neu, statt einen Eingabefehler zu melden, den niemand gemacht hat.
  */
 export default defineEventHandler(async (event): Promise<BrandSessionAcceptResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const context = await loadBrandAcceptanceContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const context = await loadBrandAcceptanceContext(event, userId, betaAccount)
   const body = await readValidatedBody(event, createBrandSessionAcceptSchema().parse)
 
   return writeBrandSessionFlag(event, context, body.revision, slotId => ({ kind: 'acceptSlot', slotId }))

@@ -156,8 +156,8 @@ function stripBoldMarkers(draft: string): string {
 
 export default defineEventHandler(async (event) => {
   const started = Date.now()
-  const { userId } = await requireBrandAccess(event)
-  const { profile, stepKey, stepRow, stepRows } = await loadBrandStepContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile, stepKey, stepRow, stepRows } = await loadBrandStepContext(event, userId, betaAccount)
 
   // ── HTTP-Gates: Fehler des Aufrufers (s. Kopf) ───────────────────────────
   const parsed = createBrandGenerateSchema().safeParse(await readBody(event))
@@ -218,8 +218,8 @@ export default defineEventHandler(async (event) => {
   const dependencies = labelSlotDependencies(
     collectSlotDependencies(slot.id, allRecords),
     profile.contentLocale,
-    profileFacts(profile).pathKind,
-    profileFacts(profile).team,
+    profileFacts(profile, betaAccount).pathKind,
+    profileFacts(profile, betaAccount).team,
   )
   const inputHash = brandGenerationInputHash(slot.id, profile.contentLocale, dependencies)
   const stored = parseGenerations(stepRow.generations)
@@ -445,7 +445,7 @@ export default defineEventHandler(async (event) => {
       // Der Rückfall auf die Inhaltssprache passiert HIER, damit kein
       // Generator ihn je selbst bauen muss.
       uiLocale: resolveBrandUiLocale(body.uiLocale, profile.contentLocale),
-      pathKind: profileFacts(profile).pathKind,
+      pathKind: profileFacts(profile, betaAccount).pathKind,
       // Die STARTKARTE aus dem PROFIL (§2.1) — sie geht NICHT in den
       // `inputHash`: der beschreibt den Stand der Quell-SLOTS, und dafür ist
       // `collectSlotDependencies` die einzige Quelle. Eine Änderung an der
@@ -698,7 +698,7 @@ export default defineEventHandler(async (event) => {
         ? { ...row, slots: JSON.stringify(next) }
         : row))
       const progress = resolveProfileProgress(
-        resolveBrandJourney(profileFacts(profile), toStepFacts(mergedRows)),
+        resolveBrandJourney(profileFacts(profile, betaAccount), toStepFacts(mergedRows)),
       )
       await touchProfile(event, profile.$id, {
         progressPct: progress.progressPct,

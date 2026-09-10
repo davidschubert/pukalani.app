@@ -195,24 +195,27 @@
           "generic": "Das hat gerade nicht geklappt. Versucht es in einer Minute noch einmal."
         }
       },
-      "designUnlock": {
-        "nav": "Brand Design",
-        "title": "Brand Design freischalten",
-        "subtitle": "Brand Design ist studio-begleitet: eine Marke bekommt Schicht 2, wenn das Erstgespräch gelaufen ist. Vorher bleiben die sechs Kapitel gesperrt.",
+      "unlocks": {
+        "nav": "Freischaltungen",
+        "title": "Freischaltungen",
+        "subtitle": "Zwei Schranken je Marke: Brand Design (Schicht 2) und die Ableitung — ein Feld, das Brand Book & Kit und den Marktvergleich zugleich öffnet. Beides ist studio-begleitet: eine Marke bekommt es, wenn das Erstgespräch gelaufen ist. Beta-Konten haben die Ableitung dauerhaft frei, auch ohne Eintrag.",
         "refresh": "Neu laden",
         "rowActions": "Aktionen für dieses Branding",
         "emptyTitle": "Noch kein Branding",
-        "empty": "Sobald jemand eine Marke anlegt, steht sie hier — mit dem Knopf, sobald ihre Foundation steht.",
+        "empty": "Sobald jemand eine Marke anlegt, steht sie hier — mit den Knöpfen, sobald ihre Foundation steht.",
         "actionFailed": "Das hat nicht geklappt",
+        "events": "Ereignisse dieser Sitzung",
         "counts": {
           "all": "Brandings",
-          "ready": "Bereit zum Freischalten",
-          "unlocked": "Freigeschaltet"
+          "ready": "Foundation fertig",
+          "design": "Brand Design frei",
+          "derivation": "Ableitung frei"
         },
         "col": {
           "brand": "Marke",
           "foundation": "Foundation",
           "design": "Brand Design",
+          "derivation": "Ableitung",
           "created": "Angelegt"
         },
         "foundation": {
@@ -221,30 +224,64 @@
         },
         "state": {
           "locked": "Gesperrt",
-          "unlocked": "Frei seit {date}"
+          "unlocked": "Frei seit {date}",
+          "unlockedVia": "Frei seit {date} · {via}",
+          "beta": "Frei · Beta-Konto"
+        },
+        "grant": {
+          "beta": "Beta-Konto",
+          "operator": "vom Studio",
+          "purchase": "gekauft",
+          "none": "gesperrt"
         },
         "action": {
-          "unlock": "Brand Design freischalten",
-          "lock": "Freischaltung zurücknehmen"
+          "design": {
+            "unlock": "Brand Design freischalten",
+            "lock": "Brand Design zurücknehmen"
+          },
+          "derivation": {
+            "unlock": "Ableitung freischalten",
+            "lock": "Ableitung zurücknehmen"
+          }
         },
         "done": {
-          "unlock": "Brand Design ist freigeschaltet",
-          "lock": "Freischaltung zurückgenommen"
+          "design": {
+            "unlock": "Brand Design ist freigeschaltet",
+            "lock": "Brand Design ist wieder gesperrt"
+          },
+          "derivation": {
+            "unlock": "Die Ableitung ist freigeschaltet",
+            "lock": "Die Ableitung ist wieder gesperrt"
+          }
         },
         "confirm": {
-          "unlock": {
-            "title": "Brand Design freischalten?",
-            "body": "„{brand}\" bekommt damit die sechs Kapitel von Schicht 2 — Moodboard, Farbwelt, Typografie, Zeichen, Bildsprache, Bewegung. Ihr könnt das jederzeit zurücknehmen.",
-            "action": "Freischalten"
+          "design": {
+            "unlock": {
+              "title": "Brand Design freischalten?",
+              "body": "„{brand}\" bekommt damit die sechs Kapitel von Schicht 2 — Moodboard, Farbwelt, Typografie, Zeichen, Bildsprache, Bewegung. Ihr könnt das jederzeit zurücknehmen.",
+              "action": "Freischalten"
+            },
+            "lock": {
+              "title": "Brand Design zurücknehmen?",
+              "body": "Brand Design wird für „{brand}\" wieder gesperrt. Nichts wird gelöscht: bereits erarbeitete Kapitel bleiben liegen und stehen nach einer erneuten Freischaltung wieder da.",
+              "action": "Zurücknehmen"
+            }
           },
-          "lock": {
-            "title": "Freischaltung zurücknehmen?",
-            "body": "Brand Design wird für „{brand}\" wieder gesperrt. Nichts wird gelöscht: bereits erarbeitete Kapitel bleiben liegen und stehen nach einer erneuten Freischaltung wieder da.",
-            "action": "Zurücknehmen"
+          "derivation": {
+            "unlock": {
+              "title": "Ableitung freischalten?",
+              "body": "„{brand}\" bekommt damit Brand Book & Kit UND den Marktvergleich — es ist ein Feld, nicht zwei. Die drei Kapitel-Zeilen werden angelegt, und die Handlung hinterlässt eine Ereignis-Zeile mit eurem Namen.",
+              "action": "Freischalten"
+            },
+            "lock": {
+              "title": "Ableitung zurücknehmen?",
+              "body": "Brand Book & Kit und der Marktvergleich werden für „{brand}\" wieder gesperrt. Nichts wird gelöscht: erarbeitete Kapitel bleiben liegen. Ist das Konto ein Beta-Konto, bleibt die Ableitung trotzdem offen — dafür ist der Beta-Zugang zuständig, nicht diese Marke.",
+              "action": "Zurücknehmen"
+            }
           }
         },
         "error": {
-          "foundation_incomplete": "Die Brand Foundation dieser Marke ist noch nicht abgeschlossen — Schicht 2 setzt das Ergebnis-Kapitel voraus.",
+          "foundation_incomplete": "Die Brand Foundation dieser Marke ist noch nicht abgeschlossen — beide Schranken setzen das Ergebnis-Kapitel voraus.",
           "generic": "Bitte noch einmal versuchen."
         }
       }
@@ -1001,6 +1038,10 @@
       "designLocked": {
         "title": "Brand Design ist noch nicht freigeschaltet",
         "description": "Diese Schicht schaltet das Studio nach dem Erstgespräch für eure Marke frei. Eure Brand Foundation bleibt unverändert offen."
+      },
+      "derivationLocked": {
+        "title": "Book & Kit ist Teil der Ableitung",
+        "description": "Diese Schicht schaltet das Studio nach dem Erstgespräch für eure Marke frei — zusammen mit dem Marktvergleich. Eure Brand Foundation bleibt unverändert offen."
       }
     },
     "brands": {

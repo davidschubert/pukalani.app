@@ -56,8 +56,8 @@ import {
  * auch auf der Karte steht.
  */
 export default defineEventHandler(async (event): Promise<BrandMarkDraftsRunResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const { profile, stepRows } = await requireBrandMarkContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile, stepRows } = await requireBrandMarkContext(event, userId, betaAccount)
 
   const before = await listBrandMarkDrafts(event, profile.$id)
   if (brandMarkDraftsFree(before) < BRAND_MARK_DRAFTS_PER_RUN) {

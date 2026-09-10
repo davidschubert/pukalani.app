@@ -389,6 +389,52 @@ export function brandTypeRuleLines(rules: BrandTypeRules, locale: string): strin
   return view.blocks.map(block => `${block.label}: ${block.body}`)
 }
 
+/**
+ * DER WEG ZURÜCK AUS DEM PRESET (Konzept docs/plans/BRAND-BOOK-KIT.md §2.6,
+ * Paket K2) — `null`, sobald etwas nicht passt.
+ *
+ * ── WARUM ES IHN BRAUCHT ─────────────────────────────────────────────────
+ * Das Preset trägt die Schrift-Regeln als ZEILEN (`type.rules: string[]`, s.
+ * `brandTypeRuleLines`) — für ein Handbuch die richtige Form, für ein
+ * Design-Token die falsche: `font.weight.heading` ist eine ZAHL, und
+ * `letterSpacing` im Typografie-Verbund ist ein MASS. Ohne diesen Rückweg
+ * müsste das Kit den Vorschlag-Wert (600) einsetzen — und eine Marke, die sich
+ * für 300 entschieden hat, bekäme ein Token-Set, das ihre Entscheidung
+ * stillschweigend zurücknimmt.
+ *
+ * ── ER LIEST DIE ZAHL, NICHT DEN SATZ ────────────────────────────────────
+ * Aus jeder Zeile wird nur der WERT vor dem `·` gelesen; Beschriftung und
+ * Erklärung sind in der Inhaltssprache der Marke geschrieben und interessieren
+ * nicht. Nur die Versalien-Zeile ist ein Wort, und dafür gibt es den Katalog
+ * `UPPERCASE_TERMS` in beiden Sprachen. Fehlt eine Zeile oder steht dort
+ * Unlesbares, ist die Antwort `null` — der Aufrufer nimmt dann den Vorschlag,
+ * und zwar sichtbar an EINER Stelle statt still an dreien.
+ */
+export function brandTypeRulesFromLines(lines: readonly string[]): BrandTypeRules | null {
+  if (lines.length !== RULE_BLOCK_LABELS.length) return null
+  // `label: wert · erklärung` — getrennt wird am ERSTEN Doppelpunkt, weil
+  // keiner der vier Werte einen trägt (Zahl, px-Angabe, Ja/Nein, Mono-Stack).
+  const parts = lines.map((line) => {
+    const colon = line.indexOf(':')
+    const body = colon >= 0 ? line.slice(colon + 1) : line
+    return (body.split('·')[0] ?? '').trim()
+  })
+  const weight = Number.parseInt(parts[0] ?? '', 10)
+  const tracking = trackingFromText(parts[1] ?? '')
+  const needle = (parts[2] ?? '').toLowerCase()
+  const uppercase = UPPERCASE_TERMS
+    .find(term => term.de.toLowerCase() === needle || term.en.toLowerCase() === needle)
+  if (!Number.isFinite(weight) || !Number.isFinite(tracking) || !uppercase) return null
+  // Dieselbe Gegenprobe wie im Slot-Rückweg: der vierte Block MUSS die feste
+  // Mono-Rolle tragen, sonst stammen die Zeilen nicht aus dieser Regel.
+  if (!(parts[3] ?? '').includes('monospace')) return null
+  return brandTypeNormalizeRules({
+    headingWeight: weight,
+    headingTracking: tracking,
+    headingUppercase: uppercase.value,
+  })
+}
+
 // ── Die Invarianten als prüfbare Funktion ──────────────────────────────────
 
 /**

@@ -60,14 +60,14 @@ import {
  * und mit nur einer Zeile stünde die halbe Registry für immer auf `locked`.
  */
 export default defineEventHandler(async (event): Promise<BrandStepDetailResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const { profile, stepKey, stepRow, stepRows, journey } = await loadBrandStepContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile, stepKey, stepRow, stepRows, journey } = await loadBrandStepContext(event, userId, betaAccount)
 
   const step = journey.find(entry => entry.stepKey === stepKey)!
   const generations = parseGenerations(stepRow.generations)
   const records = parseSlotRecords(stepRow.slots)
 
-  const states = resolveBrandSessionStates(profileFacts(profile), toStepFacts(stepRows))
+  const states = resolveBrandSessionStates(profileFacts(profile, betaAccount), toStepFacts(stepRows))
   const sessions: Record<string, BrandSessionView> = {}
   for (const session of slotsForStep(stepKey)) {
     const collected = parseCollectedParts(records[session.id])

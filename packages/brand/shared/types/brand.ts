@@ -20,6 +20,7 @@
  * antworten 404 — Datentür).
  */
 
+import type { BrandDerivationGrant } from '../brandDerivation'
 import type { BrandFoundationView } from '../brandFoundation'
 import type { BrandGenerationOutcome } from '../brandGeneration'
 import type { BrandInspirationEntry } from '../brandInspiration'
@@ -148,6 +149,22 @@ export interface BrandProfileSummary {
    * will, ob ein Kapitel betretbar ist, fragt sie und nicht dieses Feld.
    */
   designUnlockedAt: string | null
+  /**
+   * IST DIE ABLEITUNG FÜR DIESE MARKE OFFEN? (Konzept
+   * docs/plans/BRAND-BOOK-KIT.md §2.8, Paket K1) — Brand Book & Kit UND der
+   * Marktvergleich hängen daran.
+   *
+   * EIN JA/NEIN und kein Zeitstempel, anders als bei `designUnlockedAt`: die
+   * Freischaltung hat drei Quellen (Beta-Konto, Betreiber-Knopf, ab BS1 Z1 der
+   * Stripe-Webhook), und nur zwei davon schreiben ein Datum. Was hier steht,
+   * ist das ERGEBNIS der puren Regel `resolveDerivationAccess` — nie eine
+   * ihrer Zutaten.
+   *
+   * Es ist wie beim Design nur die HÄLFTE der Bedingung: ob ein Kapitel der
+   * dritten Schicht betretbar ist, sagt die Journey (dort muss zusätzlich
+   * `result` abgeschlossen sein), nicht dieses Feld.
+   */
+  derivationUnlocked: boolean
 }
 
 export interface BrandProfileListResponse {
@@ -2113,6 +2130,48 @@ export interface BrandDesignUnlockListResponse {
 export interface BrandDesignUnlockResponse {
   ok: true
   item: BrandDesignUnlockItem
+}
+
+/**
+ * EINE ZEILE DER BETREIBER-SEITE „FREISCHALTUNGEN" (Konzept
+ * docs/plans/BRAND-BOOK-KIT.md §2.20 Nr. 5, Paket K1) — BEIDE Schranken einer
+ * Marke nebeneinander: Brand Design (Schicht 2) und die Ableitung (Book & Kit
+ * + Marktvergleich).
+ *
+ * ── WARUM SIE DIE DESIGN-ZEILE ERWEITERT UND NICHT DANEBEN STEHT ─────────
+ * Die Seite ist EINE Tabelle mit zwei Spalten (Davids Entscheidung §2.20
+ * Nr. 5): „zwei Listen untereinander hätten dieselbe Marke zweimal gezeigt und
+ * die Frage ‚was hat die eigentlich?' nie beantwortet." Beide Zustände stehen
+ * in DERSELBEN `brand_profiles`-Zeile — sie zweimal zu holen wäre derselbe
+ * Lesevorgang doppelt. Die schmale `BrandDesignUnlockItem` bleibt daneben
+ * bestehen: sie ist die Antwort der Design-Liste, die ihren eigenen Beweis hat
+ * (`verify-brand-sessions.mjs`).
+ */
+export interface BrandUnlockItem extends BrandDesignUnlockItem {
+  /** `null` = kein FELD. Ein Beta-Konto ist trotzdem frei — s. `derivationGrant`. */
+  derivationUnlockedAt: string | null
+  /** Betreiber-Id bzw. Stripe-Event-Id; leer, wenn kein Feld gesetzt ist. */
+  derivationUnlockedBy: string
+  /**
+   * DAS ERGEBNIS DER PUREN REGEL (`resolveDerivationAccess`) — nicht die
+   * Spalte. `'beta'` heisst „das KONTO des Eigentümers ist ein Beta-Konto,
+   * ganz ohne Feld"; `'none'` heisst „gesperrt". Der Chip nennt die Herkunft
+   * immer: „frei" ohne „warum" wäre in einem Streitfall keine Auskunft.
+   */
+  derivationGrant: BrandDerivationGrant
+}
+
+export interface BrandUnlockListResponse {
+  items: BrandUnlockItem[]
+  total: number
+  /** Leer heisst „letzte Seite" (s. Begründung in der Warteliste). */
+  nextCursor: string
+}
+
+/** Die Antwort beider Ableitungs-Routen — die ganze Zeile, damit die Liste nicht neu lädt. */
+export interface BrandUnlockResponse {
+  ok: true
+  item: BrandUnlockItem
 }
 
 /**

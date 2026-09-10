@@ -29,8 +29,8 @@ import {
  * behaltene, verschwindet der Slot ganz (s. `syncBrandMarkDraftsSlot`).
  */
 export default defineEventHandler(async (event): Promise<BrandMarkDraftWriteResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const { profile, stepRows } = await requireBrandMarkContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile, stepRows } = await requireBrandMarkContext(event, userId, betaAccount)
 
   const draftId = getRouterParam(event, 'draftId')
   if (!draftId || draftId.length > 64) throw createError({ status: 400, statusText: 'Missing id' })
