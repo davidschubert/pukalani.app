@@ -969,6 +969,16 @@ nicht die Suchnachfrage.)
 geschärften Form — sie ist Gate für **alles über Metadaten hinaus**, nicht für
 den Radar als solchen + ein **Google-Cloud-Projekt mit API-Schlüssel (David)**.
 
+#### Fortsetzung: Kuration, Merkliste, Artikel aus Video (BI2)
+
+Davids Blick auf den ersten Prod-Lauf (2026-09-09) hat sieben Wünsche ergeben,
+die über den Zuschnitt von I4 hinausgehen: die Kanalliste einsehen und
+bearbeiten, die Cluster erweitern, filtern und sortieren, eine eigene
+Fundstück-Liste per YouTube-Link, ein Dreifach-Urteil je Video, und aus einem
+Video einen Artikel. Sie stehen als eigener Plan in
+**[BRAND-INSIGHTS-KURATION.md](BRAND-INSIGHTS-KURATION.md)** (Pakete K1–K7,
+drei Entscheidungsfragen offen) — dieses Dokument bleibt der Stand von BI1.
+
 ### 9.7 Messung — drei Ziele, drei Zahlen
 
 Entscheidung 9 gewichtet die drei Ziele gleich. Je Ziel EINE Kennzahl, und
