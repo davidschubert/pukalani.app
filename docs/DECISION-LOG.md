@@ -7,6 +7,55 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-10 — Mehrsprachige Betreiber-Seiten (F60): der Zuschnitt ist ein anderer als gedacht
+
+**Anlass:** F60 sollte laut OPEN-ITEMS „je Sprache eine Fassung" nach dem Muster der
+Kategorie-Übersetzungen bauen (Übersetzungs-JSON überschreibt eine Grundfassung). Die Analyse
+vor Baubeginn zeigt: **der `pages`-Layer hat das seit `pages-001`** — und zwar in der stärkeren
+Form. Eine Zeile je `slug` × `locale` (Unique-Index `uq_slug_locale`), `body` als MEDIUMTEXT,
+Titel/Body/Veröffentlicht-Status je Fassung, EN/DE-Reiter im Editor, sprachgenaue öffentliche
+Auflösung samt Microcache. **Folge: keine Ablage-Entscheidung, keine Migration.** Das
+Kategorie-Muster wäre hier ein Rückschritt gewesen — ein JSON-Feld mit
+200.000-Zeichen-Rechtstexten im MariaDB-Zeilenbudget.
+
+**Was wirklich fehlte** — vier Lücken um dieses Modell herum, alle vier gebaut:
+(1) der Sprach-Fallback war STUMM (eine nur auf DE gepflegte Seite kam unter dem EN-Pfad mit
+`lang="en"` heraus, deutschem Titel in der EN-Navigation, und `useLocaleHead` bewarb weiter ein
+`hreflang="en"`-Alternate, hinter dem kein englischer Text stand — bei Impressum und
+Datenschutz der unangenehmste Fall), (2) kein KI-Vorschlag, (3) die Sprachliste im Editor
+hartcodiert `['en','de']`, obwohl sie in der i18n-Config steht, (4) keine Sicht auf FEHLENDE
+Fassungen (die Tabelle zeigte nur, was da war).
+
+**Davids Entscheidungen (vier Fragen, gebündelt vor Baubeginn):**
+(a) **Zuschnitt = Lücken schließen + KI-Vorschlag**, ohne Migration.
+(b) **Fallback: zeigen und ehrlich beschriften.** Die vorhandene Fassung wird ausgeliefert —
+Rechtstexte bleiben in jeder Sprache erreichbar —, der Artikel trägt das RICHTIGE
+`lang`-Attribut, darüber steht eine schlichte Zeile „Diese Seite gibt es noch nicht auf
+Englisch", und für die fehlende Sprache wird keine Alternate-Adresse mehr behauptet. Verworfen:
+still bleiben wie bisher (der Leser rätselt, warum die Sprache springt) · 404 in der fehlenden
+Sprache (sauberste Trennung, aber Impressum/Datenschutz wären weg, sobald der Owner nur eine
+Sprache pflegt — rechtlich riskant).
+(c) **KI-Vorschlag wie bei den Kategorien:** Knopf im Sprachreiter, die Route SPEICHERT NICHTS,
+sie füllt das Formular; veröffentlicht wird von Hand. Zwei Produkt-Gates (`pages` UND `ai`),
+Kill-Switch, Drossel, ZDR. Verworfen: eine Absatz-für-Absatz-Gegenüberstellung (viel UI für
+200k-Bodies) · Verschieben auf einen eigenen Punkt.
+(d) **Lange Texte: Deckel statt Halbergebnis.** Übersetzt werden Bodies bis 12.000 Zeichen (ein
+normaler Rechtstext liegt darunter); darüber sagt der Knopf klar „zu lang für den Vorschlag".
+Ein Klick = ein KI-Aufruf = ein Kontingent. Verworfen: abschnittsweises Übersetzen an
+Überschriften (mehrere Aufrufe je Klick, eigene Drossel-Rechnung nötig) · nur den Titel
+übersetzen (billig, aber der Nutzen ist zu klein).
+
+**Nachtrag beim Rebase — eigener Core-Weg fallen gelassen:** für die Alternate-Adressen war ein
+eigener Kern-Vertrag geschrieben (`usePageLocaleAlternates()` + `core/shared/localeAlternates.ts`,
+Pfad im State statt Zurücksetzen). Eine Nachbarsitzung hatte am selben Tag für BI1 I3 denselben
+Mechanismus gebaut (`useSeoHiddenLocales()` + `core/shared/seoAlternates.ts`). Nach der
+CLAUDE.md-Regel („zwei Wege für dieselbe Sache kosten dauerhaft mehr als eine verlorene Stunde")
+fällt der EIGENE Commit, nicht die fremde Lösung — sie kann zudem mehr (räumt auch
+`og:locale:alternate` mit) und trifft bei `x-default` die bessere Entscheidung: es bleibt, weil
+es keine Sprachzusage ist, sondern der Rückfall, den die Seite ohnehin zeigt.
+
+---
+
 ## 2026-09-10 — Brand Insights (BI1) Kanalliste: Ogilvy und Harry Dry ersetzt statt gestrichen
 
 **Anlass:** der Alters-Deckel aus der I4-Schärfung hat sichtbar gemacht, was vorher nur alt

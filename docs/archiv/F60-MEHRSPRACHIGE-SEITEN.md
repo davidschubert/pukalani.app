@@ -67,19 +67,21 @@ ohnehin schon geladen; es kostet keine zweite Abfrage.
   gewünschte ist: *„Diese Seite gibt es nur auf Deutsch."*;
 - die Seite meldet ihre vorhandenen Sprachen an den EINEN SEO-Kopf.
 
-**Core-Vertrag** — `usePageLocaleAlternates()`, gebaut wie `useBrandOgImage()`
-(CONCEPT.md A14: der Kern darf den Produkt-Layer nicht kennen, also sagt der
-Produkt-Layer dem Kern, WAS gilt, und der Kern entscheidet, WIE). Der State
-trägt **Pfad + Sprachliste**, nicht nur die Liste: ein Eintrag, dessen Pfad
-nicht zur aktuellen Route passt, wird ignoriert. Das löst das
-Reihenfolge-Problem beim Navigieren im Browser ohne Watcher — ein veralteter
-Eintrag ist automatisch wirkungslos, und der Ausfallwert ist „alle Sprachen wie
-bisher".
+**Core-Vertrag** — `useSeoHiddenLocales()`. Der war beim Bau noch nicht da; ein
+eigener (`usePageLocaleAlternates()` plus `core/shared/localeAlternates.ts`) war
+schon geschrieben und ist beim Rebase **fallen gelassen** worden, weil eine
+Nachbarsitzung für BI1 I3 am selben Tag denselben Mechanismus gebaut hatte
+(CLAUDE.md: „zwei Wege für dieselbe Sache kosten dauerhaft mehr als eine
+verlorene Stunde"). Die fremde Fassung kann an einer Stelle mehr — sie räumt
+auch die `og:locale:alternate`-Meta-Angaben mit — und trifft bei `x-default` die
+andere, bessere Entscheidung: es BLEIBT stehen, weil es keine Sprachzusage ist,
+sondern die Ansage „nimm diese, wenn keine passt".
 
-`useLocaleSeoHead()` filtert damit die `hreflang`-Alternates. Die Regel ist rein
-und getestet (`core/shared/localeAlternates.ts`): `canonical` bleibt immer,
-`alternate` nur für vorhandene Sprachen, `x-default` fällt mit, wenn es die
-Standardsprache nicht gibt. `null`/leere Liste ⇒ unverändert (Core-Default).
+Der Unterschied in der Bauart: der fremde State ist app-weit und muss von der
+Seite ZURÜCKGESETZT werden (`onBeforeRouteLeave` + `onUnmounted`) — der eigene
+trug den Pfad mit und war dadurch automatisch wirkungslos, wenn er nicht mehr
+passte. Die Seite tut jetzt das Zurücksetzen; die Gegenprobe im Beweis (Punkt 7
+und 8) prüft genau das.
 
 **Bewusst NICHT geändert:** die Navigation zeigt weiter den Titel der
 Ersatzsprache, ohne Zusatz. Ein „(Deutsch)" hinter jedem Menüpunkt wäre Lärm an

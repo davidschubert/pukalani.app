@@ -30,6 +30,110 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### F60 — Mehrsprachige Betreiber-Seiten: der Fallback zeigt und sagt, was er zeigt ✅ 2026-09-10
+
+**Was:** Der geparkte Punkt F60 versprach „je Sprache eine Fassung" nach dem
+Muster der Kategorie-Übersetzungen. Die Analyse vor Baubeginn zeigte, dass der
+`pages`-Layer das **seit `pages-001`** hat, und zwar in der stärkeren Form: eine
+Zeile je `slug` × `locale` (Unique-Index `uq_slug_locale`), `body` als
+MEDIUMTEXT, Titel/Text/Veröffentlicht-Status je Fassung, EN/DE-Reiter im Editor,
+sprachgenaue öffentliche Auflösung samt Microcache. **Keine Ablage-Entscheidung,
+keine Migration.** Gebaut wurden die vier Lücken DRUMHERUM (Davids vier
+Entscheidungen, DECISION-LOG 2026-09-10; Plan:
+[archiv/F60-MEHRSPRACHIGE-SEITEN.md](archiv/F60-MEHRSPRACHIGE-SEITEN.md)):
+
+1. **Der stumme Fallback spricht.** Eine nur auf Deutsch gepflegte Seite kam
+   unter dem englischen Pfad mit `lang="en"` heraus, und `useLocaleHead` bewarb
+   weiterhin ein `hreflang="en"`-Alternate, hinter dem derselbe deutsche Text
+   stand — bei Impressum und Datenschutz der unangenehmste Fall. Jetzt: eine
+   Zeile für den Leser („Diese Seite gibt es noch nicht auf Englisch — angezeigt
+   wird die Fassung auf Deutsch."), `lang` am TEXT (Überschrift und Rumpf, nicht
+   am Hinweis — der steht in der Sprache des Lesers), und Alternate-Adressen nur
+   noch für Sprachen, die es **veröffentlicht** gibt. 404 in der fehlenden
+   Sprache war die verworfene Alternative: Rechtstexte müssen erreichbar bleiben.
+2. **Der Editor zeigt, was FEHLT:** je App-Sprache ein Kürzel (grün
+   veröffentlicht · grau Entwurf · umrandet fehlt), und die Reiter kommen aus der
+   i18n-Config statt aus `['en','de']` — das Datenmodell konnte immer beliebige
+   Sprachen, dieser Bildschirm nicht.
+3. **KI-Übersetzungsvorschlag** nach dem Muster des Kategorie-Vorschlags:
+   `POST /api/pages/translate` **speichert nichts**, zwei Produkt-Gates
+   (`pages` + `ai`), Kill-Switch (503 ohne Schlüssel, Knopf erscheint dann gar
+   nicht), IP-Drossel `pages:translate`, ZDR fail-closed
+   (`zdr: true, dataCollection: 'deny', allowFallbacks: false` — anders als bei
+   den Kategorien geht hier ein RECHTSTEXT an den Anbieter), Deckel 12.000
+   Zeichen mit klarer Absage statt Halbergebnis.
+
+**Beweise:** `packages/pages/scripts/verify-page-languages.mjs` **23/23** gegen
+zwei Dev-Server aus dem Worktree (Fallback, Hinweis, `lang`, `hreflang` UND
+`og:locale:alternate`, drei Gegenproben: englische Fassung dazu ⇒ Hinweis weg +
+Adressen zurück · Fassung auf Entwurf ⇒ beides wieder weg · Nachbarseite und
+Startseite behalten ihre Adressen) · Unit: `pages/tests/pageLocales.test.ts` ·
+Typecheck grün in ALLEN vier Apps mit dem Layer (platform, portfolio, control,
+branding) · `check:i18n-keys`, `check:manifests`, `check:bilanz` grün ·
+Klick-Beweis hinter Login auf einer Wegwerf-Community: Sprach-Kürzel gelesen
+(`en:missing`/`de:draft`), deutsche Fassung veröffentlicht, danach auf dem
+englischen Pfad Hinweis + `lang="de"` + nur deutsche Adressen im Browser
+gemessen, dazu beide Richtungen einer CLIENT-Navigation (einsprachig ↔
+zweisprachig ↔ Startseite) — genau dort steckte der Fehler unter Gelernt (3) ·
+Kunden-Hilfe in beiden Sprachen ergänzt.
+
+**Gelernt:** (1) **Ein geparkter Punkt beschreibt den Stand vom Tag seiner
+Aufnahme, nicht den von heute.** F60 stand mit „Aufwand M — Tage" in der Liste;
+die Hälfte war längst gebaut. Vor der ersten Frage an David gehört die
+Ausgangslage im CODE nachgelesen — sonst führt man eine Entscheidungsrunde über
+eine Ablage, die es schon gibt. (2) **Doppelte Arbeit erkennt man erst beim
+Rebase, und dann gilt Davids Regel.** Ein eigener Kern-Vertrag für die
+Alternate-Adressen war fertig und getestet, als der Rebase zeigte, dass eine
+Nachbarsitzung am selben Tag für BI1 I3 denselben Mechanismus gebaut hatte
+(`useSeoHiddenLocales()` + `core/shared/seoAlternates.ts`). Der EIGENE Commit
+fiel; die fremde Fassung kann mehr (räumt auch `og:locale:alternate` mit) und
+entscheidet bei `x-default` besser (es bleibt — keine Sprachzusage, sondern der
+Rückfall, den die Seite ohnehin zeigt). Der Preis war eine Stunde; zwei Wege für
+dieselbe Sache hätten dauerhaft mehr gekostet. (3) **Und der übernommene
+Vertrag hatte einen Fehler, den nur der Klick-Beweis findet.** Der fremde State
+ist app-weit; sein Kopf verlangt, dass die Seite ihn in `onBeforeRouteLeave` und
+`onUnmounted` LEERT. Beim Wechsel im Browser wird aber zuerst die NEUE Seite
+aufgebaut — sie schreibt ihren Wert — und erst danach die alte abgeräumt: das
+blinde Leeren löscht genau den frischen Eintrag. Gemessen auf dem Weg zurück von
+einer zweisprachigen Seite auf eine einsprachige: der Hinweis stand da, der Kopf
+bewarb weiter `hreflang="en"`. Die Gegenrichtung fällt NICHT auf, weil dort beide
+Seiten denselben Wert schreiben — und SSR sieht davon nichts, weil jeder Request
+einen frischen State hat. Die Seite räumt jetzt nur auf, wenn im State noch genau
+DAS Array-Objekt liegt, das sie hineingelegt hat (Identität, nicht Inhalt: zwei
+Seiten dürfen dieselbe fehlende Sprache melden). Dass die insights-Seiten aus
+BI1 I3 denselben Fehler haben könnten, ist als eigene Aufgabe gemeldet — die
+Absicherung gehört auf Dauer EINMAL in den Kern, nicht in jede Seite.
+(4) **Erwartungswerte im Beweis sind selbst eine Behauptung.** Drei Prüfungen
+waren rot, weil sie `["de"]` erwarteten — nuxt-i18n schreibt je Sprache ZWEI
+Alternates (`de` aus `code`, `de-DE` aus `language`) plus `x-default`. Der Code
+stimmte, die Erwartung nicht. (5) **Die Port-Falle aus `.claude/rules/tests.md`
+ist real und sieht wie ein Regressionsschaden aus:** der Platform-Dev-Server wich
+beim Start still von 3021 auf **3000** aus (der Vorgänger hatte den Port noch
+nicht freigegeben), die Messungen liefen gegen den sterbenden alten Prozess —
+Symptom war ein `401 Invalid credentials` beim Login mit einem gerade erst
+angelegten Konto, weil `login.post.ts` JEDEN Appwrite-Fehler bewusst zu einer
+generischen 401 macht. Immer die `Local:`-Zeile im Dev-Log gegen den erwarteten
+Port prüfen, nicht nur `lsof`. (6) **Beweis-Skripte räumten bisher nur ihre
+EIGENEN Zeilen weg, nicht die vom Onboarding geseedeten** — in der lokalen
+Dev-Datenbank lagen dadurch ~200 Seiten-Zeilen zu 69 Communities, von denen es
+nur noch vier gibt. `verify-page-languages.mjs` merkt sich die Pool-Id der
+Community (sie steht auf jeder gespeicherten `pages`-Zeile) und löscht am Ende
+alle Seiten dieser Community. (7) **Ein frisch installierter Worktree kann ein
+LÜCKENHAFTES Hoisting haben:** `pnpm install --frozen-lockfile` liess
+`@shikijs/engine-oniguruma` aus `node_modules/.pnpm/node_modules` weg, und JEDE
+SSR-Seite und API-Route antwortete 500 („Cannot find package") —
+`pnpm install --frozen-lockfile --force` baut `node_modules` neu auf, ohne das
+Lockfile anzufassen.
+
+**Offen bei David (ein Gate, kein Blocker):** Der ZDR-Zwang ist lokal NICHT
+gegen einen echten Anbieter gemessen — ohne hinterlegten Schlüssel antwortet die
+Route 503, bevor sie das Modell ruft. Dieselbe Routing-Vorgabe läuft auf
+branding.supply seit BI1 I2 produktiv (`BRAND_PROVIDER_ROUTING`), dort aber mit
+einem anderen Modell. Der erste Klick auf Prod zeigt, ob ein ZDR-Anbieter das
+auf `platform` eingestellte Modell bedient; tut er es nicht, ist die ehrliche
+Absage sichtbar — und die Entscheidung, ob ZDR fällt oder das Modell wechselt,
+gehört dann David.
+
 ### Sitzungs-Hygiene: 24 Video-Tipps gegen unseren Stand geprüft, Regeln je Phase, Ausgabe-Deckel gesetzt ✅ 2026-09-09
 
 **Was:** Davids Auftrag, das Video „How To Never Run Out Of Codex and Claude
