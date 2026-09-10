@@ -11,6 +11,7 @@ import type {
   InsightsTopicKey,
 } from './insightsPost'
 import {
+  INSIGHTS_BRAND_STATES,
   INSIGHTS_FORMATS,
   INSIGHTS_LOCALES,
   INSIGHTS_STATES,
@@ -27,6 +28,7 @@ import {
   INSIGHTS_CORRECTION_STATUSES,
   INSIGHTS_CORRECTION_TARGET_KINDS,
 } from './insightsCorrection'
+import type { InsightsCorrectionListItem } from './types/insightsApi'
 
 /**
  * DER ABLAGE-VERTRAG VON BRAND INSIGHTS (Migrationen insights-001…003,
@@ -302,8 +304,6 @@ export function fromInsightsPost(post: InsightsPost): InsightsPostRowData {
 
 // ── Markenprofil: Zeile ⇄ Vertrag ──────────────────────────────────────────
 
-const BRAND_STATES = ['draft', 'published', 'removed'] as const
-
 /** ZEILE → VERTRAG (s. Kopf: fail-soft, engster Ersatzwert). */
 export function toInsightsBrand(row: InsightsBrandRow): InsightsBrand {
   return {
@@ -326,7 +326,7 @@ export function toInsightsBrand(row: InsightsBrandRow): InsightsBrand {
     history: parseJsonArray<InsightsBrand['history'][number]>(row.history),
     relations: parseJsonArray<string>(row.relations),
     sources: parseJsonArray<InsightsSource>(row.sources),
-    state: oneOf(BRAND_STATES, row.state, 'draft'),
+    state: oneOf(INSIGHTS_BRAND_STATES, row.state, 'draft'),
     removedAt: row.removedAt ?? '',
     removalReason: row.removalReason ?? '',
     claimedBy: row.claimedBy ?? '',
@@ -407,5 +407,38 @@ export function fromInsightsCorrection(
     contactEmail: correction.contactEmail,
     status: correction.status,
     decisionNote: correction.decisionNote,
+  }
+}
+
+/**
+ * ZEILE → ARBEITSLISTEN-EINTRAG (BI1 I2-Rest).
+ *
+ * ── WARUM DIESER MAPPER HIER STEHT UND NICHT IN `server/utils` ───────────
+ * Sein Nachbar `toInsightsPostListItem` liegt dort, und das ist für ihn auch
+ * richtig. Dieser hier gibt aber ein VERSPRECHEN ab: die Kontakt-Adresse
+ * verlässt den Server nicht, nur ihr Vorhandensein tut es (§9.3, das einzige
+ * personenbezogene Feld des Layers). Ein Versprechen dieser Art gehört an
+ * eine Stelle, die eine Gegenprobe zeigen kann — und ein Vitest-Lauf ohne
+ * Nitro kann `server/utils` nicht importieren (Auto-Imports, `H3Event`,
+ * Appwrite-Client). Hier ist er pur und geprüft.
+ *
+ * `targetLabel` reicht die Route herein: sie allein weiss, ob es zu
+ * `targetId` noch einen Beitrag oder eine Marke gibt.
+ */
+export function toInsightsCorrectionListItem(
+  row: InsightsCorrectionRow,
+  targetLabel = '',
+): InsightsCorrectionListItem {
+  const { contactEmail, ...correction } = toInsightsCorrection(row)
+  return {
+    ...correction,
+    id: row.$id,
+    targetLabel,
+    // Bewusst `Boolean(...)` und nicht die Adresse: siehe Kopf. Nach dem
+    // Retention-Sweep (12 Monate) ist das Feld leer — dann sagt die Spalte
+    // ehrlich „kein Kontakt (mehr)", statt eine Adresse zu behaupten.
+    hasContact: Boolean(contactEmail),
+    createdAt: row.$createdAt,
+    decidedAt: row.decidedAt ?? '',
   }
 }

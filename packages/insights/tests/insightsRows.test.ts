@@ -2,7 +2,7 @@ import type { Models } from 'node-appwrite'
 import { describe, expect, it } from 'vitest'
 import type { InsightsBrand, InsightsPost } from '../shared/insightsPost'
 import { INSIGHTS_SLUG_HISTORY_MAX, insightsSlugHistoryPush } from '../shared/insightsPost'
-import type { InsightsBrandRow, InsightsPostRow } from '../shared/insightsRows'
+import type { InsightsBrandRow, InsightsCorrectionRow, InsightsPostRow } from '../shared/insightsRows'
 import {
   INSIGHTS_BRANDS_TABLE,
   INSIGHTS_CORRECTIONS_TABLE,
@@ -10,6 +10,7 @@ import {
   fromInsightsBrand,
   fromInsightsPost,
   toInsightsBrand,
+  toInsightsCorrectionListItem,
   toInsightsPost,
 } from '../shared/insightsRows'
 
@@ -262,5 +263,84 @@ describe('insightsSlugHistoryPush', () => {
     const history = ['a']
     insightsSlugHistoryPush(history, 'b')
     expect(history).toEqual(['a'])
+  })
+})
+
+/**
+ * DER ARBEITSLISTEN-EINTRAG EINES KORREKTURVORSCHLAGS (BI1 I2-Rest).
+ *
+ * Er gibt EIN Versprechen ab, und genau darum steht er in einer puren Datei:
+ * die Kontakt-Adresse — das einzige personenbezogene Feld dieses Layers
+ * (§9.3) — verlässt den Server NICHT, nur ihr Vorhandensein tut es. Eine
+ * Prüfung, die nur `hasContact === true` kennt, wäre auch dann grün, wenn die
+ * Adresse gleich daneben im Objekt stünde; deshalb prüft der Test BEIDES: das
+ * Häkchen und die Abwesenheit des Feldes.
+ */
+const correctionMeta: Models.Row = {
+  ...rowMeta,
+  $id: 'corr-1',
+  $tableId: INSIGHTS_CORRECTIONS_TABLE,
+  $createdAt: '2026-09-01T08:00:00.000Z',
+}
+
+function correctionRow(extra: Partial<InsightsCorrectionRow> = {}): InsightsCorrectionRow {
+  return {
+    ...correctionMeta,
+    targetKind: 'brand',
+    targetId: 'brand-1',
+    kind: 'correction',
+    field: 'foundedYear',
+    proposed: '1994',
+    reason: 'Die Rösterei gibt es seit 1994, nicht seit 1999.',
+    status: 'open',
+    decisionNote: '',
+    ...extra,
+  }
+}
+
+describe('toInsightsCorrectionListItem', () => {
+  it('sagt, DASS ein Kontakt hinterlegt ist — und schickt die Adresse NICHT mit', () => {
+    const item = toInsightsCorrectionListItem(correctionRow({ contactEmail: 'max@example.com' }))
+    expect(item.hasContact).toBe(true)
+    // Das eigentliche Versprechen: kein Feld, nicht nur kein Wert.
+    expect(Object.keys(item)).not.toContain('contactEmail')
+    expect(JSON.stringify(item)).not.toContain('example.com')
+  })
+
+  it('GEGENPROBE: ohne Adresse ist `hasContact` falsch', () => {
+    expect(toInsightsCorrectionListItem(correctionRow()).hasContact).toBe(false)
+    expect(toInsightsCorrectionListItem(correctionRow({ contactEmail: '' })).hasContact).toBe(false)
+  })
+
+  it('GEGENPROBE: eine GELEERTE Adresse (Retention-Sweep) zählt als kein Kontakt', () => {
+    const swept = correctionRow({ contactEmail: '', ipHash: '', retentionAt: null })
+    expect(toInsightsCorrectionListItem(swept).hasContact).toBe(false)
+  })
+
+  it('trägt Id, Eingangsdatum und den Ziel-Namen', () => {
+    const item = toInsightsCorrectionListItem(correctionRow(), 'Upcountry Roasters')
+    expect(item.id).toBe('corr-1')
+    expect(item.createdAt).toBe('2026-09-01T08:00:00.000Z')
+    expect(item.targetLabel).toBe('Upcountry Roasters')
+    expect(item.decidedAt).toBe('')
+  })
+
+  it('GEGENPROBE: ohne auflösbares Ziel bleibt das Etikett LEER (die Seite zeigt dann die Id)', () => {
+    expect(toInsightsCorrectionListItem(correctionRow()).targetLabel).toBe('')
+  })
+
+  it('reicht die Entscheidung samt Zeitpunkt durch', () => {
+    const item = toInsightsCorrectionListItem(correctionRow({
+      status: 'declined',
+      decisionNote: 'Der Beleg nennt 1999.',
+      decidedAt: '2026-09-05T10:00:00.000Z',
+    }))
+    expect(item.status).toBe('declined')
+    expect(item.decisionNote).toBe('Der Beleg nennt 1999.')
+    expect(item.decidedAt).toBe('2026-09-05T10:00:00.000Z')
+  })
+
+  it('GEGENPROBE: ein unbekannter Status fällt auf `open` — nicht ins Nichts', () => {
+    expect(toInsightsCorrectionListItem(correctionRow({ status: 'erledigt' })).status).toBe('open')
   })
 })

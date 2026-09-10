@@ -260,13 +260,137 @@
         "postNotFound": "Diesen Beitrag gibt es nicht.",
         "sourceNotFound": "Diese Quelle gibt es nicht mehr.",
         "storageUnavailable": "Die Ablage ist gerade nicht erreichbar.",
-        "generic": "Das hat nicht geklappt."
-      }
+        "generic": "Das hat nicht geklappt.",
+        "notDeletable": "Erst zurückziehen — ein freigegebener Beitrag wird nicht direkt gelöscht."
+      },
+      "delete": "Löschen",
+      "deleteTitle": "Beitrag löschen",
+      "deleteText": "„{title}“ wird endgültig gelöscht. Das lässt sich nicht rückgängig machen.",
+      "deleteHint": "Quellen, Fakten und die Redaktionsnotiz gehen mit — sie stehen in derselben Zeile.",
+      "deleteBlocked": "Erst zurückziehen: ein freigegebener Beitrag wird nicht aus der Öffentlichkeit heraus gelöscht.",
+      "deleted": "Beitrag gelöscht."
     },
     "admin": {
       "nav": "Brand Insights",
       "navPosts": "Beiträge",
+      "navBrands": "Marken",
+      "navCorrections": "Korrekturen",
       "navRadar": "Themenradar"
+    },
+    "brands": {
+      "title": "Marken",
+      "lead": "Jede Marke, über die wir schreiben, hat hier eine Zeile — sonst gibt es keinen Ort, an dem ein Korrekturvorschlag ankommt.",
+      "new": "Marke anlegen",
+      "edit": "Marke bearbeiten",
+      "editHint": "Zeichen, Historie und Beziehungen brauchen je einen Beleg aus der Quellenliste.",
+      "refresh": "Neu laden",
+      "saved": "Marke gespeichert.",
+      "emptyTitle": "Noch keine Marke",
+      "emptyDescription": "Eine neue Marke beginnt mit Name, Website und Branche.",
+      "slugHint": "Die Adresse. Beim Ändern wandert die alte in die Historie — Links bleiben heil.",
+      "countryHint": "Zwei Buchstaben, etwa DE oder US.",
+      "foundedYear": "Gegründet",
+      "archetypeSecondary": "Zweiter Archetyp",
+      "paletteId": "Farbwelt",
+      "libraryKey": "Bibliotheks-Schlüssel",
+      "checkId": "Brand-Check",
+      "checkIdHint": "Der jüngste Check dieser Website — daher kommt der Score.",
+      "publicationId": "Discover-Publikation",
+      "publicationIdHint": "Wenn die Marke auch Kundin ist: das Kundenprofil gewinnt.",
+      "relationsHint": "Wettbewerber und verwandte Marken. Die eigene Zeile steht nicht zur Wahl.",
+      "relationsPlaceholder": "Marken auswählen",
+      "marksHint": "Symbol, Claim, Typografie oder Farbe — je ein Satz, je ein Beleg.",
+      "markKind": "Art",
+      "markText": "Beschreibung",
+      "markAdd": "Zeichen hinzufügen",
+      "markRemove": "Zeichen entfernen",
+      "historyHint": "Ein Jahr, ein Satz, ein Beleg.",
+      "historyYear": "Jahr",
+      "historyText": "Was geschah",
+      "historyAdd": "Zeile hinzufügen",
+      "historyRemove": "Zeile entfernen",
+      "sourceIndex": "Beleg",
+      "sourceIndexNone": "Ohne Beleg",
+      "removalReason": "Grund der Entfernung",
+      "removalReasonHint": "Pflicht. Wir halten Datum und Grund fest — danach wird später gefragt.",
+      "filter": {
+        "draft": "Entwurf",
+        "published": "Veröffentlicht",
+        "removed": "Entfernt",
+        "all": "Alle"
+      },
+      "state": {
+        "draft": "Entwurf",
+        "published": "Veröffentlicht",
+        "removed": "Auf Wunsch entfernt"
+      },
+      "col": {
+        "name": "Name",
+        "slug": "Adresse",
+        "industry": "Branche",
+        "country": "Land",
+        "state": "Zustand",
+        "updated": "Zuletzt"
+      },
+      "error": {
+        "notFound": "Diese Marke gibt es nicht.",
+        "slugTaken": "Diese Adresse ist vergeben — bitte eine andere wählen.",
+        "validation": "Eingaben unvollständig — bitte Pflichtfelder und Belege prüfen."
+      }
+    },
+    "corrections": {
+      "title": "Korrekturen",
+      "lead": "Wer einen Fehler sieht oder eine Entfernung wünscht, schreibt uns. Hier steht die andere Hälfte davon.",
+      "refresh": "Neu laden",
+      "emptyTitle": "Nichts offen",
+      "emptyDescription": "Es liegt kein Vorschlag in dieser Ansicht.",
+      "accepted": "Angenommen",
+      "acceptedHint": "Die Änderung selbst macht die Redaktion — im Editor oder auf der Marken-Seite.",
+      "declined": "Abgelehnt",
+      "contactYes": "Kontakt hinterlegt",
+      "declineTitle": "Vorschlag ablehnen",
+      "declineText": "Der Vorschlag zu „{target}“ wird abgelehnt. Die Begründung bleibt bei der Zeile stehen.",
+      "declineNoteLabel": "Begründung",
+      "declineNoteHint": "Pflicht. Ohne sie ist eine Ablehnung ein Verschwinden.",
+      "declineNotePlaceholder": "Warum wir dem Vorschlag nicht folgen.",
+      "filter": {
+        "open": "Offen",
+        "accepted": "Angenommen",
+        "declined": "Abgelehnt",
+        "all": "Alle"
+      },
+      "status": {
+        "open": "Offen",
+        "accepted": "Angenommen",
+        "declined": "Abgelehnt"
+      },
+      "kind": {
+        "correction": "Korrektur",
+        "removal": "Entfernung"
+      },
+      "targetKind": {
+        "brand": "Marke",
+        "post": "Beitrag"
+      },
+      "col": {
+        "target": "Ziel",
+        "kind": "Art",
+        "field": "Feld",
+        "proposed": "Vorschlag",
+        "reason": "Grund",
+        "contact": "Kontakt",
+        "date": "Eingegangen",
+        "status": "Status"
+      },
+      "action": {
+        "accept": "Annehmen",
+        "decline": "Ablehnen"
+      },
+      "error": {
+        "alreadyDecided": "Diese Zeile ist bereits entschieden.",
+        "noteRequired": "Eine Ablehnung braucht eine Begründung.",
+        "notFound": "Diesen Vorschlag gibt es nicht."
+      }
     }
   }
 }

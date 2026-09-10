@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import { INSIGHTS_FORMATS, INSIGHTS_LOCALES } from '../../../../shared/insightsPost'
-import type { InsightsPostListItem, InsightsPostCreatedResponse, InsightsPostsListResponse } from '../../../../shared/types/insightsApi'
+import { INSIGHTS_FORMATS, INSIGHTS_LOCALES, insightsPostDeletable } from '../../../../shared/insightsPost'
+import type {
+  InsightsPostCreatedResponse,
+  InsightsPostDeletedResponse,
+  InsightsPostListItem,
+  InsightsPostsListResponse,
+} from '../../../../shared/types/insightsApi'
 import { createInsightsNewPostSchema } from '../../../utils/insightsForms'
 
 /**
@@ -43,6 +48,18 @@ const { data, refresh, status } = await useFetch<InsightsPostsListResponse>('/ap
   server: false,
 })
 
+/**
+ * `server: false` lässt die Abfrage erst im Browser laufen — auf dem Server
+ * steht `status` auf `idle`, im Browser schon beim Hydrieren auf `pending`.
+ * Wer `status` direkt ins Markup bindet, bekommt einen Hydration-Mismatch
+ * (Lade-Icon, `disabled` am Knopf, leerer Zustand — Klick-Beweis 2026-09-10).
+ * Deshalb zählt der Ladezustand erst nach dem Mounten: dieselbe Wahrheit auf
+ * beiden Seiten.
+ */
+const hydrated = ref(false)
+onMounted(() => { hydrated.value = true })
+const pending = computed(() => hydrated.value && status.value === 'pending')
+
 const rows = computed(() => data.value?.posts ?? [])
 
 const columns = computed<TableColumn<InsightsPostListItem>[]>(() => [
@@ -56,6 +73,26 @@ const columns = computed<TableColumn<InsightsPostListItem>[]>(() => [
   { id: 'open', header: () => t('insights.editor.colOpen') },
 ])
 
+/**
+ * DER GRUND EINER ABLEHNUNG — aus `error.data.reason`, wie im Editor daneben.
+ *
+ * Die Liste hat seit dem Papierkorb eigene Neins: eine Zeile, die inzwischen
+ * jemand anders freigegeben hat (`not_deletable`), eine, die es nicht mehr
+ * gibt (`post_not_found`), eine Ablage, die gerade nicht antwortet. Ohne
+ * diesen Leser hiesse jedes davon „es ging etwas schief".
+ */
+const REASON_KEY: Record<string, string> = {
+  not_deletable: 'insights.editor.error.notDeletable',
+  post_not_found: 'insights.editor.error.postNotFound',
+  storage_unavailable: 'insights.editor.error.storageUnavailable',
+}
+
+function fail(error: unknown): void {
+  const data = (error as { data?: { reason?: unknown } } | undefined)?.data
+  const reason = typeof data?.reason === 'string' ? data.reason : ''
+  toast.add({ title: t(REASON_KEY[reason] ?? 'insights.editor.error.generic'), color: 'error' })
+}
+
 /** Der Titel in der Lesersprache — mit Rückfall auf die Grundfassung. */
 function titleOf(row: InsightsPostListItem): string {
   const wantsDe = readerLocale.value === 'de'
@@ -66,6 +103,44 @@ function titleOf(row: InsightsPostListItem): string {
 
 function openPost(id: string): void {
   navigateTo(localePath(`/dashboard/insights/${id}`))
+}
+
+// ── Löschen ────────────────────────────────────────────────────────────────
+
+/**
+ * DER PAPIERKORB IN DER ZEILE — und warum er nicht überall steht.
+ *
+ * `insightsPostDeletable` ist DIESELBE Regel, die die Route durchsetzt (409
+ * `not_deletable`). Hier ist sie eine Anzeige: ein öffentlicher Beitrag zeigt
+ * gar keinen Papierkorb, statt einen, der beim Klicken „nein" sagt. Die
+ * Sicherung bleibt trotzdem der Server — zwischen dem Laden dieser Liste und
+ * dem Klick kann ein zweiter Reiter freigegeben haben.
+ */
+const deleting = ref<InsightsPostListItem | null>(null)
+const deleteBusy = ref(false)
+
+function deletableRow(row: InsightsPostListItem): boolean {
+  return insightsPostDeletable(row.state)
+}
+
+async function confirmDelete(): Promise<void> {
+  const entry = deleting.value
+  if (!entry) return
+  deleteBusy.value = true
+  try {
+    await $fetch<InsightsPostDeletedResponse>(`/api/insights/posts/${entry.id}`, { method: 'DELETE' })
+    deleting.value = null
+    toast.add({ title: t('insights.editor.deleted'), color: 'success' })
+  }
+  catch (error) {
+    fail(error)
+  }
+  finally {
+    deleteBusy.value = false
+    // Auch im Fehlerfall: bei `not_deletable` steht die Wahrheit schon in der
+    // Ablage, und die Liste soll sie zeigen statt sie zu raten.
+    await refresh()
+  }
 }
 
 // ── Neuer Beitrag ──────────────────────────────────────────────────────────
@@ -126,7 +201,7 @@ async function createPost(): Promise<void> {
       <UTable
         :data="rows"
         :columns="columns"
-        :loading="status === 'pending'"
+        :loading="pending"
         class="mt-4"
       >
         <template #title-cell="{ row }">
@@ -153,11 +228,21 @@ async function createPost(): Promise<void> {
           <span class="text-sm tabular-nums text-muted">{{ row.original.updatedAt.slice(0, 10) }}</span>
         </template>
         <template #open-cell="{ row }">
-          <UButton
-            icon="i-ph-pencil-simple" size="xs" color="neutral" variant="ghost"
-            :aria-label="t('insights.editor.colOpen')"
-            @click="openPost(row.original.id)"
-          />
+          <div class="flex justify-end gap-1">
+            <UButton
+              icon="i-ph-pencil-simple" size="xs" color="neutral" variant="ghost"
+              :aria-label="t('insights.editor.colOpen')"
+              :data-insights-open="row.original.id"
+              @click="openPost(row.original.id)"
+            />
+            <UButton
+              v-if="deletableRow(row.original)"
+              icon="i-ph-trash" size="xs" color="error" variant="ghost"
+              :aria-label="t('insights.editor.delete')"
+              :data-insights-delete="row.original.id"
+              @click="deleting = row.original"
+            />
+          </div>
         </template>
 
         <template #empty>
@@ -171,6 +256,34 @@ async function createPost(): Promise<void> {
           />
         </template>
       </UTable>
+
+      <!-- Löschen: der Titel steht im Text, damit niemand die falsche Zeile
+           bestätigt (die Tabelle ist nach „zuletzt bearbeitet" sortiert und
+           springt zwischen zwei Blicken). -->
+      <UModal
+        :open="Boolean(deleting)"
+        :title="t('insights.editor.deleteTitle')"
+        @update:open="(open: boolean) => { if (!open) deleting = null }"
+      >
+        <template #body>
+          <p class="text-sm leading-relaxed">
+            {{ t('insights.editor.deleteText', { title: deleting ? titleOf(deleting) : '' }) }}
+          </p>
+          <p class="mt-2 text-sm text-muted">{{ t('insights.editor.deleteHint') }}</p>
+        </template>
+        <template #footer>
+          <div class="flex w-full justify-end gap-2">
+            <UButton color="neutral" variant="ghost" :label="t('ui.cancel')" @click="deleting = null" />
+            <UButton
+              color="error"
+              :loading="deleteBusy"
+              :label="t('insights.editor.delete')"
+              data-insights-delete-confirm
+              @click="confirmDelete()"
+            />
+          </div>
+        </template>
+      </UModal>
 
       <UModal v-model:open="dialogOpen" :title="t('insights.editor.newPost')">
         <template #body>

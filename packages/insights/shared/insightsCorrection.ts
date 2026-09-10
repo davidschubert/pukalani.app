@@ -178,3 +178,48 @@ export const insightsCorrectionSchema = z.object({
 })
 
 export type InsightsCorrection = z.infer<typeof insightsCorrectionSchema>
+
+// ── Die Entscheidung des Betreibers (BI1 I2-Rest, §9.4) ────────────────────
+
+/** Was die Redaktion aus einem offenen Vorschlag machen kann. */
+export type InsightsCorrectionDecisionTarget = Exclude<InsightsCorrectionStatus, 'open'>
+
+export type InsightsCorrectionDecision =
+  | { ok: true }
+  | { ok: false, code: 'already_decided' | 'note_required' }
+
+/**
+ * DARF DIESE ZEILE JETZT SO ENTSCHIEDEN WERDEN?
+ *
+ * Zwei Nein, beide mit eigenem Grund — und ein Ja nur aus `open` heraus.
+ *
+ * ── `already_decided`: EINE ENTSCHEIDUNG WIRD NICHT ÜBERSCHRIEBEN ────────
+ * Anders als bei `brand_check_corrections`, wo ein zweites Annehmen ein
+ * nachsichtiges `noop` ist. Der Unterschied liegt in dem, was die Zeile IST:
+ * dort ist sie ein Schalter auf einem Wert (derselbe Wert, zweimal
+ * geschrieben, ist derselbe Wert). Hier ist sie der NACHWEIS, dass der
+ * Korrekturweg funktioniert — genau danach fragt Anwaltsfrage 3 —, und ein
+ * `decidedAt`, das beim zweiten Klick weiterrückt, wäre ein Protokoll, das
+ * sich selbst umschreibt. Wer wirklich umentscheiden will, tut das sichtbar
+ * am Ziel (Beitrag oder Marke), nicht als Nebenwirkung eines zweiten Klicks.
+ *
+ * ── `note_required`: EIN „NEIN" OHNE ANTWORT IST KEINE ANTWORT ───────────
+ * Bei einer ABLEHNUNG ist die Notiz Pflicht, bei einer ANNAHME nicht: dort
+ * ist die Änderung selbst die Begründung. Dieselbe Regel steht schon im
+ * `insightsCorrectionSchema` (`status === 'declined'` ⇒ `decisionNote`) —
+ * hier steht sie ein zweites Mal, weil die Route den Grund VOR dem Schreiben
+ * kennen muss, um ihn als `data.code` zurückzugeben. Ein Zod-Fehler trägt
+ * keinen fachlichen Schlüssel, und der Mensch vor dem Formular bekäme dann
+ * „Eingaben unvollständig" statt „bitte begründen".
+ *
+ * Die Notiz wird GETRIMMT gemessen: drei Leerzeichen sind keine Begründung.
+ */
+export function insightsCorrectionDecisionAllowed(
+  current: InsightsCorrectionStatus,
+  next: InsightsCorrectionDecisionTarget,
+  note: string,
+): InsightsCorrectionDecision {
+  if (current !== 'open') return { ok: false, code: 'already_decided' }
+  if (next === 'declined' && !note.trim()) return { ok: false, code: 'note_required' }
+  return { ok: true }
+}

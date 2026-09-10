@@ -5,15 +5,12 @@ import type {
   InsightsPost,
   InsightsPostEdit,
   InsightsReviewIssue,
-  InsightsSource,
-  InsightsSourceKind,
   InsightsState,
 } from '../../shared/insightsPost'
 import {
   INSIGHTS_FORMATS,
   INSIGHTS_LOCALES,
   INSIGHTS_QUOTE_MAX,
-  INSIGHTS_SOURCE_KINDS,
   INSIGHTS_STATES,
   INSIGHTS_TOPICS,
   INSIGHTS_TRANSITIONS,
@@ -31,7 +28,7 @@ import {
 } from '../../shared/insightsPrompts'
 import type { InsightsBrandListItem, InsightsEvidenceResponse } from '../../shared/types/insightsApi'
 import { bodyToSave as decideBodyToSave } from '../../../core/shared/editorBody'
-import { insightsDay, insightsHost } from '../utils/insightsFormat'
+import { insightsDay } from '../utils/insightsFormat'
 import { createInsightsBrandSchema } from '../utils/insightsForms'
 
 /**
@@ -220,34 +217,17 @@ const editorProps = { transformPastedHTML: (html: string) => html.replace(/<hr\b
 
 // ── Quellen ────────────────────────────────────────────────────────────────
 
-/** Ausgeschrieben statt gerechnet: `brand-site` und `own-data` tragen einen
- *  Bindestrich, und ein zusammengebauter Schlüssel wäre für den i18n-Wächter
- *  unsichtbar. */
-const SOURCE_KIND_KEY: Record<InsightsSourceKind, string> = {
-  'brand-site': 'insights.sources.kindBrandSite',
-  'press': 'insights.sources.kindPress',
-  'wikipedia': 'insights.sources.kindWikipedia',
-  'youtube': 'insights.sources.kindYoutube',
-  'own-data': 'insights.sources.kindOwnData',
-}
-
-const sourceKindItems = computed(() => INSIGHTS_SOURCE_KINDS.map(kind => ({
-  label: t(SOURCE_KIND_KEY[kind]),
-  value: kind,
-})))
-
-function addSource(): void {
-  const fresh: InsightsSource = { url: '', publisher: '', date: '', kind: 'press' as InsightsSourceKind, quote: '', license: '' }
-  draft.sources.push(fresh)
-}
-
 /**
- * EINE QUELLE ENTFERNEN — und die Beleg-Zeiger MITZIEHEN.
+ * DIE ZEILEN-OBERFLÄCHE LIEGT SEIT DEM MARKEN-FORMULAR IN
+ * `InSourcesEditor` — dieselbe `sources`-Form trägt auch ein Markenprofil
+ * (§9.3), und zwei abgeschriebene Formulare wären zwei Belegpflichten, von
+ * denen die jüngere hinterherhinkt.
  *
- * `facts[].sourceIndex` und `marks[].sourceIndex` zeigen auf eine POSITION.
- * Löscht man Quelle 2, zeigt jeder Beleg ab 3 danach auf die falsche Quelle —
- * und zwar unsichtbar, weil die Zahl weiter gültig ist. Zeiger auf genau
- * diese Quelle werden ungültig gesetzt (`-1`), damit Prüfregel 3 sie zeigt.
+ * WAS HIER BLEIBT, IST DAS ENTFERNEN — und die Beleg-Zeiger MITZUZIEHEN.
+ * `facts[].sourceIndex` zeigt auf eine POSITION. Löscht man Quelle 2, zeigt
+ * jeder Beleg ab 3 danach auf die falsche Quelle — und zwar unsichtbar, weil
+ * die Zahl weiter gültig ist. Zeiger auf genau diese Quelle werden ungültig
+ * gesetzt (`-1`), damit Prüfregel 3 sie zeigt.
  */
 function removeSource(index: number): void {
   draft.sources.splice(index, 1)
@@ -256,25 +236,6 @@ function removeSource(index: number): void {
     else if (fact.sourceIndex > index) fact.sourceIndex -= 1
   }
   factsText.value = factsAsText()
-}
-
-/**
- * DIE AMPEL EINER QUELLE als FLACHER Wert — bewusst nicht das rohe Ergebnis.
- *
- * Im Template stünden sonst drei Nicht-Null-Behauptungen (`evidence[i]!`) für
- * denselben Wert; jede davon ist eine Zusage an den Übersetzer, die niemand
- * prüft. `known: false` sagt dasselbe, ohne dass jemand sie geben muss.
- */
-interface InsightsEvidenceView {
-  known: boolean
-  grounded: boolean
-  reasonKey: string
-}
-
-function evidenceOf(index: number): InsightsEvidenceView {
-  const entry: InsightsEvidenceResponse | undefined = props.evidence?.[index]
-  if (!entry) return { known: false, grounded: false, reasonKey: 'insights.editor.evidenceUnchecked' }
-  return { known: true, grounded: entry.grounded, reasonKey: `insights.editor.evidenceReason.${entry.reason}` }
 }
 
 // ── Marken ─────────────────────────────────────────────────────────────────
@@ -642,81 +603,15 @@ const previewOpen = ref(false)
         </div>
       </div>
 
-      <!-- Quellen-Panel mit Beleg-Ampel -->
+      <!-- Quellen-Panel mit Beleg-Ampel (Zeilen: `InSourcesEditor`) -->
       <div class="bw-card p-6">
-        <div class="flex flex-wrap items-baseline justify-between gap-3">
-          <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.editor.sourcesPanel') }}</p>
-          <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.sources.lead', { max: INSIGHTS_QUOTE_MAX }) }}</p>
-        </div>
-
-        <ul class="mt-4 space-y-5">
-          <li v-for="(source, index) in draft.sources" :key="index" class="border-b pb-5 last:border-0" style="border-color: var(--bw-line)">
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="bw-label" style="color: var(--bw-muted)">{{ index + 1 }}</span>
-              <span class="bw-label" style="color: var(--bw-ink-soft)">{{ insightsHost(source.url) }}</span>
-              <UButton
-                :label="t('insights.editor.checkEvidence')" size="xs" color="neutral" variant="ghost"
-                :loading="checkingIndex === index" :disabled="!source.url || !source.quote"
-                class="ml-auto rounded-full" style="background: var(--bw-surface)"
-                @click="emit('checkEvidence', index)"
-              />
-              <UButton
-                icon="i-ph-trash" size="xs" color="neutral" variant="ghost"
-                :aria-label="t('insights.editor.sourceRemove')"
-                @click="removeSource(index)"
-              />
-            </div>
-
-            <!-- Die Ampel: geprüft und wahr · geprüft und falsch · ungeprüft. -->
-            <p
-              class="bw-label mt-2 inline-flex items-center gap-1"
-              :style="!evidenceOf(index).known
-                ? 'color: var(--bw-muted)'
-                : (evidenceOf(index).grounded ? 'color: var(--bw-accent)' : 'color: var(--bw-stale)')"
-            >
-              <UIcon
-                :name="!evidenceOf(index).known ? 'i-ph-circle-dashed' : (evidenceOf(index).grounded ? 'i-ph-check-circle-fill' : 'i-ph-x-circle-fill')"
-                class="size-4"
-              />
-              {{ t(evidenceOf(index).reasonKey) }}
-            </p>
-
-            <div class="mt-3 grid gap-3 sm:grid-cols-2">
-              <UFormField :label="t('insights.editor.sourceUrl')">
-                <UInput v-model="source.url" class="w-full font-mono text-xs" :maxlength="512" />
-              </UFormField>
-              <UFormField :label="t('insights.editor.sourceKind')">
-                <USelect v-model="source.kind" :items="sourceKindItems" value-key="value" class="w-full" />
-              </UFormField>
-              <UFormField :label="t('insights.editor.sourcePublisher')">
-                <UInput v-model="source.publisher" class="w-full" :maxlength="160" />
-              </UFormField>
-              <UFormField :label="t('insights.editor.sourceDate')">
-                <UInput v-model="source.date" type="date" class="w-full" />
-              </UFormField>
-              <UFormField v-if="source.kind === 'wikipedia'" class="sm:col-span-2" :label="t('insights.editor.sourceLicense')">
-                <UInput v-model="source.license" class="w-full" :maxlength="200" />
-              </UFormField>
-              <UFormField class="sm:col-span-2" :label="t('insights.editor.sourceQuote')">
-                <UTextarea v-model="source.quote" :rows="2" class="w-full" :maxlength="INSIGHTS_QUOTE_MAX" />
-              </UFormField>
-            </div>
-          </li>
-        </ul>
-
-        <CoreEmptyState
-          v-if="draft.sources.length === 0"
-          class="mt-4"
-          icon="i-ph-link-simple"
-          :title="t('insights.editor.sourcesEmpty')"
-          :description="t('insights.editor.sourcesEmptyHint')"
-        />
-
-        <UButton
-          class="mt-4 rounded-full" icon="i-ph-plus" color="neutral" variant="ghost"
-          style="background: var(--bw-surface)"
-          :label="t('insights.editor.sourceAdd')"
-          @click="addSource"
+        <InSourcesEditor
+          v-model="draft.sources"
+          :evidence="evidence"
+          :checking-index="checkingIndex"
+          checkable
+          @check-evidence="emit('checkEvidence', $event)"
+          @remove="removeSource"
         />
       </div>
 

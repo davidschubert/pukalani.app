@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type { InsightsPost, InsightsPostEdit, InsightsReviewIssue, InsightsState } from '../../../../shared/insightsPost'
+import { insightsPostDeletable } from '../../../../shared/insightsPost'
 import type {
   InsightsBrandCreatedResponse,
   InsightsBrandListItem,
   InsightsDraftResponse,
   InsightsEvidenceResponse,
+  InsightsPostDeletedResponse,
   InsightsPostDetailResponse,
   InsightsPostSavedResponse,
   InsightsPostStateResponse,
@@ -53,6 +55,18 @@ const { data, refresh, status } = await useFetch<InsightsPostDetailResponse>(
 )
 
 /**
+ * `server: false` lässt die Abfrage erst im Browser laufen — auf dem Server
+ * steht `status` auf `idle`, im Browser schon beim Hydrieren auf `pending`.
+ * Wer `status` direkt ins Markup bindet, bekommt einen Hydration-Mismatch
+ * (Lade-Icon, `disabled` am Knopf, leerer Zustand — Klick-Beweis 2026-09-10).
+ * Deshalb zählt der Ladezustand erst nach dem Mounten: dieselbe Wahrheit auf
+ * beiden Seiten.
+ */
+const hydrated = ref(false)
+onMounted(() => { hydrated.value = true })
+const pending = computed(() => hydrated.value && status.value === 'pending')
+
+/**
  * DER STAND, DEN DER EDITOR SIEHT. Er kommt aus der Abfrage, wird aber von
  * jeder Antwort (Speichern, Übersetzen, Entwerfen, Zustand) ÜBERSCHRIEBEN —
  * ein `refresh()` nach jedem Schreiben wäre eine zweite Rundreise für Daten,
@@ -93,6 +107,7 @@ const evidence = ref<Record<number, InsightsEvidenceResponse>>({})
  */
 const REASON_KEY: Record<string, string> = {
   ai_disabled: 'insights.editor.error.aiDisabled',
+  not_deletable: 'insights.editor.error.notDeletable',
   ai_hourly_limit: 'insights.editor.error.aiHourlyLimit',
   ai_daily_limit: 'insights.editor.error.aiDailyLimit',
   not_draft: 'insights.editor.error.notDraft',
@@ -231,6 +246,47 @@ async function runDraft(input: { brief: string, targetWords: number }): Promise<
   }
 }
 
+// ── Löschen ────────────────────────────────────────────────────────────────
+
+/**
+ * DER LÖSCHEN-KNOPF — aktiv nur, solange `insightsPostDeletable` Ja sagt.
+ *
+ * Dieselbe Regel wie in der Route (409 `not_deletable`) und in der Liste. Der
+ * Knopf VERSCHWINDET hier nicht, sondern wird ausgegraut: im Editor steht man
+ * vor genau diesem einen Beitrag, und ein Knopf, der fehlt, sagt nichts —
+ * einer, der ausgegraut ist und „erst zurückziehen" dazuschreibt, sagt den
+ * nächsten Handgriff.
+ */
+const deleteOpen = ref(false)
+const deleting = ref(false)
+
+const deletable = computed(() => (post.value ? insightsPostDeletable(post.value.state) : false))
+
+const postTitle = computed(() => {
+  const current = post.value
+  if (!current) return ''
+  return (current.baseLocale === 'de' ? current.titleDe : current.titleEn) || t('insights.editor.untitled')
+})
+
+async function confirmDelete(): Promise<void> {
+  deleting.value = true
+  try {
+    await $fetch<InsightsPostDeletedResponse>(`/api/insights/posts/${id.value}`, { method: 'DELETE' })
+    deleteOpen.value = false
+    toast.add({ title: t('insights.editor.deleted'), color: 'success' })
+    await navigateTo(localePath('/dashboard/insights'))
+  }
+  catch (error) {
+    fail(error)
+    // Der Zustand kann sich in einem zweiten Reiter geändert haben — die
+    // Wahrheit steht in der Ablage, nicht in diesem Tab.
+    await refresh()
+  }
+  finally {
+    deleting.value = false
+  }
+}
+
 // ── Marke anlegen ──────────────────────────────────────────────────────────
 
 async function createBrand(input: { name: string, homepage: string, industry: string }): Promise<void> {
@@ -264,9 +320,17 @@ async function createBrand(input: { name: string, homepage: string, industry: st
           />
           <UButton
             icon="i-ph-arrows-clockwise" color="neutral" variant="ghost"
-            :loading="status === 'pending'"
+            :loading="pending"
             :aria-label="t('insights.editor.reload')"
             @click="refresh()"
+          />
+          <UButton
+            :label="t('insights.editor.delete')" icon="i-ph-trash"
+            color="error" variant="ghost"
+            :disabled="!deletable"
+            :title="deletable ? undefined : t('insights.editor.deleteBlocked')"
+            data-insights-delete
+            @click="deleteOpen = true"
           />
         </template>
       </UDashboardNavbar>
@@ -296,7 +360,7 @@ async function createBrand(input: { name: string, homepage: string, industry: st
           @create-brand="createBrand"
         />
         <CoreEmptyState
-          v-else-if="status !== 'pending'"
+          v-else-if="hydrated && !pending"
           icon="i-ph-newspaper"
           :title="t('insights.editor.error.postNotFound')"
           :description="t('insights.editor.emptyDescription')"
@@ -304,6 +368,27 @@ async function createBrand(input: { name: string, homepage: string, industry: st
           :action-to="localePath('/dashboard/insights')"
         />
       </div>
+
+      <!-- Löschen: der Titel steht im Text — eine Bestätigung ohne den Namen
+           der Sache ist keine. -->
+      <UModal v-model:open="deleteOpen" :title="t('insights.editor.deleteTitle')">
+        <template #body>
+          <p class="text-sm leading-relaxed">{{ t('insights.editor.deleteText', { title: postTitle }) }}</p>
+          <p class="mt-2 text-sm text-muted">{{ t('insights.editor.deleteHint') }}</p>
+        </template>
+        <template #footer>
+          <div class="flex w-full justify-end gap-2">
+            <UButton color="neutral" variant="ghost" :label="t('ui.cancel')" @click="deleteOpen = false" />
+            <UButton
+              color="error"
+              :loading="deleting"
+              :label="t('insights.editor.delete')"
+              data-insights-delete-confirm
+              @click="confirmDelete()"
+            />
+          </div>
+        </template>
+      </UModal>
     </template>
   </UDashboardPanel>
 </template>
