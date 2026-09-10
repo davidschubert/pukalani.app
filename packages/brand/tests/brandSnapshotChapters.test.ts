@@ -99,7 +99,7 @@ describe('buildBrandSnapshot', () => {
   })
 
   it('OHNE Preset: kein Design-Kapitel in `chapters`, die Foundation steht darin', () => {
-    const { snapshot, payload } = buildBrandSnapshot(profile(), ROWS)
+    const { snapshot, payload } = buildBrandSnapshot(profile(), ROWS, { betaAccount: false })
     const keys = snapshot.chapters.map(chapter => chapter.stepKey)
     expect(keys).toContain('context')
     for (const stepKey of BRAND_DESIGN_STEP_KEYS) expect(keys).not.toContain(stepKey)
@@ -113,7 +113,7 @@ describe('buildBrandSnapshot', () => {
   })
 
   it('MIT Preset: dasselbe Ergebnis — plus das Preset', () => {
-    const { snapshot, payload } = buildBrandSnapshot(profile(), ROWS, { design: DESIGN })
+    const { snapshot, payload } = buildBrandSnapshot(profile(), ROWS, { betaAccount: false, design: DESIGN })
     for (const stepKey of BRAND_DESIGN_STEP_KEYS) {
       expect(snapshot.chapters.map(chapter => chapter.stepKey)).not.toContain(stepKey)
     }
@@ -126,13 +126,13 @@ describe('buildBrandSnapshot', () => {
   it('die Kapitel-Liste ist mit und ohne Preset dieselbe', () => {
     // Die Zusage der schärferen Fassung in einem Satz: das Preset ENTSCHEIDET
     // nicht, was in `chapters` steht.
-    const withoutPreset = buildBrandSnapshot(profile(), ROWS).snapshot.chapters
-    const withPreset = buildBrandSnapshot(profile(), ROWS, { design: DESIGN }).snapshot.chapters
+    const withoutPreset = buildBrandSnapshot(profile(), ROWS, { betaAccount: false }).snapshot.chapters
+    const withPreset = buildBrandSnapshot(profile(), ROWS, { betaAccount: false, design: DESIGN }).snapshot.chapters
     expect(withPreset).toEqual(withoutPreset)
   })
 
   it('eine GESPERRTE Schicht reist ebenso wenig mit — `locked` ist nicht `skipped`', () => {
-    const { payload } = buildBrandSnapshot(profile({ designUnlockedAt: null }), ROWS)
+    const { payload } = buildBrandSnapshot(profile({ designUnlockedAt: null }), ROWS, { betaAccount: false })
     expect(payload).not.toContain('h.base')
     expect(payload).toContain('Ausschank auf Oʻahu')
   })

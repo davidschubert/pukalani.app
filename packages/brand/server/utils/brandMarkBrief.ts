@@ -108,11 +108,12 @@ export interface BrandMarkContext {
 export async function requireBrandMarkContext(
   event: H3Event,
   userId: string,
+  betaAccount: boolean,
 ): Promise<BrandMarkContext> {
   const profileId = requireProfileIdParam(event)
   const profile = await loadOwnedProfile(event, userId, profileId)
   const stepRows = await loadStepRows(event, profile.$id)
-  const journey = resolveBrandJourney(profileFacts(profile), toStepFacts(stepRows))
+  const journey = resolveBrandJourney(profileFacts(profile, betaAccount), toStepFacts(stepRows))
   const decision = canEnterBrandStep(journey, BRAND_MARK_STEP_KEY)
   if (!decision.allowed) throw createError({ status: 404, statusText: 'Not Found' })
   return { profile, stepRows }

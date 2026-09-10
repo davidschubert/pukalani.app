@@ -45,6 +45,13 @@ export function insightsPostMissing() {
   return createError({ status: 404, statusText: 'Post not found', data: { code: 'post_not_found' } })
 }
 
+/** „Diese Marken-Zeile gibt es nicht." — dasselbe Argument wie eine Zeile
+ *  darüber, nur für die andere Tabelle. Ein eigener Code, weil die Oberfläche
+ *  daraus einen anderen Satz macht (und ein anderer Ort gemeint ist). */
+export function insightsBrandMissing() {
+  return createError({ status: 404, statusText: 'Brand not found', data: { code: 'brand_not_found' } })
+}
+
 /** Ein Ablage-Ausfall — 503 mit Grund im Log, nie im Körper. */
 export function insightsStorageError(error: unknown, message: string) {
   console.error('[insights] Ablage nicht erreichbar:', message, error)
@@ -117,6 +124,29 @@ export async function saveInsightsPostRow(event: H3Event, id: string, post: Insi
   }
 }
 
+/**
+ * EINE BEITRAGS-ZEILE LÖSCHEN (BI1 I2-Rest).
+ *
+ * OB gelöscht werden darf, entscheidet `insightsPostDeletable` in der Route —
+ * nicht diese Funktion. Sie ist der Ablage-Zugriff und kennt keinen Zustand;
+ * eine Sicherung hier UND dort wären zwei Wahrheiten, und die hier wäre die
+ * ohne Fehlermeldung für den Menschen.
+ *
+ * Das 404 ist ein ehrliches: wer hier ankommt, hat `insights.manage` und darf
+ * wissen, dass die Zeile schon weg ist (etwa weil ein zweiter Reiter offen
+ * war).
+ */
+export async function deleteInsightsPostRow(event: H3Event, id: string): Promise<void> {
+  const { tablesDB, databaseId } = insightsDb(event)
+  try {
+    await tablesDB.deleteRow({ databaseId, tableId: INSIGHTS_POSTS_TABLE, rowId: id })
+  }
+  catch (error) {
+    if (isInsightsRowMissing(error)) throw insightsPostMissing()
+    throw insightsStorageError(error, `deleteInsightsPostRow ${id}`)
+  }
+}
+
 /** Die Zeile, wie die Redaktionsliste sie zeigt — OHNE Fliesstext (s. Typ). */
 export function toInsightsPostListItem(row: InsightsPostRow): InsightsPostListItem {
   const post = toInsightsPost(row)
@@ -168,6 +198,37 @@ export async function createInsightsBrandRow(event: H3Event, brand: InsightsBran
   }
 }
 
+export async function loadInsightsBrandRow(event: H3Event, id: string): Promise<InsightsBrandRow> {
+  const { tablesDB, databaseId } = insightsDb(event)
+  try {
+    return await tablesDB.getRow<InsightsBrandRow>({
+      databaseId,
+      tableId: INSIGHTS_BRANDS_TABLE,
+      rowId: id,
+    })
+  }
+  catch (error) {
+    if (isInsightsRowMissing(error)) throw insightsBrandMissing()
+    throw insightsStorageError(error, `loadInsightsBrandRow ${id}`)
+  }
+}
+
+export async function saveInsightsBrandRow(event: H3Event, id: string, brand: InsightsBrand): Promise<InsightsBrandRow> {
+  const { tablesDB, databaseId } = insightsDb(event)
+  try {
+    return await tablesDB.updateRow<InsightsBrandRow>({
+      databaseId,
+      tableId: INSIGHTS_BRANDS_TABLE,
+      rowId: id,
+      data: fromInsightsBrand(brand),
+    })
+  }
+  catch (error) {
+    if (isInsightsRowMissing(error)) throw insightsBrandMissing()
+    throw insightsStorageError(error, `saveInsightsBrandRow ${id}`)
+  }
+}
+
 export function toInsightsBrandListItem(row: InsightsBrandRow): InsightsBrandListItem {
   const brand = toInsightsBrand(row)
   return {
@@ -176,7 +237,9 @@ export function toInsightsBrandListItem(row: InsightsBrandRow): InsightsBrandLis
     slug: brand.slug,
     homepage: brand.homepage,
     industry: brand.industry,
+    country: brand.country,
     state: brand.state,
+    updatedAt: row.$updatedAt,
   }
 }
 
@@ -245,24 +308,31 @@ export async function findFreeInsightsSlug(
 }
 
 /**
- * DIE UMBENENNUNG EINES BEITRAGS (§9.2) — die alte Adresse reiht sich in die
- * Historie ein, damit die 301 sie später findet.
+ * DIE UMBENENNUNG (§9.2) — die alte Adresse reiht sich in die Historie ein,
+ * damit die 301 sie später findet.
  *
  * Sie steht hier und nicht in der Route, weil zwei Dinge zusammengehören, die
  * man einzeln vergessen kann: prüfen, ob die neue Adresse frei ist, UND die
  * alte aufheben. Eine Route, die nur das erste tut, bricht jeden Link — still.
+ *
+ * SIE GILT FÜR BEIDE TABELLEN (seit der Marken-Seite, BI1 I2-Rest): `table`
+ * sagt, wo gesucht wird, und `current` nimmt nur die zwei Felder entgegen, um
+ * die es geht. Eine zweite, abgeschriebene Fassung für Marken hätte genau
+ * einen Unterschied — den Tabellennamen — und irgendwann einen zweiten, den
+ * niemand wollte.
  */
 export async function applyInsightsSlugChange(
   event: H3Event,
+  table: 'posts' | 'brands',
   id: string,
-  current: InsightsPost,
+  current: { slug: string, slugHistory: string[] },
   wanted: string,
 ): Promise<{ slug: string, slugHistory: string[] }> {
   const trimmed = wanted.trim()
   if (!trimmed || trimmed === current.slug) {
     return { slug: current.slug, slugHistory: current.slugHistory }
   }
-  const free = await findFreeInsightsSlug(event, 'posts', trimmed, id)
+  const free = await findFreeInsightsSlug(event, table, trimmed, id)
   if (!free) {
     throw createError({ status: 409, statusText: 'Slug unavailable', data: { code: 'slug_taken' } })
   }

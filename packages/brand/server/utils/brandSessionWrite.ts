@@ -136,7 +136,7 @@ export async function writeBrandSessionFlag(
   // DIE KONFLIKTE REISEN MIT (Paket 4): der Zähler, den die Seite danach zeigt,
   // muss dieselbe Sperre kennen wie der, den sie vorher gezeigt hat — sonst
   // sagte die Antwort „bereit", während der nächste Abruf wieder sperrt.
-  const derived = deriveBrandAcceptance(context.profile, stepKey, afterFacts, context.openConflicts)
+  const derived = deriveBrandAcceptance(context.profile, stepKey, afterFacts, context.betaAccount, context.openConflicts)
 
   return {
     stepKey,
@@ -267,7 +267,7 @@ export async function acceptAllBrandSessions(
   }
 
   const afterFacts = withStepSlotFacts(stepFacts, stepKey, nextRecords)
-  const derived = deriveBrandAcceptance(context.profile, stepKey, afterFacts, context.openConflicts)
+  const derived = deriveBrandAcceptance(context.profile, stepKey, afterFacts, context.betaAccount, context.openConflicts)
 
   return {
     stepKey,

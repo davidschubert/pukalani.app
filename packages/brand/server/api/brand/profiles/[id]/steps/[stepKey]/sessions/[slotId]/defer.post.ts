@@ -21,8 +21,8 @@ import { writeBrandSessionFlag } from '../../../../../../../../utils/brandSessio
  * ja da. Was ihn wieder öffnet, heisst „Korrigieren" und ist ein anderer Weg.
  */
 export default defineEventHandler(async (event): Promise<BrandSessionAcceptResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const context = await loadBrandAcceptanceContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const context = await loadBrandAcceptanceContext(event, userId, betaAccount)
   const body = await readValidatedBody(event, createBrandSessionDeferSchema().parse)
 
   return writeBrandSessionFlag(

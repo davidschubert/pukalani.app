@@ -56,7 +56,7 @@ export default defineEventHandler(async (event): Promise<InsightsPostSavedRespon
     })
   }
 
-  const { slug, slugHistory } = await applyInsightsSlugChange(event, id, current, body.slug)
+  const { slug, slugHistory } = await applyInsightsSlugChange(event, 'posts', id, current, body.slug)
 
   const next: InsightsPost = {
     ...body,

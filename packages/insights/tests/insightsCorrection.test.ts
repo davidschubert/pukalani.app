@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   INSIGHTS_CORRECTION_PII_RETENTION_DAYS,
+  insightsCorrectionDecisionAllowed,
   insightsCorrectionRetentionAt,
   insightsCorrectionSchema,
   insightsCorrectionSweepDue,
@@ -114,5 +115,46 @@ describe('insightsCorrectionSweepDue', () => {
     expect(insightsCorrectionSweepDue({ retentionAt: '2020-01-01T00:00:00.000Z', contactEmail: '', ipHash: '' }, now)).toBe(false)
     // Der `ipHash` allein reicht: er ist derselbe Personenbezug, nur schwächer.
     expect(insightsCorrectionSweepDue({ retentionAt: '2020-01-01T00:00:00.000Z', contactEmail: '', ipHash: 'abc' }, now)).toBe(true)
+  })
+})
+
+/**
+ * DIE ENTSCHEIDUNG DES BETREIBERS (BI1 I2-Rest, §9.4).
+ *
+ * Zwei Sperren, und beide brauchen ihre Gegenprobe: eine Regel, die nur den
+ * grünen Weg kennt, bliebe grün, wenn sie gar nichts sperrte — und was hier
+ * hängt, ist der NACHWEIS, dass der Korrekturweg funktioniert (Anwaltsfrage 3).
+ */
+describe('insightsCorrectionDecisionAllowed', () => {
+  it('offen → angenommen: ja, auch ohne Notiz (die Änderung ist die Begründung)', () => {
+    expect(insightsCorrectionDecisionAllowed('open', 'accepted', '')).toEqual({ ok: true })
+  })
+
+  it('offen → abgelehnt MIT Notiz: ja', () => {
+    expect(insightsCorrectionDecisionAllowed('open', 'declined', 'Der Beleg nennt 1999.')).toEqual({ ok: true })
+  })
+
+  it('GEGENPROBE: offen → abgelehnt OHNE Notiz: nein', () => {
+    expect(insightsCorrectionDecisionAllowed('open', 'declined', '')).toEqual({ ok: false, code: 'note_required' })
+  })
+
+  it('GEGENPROBE: Leerzeichen sind keine Begründung', () => {
+    expect(insightsCorrectionDecisionAllowed('open', 'declined', '   ')).toEqual({ ok: false, code: 'note_required' })
+  })
+
+  it('GEGENPROBE: angenommen → abgelehnt: nein, eine Entscheidung wird nicht gedreht', () => {
+    expect(insightsCorrectionDecisionAllowed('accepted', 'declined', 'Doch nicht.')).toEqual({ ok: false, code: 'already_decided' })
+  })
+
+  it('GEGENPROBE: DASSELBE ein zweites Mal ist auch nein — kein wanderndes `decidedAt`', () => {
+    expect(insightsCorrectionDecisionAllowed('accepted', 'accepted', '')).toEqual({ ok: false, code: 'already_decided' })
+    expect(insightsCorrectionDecisionAllowed('declined', 'declined', 'Nochmal.')).toEqual({ ok: false, code: 'already_decided' })
+  })
+
+  it('GEGENPROBE: die fehlende Notiz wird gar nicht mehr gefragt, wenn schon entschieden ist', () => {
+    // Die Reihenfolge der zwei Sperren ist eine Aussage: „schon entschieden"
+    // ist der ältere und der härtere Grund — sonst hörte der Betreiber
+    // „bitte begründen" für eine Zeile, die er ohnehin nicht mehr ändern darf.
+    expect(insightsCorrectionDecisionAllowed('declined', 'declined', '')).toEqual({ ok: false, code: 'already_decided' })
   })
 })

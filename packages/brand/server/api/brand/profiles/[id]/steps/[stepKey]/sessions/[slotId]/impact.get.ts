@@ -35,8 +35,8 @@ import { loadBrandStepContext, toStepFacts } from '../../../../../../../../utils
  * zwei Stellen wissen müssen, was eine Korrektur ist.
  */
 export default defineEventHandler(async (event): Promise<BrandSessionImpactResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const { stepKey, stepRow, stepRows } = await loadBrandStepContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { stepKey, stepRow, stepRows } = await loadBrandStepContext(event, userId, betaAccount)
   const session = requireSessionParam(event, stepKey)
 
   // Über ALLE Kapitel: eine Session liest ausdrücklich über Kapitelgrenzen,

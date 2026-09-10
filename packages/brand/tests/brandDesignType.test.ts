@@ -12,6 +12,7 @@ import {
   brandTypeFamilies,
   brandTypeRatioText,
   brandTypeRuleLines,
+  brandTypeRulesFromLines,
   brandTypeRulesSlotValue,
   brandTypeScaleFactor,
   brandTypeScaleRatio,
@@ -303,5 +304,36 @@ describe('Die Verträge um das Kapitel herum', () => {
     expect(BRAND_STAGE_SOURCE_SLOTS.type).toEqual([
       'g.mix', 'h.base', 'h.neutral', 'h.accent', 'result.direction',
     ])
+  })
+})
+
+/**
+ * DER RÜCKWEG AUS DEM PRESET (K2, Konzept docs/plans/BRAND-BOOK-KIT.md §2.6).
+ *
+ * Das Kit braucht die Schrift-Regeln als ZAHLEN (`font.weight.heading`,
+ * `letterSpacing`), das Preset trägt sie als Zeilen. Ohne diesen Weg fiele das
+ * Kit still auf den D4-Vorschlag zurück — eine Marke, die 700 entschieden hat,
+ * bekäme 400, und niemand sähe es.
+ */
+describe('brandTypeRulesFromLines', () => {
+  it('liest die Entscheidung aus den Preset-Zeilen zurück — in beiden Sprachen', () => {
+    const rules: BrandTypeRules = { headingWeight: 700, headingTracking: -0.5, headingUppercase: true }
+    for (const locale of ['de', 'en']) {
+      expect(brandTypeRulesFromLines(brandTypeRuleLines(rules, locale)), locale).toEqual(rules)
+    }
+    expect(brandTypeRulesFromLines(brandTypeRuleLines(BRAND_TYPE_DEFAULT_RULES, 'de')))
+      .toEqual(BRAND_TYPE_DEFAULT_RULES)
+  })
+
+  it('sagt `null` statt zu raten, wenn die Zeilen nicht aus dieser Regel stammen', () => {
+    expect(brandTypeRulesFromLines([])).toBeNull()
+    expect(brandTypeRulesFromLines(['Gewicht: 700', 'Laufweite: 0 px'])).toBeNull()
+    // Vier Zeilen, aber die Mono-Rolle fehlt: dann ist es ein anderer Wert.
+    expect(brandTypeRulesFromLines([
+      'Überschrift-Gewicht: 700 · x',
+      'Laufweite: 0 px · x',
+      'Versalien: Nein · x',
+      'Mono-Rolle: Helvetica · x',
+    ])).toBeNull()
   })
 })

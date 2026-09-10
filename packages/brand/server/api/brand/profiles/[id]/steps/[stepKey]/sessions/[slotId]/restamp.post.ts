@@ -53,8 +53,8 @@ import {
  * Wirkung.
  */
 export default defineEventHandler(async (event): Promise<BrandSessionAcceptResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const context = await loadBrandAcceptanceContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const context = await loadBrandAcceptanceContext(event, userId, betaAccount)
   const { profile, stepKey, stepRow, records, stepFacts } = context
   const body = await readValidatedBody(event, createBrandSessionRestampSchema().parse)
 
@@ -108,7 +108,7 @@ export default defineEventHandler(async (event): Promise<BrandSessionAcceptRespo
   // den sie danach zeigen soll (der `stale`-Blocker ist gerade gefallen), ohne
   // einen zweiten Abruf. Dieselbe Kette wie in `writeBrandSessionFlag`.
   const afterFacts = withStepSlotFacts(stepFacts, stepKey, nextRecords)
-  const derived = deriveBrandAcceptance(profile, stepKey, afterFacts, context.openConflicts)
+  const derived = deriveBrandAcceptance(profile, stepKey, afterFacts, context.betaAccount, context.openConflicts)
 
   return {
     stepKey,

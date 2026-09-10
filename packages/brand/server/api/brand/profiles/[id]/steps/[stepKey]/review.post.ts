@@ -54,8 +54,8 @@ import { mergeStepSlotRecords, profileFacts } from '../../../../../../utils/bran
  * Blick ein zweites Mal zu.
  */
 export default defineEventHandler(async (event): Promise<BrandStepReviewResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const context = await loadBrandAcceptanceContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const context = await loadBrandAcceptanceContext(event, userId, betaAccount)
   const { profile, stepKey, stepRow, stepRows, records } = context
 
   const revision = stepRow.revision ?? 0
@@ -75,7 +75,7 @@ export default defineEventHandler(async (event): Promise<BrandStepReviewResponse
   }
 
   const contentLocale = profile.contentLocale
-  const { pathKind, team } = profileFacts(profile)
+  const { pathKind, team } = profileFacts(profile, betaAccount)
   const allRecords = mergeStepSlotRecords(stepRows)
 
   const outcome = await runBrandSessionReview({

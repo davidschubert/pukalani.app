@@ -36,8 +36,8 @@ import {
  * Bild-Typ, den wir nicht belegen können, wird nicht behauptet.
  */
 export default defineEventHandler(async (event) => {
-  const { userId } = await requireBrandAccess(event)
-  const { profile } = await requireBrandMarkContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile } = await requireBrandMarkContext(event, userId, betaAccount)
 
   const draftId = getRouterParam(event, 'draftId')
   if (!draftId || draftId.length > 64) throw createError({ status: 400, statusText: 'Missing id' })

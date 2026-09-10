@@ -223,7 +223,7 @@ export const insightsDuelFactSchema = z.object({
   left: z.string().max(200),
   right: z.string().max(200),
   winner: z.enum(['left', 'right', 'tie']),
-  sourceIndex: z.number().int().min(0),
+  sourceIndex: z.number().int().min(0, 'Beleg fehlt'),
 })
 
 export type InsightsDuelFact = z.infer<typeof insightsDuelFactSchema>
@@ -545,6 +545,32 @@ export function insightsTransitionAllowed(from: InsightsState, to: InsightsState
 }
 
 /**
+ * DARF DIESE ZEILE GELÖSCHT WERDEN? (BI1 I2-Rest)
+ *
+ * Nur `draft` und `review` — also genau das, was nie öffentlich war oder es
+ * gerade nicht ist. Ein `published`/`updated`-Beitrag wird ZUERST
+ * zurückgezogen (`→ draft`, der Übergang steht in der Tabelle darüber) und
+ * erst dann gelöscht.
+ *
+ * ── WARUM NICHT EINFACH LÖSCHEN, WENN JEMAND `insights.manage` HAT ───────
+ * Weil eine öffentliche Adresse mehr ist als eine Zeile: sie steht in
+ * Suchmaschinen, in fremden Links und in unserer eigenen `slugHistory`. Ein
+ * Löschen aus der Öffentlichkeit heraus wäre ein 404 ohne Vorwarnung und ohne
+ * die Spur, aus der eine 301 später wieder einen Weg macht. Der Umweg über
+ * das Zurückziehen ist eine SEKUNDE Arbeit und macht aus dem Verschwinden
+ * einen sichtbaren Vorgang.
+ *
+ * Die Regel steht hier und nicht in der Route, weil BEIDE Enden sie brauchen:
+ * die Route als Sperre (409 `not_deletable`), die Oberfläche als Grund, den
+ * Knopf auszugrauen. Eine Sperre, die nur im Browser steht, ist mit einem
+ * `curl` erledigt; ein Knopf, der erst beim Klicken „nein" sagt, ist eine
+ * Falle.
+ */
+export function insightsPostDeletable(state: InsightsState): boolean {
+  return state === 'draft' || state === 'review'
+}
+
+/**
  * DIE ADRESSE DER METHODIK (Entscheidung 7/11) — EINMAL, weil sie in der
  * Prüfregel 5, im Entwurfs-Prompt und in der Oberfläche dieselbe sein muss.
  */
@@ -728,18 +754,36 @@ export function insightsReviewIssues(post: InsightsPost, context: InsightsReview
 
 // ── 6. Die Marken-Entität ──────────────────────────────────────────────────
 
+/**
+ * DIE DREI ZUSTÄNDE EINER MARKEN-ZEILE (§9.3).
+ *
+ *  · `draft`     — angelegt, aber keine öffentliche Seite. Der Normalfall
+ *                  einer Zeile, die nur als Anker eines Verweises entstanden
+ *                  ist (Prüfregel 6).
+ *  · `published` — `/brands/<slug>` zeigt sie (I3).
+ *  · `removed`   — der Notausgang aus Entscheidung 11, mit Datum und Grund.
+ *
+ * Seit dem Marken-Formular (BI1 I2-Rest) stehen sie als KATALOG hier statt
+ * als Aufzählung im Schema: die Ablage-Abbildung (`shared/insightsRows.ts`)
+ * und die Filterzeile der Redaktion lesen dieselbe Liste. Drei Stellen mit
+ * derselben Aufzählung sind beim ersten neuen Wert drei verschiedene
+ * Wahrheiten.
+ */
+export const INSIGHTS_BRAND_STATES = ['draft', 'published', 'removed'] as const
+export type InsightsBrandState = (typeof INSIGHTS_BRAND_STATES)[number]
+
 /** Ein eigenständiges Markenzeichen mit Beleg (§2.1, §9.3 `marks`). */
 export const insightsMarkSchema = z.object({
   kind: z.enum(['symbol', 'claim', 'type', 'color']),
   text: z.string().min(1).max(300),
-  sourceIndex: z.number().int().min(0),
+  sourceIndex: z.number().int().min(0, 'Beleg fehlt'),
 })
 
 /** Ein Jahr und ein Satz (§9.3 `history`). */
 export const insightsHistoryEntrySchema = z.object({
   year: z.number().int().min(1000).max(2999),
   text: z.string().min(1).max(300),
-  sourceIndex: z.number().int().min(0),
+  sourceIndex: z.number().int().min(0, 'Beleg fehlt'),
 })
 
 /**
@@ -755,7 +799,7 @@ export const insightsHistoryEntrySchema = z.object({
  * `state: 'removed'` IST der Notausgang aus Entscheidung 11 („ohne Diskussion
  * gewährt") — mit Datum und Grund, weil genau danach Anwaltsfrage 3 fragt.
  */
-export const insightsBrandSchema = z.object({
+const insightsBrandFields = {
   slug: z.string().min(1).max(160),
   slugHistory: z.array(z.string().max(160)).max(INSIGHTS_SLUG_HISTORY_MAX).default([]),
   name: z.string().min(1).max(200),
@@ -773,27 +817,89 @@ export const insightsBrandSchema = z.object({
   history: z.array(insightsHistoryEntrySchema).max(12).default([]),
   relations: z.array(z.string().max(64)).max(12).default([]),
   sources: z.array(insightsSourceSchema).max(40).default([]),
-  state: z.enum(['draft', 'published', 'removed']),
+  state: z.enum(INSIGHTS_BRAND_STATES),
   removedAt: z.string().max(32).default(''),
   removalReason: z.string().max(300).default(''),
   claimedBy: z.string().max(64).default(''),
-}).superRefine((brand, ctx) => {
+}
+
+/**
+ * WAS DIE MARKEN-REGELN ANSEHEN — wörtlich dieselbe Bauart wie
+ * `InsightsPostRuleInput` weiter oben und aus demselben Grund: seit dem
+ * Marken-Formular (BI1 I2-Rest) gibt es ZWEI Schemas über denselben Feldern,
+ * und zwei abgeschriebene `superRefine`-Blöcke wären zwei Wahrheiten, von
+ * denen die im Formular irgendwann milder wird.
+ */
+interface InsightsBrandRuleInput {
+  state: InsightsBrandState
+  removalReason: string
+  marks: readonly { sourceIndex: number }[]
+  history: readonly { sourceIndex: number }[]
+  sources: readonly InsightsSource[]
+}
+
+function insightsBrandRuleIssues(brand: InsightsBrandRuleInput): { path: (string | number)[], message: string }[] {
+  const issues: { path: (string | number)[], message: string }[] = []
   if (brand.state === 'removed' && !brand.removalReason) {
-    ctx.addIssue({ code: 'custom', path: ['removalReason'], message: 'Entfernung ohne dokumentierten Grund' })
+    issues.push({ path: ['removalReason'], message: 'Entfernung ohne dokumentierten Grund' })
   }
   for (const [index, mark] of brand.marks.entries()) {
     if (mark.sourceIndex >= brand.sources.length) {
-      ctx.addIssue({ code: 'custom', path: ['marks', index, 'sourceIndex'], message: 'Zeichen ohne Beleg' })
+      issues.push({ path: ['marks', index, 'sourceIndex'], message: 'Zeichen ohne Beleg' })
     }
   }
   for (const [index, entry] of brand.history.entries()) {
     if (entry.sourceIndex >= brand.sources.length) {
-      ctx.addIssue({ code: 'custom', path: ['history', index, 'sourceIndex'], message: 'Historien-Zeile ohne Beleg' })
+      issues.push({ path: ['history', index, 'sourceIndex'], message: 'Historien-Zeile ohne Beleg' })
     }
+  }
+  return issues
+}
+
+export const insightsBrandSchema = z.object(insightsBrandFields).superRefine((brand, ctx) => {
+  for (const issue of insightsBrandRuleIssues(brand)) {
+    ctx.addIssue({ code: 'custom', path: issue.path, message: issue.message })
   }
 })
 
 export type InsightsBrand = z.infer<typeof insightsBrandSchema>
+
+/**
+ * DIE FELDER, DIE DER SERVER AN EINER MARKE SELBST FÜHRT — und deshalb aus
+ * einer Redaktions-Eingabe VERSCHWINDEN müssen (BI1 I2-Rest).
+ *
+ * Drei Stück, jedes das Ergebnis einer HANDLUNG statt einer Meinung des
+ * Formulars:
+ *
+ *  · `slugHistory` führt die Umbenennung (`insightsSlugHistoryPush`) — wer sie
+ *    schicken dürfte, könnte eine alte Adresse löschen und damit jede 301
+ *    darauf; das bricht fremde Links, und zwar still.
+ *  · `removedAt` setzt der Übergang nach `removed`. Ein durchgereichtes Datum
+ *    wäre eine Behauptung darüber, WANN eine Zusage eingelöst wurde — und
+ *    genau danach fragt Anwaltsfrage 3.
+ *  · `claimedBy` ist der Stempel „diese Marke hat sich gemeldet". Er entsteht
+ *    auf dem Weg über den Kontakt, nicht in einem Feld neben der Branche.
+ *
+ * `state` bleibt BEWUSST drin — anders als beim Beitrag. Dort ist der Zustand
+ * das Gate mit sechs Prüfregeln davor, hier ist er eine redaktionelle Angabe
+ * mit genau EINER Bedingung (`removed` braucht einen Grund), und die steht im
+ * Schema. Ein eigener Zustands-Endpunkt für drei Werte ohne Prüfkette wäre
+ * eine zweite Route für dasselbe Speichern.
+ */
+export const INSIGHTS_BRAND_SERVER_OWNED_FIELDS = ['slugHistory', 'removedAt', 'claimedBy'] as const
+
+/** Was ein Marken-Formular schicken darf (s. `INSIGHTS_BRAND_SERVER_OWNED_FIELDS`). */
+export const insightsBrandEditSchema = z.object(insightsBrandFields).omit({
+  slugHistory: true,
+  removedAt: true,
+  claimedBy: true,
+}).superRefine((brand, ctx) => {
+  for (const issue of insightsBrandRuleIssues(brand)) {
+    ctx.addIssue({ code: 'custom', path: issue.path, message: issue.message })
+  }
+})
+
+export type InsightsBrandEdit = z.infer<typeof insightsBrandEditSchema>
 
 /**
  * DER SCORE ALS ANSICHT, NICHT ALS SPALTE (Entscheidung 7, §9.0).

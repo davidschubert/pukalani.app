@@ -18,12 +18,20 @@
  * daraus eine TATSACHE mit zwei möglichen Antworten, die ein Test beide
  * stellen kann.
  *
- * ── DIE ZUTEILUNG JE BRANDING IST NICHT GEBAUT, UND DAS STEHT HIER ───────
- * §1.9 sieht sie vor („die Schranke ist eine Zuteilung — sie entscheidet je
- * Branding und nie je Deployment"). Bis es sie gibt, ist `betaAccess` die
- * einzige Zutat. Wer sie baut, erweitert die EINGABE dieser Funktion und
- * nicht die Oberfläche: die Seite fragt schon heute nach `unlocked`, nicht
- * nach „Beta".
+ * ── DIE ZUTEILUNG JE BRANDING IST SEIT K1 DA ────────────────────────────
+ * §1.9 sah sie vor („die Schranke ist eine Zuteilung — sie entscheidet je
+ * Branding und nie je Deployment"), und BS1 §4.1 (b) hat sie bestellt. Gebaut
+ * ist sie im brand-Layer als EIN Feld an der Marke
+ * (`brand_profiles.derivationUnlockedAt`, Migration brand-025, Konzept
+ * docs/plans/BRAND-BOOK-KIT.md §2.8): „die Ableitung" — dieselbe Schranke, die
+ * Brand Book & Kit öffnet. Genau EIN Ja für zwei Produkte; zwei Schalter wären
+ * zwei Wahrheiten über denselben Kauf gewesen.
+ *
+ * Diese Funktion hat dafür ihre EINGABE erweitert und nicht die Oberfläche —
+ * so, wie es hier stand: die Seite fragt weiterhin nach `unlocked`, nicht nach
+ * „Beta". Die REGEL dahinter (`resolveDerivationAccess`) lebt im brand-Layer,
+ * weil ihr das Feld gehört; hier kommt sie als TATSACHE an (Vertrag
+ * `server/contracts/brandContract.ts`).
  *
  * ── KEIN SCHALTER IM PRODUKT ──────────────────────────────────────────────
  * Der Prototyp hatte einen (`market.paywall.toggle`), um David beide Bilder
@@ -31,8 +39,13 @@
  * Schranke umlegen kann, hat keine.
  */
 
-/** Woher die Freischaltung kommt. `none` = keine — die Schranke steht. */
-export type MarketPaywallGrant = 'beta' | 'none'
+/**
+ * Woher die Freischaltung kommt. `none` = keine — die Schranke steht.
+ * `derivation` = dieses BRANDING hat die Ableitung (Betreiber-Zusage oder
+ * Kauf); `beta` = das KONTO ist ein Beta-Konto und damit dauerhaft frei
+ * (BS1 §9 Entscheidung 6).
+ */
+export type MarketPaywallGrant = 'beta' | 'derivation' | 'none'
 
 export interface MarketPaywallState {
   readonly unlocked: boolean
@@ -40,12 +53,30 @@ export interface MarketPaywallState {
 }
 
 export interface MarketPaywallInput {
-  /** Hat das Konto einen gültigen Beta-Zugang (`brand_access`)? */
+  /** Hat das KONTO einen gültigen Beta-Zugang (`brand_access`)? */
   readonly betaAccess: boolean
+  /**
+   * Ist für DIESES Branding die Ableitung offen? — das Ergebnis von
+   * `resolveDerivationAccess` im brand-Layer, nie eine seiner Zutaten.
+   *
+   * Die Regel dort rechnet die Beta-Zulassung bereits mit ein; hier steht
+   * `betaAccess` trotzdem daneben, weil es eine andere Frage beantwortet
+   * („wem gehört die Freistellung — dem Konto oder der Marke?"). Genau das
+   * ist der Unterschied, den ein Widerruf des Beta-Zugangs sichtbar macht.
+   */
+  readonly derivationUnlocked: boolean
 }
 
+/**
+ * ZWEI WEGE, EIN JA — und die Herkunft nennt den, der ALLEIN trägt.
+ *
+ * `beta` steht vorn, weil es die Erklärung ist, die heute jede offene Schranke
+ * hat: ohne Beta-Konto kommt niemand auf diese Seite (das Gate des Wizards
+ * steht davor). Erst wenn ein Konto OHNE Beta-Zugang eine Marke mit gekaufter
+ * Ableitung hat — der Normalfall ab BS1 Z1 —, sagt die Antwort `derivation`.
+ */
 export function resolveMarketPaywall(input: MarketPaywallInput): MarketPaywallState {
-  return input.betaAccess
-    ? { unlocked: true, grant: 'beta' }
-    : { unlocked: false, grant: 'none' }
+  if (input.betaAccess) return { unlocked: true, grant: 'beta' }
+  if (input.derivationUnlocked) return { unlocked: true, grant: 'derivation' }
+  return { unlocked: false, grant: 'none' }
 }

@@ -281,13 +281,137 @@
         "postNotFound": "This post does not exist.",
         "sourceNotFound": "This source no longer exists.",
         "storageUnavailable": "Storage is not reachable right now.",
-        "generic": "That did not work."
-      }
+        "generic": "That did not work.",
+        "notDeletable": "Withdraw it first — a published piece is not deleted directly."
+      },
+      "delete": "Delete",
+      "deleteTitle": "Delete this piece",
+      "deleteText": "“{title}” will be deleted for good. There is no undo.",
+      "deleteHint": "Sources, facts and the desk note go with it — they live in the same row.",
+      "deleteBlocked": "Withdraw it first: a published piece is not deleted straight out of the open.",
+      "deleted": "Piece deleted."
     },
     "admin": {
       "nav": "Brand Insights",
       "navPosts": "Posts",
+      "navBrands": "Brands",
+      "navCorrections": "Corrections",
       "navRadar": "Topic radar"
+    },
+    "brands": {
+      "title": "Brands",
+      "lead": "Every brand we write about has a row here — otherwise there is no place a correction could land.",
+      "new": "Add brand",
+      "edit": "Edit brand",
+      "editHint": "Marks, history and relations each need a source from the list below.",
+      "refresh": "Reload",
+      "saved": "Brand saved.",
+      "emptyTitle": "No brand yet",
+      "emptyDescription": "A new brand starts with name, website and industry.",
+      "slugHint": "The address. On a rename the old one moves into the history — links stay alive.",
+      "countryHint": "Two letters, e.g. DE or US.",
+      "foundedYear": "Founded",
+      "archetypeSecondary": "Second archetype",
+      "paletteId": "Colour world",
+      "libraryKey": "Library key",
+      "checkId": "Brand check",
+      "checkIdHint": "The latest check of this website — that is where the score comes from.",
+      "publicationId": "Discover publication",
+      "publicationIdHint": "If the brand is also a customer: the customer profile wins.",
+      "relationsHint": "Competitors and related brands. The row itself is not on the list.",
+      "relationsPlaceholder": "Pick brands",
+      "marksHint": "Symbol, claim, type or colour — one sentence each, one source each.",
+      "markKind": "Kind",
+      "markText": "Description",
+      "markAdd": "Add mark",
+      "markRemove": "Remove mark",
+      "historyHint": "A year, a sentence, a source.",
+      "historyYear": "Year",
+      "historyText": "What happened",
+      "historyAdd": "Add row",
+      "historyRemove": "Remove row",
+      "sourceIndex": "Source",
+      "sourceIndexNone": "No source",
+      "removalReason": "Reason for removal",
+      "removalReasonHint": "Required. We record date and reason — that is what gets asked about later.",
+      "filter": {
+        "draft": "Draft",
+        "published": "Published",
+        "removed": "Removed",
+        "all": "All"
+      },
+      "state": {
+        "draft": "Draft",
+        "published": "Published",
+        "removed": "Removed on request"
+      },
+      "col": {
+        "name": "Name",
+        "slug": "Address",
+        "industry": "Industry",
+        "country": "Country",
+        "state": "State",
+        "updated": "Last"
+      },
+      "error": {
+        "notFound": "This brand does not exist.",
+        "slugTaken": "That address is taken — please pick another.",
+        "validation": "Incomplete input — please check required fields and sources."
+      }
+    },
+    "corrections": {
+      "title": "Corrections",
+      "lead": "People who spot a mistake or want a removal write to us. This is the other half of that.",
+      "refresh": "Reload",
+      "emptyTitle": "Nothing open",
+      "emptyDescription": "There is no proposal in this view.",
+      "accepted": "Accepted",
+      "acceptedHint": "The change itself is desk work — in the editor or on the brands page.",
+      "declined": "Declined",
+      "contactYes": "Contact on file",
+      "declineTitle": "Decline this proposal",
+      "declineText": "The proposal about “{target}” will be declined. The reason stays with the row.",
+      "declineNoteLabel": "Reason",
+      "declineNoteHint": "Required. Without it a decline is just a disappearance.",
+      "declineNotePlaceholder": "Why we are not following the proposal.",
+      "filter": {
+        "open": "Open",
+        "accepted": "Accepted",
+        "declined": "Declined",
+        "all": "All"
+      },
+      "status": {
+        "open": "Open",
+        "accepted": "Accepted",
+        "declined": "Declined"
+      },
+      "kind": {
+        "correction": "Correction",
+        "removal": "Removal"
+      },
+      "targetKind": {
+        "brand": "Brand",
+        "post": "Piece"
+      },
+      "col": {
+        "target": "Target",
+        "kind": "Kind",
+        "field": "Field",
+        "proposed": "Proposal",
+        "reason": "Reason",
+        "contact": "Contact",
+        "date": "Received",
+        "status": "Status"
+      },
+      "action": {
+        "accept": "Accept",
+        "decline": "Decline"
+      },
+      "error": {
+        "alreadyDecided": "This row has already been decided.",
+        "noteRequired": "A decline needs a reason.",
+        "notFound": "This proposal does not exist."
+      }
     }
   }
 }

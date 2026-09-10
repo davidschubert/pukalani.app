@@ -200,8 +200,8 @@ import { recordBrandEvent } from '../../../../../../utils/brandEvents'
 
 export default defineEventHandler(async (event): Promise<BrandConverseResponse | undefined> => {
   const started = Date.now()
-  const { userId } = await requireBrandAccess(event)
-  const { profile, stepKey, stepRow, stepRows } = await loadBrandStepContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile, stepKey, stepRow, stepRows } = await loadBrandStepContext(event, userId, betaAccount)
 
   const parsed = createBrandConverseSchema().safeParse(await readBody(event))
   if (!parsed.success) {
@@ -277,7 +277,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
    * durch. Gerechnet wird über die Fakten ALLER Kapitel, weil eine Session
    * über Kapitelgrenzen liest (`b.purpose` ← `a.pitch`).
    */
-  const sessionStates = resolveBrandSessionStates(profileFacts(profile), toStepFacts(stepRows))
+  const sessionStates = resolveBrandSessionStates(profileFacts(profile, betaAccount), toStepFacts(stepRows))
   if (session && sessionStates[session.id] === 'locked') {
     throw createError({
       status: 409,
@@ -305,8 +305,8 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
         .map(slotId => brandSlotPromptLabel(
           slotId,
           profile.contentLocale,
-          profileFacts(profile).pathKind,
-          profileFacts(profile).team,
+          profileFacts(profile, betaAccount).pathKind,
+          profileFacts(profile, betaAccount).team,
         ))
 
   /**
@@ -455,8 +455,8 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
     label: brandSlotPromptLabel(
       entry.sessionKey,
       profile.contentLocale,
-      profileFacts(profile).pathKind,
-      profileFacts(profile).team,
+      profileFacts(profile, betaAccount).pathKind,
+      profileFacts(profile, betaAccount).team,
     ),
     answer: entry.answer,
   }))
@@ -520,7 +520,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
     if (!session) return null
 
     const contentLocale = profile.contentLocale
-    const { pathKind, team } = profileFacts(profile)
+    const { pathKind, team } = profileFacts(profile, betaAccount)
 
     let latest: { slotId: string, at: string, missing: string[] } | null = null
     for (const [slotId, record] of Object.entries(currentRecords)) {
@@ -721,7 +721,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
     const system = georgeSystemPrompt({
       locale: uiLocale,
       contentLocale: profile.contentLocale,
-      pathKind: profileFacts(profile).pathKind,
+      pathKind: profileFacts(profile, betaAccount).pathKind,
       technique,
     })
 
@@ -779,8 +779,8 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
       ? brandSlotPromptLabel(
           session.id,
           profile.contentLocale,
-          profileFacts(profile).pathKind,
-          profileFacts(profile).team,
+          profileFacts(profile, betaAccount).pathKind,
+          profileFacts(profile, betaAccount).team,
         )
       : ''
 
@@ -818,8 +818,8 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
           const label = (slotId: string) => brandSlotPromptLabel(
             slotId,
             profile.contentLocale,
-            profileFacts(profile).pathKind,
-            profileFacts(profile).team,
+            profileFacts(profile, betaAccount).pathKind,
+            profileFacts(profile, betaAccount).team,
           )
           const skipFacts: Record<string, { confirmed: boolean, deferred: boolean }> = {}
           for (const slot of slotsForStep(stepKey)) {
@@ -868,7 +868,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
         ...(draftFieldLabel ? { draftField: draftFieldLabel } : {}),
         // DIE ANREDE (converse-13, Davids Klick-Test): „alleine" heisst du,
         // „im Team" heisst ihr — dieselbe Weiche wie bei den Beschriftungen.
-        team: profileFacts(profile).team,
+        team: profileFacts(profile, betaAccount).team,
         session: sessionOptions,
         // converse-14: der Zustand der Session erreicht endlich den Auftrag.
         sessionConfirmed,
@@ -896,8 +896,8 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
               staleSources: session.inputs.slots.map(slotId => brandSlotPromptLabel(
                 slotId,
                 profile.contentLocale,
-                profileFacts(profile).pathKind,
-                profileFacts(profile).team,
+                profileFacts(profile, betaAccount).pathKind,
+                profileFacts(profile, betaAccount).team,
               )),
             }
           : {}),
@@ -912,8 +912,8 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
             value: brandSlotStoredValue(records[slot.id]),
           })),
           profile.contentLocale,
-          profileFacts(profile).pathKind,
-          profileFacts(profile).team,
+          profileFacts(profile, betaAccount).pathKind,
+          profileFacts(profile, betaAccount).team,
         ),
         history,
         // Leer heisst KEIN BLOCK (s. `formatBrandConverseInputs`) — die Liste

@@ -90,11 +90,17 @@ export default defineAppConfig({
        * `order: 133` schliesst an die drei brand-Listen (130–132) an: sie
        * gehören demselben Menschen, und zwischen sie gehört nichts Fremdes.
        *
-       * `children` führt Liste UND Radar auf: der Radar ist eine eigene
-       * Adresse (§11.2 Frage 3, „drei Adressen"), und ohne Unterpunkt käme man
-       * nur über einen Link in der Liste dorthin. Die Modul-Seite steht als
-       * erster Unterpunkt mit `exact` — sonst wäre sie auf jeder Unterseite
-       * mit-aktiv.
+       * `children` führt ALLE VIER Adressen auf (§9.4: Liste, Marken,
+       * Korrekturen, Radar). Ohne Unterpunkt käme man nur über einen Link in
+       * der Liste dorthin — und die Marken-Seite und die Korrekturen sind
+       * eigene Arbeiten mit eigenen Menschen davor, nicht Unterseiten des
+       * Editors. Die Modul-Seite steht als erster Unterpunkt mit `exact` —
+       * sonst wäre sie auf jeder Unterseite mit-aktiv.
+       *
+       * Die REIHENFOLGE ist die des Arbeitsflusses: geschrieben wird ein
+       * Beitrag, dazu gehören Marken, danach kommen die Rückmeldungen, und
+       * der Radar steht als Ideengeber am Ende (er ist das einzige der vier,
+       * das noch auf ein Gate wartet).
        */
       modules: [
         {
@@ -110,6 +116,8 @@ export default defineAppConfig({
           order: 133,
           children: [
             { id: 'insights-posts', labelKey: 'insights.admin.navPosts', to: '/dashboard/insights', exact: true },
+            { id: 'insights-brands', labelKey: 'insights.admin.navBrands', to: '/dashboard/insights/brands' },
+            { id: 'insights-corrections', labelKey: 'insights.admin.navCorrections', to: '/dashboard/insights/corrections' },
             { id: 'insights-radar', labelKey: 'insights.admin.navRadar', to: '/dashboard/insights/radar' },
           ],
         },

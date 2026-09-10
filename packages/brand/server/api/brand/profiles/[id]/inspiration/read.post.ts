@@ -54,8 +54,8 @@ import {
  * (Regel 1 im Kopf von `brandEvents.ts`).
  */
 export default defineEventHandler(async (event): Promise<BrandInspirationReadResponse> => {
-  const { userId } = await requireBrandAccess(event)
-  const { profile, stepRows } = await requireBrandInspirationContext(event, userId)
+  const { userId, betaAccount } = await requireBrandAccess(event)
+  const { profile, stepRows } = await requireBrandInspirationContext(event, userId, betaAccount)
 
   const entries = await listBrandInspiration(event, profile.$id)
   if (entries.length === 0) {

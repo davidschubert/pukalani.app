@@ -60,6 +60,30 @@ export default defineNuxtConfig({
     content: true,
   },
 
+  /**
+   * DIE ALTE BETREIBER-SEITE ANTWORTET 301 (K1, Konzept
+   * docs/plans/BRAND-BOOK-KIT.md §2.20 Nr. 5: „eine Seite, zwei Spalten, alte
+   * Route leitet weiter").
+   *
+   * `/dashboard/brand-design` war die Freischalt-Seite von Schicht 2 (D1). Seit
+   * K1 stehen BEIDE Schranken je Marke nebeneinander unter
+   * `/dashboard/brand-unlocks` — zwei Seiten wären zwei Orte für dieselbe
+   * Frage, und der zweite hätte die halbe Antwort.
+   *
+   * ZWEI ZEILEN, WEIL ES ZWEI ADRESSEN GIBT (i18n 'prefix_except_default'):
+   * die englische ohne Prefix, die deutsche unter `/de/*`. Eine Regel `/de/**`
+   * gibt es hier bewusst nicht — sie träfe jede deutsche Seite. Muster:
+   * `apps/branding/nuxt.config.ts` (die alte Beispiel-Seite).
+   *
+   * Sie steht im LAYER, weil die SEITE dem Layer gehörte: wer die
+   * Betreiber-Fläche erbt, erbt auch ihre Umleitung. Ein Lesezeichen oder ein
+   * Link aus einer alten Notiz landet damit am richtigen Ort statt im 404.
+   */
+  routeRules: {
+    '/dashboard/brand-design': { redirect: { to: '/dashboard/brand-unlocks', statusCode: 301 } },
+    '/de/dashboard/brand-design': { redirect: { to: '/de/dashboard/brand-unlocks', statusCode: 301 } },
+  },
+
   // Layer-stores werden nicht auto-gescannt (Stolperfalle, CLAUDE.md)
   imports: {
     dirs: [join(currentDir, './app/stores')],

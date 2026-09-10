@@ -1,18 +1,23 @@
 import { describe, expect, it } from 'vitest'
 import {
+  INSIGHTS_BRAND_SERVER_OWNED_FIELDS,
   INSIGHTS_OPPORTUNITY_MAX,
   INSIGHTS_OPPORTUNITY_SIGNALS,
   INSIGHTS_OPPORTUNITY_SIGNALS_PLANNED,
   INSIGHTS_QUOTE_MAX,
   INSIGHTS_RANKING_PLACES,
+  INSIGHTS_STATES,
   INSIGHTS_TOPICS,
   INSIGHTS_TOPIC_KEYS,
   type InsightsPost,
   type InsightsSource,
+  insightsBrandEditSchema,
   insightsBrandSchema,
   insightsDuelSlug,
+  insightsIsPublic,
   insightsOpportunity,
   insightsPopularity,
+  insightsPostDeletable,
   insightsPostSchema,
   insightsPublicFassung,
   insightsRankingSchema,
@@ -284,6 +289,115 @@ describe('Marken-Entität', () => {
   it('GEGENPROBE: eine Entfernung ohne dokumentierten Grund fällt durch', () => {
     expect(insightsBrandSchema.safeParse({ ...brand, state: 'removed' }).success).toBe(false)
     expect(insightsBrandSchema.safeParse({ ...brand, state: 'removed', removalReason: 'Wunsch der Eigentümerin, 2026-09-01' }).success).toBe(true)
+  })
+})
+
+/**
+ * DIE REDAKTIONS-EINGABE EINER MARKE (BI1 I2-Rest).
+ *
+ * Sie muss ZWEIERLEI können, und beides braucht eine Gegenprobe: dieselben
+ * Regeln durchsetzen wie der volle Vertrag (sonst ist das Formular die
+ * mildere von zwei Wahrheiten) und die drei Server-eigenen Felder
+ * ABLEHNEN — also nicht bloss ignorieren, sondern nicht durchreichen.
+ */
+describe('Marken-Eingabe (insightsBrandEditSchema)', () => {
+  const input = {
+    slug: 'upcountry-roast',
+    name: 'Upcountry Roast Co.',
+    state: 'published' as const,
+    sources: [PRESS],
+    marks: [{ kind: 'claim' as const, text: 'Der Grat als Zeichen.', sourceIndex: 0 }],
+    history: [{ year: 1994, text: 'Erste Röstung in Makawao.', sourceIndex: 0 }],
+  }
+
+  it('nimmt eine belegte Marke an', () => {
+    const parsed = insightsBrandEditSchema.parse(input)
+    expect(parsed.name).toBe('Upcountry Roast Co.')
+    expect(parsed.foundedYear).toBeNull()
+    expect(parsed.relations).toEqual([])
+  })
+
+  it('lässt die drei Server-eigenen Felder GAR NICHT herein', () => {
+    const parsed = insightsBrandEditSchema.parse({
+      ...input,
+      slugHistory: ['alte-adresse'],
+      removedAt: '2020-01-01T00:00:00.000Z',
+      claimedBy: 'user-fremd',
+    })
+    for (const field of INSIGHTS_BRAND_SERVER_OWNED_FIELDS) {
+      expect(Object.keys(parsed)).not.toContain(field)
+    }
+  })
+
+  it('GEGENPROBE: die drei Felder stehen genau so im vollen Vertrag', () => {
+    // Sonst wäre die Auslassung oben keine Aussage, sondern ein Zufall.
+    const full = insightsBrandSchema.parse({ ...input, slugHistory: ['alte-adresse'] })
+    expect(full.slugHistory).toEqual(['alte-adresse'])
+    expect(Object.keys(full)).toEqual(expect.arrayContaining([...INSIGHTS_BRAND_SERVER_OWNED_FIELDS]))
+  })
+
+  it('GEGENPROBE: `removed` OHNE Grund fällt — dieselbe Regel wie im vollen Vertrag', () => {
+    expect(insightsBrandEditSchema.safeParse({ ...input, state: 'removed' }).success).toBe(false)
+    expect(insightsBrandEditSchema.safeParse({
+      ...input,
+      state: 'removed',
+      removalReason: 'Wunsch der Eigentümerin, 2026-09-01',
+    }).success).toBe(true)
+  })
+
+  it('GEGENPROBE: ein `sourceIndex` ausserhalb der Quellenliste fällt — bei Zeichen UND Historie', () => {
+    expect(insightsBrandEditSchema.safeParse({
+      ...input,
+      marks: [{ kind: 'claim', text: 'x', sourceIndex: 1 }],
+    }).success).toBe(false)
+    expect(insightsBrandEditSchema.safeParse({
+      ...input,
+      history: [{ year: 1994, text: 'x', sourceIndex: 9 }],
+    }).success).toBe(false)
+    // Und mit Beleg geht es: sonst prüfte der Test nur, dass irgendetwas fällt.
+    expect(insightsBrandEditSchema.safeParse({
+      ...input,
+      marks: [{ kind: 'claim', text: 'x', sourceIndex: 0 }],
+      history: [{ year: 1994, text: 'x', sourceIndex: 0 }],
+    }).success).toBe(true)
+  })
+
+  it('GEGENPROBE: ein Zeiger auf eine ENTFERNTE Quelle (-1) fällt ebenfalls', () => {
+    // Die Oberfläche setzt `-1`, wenn jemand die belegte Quelle löscht — das
+    // soll das Speichern verhindern, nicht stillschweigend durchgehen.
+    expect(insightsBrandEditSchema.safeParse({
+      ...input,
+      marks: [{ kind: 'claim', text: 'x', sourceIndex: -1 }],
+    }).success).toBe(false)
+  })
+
+  it('GEGENPROBE: ohne Namen und ohne Adresse gibt es keine Marke', () => {
+    expect(insightsBrandEditSchema.safeParse({ ...input, name: '' }).success).toBe(false)
+    expect(insightsBrandEditSchema.safeParse({ ...input, slug: '' }).success).toBe(false)
+  })
+})
+
+/**
+ * WAS GELÖSCHT WERDEN DARF (BI1 I2-Rest) — vier Zustände, zwei Antworten.
+ * Ohne die Gegenprobe wäre „ja" eine Regel, die immer ja sagt.
+ */
+describe('insightsPostDeletable', () => {
+  it('Entwurf und Redaktion: ja — sie waren nie öffentlich', () => {
+    expect(insightsPostDeletable('draft')).toBe(true)
+    expect(insightsPostDeletable('review')).toBe(true)
+  })
+
+  it('GEGENPROBE: freigegeben und aktualisiert: nein — erst zurückziehen', () => {
+    expect(insightsPostDeletable('published')).toBe(false)
+    expect(insightsPostDeletable('updated')).toBe(false)
+  })
+
+  it('deckt sich mit den öffentlichen Zuständen: was öffentlich ist, ist nicht löschbar', () => {
+    // Die eigentliche Aussage der Regel — geprüft gegen die andere Liste
+    // statt gegen eine zweite Aufzählung derselben vier Wörter.
+    for (const state of INSIGHTS_STATES) {
+      expect(insightsPostDeletable(state)).toBe(!insightsIsPublic({ state }))
+    }
   })
 })
 

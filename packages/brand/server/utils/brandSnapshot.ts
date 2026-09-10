@@ -92,14 +92,22 @@ export interface BrandSnapshotOptions {
    * eigene Entscheidung und nicht der Nebeneffekt eines Formatschritts.
    */
   readonly design?: BrandDesignSnapshotPreset
+  /**
+   * DIE BETA-TATSACHE DES EIGENTÜMERS (K1, §2.8) — ohne Vorgabewert und
+   * deshalb Pflicht: das Abbild entsteht aus der JOURNEY, und die kennt seit
+   * Schicht 3 eine Sperre, die nicht an der Zeile hängt. Ein stiller Default
+   * hätte einem Beta-Konto die Kapitel der dritten Schicht aus dem geteilten
+   * Abbild genommen, ohne dass irgendwo etwas rot wird.
+   */
+  readonly betaAccount: boolean
 }
 
 export function buildBrandSnapshot(
   profile: BrandProfileRow,
   stepRows: readonly BrandStepRow[],
-  options: BrandSnapshotOptions = {},
+  options: BrandSnapshotOptions,
 ): BrandSnapshotResult {
-  const journey = resolveBrandJourney(profileFacts(profile), toStepFacts(stepRows))
+  const journey = resolveBrandJourney(profileFacts(profile, options.betaAccount), toStepFacts(stepRows))
   const byStepKey = new Map(stepRows.map(row => [row.stepKey, row]))
 
   const snapshot: BrandShareSnapshot = {

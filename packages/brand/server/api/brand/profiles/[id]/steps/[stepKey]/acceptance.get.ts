@@ -44,9 +44,9 @@ import {
  * `acceptance.blockers`, und die Frage „Passt dieses Kapitel?" bleibt weg.
  */
 export default defineEventHandler(async (event): Promise<BrandStepAcceptanceResponse> => {
-  const { userId } = await requireBrandAccess(event)
+  const { userId, betaAccount } = await requireBrandAccess(event)
   const { profile, stepKey, stepRow, records, sessionStates, acceptance, journey, findings }
-    = await loadBrandAcceptanceContext(event, userId)
+    = await loadBrandAcceptanceContext(event, userId, betaAccount)
 
   const pathKind = profile.pathKind === 'relaunch' ? 'relaunch' : 'new'
   const team = profile.team === 'team' ? 'team' : 'solo'
