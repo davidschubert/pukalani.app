@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { H3Event } from 'h3'
 import { confirmableRequiredSlotsForStep, slotById } from '../shared/slotRegistry'
-import { brandSlotPromptLabel } from '../server/utils/brandSlotPromptLabels'
+import { brandSlotPromptLabel, brandSlotShortLabel } from '../server/utils/brandSlotPromptLabels'
 import {
   type BrandGenerationEvent,
   decodeBrandGenerationChunk,
@@ -599,6 +599,81 @@ describe('Die nächste Frage gehört der Registry', () => {
     expect(readBack(chunks).at(-1)).toMatchObject({ slotId: '' })
   })
 
+  /**
+   * TESTLAUF-BEFUND 2 (2026-09-09): der Mensch ERGÄNZTE etwas im
+   * Gründungsimpuls; der Zug endete mit der Frage der nächsten Session
+   * („Kundenstimmen"). Die Bühne stand aber weiter auf dem Gründungsimpuls
+   * (`brandStageClaim`) — die Antwort darauf landete deshalb dort.
+   *
+   * Der Riegel gehört dem SERVER: der Auftrag sagt „bleib bei diesem Feld" UND
+   * die Eingaben tragen keine fremde Frage mehr. Zwei Aussagen über denselben
+   * Zug, die auseinanderlaufen könnten, gibt es damit nicht.
+   */
+  it('EINE UNBESTÄTIGTE SESSION HÄLT DEN ZUG — keine fremde Frage, nirgends', async () => {
+    // `a.origin` trägt einen unbestätigten Entwurf, der Mensch sitzt darauf.
+    stepRow.slots = JSON.stringify({ 'a.origin': { latestDraft: 'Wir haben 2019 angefangen.' } })
+    stepRows = [stepRow, stepRowFor('pvm')]
+    body = {
+      text: 'Und noch etwas: der erste Sack kam aus Kona.',
+      sessionKey: 'a.origin',
+      slotId: 'a.origin',
+      // Genau das, was der Browser heute schickt, wenn die Bühne auf einem
+      // beantworteten Feld steht — der Wegweiser des KAPITELS.
+      nextSlotId: 'a.customerPraise',
+      nextQuestion: 'Was loben eure Kunden?',
+    }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain(
+      `THIS TURN BELONGS TO "${brandSlotPromptLabel('a.origin', 'de', 'new', 'solo')}"`,
+    )
+    // Der fremde Wortlaut erreicht weder den Auftrag noch die Eingaben.
+    expect(lastPrompt).not.toContain('Was loben eure Kunden?')
+    expect(lastPrompt).not.toContain('[the next question]')
+    expect(lastPrompt).not.toContain('CLOSE YOUR TURN WITH THE NEXT OPEN QUESTION')
+    // Und die Bühne erfährt, dass KEINE Katalog-Frage gestellt wurde.
+    expect(readBack(chunks).at(-1)).toMatchObject({ slotId: '' })
+  })
+
+  it('GEGENPROBE: ist die nächste Frage die EIGENE, wird sie ganz normal gestellt', async () => {
+    // Leeres Feld, aktive Session = die nächste offene Frage: hier ist „stell
+    // sie" genau richtig, und der Riegel darf nicht greifen.
+    stepRow.slots = '{}'
+    stepRows = [stepRow, stepRowFor('pvm')]
+    body = {
+      text: 'Kurz gesagt: Langeweile.',
+      sessionKey: 'a.origin',
+      slotId: 'a.origin',
+      nextSlotId: 'a.origin',
+      nextQuestion: 'Warum habt ihr angefangen?',
+    }
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('[the next question]\nWarum habt ihr angefangen?')
+    expect(lastPrompt).toContain('CLOSE YOUR TURN WITH THE NEXT OPEN QUESTION')
+    expect(lastPrompt).not.toContain('THIS TURN BELONGS TO')
+  })
+
+  it('GEGENPROBE: eine BESTÄTIGTE Session hält den Zug nicht fest', async () => {
+    // Vertiefen an einem abgeschlossenen Feld ist ein Gespräch, kein offener
+    // Punkt — der Weg darf dort weitergehen.
+    stepRow.slots = JSON.stringify({ 'a.origin': { confirmed: 'Wir haben 2019 angefangen.' } })
+    stepRows = [stepRow, stepRowFor('pvm')]
+    body = {
+      text: 'Nur eine Rückfrage dazu.',
+      sessionKey: 'a.origin',
+      nextSlotId: 'a.customerPraise',
+      nextQuestion: 'Was loben eure Kunden?',
+    }
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).not.toContain('THIS TURN BELONGS TO')
+    expect(lastPrompt).toContain('[the next question]\nWas loben eure Kunden?')
+  })
+
   it('nimmt eine FREIE Frage ohne Slot an', async () => {
     body = { text: 'Was meinst du mit Positionierung?' }
     const { event, chunks } = fakeEvent()
@@ -1115,9 +1190,26 @@ describe('Der Abschlusszug', () => {
     expect(readBack(chunks).at(-1)!.type).toBe('generation.completed')
     expect(lastPrompt).toContain('TASK: CLOSE this session')
     expect(lastPrompt).toContain('ASK NOTHING in this turn')
-    // Das Ziel ist die nächste offene Frage — mit ihrer Beschriftung, nicht als Id.
-    expect(lastPrompt).toContain(brandSlotPromptLabel('a.customerPraise', 'de', 'new', 'solo'))
+    /**
+     * DAS ZIEL TRÄGT DEN KURZEN NAMEN, NICHT DIE FRAGE (Testlauf-Befund 3,
+     * 2026-09-09). Im Live-Lauf stand „Der nächste Schritt heißt „Was sagen
+     * deine glücklichsten Kunden über euch — in DEREN Worten?"" — der
+     * Fragetext kam über `brandSlotPromptLabel` genau hierher.
+     */
+    expect(lastPrompt).toContain('the next session is "Kundenstimmen"')
+    expect(brandSlotShortLabel('a.customerPraise', 'de', 'new', 'solo')).toBe('Kundenstimmen')
+    expect(lastPrompt).not.toContain(
+      `the next session is "${brandSlotPromptLabel('a.customerPraise', 'de', 'new', 'solo')}"`,
+    )
     expect(lastPrompt).not.toContain('"a.customerPraise"')
+    /**
+     * UND DER BESTÄTIGTE WERT REIST MIT (Testlauf-Befund 1): ohne ihn kannte
+     * der Abschluss den Zustand des Feldes nicht und verwies am fertigen Feld
+     * auf den Entwurfs-Knopf.
+     */
+    expect(lastPrompt).toContain('IT IS ALREADY WRITTEN AND CONFIRMED')
+    expect(lastPrompt).toContain('Wir haben 2019 angefangen.')
+    expect(lastPrompt).not.toContain('WHEN THEY NAME A CONCRETE DECISION')
     // Genau EINE Zeile im Verlauf: die des Beraters.
     expect(messageRows).toHaveLength(1)
     expect(messageRows[0]).toMatchObject({ role: 'george', sessionKey: 'a.origin' })
@@ -1138,8 +1230,14 @@ describe('Der Abschlusszug', () => {
     await handler(event)
 
     expect(lastPrompt).toContain('THESE PARTS ARE ALREADY SETTLED')
-    expect(lastPrompt).toContain(brandSlotPromptLabel('a.customerPraise', 'de', 'new', 'solo'))
-    expect(lastPrompt).toContain(brandSlotPromptLabel('a.oneThing', 'de', 'new', 'solo'))
+    // Auch die Übersprungenen tragen den kurzen NAMEN (Befund 3): eine Kette
+    // aus drei zitierten Fragebogen-Sätzen wäre der Satz, den niemand liest.
+    const settled = /THESE PARTS ARE ALREADY SETTLED[\s\S]*?\n/.exec(lastPrompt)![0]
+    expect(settled).toContain(brandSlotShortLabel('a.customerPraise', 'de', 'new', 'solo'))
+    expect(settled).toContain(brandSlotShortLabel('a.complaints', 'de', 'new', 'solo'))
+    expect(lastPrompt).toContain(
+      `the next session is "${brandSlotShortLabel('a.oneThing', 'de', 'new', 'solo')}"`,
+    )
   })
 
   it('OHNE Ziel verweist er auf die Finale Abnahme', async () => {

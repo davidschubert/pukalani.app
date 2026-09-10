@@ -252,14 +252,23 @@ function sessionGlyph(session: BwRailSession): { name: string, style: string } {
 }
 
 /**
- * DIE ZWEITE ZEILE EINES KAPITELS. Aufgeklappt steht dort der UMFANG („11
- * Sessions, ~14 Min"), eingeklappt der ZÄHLER („7 von 11 bestätigt · 2 neu
- * besprechen") — zwei Auskünfte für zwei Situationen: wer die Liste sieht,
- * liest den Stand an den Glyphen ab und braucht die Zeit; wer sie nicht sieht,
- * braucht den Stand.
+ * DIE ZWEITE ZEILE EINES KAPITELS — ÜBERALL DERSELBE ZÄHLER (Testlauf-Befund 7,
+ * 2026-09-09).
+ *
+ * Vorher TAUSCHTE diese Zeile die Auskunft: eingeklappt der Zähler („7 von 11
+ * bestätigt"), aufgeklappt der Registry-Umfang („11 Sessions, ~14 Min"). Genau
+ * im OFFENEN Kapitel — dort, wo jemand gerade arbeitet — stand damit die
+ * einzige Zahl der Leiste, die sich nie bewegt: nach vier Bestätigungen sagte
+ * der Kopf unverändert „11 Sessions, ~14 Min", während die eingeklappten
+ * Kapitel daneben ihren Stand meldeten.
+ *
+ * Jetzt steht der ZÄHLER immer, und das offene Kapitel hängt seine RESTzeit
+ * hinten an (`step.effort`, gerechnet von `chapterRemainingMinutes`). Beides
+ * bewegt sich mit der Arbeit, und beide Fassungen der Zeile lesen dieselbe
+ * Rechnung.
  */
 function stepSubline(step: BwRailStep): string {
-  return (step.sessions?.length ? step.effort : step.counter) ?? ''
+  return [step.counter, step.effort].filter(part => (part ?? '').length > 0).join(' · ')
 }
 
 function selectSession(step: BwRailStep, session: BwRailSession): void {

@@ -122,6 +122,39 @@ export function brandKeepWritingButtonLabel(uiLocale: string): string {
   return lookup(ROOTS[uiLocale] ?? ROOTS.en, 'brand.workspace.confirmChoice.more') ?? ''
 }
 
+/**
+ * DER KURZE NAME EINES FELDES — Label vor Frage (Testlauf-Befund 3,
+ * 2026-09-09).
+ *
+ * ── DER BEFUND ────────────────────────────────────────────────────────────
+ * Der Abschlusszug nannte sein Ziel mit `brandSlotPromptLabel`, und das ist
+ * für eine Frage-Session der FRAGETEXT. Im Live-Lauf stand deshalb: „Der
+ * nächste Schritt heißt „Was sagen deine glücklichsten Kunden über euch — in
+ * DEREN Worten?"" — ein zitierter Fragebogen mitten in einem Satz, der einen
+ * WEG beschreiben soll. Gemeint war „Kundenstimmen".
+ *
+ * ── DIESELBE REGEL WIE IN DER OBERFLÄCHE ──────────────────────────────────
+ * `useBrandFieldLabel` beantwortet dieselbe Frage im Browser und beantwortet
+ * sie genauso: `brand.labels.<id>` wenn es ihn gibt, sonst die Frage. Ein
+ * eigener Wortlaut hier wäre der zweite Name für dasselbe Feld — und der
+ * Mensch erkennt das Feld nicht wieder, auf das er klicken soll.
+ *
+ * ── WOFÜR ER GILT UND WOFÜR NICHT ─────────────────────────────────────────
+ * Für NAMEN: das Ziel des Abschlusszuges, die übersprungenen Sessions. NICHT
+ * für die Eingabe-Blöcke — dort steht der Wert UNTER seiner Frage, und die
+ * Frage sagt dem Modell, worauf der Wert antwortet („Kundenstimmen" allein
+ * täte das nicht).
+ */
+export function brandSlotShortLabel(
+  slotId: string,
+  contentLocale: string,
+  pathKind: BrandPathKind,
+  team: BrandTeamKind,
+): string {
+  const short = lookup(ROOTS[contentLocale] ?? ROOTS.en, `brand.labels.${slotId}`)
+  return short ?? brandSlotPromptLabel(slotId, contentLocale, pathKind, team)
+}
+
 /** Dieselbe Beschriftung für eine ganze Dependency-Liste (Prompt-Aufbau). */
 export function labelSlotDependencies<T extends { slotId: string }>(
   dependencies: readonly T[],

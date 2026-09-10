@@ -148,12 +148,31 @@ export function affectsView(
   sessions: readonly BrandSessionConfig[] = BRAND_SLOTS,
 ): BrandAffectsView {
   const affected = sessionsAffectedBy(sessionId, sessions)
-  // ZWEI GRÜNDE, DIESELBE FRAGE (K0): `design_locked` ist ein gesperrtes
-  // Kapitel der Schicht 2, `derivation_locked` ein Kapitel der Schicht 3, das
-  // ohne Freischaltung gar nicht auf dem Weg liegt. Für den Hinweis bedeuten
-  // beide dasselbe — der Mensch hat dieses Kapitel in seiner Oberfläche nicht,
-  // also darf es auch nicht in „fliesst in N Felder ein" mitzählen.
-  const HIDDEN_REASONS: readonly string[] = ['design_locked', 'derivation_locked']
+  // VIER GRÜNDE, DIESELBE FRAGE: `design_locked` ist ein gesperrtes Kapitel
+  // der Schicht 2, `derivation_locked` ein Kapitel der Schicht 3, das ohne
+  // Freischaltung gar nicht auf dem Weg liegt — und seit dem zweiten Testlauf
+  // (Befund 6, 2026-09-09) auch die beiden WEICHEN-Gründe. Für den Hinweis
+  // bedeuten alle vier dasselbe: der Mensch hat dieses Kapitel in seiner
+  // Oberfläche nicht, also darf es nicht in „fliesst in N Felder ein"
+  // mitzählen.
+  //
+  // ── DER BEFUND, IN EINEM ABSATZ ────────────────────────────────────────
+  // Unter jedem Feld des Profils stand „fließt später in 32 weitere Felder
+  // ein — Purpose · … · Markenarchitektur · …", obwohl `subBrands: 'unknown'`
+  // ist und die Markenarchitektur damit gar nicht auf dem Weg liegt
+  // (`includedBrandSteps` lässt sie weg, die Journey stempelt sie `skipped`
+  // mit `junction_undecided`). Der Hinweis versprach Wirkung in einem Kapitel,
+  // das es für dieses Branding nicht gibt — und zählte seine Sessions mit.
+  //
+  // Die Liste ist damit genau die Gegenmenge zu `includedBrandSteps` plus dem
+  // gesperrten Design: `includeStep` kennt als Ausschluss-Gründe ausschliesslich
+  // `junction_off`, `junction_undecided` und `derivation_locked`.
+  const HIDDEN_REASONS: readonly string[] = [
+    'design_locked',
+    'derivation_locked',
+    'junction_off',
+    'junction_undecided',
+  ]
   const hidden = new Set(journey
     .filter(entry => entry.reason !== null && HIDDEN_REASONS.includes(entry.reason))
     .map(entry => entry.stepKey))

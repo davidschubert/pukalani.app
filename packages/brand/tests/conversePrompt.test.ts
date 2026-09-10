@@ -6,6 +6,7 @@ import { BRAND_CONVERSE_HISTORY_CHARS } from '../server/utils/georgePrompt'
 import {
   BRAND_CHAPTER_ANSWER_CHARS,
   BRAND_CHAPTER_ANSWERS_MAX,
+  BRAND_CLOSING_VALUE_CHARS,
   BRAND_CONVERSE_PROMPT_VERSION,
   BRAND_CONVERSE_QUESTION_MAX,
   BRAND_CONVERSE_TEXT_MAX,
@@ -167,8 +168,12 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     // Abschlusszug, Spiegel im Eröffnungszug); converse-15 die Sprach-Zeile
     // und das Sessions-sind-keine-Kapitel-Verbot (Testlauf-Befund N), die
     // Anrede auch im Nebensatz über Dritte (Befund K) und das Verbot, die
-    // Bestätigung als OPTION-Zeilen zu schreiben (Befund D).
-    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-15')
+    // Bestätigung als OPTION-Zeilen zu schreiben (Befund D); converse-16 der
+    // bestätigte WERT im Abschlusszug samt Knopf-Verbot (Befund 1), das Ziel
+    // als NAME statt als zitierte Frage (Befund 3) und `stayField` — ein
+    // Antwort-Zug einer unbestätigten Session stellt keine fremde Frage
+    // (Befund 2).
+    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-16')
   })
 
   /**
@@ -431,6 +436,7 @@ describe('converse-14: der Abschlusszug', () => {
     ...BOTH,
     closing: {
       goal: 'Der Gründungsimpuls steht in einem Satz.',
+      value: 'Wir haben 2019 angefangen, weil uns der Kaffee hier zu langweilig war.',
       nextLabel: 'Kritik & Beschwerden',
       acceptance: false,
       skipped: ['Kundenstimmen'],
@@ -459,7 +465,7 @@ describe('converse-14: der Abschlusszug', () => {
   it('OHNE Ziel verweist er auf die Finale Abnahme', () => {
     const instruction = brandConverseInstruction({
       ...BOTH,
-      closing: { goal: 'Ziel', nextLabel: '', acceptance: true, skipped: [] },
+      closing: { goal: 'Ziel', value: 'Ein Wert', nextLabel: '', acceptance: true, skipped: [] },
     })
     expect(instruction).toMatch(/THERE IS NO FURTHER SESSION in this chapter/)
     expect(instruction).toMatch(/accepting it/)
@@ -469,7 +475,7 @@ describe('converse-14: der Abschlusszug', () => {
   it('ohne Übersprungene wird auch nichts übersprungen', () => {
     const instruction = brandConverseInstruction({
       ...BOTH,
-      closing: { goal: 'Ziel', nextLabel: 'Kundenstimmen', acceptance: false, skipped: [] },
+      closing: { goal: 'Ziel', value: 'Ein Wert', nextLabel: 'Kundenstimmen', acceptance: false, skipped: [] },
     })
     expect(instruction).not.toMatch(/THESE PARTS ARE ALREADY SETTLED/)
   })
@@ -487,6 +493,127 @@ describe('converse-14: der Abschlusszug', () => {
     expect(instruction).not.toMatch(/CLOSE YOUR TURN WITH THE NEXT OPEN QUESTION/)
     // Und keine Knöpfe: weder Optionen noch Bestätigung.
     expect(instruction).toMatch(/Append no OPTION and no CONFIRM line/)
+  })
+})
+
+/**
+ * DER ZWEITE LIVE-TESTLAUF (2026-09-09) — die drei Befunde am Rand einer
+ * Session. Jeder von ihnen war im Zug LESBAR und in keinem Test sichtbar:
+ * ein Abschluss, der eine getane Arbeit als offen beschreibt; ein Abschluss,
+ * der einen Fragebogen zitiert; ein Antwort-Zug, der die Frage des Nachbarn
+ * stellt und dessen Antwort ins falsche Feld schreibt.
+ */
+describe('converse-16: der Abschluss kennt den Wert (Befund 1)', () => {
+  const withValue = {
+    ...BOTH,
+    draftButton: 'George, entwirf das',
+    closing: {
+      goal: 'Der Pitch steht in einem Satz.',
+      value: 'Wir rösten Kaffee auf Maui, in kleinen Mengen und für Cafés, die ihn selbst schmecken.',
+      nextLabel: 'Kritik & Beschwerden',
+      acceptance: false,
+      skipped: [],
+    },
+  }
+
+  it('trägt den bestätigten Wert und nennt ihn geschrieben und bestätigt', () => {
+    const instruction = brandConverseInstruction(withValue)
+    expect(instruction).toMatch(/IT IS ALREADY WRITTEN AND CONFIRMED/)
+    expect(instruction).toContain('Wir rösten Kaffee auf Maui')
+  })
+
+  it('VERBIETET jeden Verweis auf den Entwurfs-Knopf — beide Regeln, die ihn nannten', () => {
+    const instruction = brandConverseInstruction(withValue)
+    // Der Live-Satz war „wenn du ihn entwerfen lässt, erscheint er geschrieben
+    // neben diesem Gespräch" — er kam aus der allgemeinen Entscheidungs-Regel,
+    // die im Abschluss gar nicht gelten darf.
+    expect(instruction).not.toMatch(/WHEN THEY NAME A CONCRETE DECISION/)
+    expect(instruction).not.toContain('George, entwirf das')
+    expect(instruction).toMatch(/NEVER offer to draft, write, generate or produce this value/)
+  })
+
+  it('GEGENPROBE: im gewöhnlichen Zug bleibt die Knopf-Regel stehen', () => {
+    const reply = brandConverseInstruction({ ...BOTH, draftButton: 'George, entwirf das' })
+    expect(reply).toMatch(/WHEN THEY NAME A CONCRETE DECISION/)
+    expect(reply).toContain('George, entwirf das')
+  })
+
+  it('ohne Textwert sagt er nur, DASS es steht — und erfindet keinen Inhalt', () => {
+    const instruction = brandConverseInstruction({
+      ...BOTH,
+      closing: { goal: 'Ziel', value: '', nextLabel: 'Kundenstimmen', acceptance: false, skipped: [] },
+    })
+    expect(instruction).toMatch(/THE FIELD IS WRITTEN AND CONFIRMED/)
+    expect(instruction).not.toMatch(/IT IS ALREADY WRITTEN AND CONFIRMED/)
+  })
+
+  it('klemmt einen langen Wert am Zeichen-Deckel', () => {
+    const long = 'x'.repeat(BRAND_CLOSING_VALUE_CHARS + 500)
+    const instruction = brandConverseInstruction({
+      ...BOTH,
+      closing: { goal: 'Ziel', value: long, nextLabel: '', acceptance: true, skipped: [] },
+    })
+    expect(instruction).toContain('x'.repeat(BRAND_CLOSING_VALUE_CHARS))
+    expect(instruction).not.toContain('x'.repeat(BRAND_CLOSING_VALUE_CHARS + 1))
+  })
+})
+
+describe('converse-16: das Ziel wird benannt, nicht zitiert (Befund 3)', () => {
+  it('verlangt den NAMEN und verbietet die zitierte Frage', () => {
+    const instruction = brandConverseInstruction({
+      ...BOTH,
+      closing: {
+        goal: 'Ziel',
+        value: 'Ein Wert',
+        // Der Wortlaut, den die Route seit dieser Runde liefert: das kurze
+        // Label, nicht „Was sagen deine glücklichsten Kunden über euch …?".
+        nextLabel: 'Kundenstimmen',
+        acceptance: false,
+        skipped: [],
+      },
+    })
+    expect(instruction).toContain('the next session is "Kundenstimmen"')
+    expect(instruction).toMatch(/it is a short\s+NAME, not a question/)
+    expect(instruction).toMatch(/never read out a catalogue question instead of it/)
+  })
+})
+
+describe('converse-16: ein Antwort-Zug bleibt bei seinem Feld (Befund 2)', () => {
+  it('schliesst auf DIESEM Feld und verbietet die Frage jedes anderen', () => {
+    const instruction = brandConverseInstruction({ ...BOTH, stayField: 'Gründungsimpuls' })
+    expect(instruction).toContain('THIS TURN BELONGS TO "Gründungsimpuls" AND TO NO OTHER FIELD')
+    expect(instruction).toMatch(/You MUST NOT ask the question of any other field in this turn/)
+    // Und der alte Zweig ist wirklich weg — nicht bloss ergänzt.
+    expect(instruction).not.toMatch(/CLOSE YOUR TURN WITH THE NEXT OPEN QUESTION/)
+  })
+
+  it('nennt den Grund, aus dem die fremde Frage schadet: die Bühne steht hier', () => {
+    const instruction = brandConverseInstruction({ ...BOTH, stayField: 'Gründungsimpuls' })
+    expect(instruction).toMatch(/Anything they answer now goes into THIS field/)
+  })
+
+  it('die ENTWURFS-Session geht weiterhin vor — zwei Abschlüsse gibt es nie', () => {
+    const instruction = brandConverseInstruction({
+      ...BOTH,
+      draftField: 'Elevator-Pitch',
+      stayField: 'Gründungsimpuls',
+    })
+    expect(instruction).toMatch(/THE FIELD THEY ARE SITTING ON IS NOT A QUESTION/)
+    expect(instruction).not.toContain('THIS TURN BELONGS TO "Gründungsimpuls"')
+  })
+
+  it('GEGENPROBE: ohne `stayField` bleibt der Katalog-Zweig wortgleich', () => {
+    expect(brandConverseInstruction(BOTH)).toMatch(/CLOSE YOUR TURN WITH THE NEXT OPEN QUESTION/)
+  })
+
+  it('ERÖFFNUNG und ABSCHLUSS kennen ihn nicht — sie fragen ohnehin anders', () => {
+    expect(brandConverseInstruction({ ...BOTH, stayField: 'Gründungsimpuls', opening: true }))
+      .not.toContain('THIS TURN BELONGS TO')
+    expect(brandConverseInstruction({
+      ...BOTH,
+      stayField: 'Gründungsimpuls',
+      closing: { goal: 'Ziel', value: 'Ein Wert', nextLabel: 'Kundenstimmen', acceptance: false, skipped: [] },
+    })).not.toContain('THIS TURN BELONGS TO')
   })
 })
 

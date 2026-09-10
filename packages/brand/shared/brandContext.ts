@@ -143,7 +143,7 @@ export const BRAND_CONTEXT_LABELS: Readonly<Record<string, { de: string, en: str
   firstChoice: { de: 'Erste Wahl für', en: 'First choice for' },
   model: { de: 'Architektur-Modell', en: 'Architecture model' },
   namingRule: { de: 'Namensregel', en: 'Naming rule' },
-  values: { de: 'Eure Werte', en: 'Your values' },
+  values: { de: 'Die Werte', en: 'Your values' },
   definitions: { de: 'Definitionen', en: 'Definitions' },
   livedExamples: { de: 'Gelebte Beispiele', en: 'Lived examples' },
   conflictRule: { de: 'Konfliktregel', en: 'Conflict rule' },

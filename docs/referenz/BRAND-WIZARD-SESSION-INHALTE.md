@@ -497,7 +497,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
   > ## What holds them back
   > The sense that dusty work trousers are out of place here
 
-### `a.toneAnalysis` — Tonalität eurer bestehenden Texte
+### `a.toneAnalysis` — Tonalität bestehender Texte
 
 **Art:** Ableitung (optional) · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
@@ -1182,7 +1182,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
   - en:
   > Endorsed — the freelancer brand stands on its own and carries a small "from Meerkamp".
 
-### `b2.rule` — Eure Namensregel
+### `b2.rule` — Die Namensregel
 
 **Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
@@ -1472,7 +1472,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   > - Calm
   > - Care
 
-### `c.definitions` — Was jeder Wert bei euch heißt
+### `c.definitions` — Was jeder Wert konkret heißt
 
 **Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
@@ -1850,7 +1850,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   - en:
   > Calm. Once the appointment is confirmed, nobody should still be wondering what to wear.
 
-### `d.hypothesis` — Archetyp-Hypothese aus eurem heutigen Auftritt
+### `d.hypothesis` — Archetyp-Hypothese aus dem heutigen Auftritt
 
 **Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
@@ -3243,7 +3243,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Fliesst später in:** 28 Felder in 6 Kapiteln (Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
-### `g.inspiration` — Eure Vorbilder
+### `g.inspiration` — Die Vorbilder
 
 **Art:** Instrument (optional) · **Umfang:** ~3 Min, 1 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
 
@@ -3269,7 +3269,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Fliesst später in:** 27 Felder in 6 Kapiteln (Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
-### `g.reading` — Lesung gegen eure Foundation
+### `g.reading` — Lesung gegen die Foundation
 
 **Art:** Ableitung (optional) · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
 
@@ -3309,7 +3309,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
   - en:
   > Observed: very high contrast, geometric shapes. Tension — value "handmade": take the clarity, leave the hardness of the edges.
 
-### `g.dna` — Eure Visual DNA
+### `g.dna` — Die Visual DNA
 
 **Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
@@ -3462,7 +3462,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
 
-### `h.base` — Eure Basisfarbe
+### `h.base` — Die Basisfarbe
 
 **Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
@@ -4033,7 +4033,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Fliesst später in:** 1 Felder in 1 Kapiteln (Bildsprache)
 
-### `k.photo` — Eure Bild-Prinzipien
+### `k.photo` — Die Bild-Prinzipien
 
 **Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
@@ -4329,7 +4329,7 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
   - en:
   > Place: umbrella brand plus the district, never a number — "Radwerk Weststadt". Source: the value "closeness" — a place has a name, not a branch number.
 
-### `m.rules` — Eure Namens-Regeln
+### `m.rules` — Die Namens-Regeln
 
 **Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
@@ -4432,7 +4432,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
 
-### `n.guardrails` — Eure Leitplanken für KI
+### `n.guardrails` — Die Leitplanken für KI
 
 **Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
@@ -4580,7 +4580,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Fliesst später in:** 1 Felder in 1 Kapiteln (Pressekit)
 
-### `p.summary` — Vorschau eures Pressekits
+### `p.summary` — Vorschau des Pressekits
 
 **Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 

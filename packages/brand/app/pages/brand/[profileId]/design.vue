@@ -5,7 +5,7 @@ import { brandDesignSnapshotPreset } from '../../../../shared/brandDesignValues'
 import { BRAND_DESIGN_STEP_KEYS } from '../../../../shared/slotRegistry'
 import type { BrandDesignResponse } from '../../../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
-import { BRAND_FOUNDATION_RAIL_STEP, useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
+import { useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
 
 /**
  * DAS ERGEBNIS-BOARD ALS EIGENE ANSICHT (Konzept docs/archiv/BRAND-DESIGN.md
@@ -122,7 +122,6 @@ const railLayers = computed<BwRailLayer[]>(() => [
     label: t('brand.workspace.railLayer'),
     steps: [
       ...store.railSteps
-        .filter(entry => entry.stepKey !== BRAND_FOUNDATION_RAIL_STEP)
         .map((entry): BwRailStep => ({
           id: entry.stepKey,
           label: t(`brand.steps.${entry.stepKey}`),

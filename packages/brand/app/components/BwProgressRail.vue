@@ -126,9 +126,14 @@ export interface BwRailStep {
    * Darstellung derselben Liste wäre eine zweite Stelle zum Altern.
    */
   sessions?: BwRailSession[]
-  /** Die Zähl-Zeile eines EINGEKLAPPTEN Kapitels („7 von 11 bestätigt · 2 neu besprechen"). */
+  /** Die Zähl-Zeile eines Kapitels („7 von 11 bestätigt · 2 neu besprechen"). */
   counter?: string
-  /** Der Umfang des AUFGEKLAPPTEN Kapitels („11 Sessions, ~14 Min"). */
+  /**
+   * Die RESTzeit des AUFGEKLAPPTEN Kapitels („~9 Min") — sie hängt hinten an
+   * `counter` (Testlauf-Befund 7, 2026-09-09). Vorher stand hier der
+   * Registry-Umfang, und er ERSETZTE den Zähler: die eine Zeile der Leiste, die
+   * sich beim Arbeiten nie bewegte.
+   */
   effort?: string
 }
 export interface BwRailLayer {

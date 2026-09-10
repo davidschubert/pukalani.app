@@ -409,7 +409,6 @@
       "chapterCount": "{confirmed} of {total} confirmed",
       "chapterCountOptional": "{confirmed} of {total} confirmed + {optional} optional",
       "chapterCountStale": "{confirmed} of {total} confirmed · {stale} to revisit",
-      "chapterEffort": "{count} sessions, ~{minutes} min",
       "document": "Your branding",
       "foundation": "Brand Foundation"
     },
@@ -1081,11 +1080,11 @@
       "kind": {
         "new": {
           "label": "New brand",
-          "note": "You're starting from zero — name and brand come out of the conversation."
+          "note": "Starting from zero — name and brand come out of the conversation."
         },
         "relaunch": {
           "label": "Brand relaunch",
-          "note": "You already have a brand — from a polish to a full recut."
+          "note": "There is already a brand — from a polish to a full recut."
         }
       },
       "scope": {
@@ -1096,13 +1095,13 @@
       },
       "titleField": {
         "new": "Working title (optional)",
-        "relaunch": "What is your brand called?",
+        "relaunch": "What is the brand called?",
         "placeholderNew": "e.g. Kailua Coffee Co. — the real name can emerge in the conversation",
         "placeholderRelaunch": "e.g. Kailua Coffee Co."
       },
       "locale": {
-        "label": "Your brand speaks",
-        "note": "The language your brand content is written in — not the language of this interface. And it's not a lonely decision: George can later translate everything into more languages on request, e.g. from English to German."
+        "label": "Language of the brand",
+        "note": "The language the brand content is written in — not the language of this interface. And it's not a lonely decision: George can later translate everything into more languages on request, e.g. from English to German."
       },
       "team": {
         "label": "Who is behind it?",

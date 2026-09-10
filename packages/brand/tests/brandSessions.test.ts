@@ -288,6 +288,38 @@ describe('sessionsAffectedBy — die Umkehrung der Abhängigkeiten (§9)', () =>
     expect(open.steps.filter(stepKey => isBrandKitStep(stepKey))).toEqual([...BRAND_KIT_STEP_KEYS])
   })
 
+  /**
+   * DER ZWEITE LIVE-TESTLAUF, BEFUND 6 (2026-09-09): unter jedem Feld des
+   * Profils stand „fließt später in 32 weitere Felder ein — Purpose · … ·
+   * Markenarchitektur · …", obwohl `subBrands: 'unknown'` ist. Ein Kapitel,
+   * das für dieses Branding gar nicht auf dem Weg liegt, versprach Wirkung —
+   * und zählte seine Sessions mit.
+   */
+  it('affectsView: eine abgewählte oder unentschiedene Weiche fällt aus dem Hinweis', () => {
+    const journey = BRAND_FOUNDATION_STEP_KEYS.map(stepKey => ({ stepKey, reason: 'completed' }))
+    const undecided = journey.map(entry => (entry.stepKey === 'architecture'
+      // Genau der Stempel, den `resolveBrandJourney` bei `subBrands: 'unknown'`
+      // setzt (`includeStep` ⇒ `skipped`).
+      ? { ...entry, reason: 'junction_undecided' }
+      : entry))
+    const off = journey.map(entry => (entry.stepKey === 'naming'
+      ? { ...entry, reason: 'junction_off' }
+      : entry))
+
+    const all = affectsView('a.pitch', journey)
+    const withoutArchitecture = affectsView('a.pitch', undecided)
+    const withoutNaming = affectsView('a.pitch', off)
+
+    expect(all.steps).toContain('architecture')
+    expect(withoutArchitecture.steps).not.toContain('architecture')
+    expect(withoutNaming.steps).not.toContain('naming')
+    // Und die ZAHL fällt mit: sonst nennte der Hinweis sieben Kapitel und
+    // versprach die Wirkung von acht.
+    expect(withoutArchitecture.count).toBeLessThan(all.count)
+    expect(all.count - withoutArchitecture.count)
+      .toBe(sessionsAffectedBy('a.pitch').byStep.architecture?.length ?? 0)
+  })
+
   it('trennt direkt von der vollen Hülle — und `direct` ist deren Teilmenge', () => {
     const affected = sessionsAffectedBy('a.pitch')
     // b.purpose, b.mission und b.positioningCategory lesen a.pitch direkt;

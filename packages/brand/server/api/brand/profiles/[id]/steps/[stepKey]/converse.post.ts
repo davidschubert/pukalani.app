@@ -79,6 +79,7 @@ import {
   brandSessionPartLabel,
   brandSessionPartQuestion,
   brandSlotPromptLabel,
+  brandSlotShortLabel,
   labelSlotDependencies,
 } from '../../../../../../utils/brandSlotPromptLabels'
 import {
@@ -287,10 +288,48 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
       data: { code: 'session_locked' },
     })
   }
+  /**
+   * BLEIBT DIESER ZUG BEI SEINEM FELD? (converse-16, Testlauf-Befund 2 —
+   * 2026-09-09.)
+   *
+   * ── DER BEFUND ──────────────────────────────────────────────────────────
+   * Der Mensch ergänzte etwas im Gründungsimpuls; der Zug endete mit der Frage
+   * der NÄCHSTEN Session („Kundenstimmen"). Die Bühne stand aber weiter auf dem
+   * Gründungsimpuls (`brandStageClaim`, seit den Befunden A/G) — die Antwort
+   * darauf landete deshalb in dem Feld, zu dem sie nicht gehört.
+   *
+   * ── DIE REGEL, SERVERSEITIG ─────────────────────────────────────────────
+   * Solange die laufende Session UNBESTÄTIGT ist, gehört ihr der Zug. Der
+   * Wegweiser auf die nächste Frage wird dann gar nicht erst mitgegeben — weder
+   * im Auftrag (`stayField` statt `nextQuestion`-Zweig) noch in den Eingaben
+   * (`[the next question]` fällt weg) noch als `askedSlotId` an die Bühne. Ein
+   * Auftrag, der „frag nichts anderes" sagt, und ein Eingabe-Block, der die
+   * fremde Frage danebenlegt, wären zwei Aussagen über denselben Zug.
+   *
+   * ── DREI AUSNAHMEN, JEDE MIT GRUND ──────────────────────────────────────
+   *  1. Der ERÖFFNUNGS- und der ABSCHLUSSZUG: der eine stellt die Frage seiner
+   *     eigenen Session, der andere spricht den Übergang aus — er ist die EINE
+   *     Stelle, an der gewechselt wird (converse-14).
+   *  2. Eine Session, die man gar nicht bestätigen kann (`d.pairs`): dort gibt
+   *     es kein „erst bestätigen, dann weiter", also auch nichts festzuhalten.
+   *  3. Die nächste offene Frage IST die dieser Session (dünne oder leere
+   *     Antwort): sie noch einmal zu stellen ist genau das Richtige.
+   */
+  const staysOnSession = Boolean(
+    session
+    && !body.opening
+    && !body.closing
+    && slotIsConfirmable(session)
+    && !brandSlotRecordConfirmed(records[session.id])
+    && (!next || next.slotId !== session.id),
+  )
+
   // Der Wortlaut zählt NUR, wenn er zu der Frage gehört, die der Server selbst
   // als nächste sieht. Sonst bekommt der Berater gesagt, dass er keine erfinden
   // darf (`nextQuestionKnown: false`) — die Reihenfolge gehört der Registry.
-  const nextQuestion = next && body.nextSlotId === next.slotId ? (body.nextQuestion ?? '').trim() : ''
+  const nextQuestion = !staysOnSession && next && body.nextSlotId === next.slotId
+    ? (body.nextQuestion ?? '').trim()
+    : ''
 
   /**
    * DIE OFFENEN PFLICHT-FELDER, sobald keine Katalog-Frage mehr dran ist
@@ -817,7 +856,17 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
     const closingOptions = body.closing && session
       ? (() => {
           const stop = resolveNextStop(stepKey, facts, sessionStates)
-          const label = (slotId: string) => brandSlotPromptLabel(
+          /**
+           * DER KURZE NAME, NICHT DIE FRAGE (Testlauf-Befund 3, 2026-09-09).
+           *
+           * `brandSlotPromptLabel` liefert für eine Frage-Session den
+           * FRAGETEXT — der Abschlusszug zitierte deshalb wörtlich „Der
+           * nächste Schritt heißt „Was sagen deine glücklichsten Kunden über
+           * euch — in DEREN Worten?"". Ein Ziel wird benannt, nicht gefragt;
+           * `brandSlotShortLabel` ist dieselbe Label-vor-Frage-Regel, die auch
+           * die Leiste und die Log-Karten benutzen.
+           */
+          const label = (slotId: string) => brandSlotShortLabel(
             slotId,
             profile.contentLocale,
             profileFacts(profile, betaAccount).pathKind,
@@ -832,6 +881,16 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
           }
           return {
             goal: session.goal,
+            /**
+             * DER BESTÄTIGTE WERT (Testlauf-Befund 1, 2026-09-09): ohne ihn
+             * kannte der Abschluss-Auftrag den Zustand des Feldes nicht und
+             * verwies am fertigen Elevator-Pitch auf den Entwurfs-Knopf. Er
+             * kommt aus `currentRecords` und nicht aus dem Rumpf — bestätigt
+             * hat die Bestätigungs-Route, gelesen wird der Server-Stand. Den
+             * Zeichen-Deckel setzt der Prompt (`BRAND_CLOSING_VALUE_CHARS`),
+             * wie bei jedem anderen Textblock dort.
+             */
+            value: brandSlotStoredValue(currentRecords[session.id]),
             nextLabel: stop && 'sessionKey' in stop ? label(stop.sessionKey) : '',
             acceptance: !stop || 'acceptance' in stop,
             skipped: skippedSessionsBetween(stepKey, session.id, stop, skipFacts).map(label),
@@ -868,6 +927,26 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
          * der Nebenbefund, der diese Runde ausgelöst hat.
          */
         ...(draftFieldLabel ? { draftField: draftFieldLabel } : {}),
+        /**
+         * UND WO ES KEINE ENTWURFS-SESSION IST: DIE UNBESTÄTIGTE FRAGE-SESSION
+         * HÄLT DEN ZUG (converse-16, Befund 2 — s. `staysOnSession` oben).
+         *
+         * Die beiden schliessen einander aus und stehen deshalb als Kette:
+         * `draftField` gehört den Feldern OHNE Katalog-Frage und schliesst auf
+         * den Entwurfs-Knopf, `stayField` denen MIT Frage und schliesst auf
+         * eine Nachfrage. Beides gleichzeitig zu schicken hiesse, dem Modell
+         * zwei Abschlüsse für einen Zug anzubieten.
+         */
+        ...(!draftFieldLabel && staysOnSession && session
+          ? {
+              stayField: brandSlotPromptLabel(
+                session.id,
+                profile.contentLocale,
+                profileFacts(profile, betaAccount).pathKind,
+                profileFacts(profile, betaAccount).team,
+              ),
+            }
+          : {}),
         // DIE ANREDE (converse-13, Davids Klick-Test): „alleine" heisst du,
         // „im Team" heisst ihr — dieselbe Weiche wie bei den Beschriftungen.
         team: profileFacts(profile, betaAccount).team,

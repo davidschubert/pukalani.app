@@ -409,8 +409,7 @@
       "chapterCount": "{confirmed} von {total} bestätigt",
       "chapterCountOptional": "{confirmed} von {total} bestätigt + {optional} optional",
       "chapterCountStale": "{confirmed} von {total} bestätigt · {stale} neu besprechen",
-      "chapterEffort": "{count} Sessions, ~{minutes} Min",
-      "document": "Euer Branding",
+      "document": "Dein Branding",
       "foundation": "Brand Foundation"
     },
     "legal": {
@@ -424,7 +423,7 @@
         "category": "Kategorie",
         "competitors": "Wettbewerber",
         "audienceSketch": "Zielgruppen-Skizze",
-        "toneAnalysis": "Tonalität eurer bestehenden Texte",
+        "toneAnalysis": "Tonalität bestehender Texte",
         "origin": {
           "new": "Warum hast du angefangen — was war der Auslöser, welches Problem konntest du nicht ignorieren?",
           "relaunch": "Was am bestehenden Auftritt MUSS bleiben — woran man euch erkennt, was Stammkunden vermissen würden?"
@@ -455,7 +454,7 @@
         "roleOfMaster": "Soll die Hauptmarke ihnen Vertrauen leihen — oder dürfen sie Publika erreichen, die die Hauptmarke nicht erreicht?",
         "namingPattern": "Wie dürfen sie HEISSEN — „Marke Produkt\", oder eigene Namen?",
         "model": "Welches Architektur-Modell passt zu euch?",
-        "rule": "Eure Namensregel"
+        "rule": "Die Namensregel"
       },
       "c": {
         "discovery1": "Denk an einen Moment, in dem euer Geschäft am besten war. Was ist da passiert?",
@@ -466,13 +465,13 @@
         },
         "candidates": "Wertekandidaten",
         "final": "Welche drei bis fünf würdet ihr verteidigen, auch wenn es euch etwas kostet?",
-        "definitions": "Was jeder Wert bei euch heißt",
+        "definitions": "Was jeder Wert konkret heißt",
         "livedExamples": "Zu jedem Wert: EIN echtes Beispiel, wo ihr ihn schon gelebt habt.",
         "conflictRule": "Wo geraten zwei eurer Werte in Konflikt — und welcher gewinnt?",
         "teamFilter": "Wenn ihr morgen jemanden einstellt: Welcher Wert ist der unverhandelbare Filter?"
       },
       "d": {
-        "hypothesis": "Archetyp-Hypothese aus eurem heutigen Auftritt",
+        "hypothesis": "Archetyp-Hypothese aus dem heutigen Auftritt",
         "pairs": "Welche der beiden fühlt sich mehr nach euch an?",
         "primary": "Primärer Archetyp",
         "secondary": "Sekundärer Archetyp",
@@ -516,15 +515,15 @@
       },
       "g": {
         "source": "Habt ihr Vorbilder — Screenshots, ein Pinnwand-Board, drei Seiten, die euch gefallen?",
-        "inspiration": "Eure Vorbilder",
-        "reading": "Lesung gegen eure Foundation",
-        "dna": "Eure Visual DNA",
+        "inspiration": "Die Vorbilder",
+        "reading": "Lesung gegen die Foundation",
+        "dna": "Die Visual DNA",
         "boards": "Drei Moodboards",
         "board": "Welches Board ist euer Ausgangspunkt?",
         "mix": "Mix und Match"
       },
       "h": {
-        "base": "Eure Basisfarbe",
+        "base": "Die Basisfarbe",
         "ramp": "Hell- und Dunkel-Rampe",
         "neutral": "Welchen Grundton sollen eure Flächen haben?",
         "accent": "Welche Farbe ist euer Signal?",
@@ -544,7 +543,7 @@
         "drafts": "KI-Entwürfe"
       },
       "k": {
-        "photo": "Eure Bild-Prinzipien",
+        "photo": "Die Bild-Prinzipien",
         "illustration": "Wollt ihr Illustration — und wenn ja, welche?",
         "icons": "Welcher Icon-Satz passt zu eurer Schrift?",
         "dodont": "Do und Don’t der Bildsprache"
@@ -558,18 +557,18 @@
       "m": {
         "types": "Wofür braucht ihr Namen — Produkte, Leistungen, Formate, Orte, Digitales?",
         "patterns": "Namensmuster je Typ",
-        "rules": "Eure Namens-Regeln"
+        "rules": "Die Namens-Regeln"
       },
       "n": {
         "scope": "Was darf KI in eurem Namen erzeugen?",
         "review": "Wer gibt frei, bevor etwas rausgeht?",
-        "guardrails": "Eure Leitplanken für KI",
+        "guardrails": "Die Leitplanken für KI",
         "prompts": "Prompt-Vorlagen"
       },
       "p": {
         "facts": "Welche Fakten dürfen ins Pressekit?",
         "contact": "Wer ist eure Ansprechperson für Presse?",
-        "summary": "Vorschau eures Pressekits"
+        "summary": "Vorschau des Pressekits"
       }
     },
     "labels": {
@@ -584,9 +583,9 @@
       "b": {
         "whyStarted": "Warum es zählt",
         "worldLoses": "Was fehlen würde",
-        "conviction": "Eure Überzeugung",
+        "conviction": "Die Überzeugung",
         "tenYears": "Blick in zehn Jahre",
-        "legacy": "Euer Vermächtnis",
+        "legacy": "Das Vermächtnis",
         "positioningCategory": "Positionierungs-Kategorie",
         "positioningFirstChoice": "Erste Wahl für"
       },
@@ -600,7 +599,7 @@
         "discovery1": "Bester Moment",
         "discovery2": "Falscher Moment",
         "discovery3": "Nie geduldet",
-        "final": "Eure Werte",
+        "final": "Die Werte",
         "livedExamples": "Gelebte Beispiele",
         "conflictRule": "Konfliktregel",
         "teamFilter": "Einstellungs-Filter"
@@ -1069,7 +1068,7 @@
         "actions": "Aktionen",
         "rename": "Umbenennen",
         "share": "Teilen",
-        "result": "Euer Branding",
+        "result": "Dein Branding",
         "resultLocked": "Ab Foundation-Abschluss",
         "delete": "Löschen"
       },
@@ -1081,11 +1080,11 @@
       "kind": {
         "new": {
           "label": "Neue Marke",
-          "note": "Ihr startet bei null — Name und Marke entstehen im Gespräch."
+          "note": "Start bei null — Name und Marke entstehen im Gespräch."
         },
         "relaunch": {
           "label": "Marken-Relaunch",
-          "note": "Ihr habt schon eine Marke — vom Feinschliff bis zum Neuschnitt."
+          "note": "Es gibt schon eine Marke — vom Feinschliff bis zum Neuschnitt."
         }
       },
       "scope": {
@@ -1096,13 +1095,13 @@
       },
       "titleField": {
         "new": "Arbeitstitel (optional)",
-        "relaunch": "Wie heißt eure Marke?",
+        "relaunch": "Wie heißt die Marke?",
         "placeholderNew": "z. B. Kailua Coffee Co. — der echte Name kann im Gespräch entstehen",
         "placeholderRelaunch": "z. B. Kailua Coffee Co."
       },
       "locale": {
-        "label": "Eure Marke spricht",
-        "note": "Die Sprache, in der eure Markeninhalte entstehen — nicht die der Oberfläche. Und keine einsame Entscheidung: George übersetzt später alles auf Wunsch in weitere Sprachen, z. B. von Englisch nach Deutsch."
+        "label": "Sprache der Marke",
+        "note": "Die Sprache, in der die Markeninhalte entstehen — nicht die der Oberfläche. Und keine einsame Entscheidung: George übersetzt später alles auf Wunsch in weitere Sprachen, z. B. von Englisch nach Deutsch."
       },
       "team": {
         "label": "Wer steckt dahinter?",
@@ -2103,10 +2102,10 @@
         "failed": "Das hat nicht geklappt.",
         "loading": "Wird geprüft …"
       },
-      "continueToDocument": "Weiter zu eurem Branding"
+      "continueToDocument": "Weiter zu deinem Branding"
     },
     "document": {
-      "title": "Euer Branding",
+      "title": "Dein Branding",
       "lead": "Alle bestätigten Entscheidungen eurer Foundation, Kapitel für Kapitel. Hier wird gelesen — abgenommen wird im Kapitel.",
       "loadFailed": "Das Dokument konnte nicht geladen werden.",
       "empty": "Hier steht noch nichts — sobald ihr ein Kapitel besprochen habt, füllt es sich.",
@@ -2286,7 +2285,7 @@
         "firstChoice": "Erste Wahl für",
         "model": "Architektur-Modell",
         "namingRule": "Namensregel",
-        "values": "Eure Werte",
+        "values": "Die Werte",
         "definitions": "Definitionen",
         "livedExamples": "Gelebte Beispiele",
         "conflictRule": "Konfliktregel",
@@ -2870,7 +2869,7 @@
     },
     "designLayer": {
       "label": "Brand Design",
-      "lockedNote": "Baut auf eurer Foundation auf",
+      "lockedNote": "Baut auf der Foundation auf",
       "info": "Die visuelle Identität eurer Marke — hergeleitet aus Foundation und Brand Language, nicht aus dem Katalog. Farben, Schrift und Zeichen entstehen aus Archetyp, Werten und Stimme; jede Entscheidung trägt ihre Begründung. Freigeschaltet wird Brand Design vom Studio nach dem Erstgespräch.",
       "progress": "{done} von {total} Kapiteln",
       "result": "Visuelle Identität"

@@ -15,7 +15,7 @@ import { BRAND_ACCEPTANCE_VIEW } from '../../../../shared/brandWorkspaceNav'
 import { brandDerivedDividerSlot } from '../../../../shared/brandSessionGroups'
 import { slotById, type BrandStepKey } from '../../../../shared/slotRegistry'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
-import { BRAND_FOUNDATION_RAIL_STEP, useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
+import { useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
 import { useBrandImpactConsent } from '../../../composables/useBrandImpactConsent'
 
 /**
@@ -354,8 +354,8 @@ const navExtras = useBrandWorkspaceNavExtras({
 })
 
 /**
- * DER EINSTIEG IN DIE LESEANSICHT (Paket G2) — er ersetzt den Ergebnis-Punkt
- * der Leiste, hier wie in der Werkstatt (eine Quelle, s. Composable).
+ * DER EINSTIEG IN DIE LESEANSICHT (Paket G2) — ein eigener Punkt am Ende der
+ * Leiste, hier wie in der Werkstatt (eine Quelle, s. Composable).
  */
 const foundationStep = useBrandFoundationRailStep({ profileId })
 
@@ -363,11 +363,10 @@ const railLayers = computed<BwRailLayer[]>(() => [{
   id: 'foundation',
   label: t('brand.workspace.railLayer'),
   steps: [
-    // Der Ergebnis-Punkt wandert ans ENDE: er ist seit Paket G2 der Einstieg
-    // in die Leseansicht und steht dort, wo das Konzept ihn hinstellt —
-    // Dokument, dann Foundation (§2.6).
+    // ALLE Kapitel, „Ergebnis" eingeschlossen (Testlauf-Befund 8) — die
+    // LESEANSICHT ist ein eigener Punkt und steht dort, wo das Konzept ihn
+    // hinstellt: Dokument, dann Foundation (§2.6).
     ...store.railSteps
-      .filter(entry => entry.stepKey !== BRAND_FOUNDATION_RAIL_STEP)
       .map((entry): BwRailStep => ({
         id: entry.stepKey,
         label: t(`brand.steps.${entry.stepKey}`),

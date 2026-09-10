@@ -4,6 +4,7 @@ import {
   type BrandNavSession,
   acceptTargets,
   chapterEffortMinutes,
+  chapterRemainingMinutes,
   countChapterSessions,
   countOpenFindings,
   decideAutoAdvance,
@@ -207,6 +208,49 @@ describe('chapterEffortMinutes', () => {
       expect(chapterEffortMinutes(key)).toBeGreaterThan(0)
       expect(chapterEffortMinutes(key)).toBeLessThanOrEqual(30)
     }
+  })
+})
+
+/**
+ * TESTLAUF-BEFUND 7 (2026-09-09): der Kopf des AKTIVEN Kapitels zeigte den
+ * Registry-Umfang und blieb nach vier Bestätigungen unverändert stehen — die
+ * einzige Zahl der Leiste, die vom Fortschritt nichts weiss.
+ */
+describe('chapterRemainingMinutes', () => {
+  it('ohne einen einzigen Stand ist die Restzeit der volle Umfang', () => {
+    expect(chapterRemainingMinutes('context', {})).toBe(chapterEffortMinutes('context'))
+  })
+
+  it('jede BESTÄTIGTE Session nimmt ihre Minuten aus der Zahl', () => {
+    const first = CONTEXT_SESSIONS[0]!
+    const second = CONTEXT_SESSIONS[1]!
+    const rest = chapterRemainingMinutes('context', map({
+      [first.id]: { state: 'done' },
+      [second.id]: { state: 'done' },
+    }))
+    expect(rest).toBe(
+      chapterEffortMinutes('context') - first.effort.minutes - second.effort.minutes,
+    )
+    expect(rest).toBeLessThan(chapterEffortMinutes('context'))
+  })
+
+  it('GEGENPROBE: vertagt, veraltet und offen bleiben Arbeit', () => {
+    // Eine vertagte Session ist aufgehobene Arbeit, eine veraltete
+    // ausdrücklich wieder welche („neu besprechen") — beide gehören in die
+    // Restzeit, sonst verspräche sie ein Ende, das es nicht gibt.
+    const full = chapterEffortMinutes('context')
+    expect(chapterRemainingMinutes('context', map({
+      [FIRST]: { state: 'open', deferred: true },
+      [SECOND]: { state: 'stale' },
+      [THIRD]: { state: 'active' },
+    }))).toBe(full)
+  })
+
+  it('alles bestätigt heisst null Minuten', () => {
+    const all = Object.fromEntries(
+      CONTEXT_SESSIONS.map(session => [session.id, { state: 'done' } as BrandNavSession]),
+    )
+    expect(chapterRemainingMinutes('context', all)).toBe(0)
   })
 })
 

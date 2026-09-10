@@ -25,6 +25,8 @@ import { type BrandStepKey, slotById, slotIsConfirmable, slotsForStep } from './
  *     („7 von 11 bestätigt · 2 neu besprechen").
  *  3. `chapterEffortMinutes` — der Umfang eines Kapitels („11 Sessions,
  *     ~14 Min"), Summe aus der Registry.
+ *  3a. `chapterRemainingMinutes` — was davon NOCH aussteht („~9 Min"), die
+ *     Zahl im Kopf des offenen Kapitels (Testlauf-Befund 7).
  *  4. `decideAutoAdvance` — DARF jetzt gewechselt werden? Der Auto-Weiter aus
  *     §5, mit allen Sperren an EINER Stelle. Seit Davids Entscheidung vom
  *     2026-09-09 bedient er nur noch den ERÖFFNUNGSZUG und das Vertagen; nach
@@ -219,6 +221,41 @@ export function countChapterSessions(
  */
 export function chapterEffortMinutes(stepKey: BrandStepKey): number {
   return slotsForStep(stepKey).reduce((sum, session) => sum + session.effort.minutes, 0)
+}
+
+/**
+ * WAS NOCH VOR EINEM LIEGT — die Minuten der UNBESTÄTIGTEN Sessions
+ * (Testlauf-Befund 7, 2026-09-09).
+ *
+ * ── DER BEFUND, IN EINEM ABSATZ ───────────────────────────────────────────
+ * Der Kopf des AKTIVEN Kapitels zeigte den Umfang aus der Registry („Kontext ·
+ * 11 Sessions, ~14 Min") und blieb nach vier Bestätigungen buchstäblich
+ * unverändert, während die eingeklappten Kapitel daneben „0 von 10 bestätigt"
+ * meldeten. Genau dort, wo jemand arbeitet, bewegte sich die Zeile nicht — und
+ * die Zahl, die dort stand, war die einzige der Leiste, die vom Fortschritt
+ * nichts weiss.
+ *
+ * ── WARUM REST UND NICHT GESAMT ───────────────────────────────────────────
+ * Eine Zeitangabe im Kopf eines offenen Kapitels beantwortet „wie lange noch",
+ * nicht „wie lang war das mal". Der Gesamt-Umfang steht weiterhin im
+ * Info-Layer (`BwStepInfoModal`), wo er hingehört: dort fragt man, was einen
+ * erwartet, BEVOR man anfängt.
+ *
+ * ── WER ZÄHLT ─────────────────────────────────────────────────────────────
+ * Jede Session, die nicht `done` ist — auch die optionalen und die vertagten.
+ * Eine vertagte Session ist Arbeit, die man sich aufgehoben hat, keine, die
+ * verschwunden ist; und eine `stale` Session ist ausdrücklich wieder Arbeit
+ * (sie zählt in `countChapterSessions` genauso als „neu besprechen").
+ * Unbekannte Sessions (frisch geladenes Kapitel) zählen mit — nie als fertig,
+ * dieselbe Richtung wie beim Zähler.
+ */
+export function chapterRemainingMinutes(
+  stepKey: BrandStepKey,
+  sessions: Readonly<Record<string, BrandNavSession | undefined>>,
+): number {
+  return slotsForStep(stepKey)
+    .filter(session => sessions[session.id]?.state !== 'done')
+    .reduce((sum, session) => sum + session.effort.minutes, 0)
 }
 
 // ── 3 · Auto-Weiter: darf jetzt gewechselt werden? ────────────────────────

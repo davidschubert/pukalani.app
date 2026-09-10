@@ -12,6 +12,7 @@ import {
   BRAND_ACCEPTANCE_VIEW,
   type BrandNavSession,
   chapterEffortMinutes,
+  chapterRemainingMinutes,
   countChapterSessions,
   countOpenFindings,
   decideAutoAdvance,
@@ -107,7 +108,7 @@ import { useBrandAutosave } from '../../../composables/useBrandAutosave'
 import { useBrandFieldLabel } from '../../../composables/useBrandFieldLabel'
 import { useBrandConversation } from '../../../composables/useBrandConversation'
 import { useBrandGeneration } from '../../../composables/useBrandGeneration'
-import { BRAND_FOUNDATION_RAIL_STEP, useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
+import { useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
 
 /**
  * DIE WERKSTATT — „GESPRÄCH ALS BÜHNE" (Davids Konzept-Revision 2026-09-02,
@@ -2627,6 +2628,24 @@ function railFindingSuffix(stepKey: BrandStepKey): string {
 }
 
 /**
+ * DIE RESTZEIT DES OFFENEN KAPITELS (Testlauf-Befund 7, 2026-09-09) — sie
+ * hängt hinten an den Zähler, statt ihn zu ERSETZEN.
+ *
+ * Vorher stand im Kopf des aktiven Kapitels der Registry-Umfang („11 Sessions,
+ * ~14 Min"), und der bleibt nach vier Bestätigungen buchstäblich derselbe: die
+ * einzige Zahl der Leiste, die vom Fortschritt nichts weiss. Der Umfang steht
+ * weiterhin im Info-Layer — dort fragt man ihn, BEVOR man anfängt.
+ *
+ * Der Befund-Zusatz fehlt hier bewusst: er hängt schon am Zähler
+ * (`railCounter`), und der steht seit dieser Runde auch am offenen Kapitel.
+ */
+function railRemaining(stepKey: BrandStepKey): string {
+  return t('brand.session.minutes', {
+    minutes: chapterRemainingMinutes(stepKey, navSessions.value),
+  })
+}
+
+/**
  * DIE ZÄHL-ZEILE EINES KAPITELS — bestätigte PFLICHT-Sessions, optionale
  * getrennt (Testlauf-Befund L, 2026-09-09).
  *
@@ -2720,10 +2739,12 @@ const railLayers = computed<BwRailLayer[]>(() => [{
   id: 'foundation',
   label: t('brand.workspace.railLayer'),
   steps: [
-    // Der Ergebnis-Punkt fehlt hier und steht unten als „Brand Foundation":
-    // er IST seit Paket G2 der Einstieg in die Leseansicht (Konzept §6 d),
-    // und die kommt NACH dem Dokument (§2.6).
-    ...store.railSteps.filter(entry => entry.stepKey !== BRAND_FOUNDATION_RAIL_STEP).map((entry): BwRailStep => {
+    // ALLE Kapitel, „Ergebnis" eingeschlossen (Testlauf-Befund 8, 2026-09-09):
+    // es hat echte Sessions (`result.direction` als Pflicht, `result.rating`
+    // optional), Notizblock und Balken zählen es — eine Leiste ohne seine Zeile
+    // machte es unerreichbar. Die LESEANSICHT steht weiterhin unten als „Brand
+    // Foundation" (Konzept §6 d), nach dem Dokument (§2.6), mit eigener Id.
+    ...store.railSteps.map((entry): BwRailStep => {
       const current = entry.stepKey === stepKey.value
       return {
         id: entry.stepKey,
@@ -2738,10 +2759,7 @@ const railLayers = computed<BwRailLayer[]>(() => [{
         ...(current
           ? {
               sessions: railSessions(entry),
-              effort: t('brand.nav.chapterEffort', {
-                count: slotsForStep(entry.stepKey).length,
-                minutes: chapterEffortMinutes(entry.stepKey),
-              }) + railFindingSuffix(entry.stepKey),
+              effort: railRemaining(entry.stepKey),
             }
           : {}),
       }
@@ -2834,10 +2852,7 @@ const designRailLayer = computed<BwRailLayer>(() => {
           ...(current
             ? {
                 sessions: railSessions(entry),
-                effort: t('brand.nav.chapterEffort', {
-                  count: slotsForStep(entry.stepKey).length,
-                  minutes: chapterEffortMinutes(entry.stepKey),
-                }) + railFindingSuffix(entry.stepKey),
+                effort: railRemaining(entry.stepKey),
               }
             : {}),
         }
@@ -2955,10 +2970,7 @@ const kitRailLayer = computed<BwRailLayer>(() => {
         ...(current
           ? {
               sessions: railSessions(entry),
-              effort: t('brand.nav.chapterEffort', {
-                count: slotsForStep(entry.stepKey).length,
-                minutes: chapterEffortMinutes(entry.stepKey),
-              }) + railFindingSuffix(entry.stepKey),
+              effort: railRemaining(entry.stepKey),
             }
           : {}),
       }

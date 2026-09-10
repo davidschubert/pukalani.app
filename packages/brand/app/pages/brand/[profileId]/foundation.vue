@@ -20,7 +20,7 @@ import type {
   BrandShareStatusResponse,
 } from '../../../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
-import { BRAND_FOUNDATION_RAIL_STEP, useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
+import { useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
 
 /**
  * „BRAND FOUNDATION" — DIE PRIVATE LESEANSICHT (Konzept
@@ -610,10 +610,10 @@ const railLayers = computed<BwRailLayer[]>(() => [{
   id: 'foundation',
   label: t('brand.workspace.railLayer'),
   steps: [
-    // Dokument, dann Foundation (§2.6) — der Ergebnis-Punkt steht deshalb
-    // nicht mehr an seiner Registry-Stelle.
+    // Dokument, dann Foundation (§2.6) — die LESEANSICHT ist ein eigener
+    // Punkt am Ende; das Kapitel „Ergebnis" steht an seiner Registry-Stelle
+    // (Testlauf-Befund 8, 2026-09-09).
     ...store.railSteps
-      .filter(entry => entry.stepKey !== BRAND_FOUNDATION_RAIL_STEP)
       .map((entry): BwRailStep => ({
         id: entry.stepKey,
         label: t(`brand.steps.${entry.stepKey}`),
