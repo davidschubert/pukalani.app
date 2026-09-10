@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isFallbackLocale, orderedLocales, translationSourceLocale } from '../shared/pageLocales'
+import { hasLocale, isFallbackLocale, orderedLocales, translationSourceLocale } from '../shared/pageLocales'
 import { createPageTranslateSchema, MAX_PAGE_TRANSLATE_BODY } from '../schemas/page'
 
 describe('isFallbackLocale', () => {
@@ -79,5 +79,19 @@ describe('pageTranslateSchema', () => {
 
   it('lässt keine zusätzlichen Felder durch (strict)', () => {
     expect(() => schema.parse({ ...valid, status: 'published' })).toThrow()
+  })
+})
+
+describe('hasLocale', () => {
+  it('findet die Sprache unabhängig von der Region', () => {
+    expect(hasLocale(['de-DE'], 'de')).toBe(true)
+    expect(hasLocale(['de'], 'de-AT')).toBe(true)
+    expect(hasLocale(['en', 'de'], 'de')).toBe(true)
+  })
+
+  it('sagt Nein, wenn die Sprache fehlt — davon hängt ab, ob ein hreflang verschwindet', () => {
+    expect(hasLocale(['de'], 'en')).toBe(false)
+    expect(hasLocale([], 'de')).toBe(false)
+    expect(hasLocale(['de'], '')).toBe(false)
   })
 })

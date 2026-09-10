@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { pageExcerpt } from '../../shared/pageExcerpt'
-import { isFallbackLocale } from '../../shared/pageLocales'
+import { hasLocale, isFallbackLocale } from '../../shared/pageLocales'
 import { PAGE_DRAFT_ROBOTS, pageHasDraftNotice } from '../../shared/pageDraftNotice'
 import type { PublicPage } from '../../shared/types/page'
 
@@ -17,7 +17,7 @@ import type { PublicPage } from '../../shared/types/page'
 definePageMeta({ key: route => route.fullPath })
 
 const route = useRoute()
-const { locale, t } = useI18n()
+const { locale, locales, t } = useI18n()
 const slug = computed(() => String(route.params.slug ?? ''))
 
 // useRequestFetch statt $fetch: der SSR-interne Aufruf MUSS den Host-Header
@@ -50,22 +50,55 @@ if (error.value || !page.value) {
  *  1. der LESER bekommt eine Zeile, die sagt, was er da liest;
  *  2. der VORLESER bekommt `lang` am Text — ohne das liest ein Screenreader
  *     deutschen Text mit englischer Aussprache vor (das Dokument sagt `en`);
- *  3. die SUCHMASCHINE bekommt nur noch die `hreflang`-Alternates, die es
- *     wirklich gibt (`usePageLocaleAlternates()` — der Kopf im core streicht
- *     den Rest).
+ *  3. die SUCHMASCHINE bekommt nur noch die Alternate-Adressen, die es
+ *     wirklich gibt — gemeldet über `useSeoHiddenLocales()` (core), den EINEN
+ *     Vertrag dafür. Er ist am 2026-09-10 für BI1 I3 entstanden und wird hier
+ *     BENUTZT statt nachgebaut: zwei Wege für dieselbe Sache kosten dauerhaft
+ *     mehr als ein verworfener eigener.
  *
- * Der Eintrag trägt den Pfad mit, damit ihn die nächste Seite nicht erbt;
- * Begründung im Kopf des Composables.
+ * ZURÜCKSETZEN IST PFLICHT (Kopf des Composables): der State ist app-weit.
+ * Bliebe er stehen, verlöre die nächste Seite im selben Client-Lauf ihre
+ * zweite Adresse, ohne dass es jemand sieht.
  */
 const deliveredLocale = computed(() => page.value?.locale ?? '')
 const isFallbackLanguage = computed(() => isFallbackLocale(locale.value, deliveredLocale.value))
 const languageName = usePageLanguageName()
 
-const pageAlternates = usePageLocaleAlternates()
+const hiddenLocales = useSeoHiddenLocales()
+const appLocaleCodes = computed(() => locales.value.map(entry => (typeof entry === 'string' ? entry : entry.code)))
+
+/**
+ * NUR AUFRÄUMEN, WAS NOCH MIR GEHÖRT (2026-09-10 im Klick-Beweis gefunden).
+ *
+ * Der State ist app-weit, und beim Wechsel im Browser läuft es so: die NEUE
+ * Seite wird aufgebaut und schreibt ihren Wert — DANACH erst wird die alte
+ * abgeräumt. Ein blindes `= []` im `onUnmounted` löschte also genau das, was
+ * die neue Seite gerade eingetragen hat. Gemessen auf dem Weg zurück von einer
+ * zweisprachigen Seite auf eine einsprachige: der Hinweis stand da, der Kopf
+ * bewarb aber weiter eine englische Adresse, die es nicht gab — also genau der
+ * Fehler, gegen den das hier gebaut ist, nur unsichtbarer.
+ *
+ * Deshalb der Vergleich auf IDENTITÄT: geräumt wird nur, wenn im State noch
+ * dasselbe Array-Objekt liegt, das diese Seite hineingelegt hat. Ein
+ * Gleichheitsvergleich auf den Inhalt täte es nicht — zwei Seiten dürfen
+ * dieselbe fehlende Sprache melden.
+ */
+let ownEntry: string[] | null = null
 watchEffect(() => {
   const available = page.value?.availableLocales ?? []
-  pageAlternates.value = available.length ? { path: route.path, locales: [...available] } : null
+  // Leere Liste heisst „diese Seite sagt nichts dazu" — nie „es gibt sie
+  // nirgends". Sonst nähme eine fehlgeschlagene Abfrage der Seite alle
+  // Alternate-Adressen.
+  ownEntry = available.length
+    ? appLocaleCodes.value.filter(code => !hasLocale(available, code))
+    : []
+  hiddenLocales.value = ownEntry
 })
+function releaseHiddenLocales() {
+  if (ownEntry && hiddenLocales.value === ownEntry) hiddenLocales.value = []
+}
+onBeforeRouteLeave(releaseHiddenLocales)
+onUnmounted(releaseHiddenLocales)
 
 // „<Seitenname> · <Brand>" + Beschreibung aus dem ersten Textabsatz der Seite
 // (Audit-Befunde S8/S5) — geteilte Links waren vorher markenlos und nackt.

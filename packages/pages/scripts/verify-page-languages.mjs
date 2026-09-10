@@ -13,8 +13,9 @@
  *      Englisch gewünscht war (Rechtstexte bleiben erreichbar) — und sie sagt
  *      in `availableLocales`, was es wirklich gibt
  *   2. der englische Pfad trägt den HINWEIS und markiert den Text als `de`
- *   3. der englische Pfad behauptet KEIN `hreflang="en"` mehr — und auch kein
- *      `x-default` (das zeigt auf die Standardsprache, die es nicht gibt)
+ *   3. der englische Pfad behauptet KEIN `hreflang="en"` und kein
+ *      `og:locale:alternate` auf Englisch mehr (`x-default` bleibt bewusst —
+ *      es ist keine Sprachzusage, sondern der Rückfall, den die Seite zeigt)
  *   4. der deutsche Pfad zeigt KEINEN Hinweis (dort stimmt die Sprache)
  *   5. Gegenprobe innerhalb derselben Seite: die englische Fassung dazu ⇒
  *      Hinweis weg, beide Alternates zurück
@@ -130,6 +131,14 @@ function alternates(html) {
     .sort()
 }
 const hasNotice = html => html.includes('data-page-language-notice')
+
+/** Die `og:locale:alternate`-Angaben — der core-Filter räumt sie mit ab. */
+function ogAlternates(html) {
+  return [...html.matchAll(/<meta[^>]+property="og:locale:alternate"[^>]*>/g)]
+    .map(tag => tag[0].match(/content="([^"]+)"/)?.[1])
+    .filter(Boolean)
+    .sort()
+}
 
 async function createPoolUser(tag) {
   const email = `f60-${tag}-${Date.now()}@example.test`
@@ -252,15 +261,20 @@ try {
   check('englischer Pfad: der Text ist als deutsch markiert (lang="de")',
     /<h1[^>]+lang="de"/.test(enHtml) && /<div lang="de">/.test(enHtml))
   check('englischer Pfad: KEIN hreflang="en"/"en-US" mehr, aber de bleibt',
-    JSON.stringify(alternates(enHtml)) === '["de","de-DE"]', JSON.stringify(alternates(enHtml)))
-  check('englischer Pfad: auch kein x-default (es zeigt auf die fehlende Standardsprache)',
-    !alternates(enHtml).includes('x-default'))
+    JSON.stringify(alternates(enHtml)) === '["de","de-DE","x-default"]', JSON.stringify(alternates(enHtml)))
+  // `x-default` BLEIBT bewusst stehen: es ist keine Sprachfassung, sondern die
+  // Ansage „nimm diese, wenn keine passt" — und genau den Rückfall zeigt die
+  // Seite ja. Die Begründung gehört dem core-Filter (`seoAlternates.ts`).
+  check('englischer Pfad: x-default bleibt (es ist keine Sprachzusage)',
+    alternates(enHtml).includes('x-default'))
+  check('englischer Pfad: auch og:locale:alternate nennt Englisch nicht mehr',
+    !ogAlternates(enHtml).some(v => v.toLowerCase().startsWith('en')), JSON.stringify(ogAlternates(enHtml)))
   check('kein roher i18n-Schlüssel im HTML', !enHtml.includes('pages.public.otherLanguage'))
 
   const deHtml = await page(site.host, `/de/${SLUG}`)
   check('deutscher Pfad: KEIN Hinweis (dort stimmt die Sprache)', !hasNotice(deHtml))
   check('deutscher Pfad: ebenfalls nur die deutschen Alternates',
-    JSON.stringify(alternates(deHtml)) === '["de","de-DE"]', JSON.stringify(alternates(deHtml)))
+    JSON.stringify(alternates(deHtml)) === '["de","de-DE","x-default"]', JSON.stringify(alternates(deHtml)))
 
   console.log('\n5. Gegenprobe: die englische Fassung dazu')
   const en = await savePage(site.host, cookie, {
@@ -278,8 +292,8 @@ try {
   })
   const enHtml3 = await page(site.host, `/${SLUG}`)
   check('Hinweis ist wieder da', hasNotice(enHtml3))
-  check('hreflang="en" und x-default sind wieder weg',
-    JSON.stringify(alternates(enHtml3)) === '["de","de-DE"]', JSON.stringify(alternates(enHtml3)))
+  check('hreflang="en" ist wieder weg',
+    JSON.stringify(alternates(enHtml3)) === '["de","de-DE","x-default"]', JSON.stringify(alternates(enHtml3)))
 
   console.log('\n7.–8. Gegenprobe: nichts leckt auf andere Seiten')
   const b1 = await savePage(site.host, cookie, { slug: BOTH, locale: 'de', title: 'Über uns', body: 'Hallo', status: 'published' })

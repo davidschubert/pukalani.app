@@ -1,5 +1,3 @@
-import { baseLanguage } from '../../core/shared/localeAlternates'
-
 /**
  * DIE SPRACH-REGELN DER BETREIBER-SEITEN — pur, damit sie an beiden Enden
  * (öffentliche Seite und Editor) dieselbe Antwort geben.
@@ -11,6 +9,19 @@ import { baseLanguage } from '../../core/shared/localeAlternates'
  * Kopf bewarb ein englisches Alternate, hinter dem nichts Englisches stand.
  * Diese Datei ist die eine Stelle, die „das ist eine Ersatzsprache" entscheidet.
  */
+
+/**
+ * Der Sprachcode ohne Region: `de-DE` ⇒ `de`.
+ *
+ * Bewusst eine EIGENE Zeile und kein Import aus `core/shared/seoAlternates.ts`:
+ * dessen `languageOf` ist dort nicht ausgeführt (der Filter braucht es nur
+ * intern), und ein Fundament-Layer soll seine Innereien nicht deshalb öffnen,
+ * weil ein Produkt-Layer dieselben drei Zeichen braucht. Die Regel ist so
+ * klein, dass eine geteilte Fassung mehr Kopplung als Nutzen wäre.
+ */
+function baseLanguage(code: string | null | undefined): string {
+  return String(code ?? '').trim().toLowerCase().split(/[-_]/)[0] ?? ''
+}
 
 /**
  * Ist die gelieferte Fassung eine ERSATZSPRACHE?
@@ -53,4 +64,16 @@ export function translationSourceLocale(
   const candidates = orderedLocales(filled, defaultLocale)
     .filter(code => baseLanguage(code) !== baseLanguage(target))
   return candidates[0] ?? null
+}
+
+/**
+ * Ist `code` in der Liste — ohne Rücksicht auf die Region?
+ *
+ * `de-DE` in der Liste und `de` gefragt ist DIESELBE Fassung; wer das mit
+ * `includes` prüfte, versteckte die Alternate-Adresse einer Sprache, die es
+ * gibt.
+ */
+export function hasLocale(available: readonly string[], code: string): boolean {
+  const wanted = baseLanguage(code)
+  return !!wanted && available.some(entry => baseLanguage(entry) === wanted)
 }
