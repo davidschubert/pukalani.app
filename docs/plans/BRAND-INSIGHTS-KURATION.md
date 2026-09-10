@@ -37,8 +37,11 @@ Punkt 7 ist der einzige mit einer echten Rechtsfrage. Punkte 1–6 sind Handwerk
 **Sie stehen im Code**, in `apps/branding/app/app.config.ts` unter
 `pukalani.insights.radar.channels` — heute **elf Zeilen**. Eine zwölfte
 (Pentagram) wurde am 2026-09-10 entfernt, weil die Kanal-Id einem Privatkonto
-gehörte; an ihrer Stelle steht ein Kommentar mit der Begründung. Jede Zeile
-trägt drei Dinge: die Kanal-Id (`UC…`), das Cluster,
+gehörte; an ihrer Stelle steht ein Kommentar mit der Begründung. Zwei weitere
+Zeilen wurden am 2026-09-10 ausgetauscht, weil ihre Kanäle seit Jahren nichts
+mehr hochladen: Ogilvy wich Nudgestock, Marketing Examples wich StoryBrand.
+**Drei Änderungen an einer Liste in zwei Tagen — genau der Befund, der Frage A
+trägt.** Jede Zeile trägt drei Dinge: die Kanal-Id (`UC…`), das Cluster,
 für das der Kanal steht, und einen Anzeigenamen als Lesehinweis.
 
 **Warum sie dort stehen und nicht in einer Tabelle**, steht wörtlich im Kopf
@@ -317,6 +320,12 @@ hängen mit dran. Vor allem aber: **es gibt noch keine öffentlichen Seiten.**
 Paket I3 ist am Anwalts-Gate (BI1-3/BI1-4). Kommentare unter Artikeln sind
 deshalb ein eigenes Paket **nach I3**, nicht Teil dieser Runde.
 
+**Nachtrag 2026-09-10:** I3 IST inzwischen gebaut — die öffentlichen Seiten
+stehen, je Format hinter einem eigenen Riegel im Layer, der bis zur
+Anwaltsantwort zu bleibt. K7 hängt damit nicht mehr an I3, sondern nur noch am
+Riegel für Artikel: solange kein Artikel öffentlich ist, gibt es unter keinem
+etwas zu kommentieren.
+
 ---
 
 ## 7. Die Pakete, in der Reihenfolge, in der sie fallen
@@ -329,12 +338,12 @@ deshalb ein eigenes Paket **nach I3**, nicht Teil dieser Runde.
 | **K4** | **Fundstücke + Schalter** — Migration `insights-006`, Link-Wurf, Urteil in beiden Listen, YouTube-Link je Zeile, Filter „nur Interessante"; Sweep zieht die Zahlen mit | Davids Ja zur Prod-Migration | M |
 | **K5** | **Brief aus Video** — Prompt `insights-b-1`, Knopf auf den Fundstücken, Beitrag als Entwurf mit Video-Quelle | Entscheidung C (§9) · K4 · **Routen-Probe** | S–M |
 | **K6** | **SEO/GEO-Artikelregeln** — Prompt `insights-d-2`, siebte Prüfregel | — | S |
-| **K7** | **Kommentare unter Artikeln** — `comments` in `apps/branding` montieren | **nach I3** (Gate Anwalt) | M |
+| **K7** | **Kommentare unter Artikeln** — `comments` in `apps/branding` montieren | I3 ist da (2026-09-10); Gate ist jetzt der **Artikel-Riegel** (Anwalt) | M |
 
 **Nach Davids Entscheidungen vom 2026-09-09 (§9):** K1 entfällt, K2 läuft
 sofort (kein Gate, keine Migration), K3 ist beauftragt und braucht ein Ja zur
-Prod-Migration, K5 wartet auf die Routen-Probe aus §9. K7 wartet auf die
-Anwaltsantworten, wie I3.
+Prod-Migration, K5 wartet auf die Routen-Probe aus §9. K7 wartet darauf, dass
+der Artikel-Riegel aus I3 aufgeht — also auf dieselben Anwaltsantworten.
 
 ## 8. Was dieses Vorhaben NICHT tut
 
