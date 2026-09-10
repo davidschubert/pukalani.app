@@ -10875,3 +10875,63 @@ geändert; der „Fehler" war die Wahrheit. (3) `check:bilanz` gehört in diesel
 wie i18n/manifests, sobald ein Layer Routen oder Seiten bekommt — die CI hat es gesehen, die
 lokale Runde nicht. (4) Klick-Beweis hinter Login ohne Passwort: `users.createSession` per
 Server-SDK, Secret als `a_session_<projekt>`-Cookie in den Playwright-Kontext.
+
+## BI1 I2-Reste — Beitrag löschen, Marken-Seite, Korrekturen-Liste (2026-09-10)
+
+**Was:** die drei kleinen Reste aus Paket I2 (Plan §9.4), ohne Migration. (1) `DELETE
+/api/insights/posts/[id]` hinter `insights.manage`: nur `draft`/`review` löschbar, ein
+freigegebener Beitrag antwortet 409 `not_deletable` und wird erst über den bestehenden
+Übergang zurückgezogen; EINE pure Regel `insightsPostDeletable` für Route und Oberfläche.
+Knopf mit Bestätigung im Editor (gesperrt mit Hinweis, solange öffentlich) und Papierkorb je
+Entwurfszeile der Liste. (2) `/dashboard/insights/brands`: UTable mit Zustands-Filtern und
+Zählern, Slideover über alle §9.3-Felder (Quellen über die aus dem Editor gezogene
+`InSourcesEditor`, Zeichen und Historie mit Beleg-Zeiger, Beziehungen, Zustand — `removed`
+nur mit Grund, `removedAt` setzt der Server am Übergang und leert es auf dem Rückweg);
+`GET`/`PATCH /api/insights/brands/[id]` mit slugHistory-Führung, `insightsBrandEditSchema`
+ohne die drei Server-Felder. (3) `/dashboard/insights/corrections` nach dem Muster der
+Brand-Check-Korrekturen: Filter open (Standard)/accepted/declined/alle mit Zählern, Annehmen,
+Ablehnen mit Pflicht-Notiz; `GET /api/insights/corrections` liefert den Kontakt NUR als
+`hasContact` (nie die Adresse), `POST …/[id]/decision` mit 409 `already_decided` und 400
+`note_required` aus der puren Regel `insightsCorrectionDecisionAllowed`. Das Speichern der
+Entscheidung schreibt bewusst nur `status`/`decisionNote`/`decidedAt` — ein Vollschreiben
+hätte eine vom Retention-Sweep geleerte Adresse aus altem Stand zurückgeholt. Annehmen
+ändert das Ziel NICHT (das bleibt Redaktionsarbeit — Hinweis im Toast). Nav: Beiträge ·
+Marken · Korrekturen · Radar als Unterpunkte; i18n de+en; 144 Tests (vorher 119).
+
+**Klick-Beweis** (Dev-Server aus dem Worktree, Port 3018, Dev-Instanz `portfolio-g4ml`,
+Admin-Session per `users.createSession` als Cookie, zwei Korrekturen per Server-SDK gesät):
+Korrekturen 2 offen → Annehmen (Zähler 1/1/0) → Ablehnen-Knopf ohne Notiz gesperrt → mit
+Notiz (0/1/1) → API-Gegenprobe 409 `already_decided` · Marke: Land + Gründungsjahr, Zeichen
+ohne Beleg ⇒ Formular bleibt mit „Beleg fehlt" stehen, ohne Zeichen + „Veröffentlicht" ⇒
+gespeichert, Slideover zu, Zähler 0/1/0; API: `removed` ohne Grund 400, mit Grund `removedAt`
+gesetzt, zurück auf `published` geleert · Löschen: neuer Entwurf im Editor gelöscht ⇒ Liste,
+GET 404; Papierkorb nur an Entwurfszeilen; DELETE auf den freigegebenen Beitrag 409; Knopf im
+Editor des freigegebenen gesperrt. Danach alle vier Seiten ohne Hydration-Meldung (Browser-
+Konsole und Dev-Log 0). Prod: Test-Entwurf „I2-Beweis: Kailua Coffee Co." über den neuen
+Löschen-Weg entfernt. Wächter: Tests, Lint insights/branding, Typecheck branding,
+check:i18n-keys, check:manifests, check:bilanz.
+
+**Vier Befunde aus dem Klick-Beweis, alle vor dem Push behoben:** (a) Hydration-Mismatch auf
+ALLEN Insights-Seiten, seit I2: `useFetch` mit `server: false` steht auf dem Server auf
+`idle`, im Browser schon beim Hydrieren auf `pending` — das Lade-Icon, das `disabled` des
+Knopfs und der Leer-Zustand des Editors („Beitrag nicht gefunden" kurz per SSR) wichen ab.
+Der Ladezustand zählt jetzt erst nach dem Mounten (`hydrated`-Ref) · (b) die Korrekturen-
+Tabelle lief bei 1440 px aus dem Panel und versteckte „Ablehnen": Nuxt UI setzt
+`whitespace-nowrap` auf jede Zelle, ein Grund-Satz reichte (dieselbe Falle wie die
+Kit-Lizenztabelle) — `:ui="{ td: 'whitespace-normal' }"` · (c) die Beleg-Auswahl zeigte
+„-1" statt „Ohne Beleg": ein numerisches `USelect` rendert einen Wert ohne Eintrag roh —
+„Ohne Beleg" ist jetzt ein Eintrag mit Wert -1, das Schema weist ihn weiter ab · (d) die
+Ablehnung des Schemas war UNSICHTBAR: die Zeilen-Felder für Zeichen/Historie hatten kein
+`name`, UForm konnte den Fehler nirgends zeigen, Speichern tat stumm nichts — `name`
+`marks.<i>.sourceIndex` usw. plus Meldung „Beleg fehlt" statt zods „Too small".
+
+**Gelernt:** (1) `server: false` + `status` im Markup ist IMMER ein Hydration-Mismatch —
+Nuxt startet die Abfrage im Browser vor dem Mount; ein Ladezustand, der SSR-sichtbar ist,
+braucht ein Mount-Gate. Die Warnung steht nur in der Dev-Konsole, Typecheck/Lint/Tests sehen
+sie nie; ein Klick-Beweis liest deshalb IMMER auch die Konsole mit. (2) Ein UForm-Feld ohne
+`name` hat keinen Ort für seinen Fehler: das Schema blockiert, der Mensch sieht nichts. Jede
+Zeilen-Liste in einem Formular braucht `name` mit Index. (3) `nuxi typecheck` neben einem
+laufenden Dev-Server desselben Worktrees schreibt `.nuxt` neu und reißt den Server mit —
+Wächter vor oder nach dem Beweis fahren, nicht daneben. (4) Ein Zähler-Reiter, der den
+Standard „Offen" zeigt, ist im Beweis nur mit ZWEI Zeilen aussagekräftig — eine angenommen,
+eine abgelehnt —, sonst ist „0 offen" auch ohne Funktion grün.
