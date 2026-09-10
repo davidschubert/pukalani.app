@@ -56,7 +56,7 @@ if (error.value || !page.value) {
  *     BENUTZT statt nachgebaut: zwei Wege für dieselbe Sache kosten dauerhaft
  *     mehr als ein verworfener eigener.
  *
- * ZURÜCKSETZEN IST PFLICHT (Kopf des Composables): der State ist app-weit.
+ * ZURÜCKSETZEN IST PFLICHT, und es geschieht IM KERN: der State ist app-weit.
  * Bliebe er stehen, verlöre die nächste Seite im selben Client-Lauf ihre
  * zweite Adresse, ohne dass es jemand sieht.
  */
@@ -64,41 +64,24 @@ const deliveredLocale = computed(() => page.value?.locale ?? '')
 const isFallbackLanguage = computed(() => isFallbackLocale(locale.value, deliveredLocale.value))
 const languageName = usePageLanguageName()
 
-const hiddenLocales = useSeoHiddenLocales()
 const appLocaleCodes = computed(() => locales.value.map(entry => (typeof entry === 'string' ? entry : entry.code)))
 
 /**
- * NUR AUFRÄUMEN, WAS NOCH MIR GEHÖRT (2026-09-10 im Klick-Beweis gefunden).
+ * Leere Liste heisst „diese Seite sagt nichts dazu" — nie „es gibt sie
+ * nirgends". Sonst nähme eine fehlgeschlagene Abfrage der Seite alle
+ * Alternate-Adressen.
  *
- * Der State ist app-weit, und beim Wechsel im Browser läuft es so: die NEUE
- * Seite wird aufgebaut und schreibt ihren Wert — DANACH erst wird die alte
- * abgeräumt. Ein blindes `= []` im `onUnmounted` löschte also genau das, was
- * die neue Seite gerade eingetragen hat. Gemessen auf dem Weg zurück von einer
- * zweisprachigen Seite auf eine einsprachige: der Hinweis stand da, der Kopf
- * bewarb aber weiter eine englische Adresse, die es nicht gab — also genau der
- * Fehler, gegen den das hier gebaut ist, nur unsichtbarer.
- *
- * Deshalb der Vergleich auf IDENTITÄT: geräumt wird nur, wenn im State noch
- * dasselbe Array-Objekt liegt, das diese Seite hineingelegt hat. Ein
- * Gleichheitsvergleich auf den Inhalt täte es nicht — zwei Seiten dürfen
- * dieselbe fehlende Sprache melden.
+ * Das Zurücksetzen beim Verlassen macht `useSeoHiddenLocales()` selbst — der
+ * State ist app-weit, und ein blindes Leeren beim Abräumen löschte den Eintrag
+ * der NEUEN Seite (am 2026-09-10 genau hier im Klick-Beweis gefunden, Begründung
+ * im Kopf des Composables). Deshalb steht der Wächter dort und nicht hier.
  */
-let ownEntry: string[] | null = null
-watchEffect(() => {
+useSeoHiddenLocales(() => {
   const available = page.value?.availableLocales ?? []
-  // Leere Liste heisst „diese Seite sagt nichts dazu" — nie „es gibt sie
-  // nirgends". Sonst nähme eine fehlgeschlagene Abfrage der Seite alle
-  // Alternate-Adressen.
-  ownEntry = available.length
+  return available.length
     ? appLocaleCodes.value.filter(code => !hasLocale(available, code))
     : []
-  hiddenLocales.value = ownEntry
 })
-function releaseHiddenLocales() {
-  if (ownEntry && hiddenLocales.value === ownEntry) hiddenLocales.value = []
-}
-onBeforeRouteLeave(releaseHiddenLocales)
-onUnmounted(releaseHiddenLocales)
 
 // „<Seitenname> · <Brand>" + Beschreibung aus dem ersten Textabsatz der Seite
 // (Audit-Befunde S8/S5) — geteilte Links waren vorher markenlos und nackt.

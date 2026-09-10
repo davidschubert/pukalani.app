@@ -60,7 +60,7 @@ export function useLocaleSeoHead(): void {
   const { t } = useI18n()
   const { membersOnly } = useTenantAudience()
   const communitySeo = useCommunitySeoSettings()
-  const hiddenLocales = useSeoHiddenLocales()
+  const hiddenLocales = useSeoHiddenLocalesState()
 
   // '' = kein Umschreiben (Silo-Apps + jeder Fall, in dem kein Origin steht)
   const origin = appConfig.pukalani?.seo?.originFromRequest === true
@@ -131,7 +131,7 @@ export function useLocaleSeoHead(): void {
    *
    * Der Default ist LEER: jede Seite ohne Eintrag bekommt unverändert alle
    * Alternates. Eintragen tut es die Seite, die weiss, dass ihr eine Fassung
-   * fehlt (`useSeoHiddenLocales()`).
+   * fehlt (`useSeoHiddenLocales(quelle)`).
    */
   useHead(() => {
     const alternates = filterSeoAlternates(localeHead.value.link, localeHead.value.meta, hiddenLocales.value)

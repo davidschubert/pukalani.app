@@ -135,6 +135,15 @@
         "source ~/.nvm/nvm.sh && nvm use 22 >/dev/null && exec pnpm --filter @pukalani/insights exec nuxi dev .playground --port 3013"
       ],
       "port": 3013
+    },
+    {
+      "name": "branding",
+      "runtimeExecutable": "zsh",
+      "runtimeArgs": [
+        "-c",
+        "source ~/.nvm/nvm.sh && nvm use 22 >/dev/null && exec pnpm --filter branding dev"
+      ],
+      "port": 3010
     }
   ]
 }

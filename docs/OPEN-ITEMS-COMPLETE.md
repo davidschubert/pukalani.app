@@ -30,6 +30,49 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### SEO-Alternates: der Wächter gegen das blinde Leeren steht jetzt im Kern ✅ 2026-09-10
+
+**Was:** Nachtrag zu F60. Der Kern-Vertrag `useSeoHiddenLocales()` (aus BI1 I3)
+ist ein APP-WEITER State, und sein Kopfkommentar verlangte von jeder Seite, ihn
+in `onBeforeRouteLeave` UND `onUnmounted` zu LEEREN. Das ist falsch: beim
+Wechsel im Browser wird zuerst die NEUE Seite aufgebaut — sie schreibt ihren
+Wert — und erst danach die alte abgeräumt. Das blinde Leeren löscht damit genau
+den frischen Eintrag der neuen Seite. Der `pages`-Layer hatte den Fix seit F60
+je Seite; die drei `insights`-Seiten (Beitrag, Duell, Ranking) hatten ihn nicht.
+
+**Wie:** Die Absicherung liegt jetzt EINMAL im Kern statt in jeder Seite.
+`useSeoHiddenLocales(quelle)` ist die neue Seiten-Seite: sie nimmt einen Getter
+oder Ref, kopiert die Liste beim Schreiben (damit die Identität wirklich ihr
+gehört) und räumt im `onUnmounted` nur auf, wenn im State noch GENAU DAS
+Array-Objekt liegt, das dieser Aufruf hineingelegt hat. Der Kopf liest über
+`useSeoHiddenLocalesState()` — ein `readonly` Ref, damit niemand am Wächter
+vorbei schreiben kann. `onBeforeRouteLeave` fällt bewusst weg: mit dem
+Identitätsvergleich braucht es den Haken nicht mehr, und er feuert, BEVOR
+feststeht, dass die Navigation stattfindet (ein abbrechender Guard räumte sonst
+die Meldung der Seite weg, auf der man bleibt). Alle vier Aufrufstellen sind
+umgestellt.
+
+**Beweis:** Erst der Fehler, dann der Fix, mit demselben Klick. `branding` lokal,
+zweisprachiger Insights-Beitrag → einsprachige Rechtsseite `/terms` (client-seitig,
+per Marker geprüft): VORHER meldete der Kopf `hreflang="en"` und `en-US` auf einen
+Text, den es auf Englisch nicht gibt — der Direktaufruf derselben Seite meldete
+korrekt nur `x-default`, `de`, `de-DE`. NACHHER stimmen beide überein. Gegenrichtung
+(`/terms` → Beitrag) liefert wieder alle fünf. Dieselben zwei Richtungen im
+`pages`-Layer auf `demo.localhost` (platform) nachgeklickt. Dazu Typecheck von
+`branding`, `portfolio`, `control`, `platform`, `pnpm -r lint`, `pnpm -r test`.
+
+**Gelernt:** **Ein app-weiter State braucht einen Besitzer, keine Disziplin.**
+Der ursprüngliche Vertrag war nicht falsch AUFGESCHRIEBEN, er war falsch
+GESCHNITTEN: er legte das Aufräumen in die Hand jeder Seite und beschrieb dabei
+eine Reihenfolge, die es im Browser nicht gibt. Vier Aufrufstellen, drei davon
+mit demselben Fehler — das ist das Muster, an dem eine Sicherung in die
+Schnittstelle gehört statt in die Anleitung (dieselbe Lehre wie beim
+`tableCacheNudge` der Migrationen). Und: **SSR sieht nichts davon.** Der Fehler
+lebt ausschließlich in der Client-Navigation; Unit-Tests, Typecheck und Lint
+finden ihn nicht, nur der Klick.
+
+---
+
 ### F60 — Mehrsprachige Betreiber-Seiten: der Fallback zeigt und sagt, was er zeigt ✅ 2026-09-10
 
 **Was:** Der geparkte Punkt F60 versprach „je Sprache eine Fassung" nach dem
@@ -101,8 +144,9 @@ Seiten denselben Wert schreiben — und SSR sieht davon nichts, weil jeder Reque
 einen frischen State hat. Die Seite räumt jetzt nur auf, wenn im State noch genau
 DAS Array-Objekt liegt, das sie hineingelegt hat (Identität, nicht Inhalt: zwei
 Seiten dürfen dieselbe fehlende Sprache melden). Dass die insights-Seiten aus
-BI1 I3 denselben Fehler haben könnten, ist als eigene Aufgabe gemeldet — die
-Absicherung gehört auf Dauer EINMAL in den Kern, nicht in jede Seite.
+BI1 I3 denselben Fehler haben könnten, war als eigene Aufgabe gemeldet — sie
+hatten ihn, und die Absicherung steht seit demselben Tag EINMAL im Kern statt in
+jeder Seite (eigener Eintrag oben).
 (4) **Erwartungswerte im Beweis sind selbst eine Behauptung.** Drei Prüfungen
 waren rot, weil sie `["de"]` erwarteten — nuxt-i18n schreibt je Sprache ZWEI
 Alternates (`de` aus `code`, `de-DE` aus `language`) plus `x-default`. Der Code

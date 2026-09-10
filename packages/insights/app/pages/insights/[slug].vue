@@ -36,8 +36,8 @@ import type { InsightsPublicPostResponse } from '../../../shared/types/insightsA
  * ist, darf sie keine Alternate-Adresse für diese Sprache melden — sie zeigte
  * dort denselben Text. Der Eintrag geht über `useSeoHiddenLocales()` an
  * `useLocaleSeoHead()`, den EINEN Kopf-Aufruf der App. Zurückgesetzt wird er
- * beim Verlassen UND beim Abräumen (es ist ein app-weiter State — bliebe er
- * stehen, verlöre die nächste Seite ihre Sprachverknüpfung).
+ * im KERN beim Abräumen (es ist ein app-weiter State — bliebe er stehen,
+ * verlöre die nächste Seite ihre Sprachverknüpfung).
  *
  * ── JSON-LD: `Article` + `BreadcrumbList`, SONST NICHTS ─────────────────
  * Kein `Organization` für die fremde Marke (wir behaupten Google gegenüber
@@ -159,23 +159,18 @@ const insightsOgImage = computed(() => {
 ogImage.value = insightsOgImage.value
 watch(insightsOgImage, (value) => { ogImage.value = value })
 
-/** Die Sprache, die es hier NICHT gibt (s. Kopf) — leer, wenn beide da sind. */
-const hiddenLocales = useSeoHiddenLocales()
-const hidden = computed<string[]>(() => {
+/**
+ * Die Sprache, die es hier NICHT gibt (s. Kopf) — leer, wenn beide da sind.
+ * Zurückgesetzt wird der app-weite State im KERN (`useSeoHiddenLocales()`):
+ * ein blindes Leeren beim Abräumen löschte den Eintrag der NEUEN Seite.
+ */
+useSeoHiddenLocales(() => {
   if (missing.value || !post.value || post.value.translationReviewed) return []
   return [post.value.baseLocale === 'de' ? 'en' : 'de']
 })
-hiddenLocales.value = hidden.value
-watch(hidden, (value) => { hiddenLocales.value = value })
 
-onBeforeRouteLeave(() => {
-  ogImage.value = null
-  hiddenLocales.value = []
-})
-onUnmounted(() => {
-  ogImage.value = null
-  hiddenLocales.value = []
-})
+onBeforeRouteLeave(() => { ogImage.value = null })
+onUnmounted(() => { ogImage.value = null })
 
 const jsonLd = computed(() => {
   const entry = post.value

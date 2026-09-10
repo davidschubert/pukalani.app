@@ -71,16 +71,14 @@ useSeoMeta({
   },
 })
 
-/** Die fehlende Sprachfassung meldet keine Alternate-Adresse (§9.5). */
-const hiddenLocales = useSeoHiddenLocales()
-const hidden = computed<string[]>(() => {
+/** Die fehlende Sprachfassung meldet keine Alternate-Adresse (§9.5). Das
+ * Zurücksetzen beim Verlassen macht `useSeoHiddenLocales()` selbst — der State
+ * ist app-weit, und ein blindes Leeren beim Abräumen löschte den Eintrag der
+ * NEUEN Seite (Begründung im Kopf des Composables). */
+useSeoHiddenLocales(() => {
   if (missing.value || !post.value || post.value.translationReviewed) return []
   return [post.value.baseLocale === 'de' ? 'en' : 'de']
 })
-hiddenLocales.value = hidden.value
-watch(hidden, (value) => { hiddenLocales.value = value })
-onBeforeRouteLeave(() => { hiddenLocales.value = [] })
-onUnmounted(() => { hiddenLocales.value = [] })
 
 /**
  * JSON-LD: `Article` + `BreadcrumbList` (§9.5) — kein `Organization` für die
