@@ -46,8 +46,9 @@ Ein Klick = ein KI-Aufruf = ein Kontingent. Verworfen: abschnittsweises Überset
 übersetzen (billig, aber der Nutzen ist zu klein).
 
 **Nachtrag beim Rebase — eigener Core-Weg fallen gelassen:** für die Alternate-Adressen war ein
-eigener Kern-Vertrag geschrieben (`usePageLocaleAlternates()` + `core/shared/localeAlternates.ts`,
-Pfad im State statt Zurücksetzen). Eine Nachbarsitzung hatte am selben Tag für BI1 I3 denselben
+eigener Kern-Vertrag geschrieben (ein `usePageLocaleAlternates()` mit einer eigenen puren
+Filter-Regel daneben; der State trug den Pfad mit, statt Zurücksetzen zu verlangen) — die Dateien
+existieren nicht mehr, deshalb stehen ihre Pfade hier bewusst nicht. Eine Nachbarsitzung hatte am selben Tag für BI1 I3 denselben
 Mechanismus gebaut (`useSeoHiddenLocales()` + `core/shared/seoAlternates.ts`). Nach der
 CLAUDE.md-Regel („zwei Wege für dieselbe Sache kosten dauerhaft mehr als eine verlorene Stunde")
 fällt der EIGENE Commit, nicht die fremde Lösung — sie kann zudem mehr (räumt auch
