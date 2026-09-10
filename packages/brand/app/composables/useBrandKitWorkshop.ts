@@ -41,9 +41,13 @@ const EMPTY: BrandKitWorkshopResponse = {
  * `watch` lädt deshalb nach, sobald sich die Id ändert.
  */
 export function useBrandKitWorkshop(profileId: MaybeRefOrGetter<string>) {
+  // `useRequestFetch()` statt rohem `$fetch` — der Core-Wächter
+  // `ssrTenantFetch.test.ts` verlangt es für jeden Abruf in `useAsyncData`:
+  // im SSR reist sonst kein Host mit (main war damit rot, 2026-09-10).
+  const requestFetch = useRequestFetch()
   const { data, pending, refresh } = useAsyncData<BrandKitWorkshopResponse>(
     'brand-kit-workshop',
-    () => $fetch<BrandKitWorkshopResponse>(
+    () => requestFetch<BrandKitWorkshopResponse>(
       `/api/brand/profiles/${encodeURIComponent(toValue(profileId))}/kit/workshop`,
     ),
     { server: false, default: () => EMPTY, watch: [() => toValue(profileId)] },
