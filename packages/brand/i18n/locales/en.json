@@ -2413,13 +2413,17 @@
         "label": "Export",
         "print": "Print / PDF",
         "printSub": "Browser print with print layout",
-        "context": "brand.md · brand.json",
-        "contextSub": "Brand context for AI agents",
+        "context": "Brand context",
+        "contextSub": "brand.md · brand.json",
         "tokens": "Design tokens",
         "tokensSub": "CSS, Tailwind, JSON",
-        "assets": "Assets.zip",
-        "assetsSub": "Logos, templates, press kit",
-        "kit": "Brand Book & Kit"
+        "assets": "Assets",
+        "assetsSub": "Marks, tokens and context as a ZIP",
+        "kit": "Brand Book & Kit",
+        "openKit": "Open the delivery page",
+        "bundle": "Bundle (ZIP)",
+        "needsDesign": "arrives with Brand Design",
+        "gate": "Look at Brand Book & Kit"
       },
       "ai": {
         "tone": "Write in this tone:",
@@ -3559,6 +3563,97 @@
         "empty": "Once tagline, boilerplates and facts stand, the whole kit shows up here.",
         "apply": "Take the preview",
         "applied": "Taken"
+      }
+    },
+    "kitPage": {
+      "title": "Kit",
+      "eyebrow": "Delivery page",
+      "headline": "{title} — brand kit",
+      "stand": "As of {date}",
+      "computed": "computed from your confirmed values, never stored",
+      "contentLocale": "Content language {locale}",
+      "toBook": "Brand book",
+      "bundle": "Download bundle ({file})",
+      "missingTiles": "Without Brand Design — one tile is missing | Without Brand Design — {count} tiles are missing",
+      "complete": "Complete",
+      "correctHint": "Nothing is decided here. Corrections happen in the chapters — the way there is on the right.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "download": "Download",
+      "loading": "Loading …",
+      "previewFailed": "The preview could not be loaded. The download still works.",
+      "showAll": "Show the whole file",
+      "showLess": "Show less",
+      "correctTitle": "Correct",
+      "correctLead": "Every file here is a calculation over your confirmed values. To change something, go to the chapter — the kit follows.",
+      "privateTitle": "What is not in here",
+      "privateLead": "Competitors, complaints, raw answers and facts you held back. The travel rule of the shared link is also the export rule.",
+      "context": {
+        "title": "Brand context",
+        "lead": "Your brand in one file a machine can read. Hand it to ChatGPT, Claude or an agent before it writes for you — it only contains what may travel in the shared document.",
+        "preview": "Preview · brand.md",
+        "privateNote": "The same values as above, machine-readable. Competitors, raw answers and held-back facts are in NEITHER file."
+      },
+      "tokens": {
+        "title": "Design tokens",
+        "lead": "Light and dark in ONE file, with the same role names in both modes — Figma maps the groups onto two modes, Style Dictionary onto two sets.",
+        "rampLight": "Light ramp · color.brand",
+        "rampDark": "Dark ramp · color.brand-dark",
+        "rolesLight": "Light roles · color.light",
+        "rolesDark": "Dark roles · color.dark",
+        "note": "Every hex in tokens.css comes from tokens.json — both come from the same calculation over your base colour. The contrast verdicts sit as an extension on the roles: they are evidence, not tokens."
+      },
+      "marks": {
+        "title": "Marks",
+        "lead": "Wordmark and monogram, one per variant. Set from your font pair and your colour world — fonts are referenced as a stack, not embedded.",
+        "note": "No PNG raster in this edition. The AI drafts you kept stay private and are in no bundle.",
+        "setting": {
+          "wordmark": "Wordmark",
+          "monogram": "Monogram"
+        },
+        "variant": {
+          "primary": "Primary",
+          "inverted": "Inverted",
+          "mono": "Single colour",
+          "icon": "Icon area"
+        }
+      },
+      "presskit": {
+        "title": "Press kit",
+        "tag": "from messages, released facts and contact",
+        "lead": "Nothing new — assembled from what is long decided. What travels, you released one by one.",
+        "contact": "Press contact",
+        "empty": "The press kit is built in the press kit chapter. As long as nothing is confirmed there, this tile stays empty.",
+        "toChapter": "Change what is released — press kit chapter"
+      },
+      "licenses": {
+        "title": "Licences",
+        "family": "Family",
+        "weights": "Weights",
+        "role": "Role",
+        "source": "Source",
+        "spdx": "Licence",
+        "download": "Download LICENSES.md"
+      },
+      "bundleList": {
+        "title": "What is in the bundle",
+        "missingTitle": "What is missing — and why",
+        "missingReason": "arrives with Brand Design",
+        "marks": "One setting as SVG | {count} settings as SVG, wordmark and monogram per variant",
+        "note": "The bundle is called {file} and carries the date in its name. It is packed anew on every request — there is no stored copy that could age.",
+        "what": {
+          "brandMd": "The brand context as markdown — ready to use as a system prompt.",
+          "brandJson": "The same values machine-readable, schemaVersion 1.",
+          "tokensJson": "Design tokens per DTCG, light and dark in one file.",
+          "tokensCss": "The same values as CSS variables plus a Tailwind block.",
+          "licensesMd": "Font families with weights, source and licence — without the font files.",
+          "readmeMd": "What is in the bundle, when it is from and what is missing."
+        }
+      },
+      "locked": {
+        "title": "Arrives with Brand Design",
+        "lead": "{what} come out of your colour world, your font pair and your mark — all decided in Brand Design. Until then the kit delivers everything else: brand context, press kit, bundle.",
+        "design": "Look at Brand Design"
       }
     }
   }

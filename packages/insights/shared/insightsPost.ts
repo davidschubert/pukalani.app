@@ -476,25 +476,58 @@ export function insightsBodyOf(post: Pick<InsightsPost, 'bodyDe' | 'bodyEn'>, lo
  * `fallback: true` ist ausserdem das Signal für `hreflang`: eine Adresse, die
  * nur die Grundfassung zeigt, darf sich nicht als eigene Sprachfassung melden.
  */
-export interface InsightsPublicFassung {
+export interface InsightsPublicKopf {
   locale: InsightsLocale
   title: string
   dek: string
-  body: string
   /** Der Leser wollte die andere Sprache und bekommt die Grundfassung. */
   fallback: boolean
 }
 
-export function insightsPublicFassung(post: InsightsPost, wanted: InsightsLocale): InsightsPublicFassung {
+export interface InsightsPublicFassung extends InsightsPublicKopf {
+  body: string
+}
+
+/**
+ * WAS EINE LISTEN-ZEILE VON EINEM BEITRAG BRAUCHT (BI1 I3).
+ *
+ * Der Typ steht hier und nicht in der Karte, weil ZWEI Formen ihn erfüllen
+ * müssen: der volle Beitrag (`InsightsPost`) und das Listen-Item der
+ * öffentlichen Route (`InsightsPublicPostListItem`, ohne Fliesstext — zwanzig
+ * Zeilen mit je zwei Artikel-Fassungen wären ein Megabyte für eine Liste).
+ * Eine Komponente, die den vollen Typ verlangt, zwänge die Liste dazu, den
+ * Text doch mitzuschicken.
+ */
+export type InsightsPostHead = Pick<
+  InsightsPost,
+  'baseLocale' | 'translationReviewed' | 'titleDe' | 'titleEn' | 'dekDe' | 'dekEn'
+>
+
+/**
+ * WELCHE FASSUNG SIEHT DER LESER — der KOPF (Titel + Vorspann), ohne Text.
+ *
+ * Die Sprach-ENTSCHEIDUNG steht damit an genau EINER Stelle und wird von
+ * `insightsPublicFassung()` unten mitbenutzt. Zwei Stellen mit derselben
+ * Rechnung wären zwei Wahrheiten darüber, welche Sprache eine Seite zeigt —
+ * und die Liste zeigte dann irgendwann eine andere als der Beitrag dahinter.
+ */
+export function insightsPublicKopf(post: InsightsPostHead, wanted: InsightsLocale): InsightsPublicKopf {
   const useBase = wanted !== post.baseLocale && !post.translationReviewed
   const locale = useBase ? post.baseLocale : wanted
   return {
     locale,
     title: insightsTitleOf(post, locale),
     dek: insightsDekOf(post, locale),
-    body: insightsBodyOf(post, locale),
     fallback: useBase,
   }
+}
+
+export function insightsPublicFassung(
+  post: InsightsPostHead & Pick<InsightsPost, 'bodyDe' | 'bodyEn'>,
+  wanted: InsightsLocale,
+): InsightsPublicFassung {
+  const kopf = insightsPublicKopf(post, wanted)
+  return { ...kopf, body: insightsBodyOf(post, kopf.locale) }
 }
 
 /** Ist der Beitrag überhaupt öffentlich? Zwei Zustände, nie mehr (§3.2). */
@@ -1100,7 +1133,26 @@ export interface InsightsListFilter {
   locale?: InsightsLocale | 'all'
 }
 
-export function insightsFilterPosts(posts: readonly InsightsPost[], filter: InsightsListFilter): InsightsPost[] {
+/**
+ * WAS DIE FILTER-REGEL ANSIEHT — und warum die Funktion generisch ist (I3).
+ *
+ * Gefiltert wird sowohl über volle Beiträge (Redaktion, Tests) als auch über
+ * die Listen-Items der öffentlichen Route, die keinen Fliesstext tragen. Die
+ * Durchreiche über `T` gibt GENAU den Typ zurück, der hereinkam — eine
+ * Verengung auf `InsightsPost` zwänge die öffentliche Liste, den Text
+ * mitzuschicken, nur damit ein Filter läuft, der ihn nie ansieht.
+ */
+export interface InsightsFilterablePost {
+  format: InsightsFormat
+  topics: readonly InsightsTopicKey[]
+  baseLocale: InsightsLocale
+  translationReviewed: boolean
+}
+
+export function insightsFilterPosts<T extends InsightsFilterablePost>(
+  posts: readonly T[],
+  filter: InsightsListFilter,
+): T[] {
   return posts.filter((post) => {
     if (filter.format && filter.format !== 'all' && post.format !== filter.format) return false
     if (filter.topic && filter.topic !== 'all' && !post.topics.includes(filter.topic)) return false
@@ -1119,7 +1171,15 @@ export function insightsFilterPosts(posts: readonly InsightsPost[], filter: Insi
  * überall, `[...posts].sort()` überall. Eine an Ort und Stelle sortierte Liste
  * wäre in Vue eine Reihenfolge, die sich beim Rendern ändert.
  */
-export function insightsSortPosts(posts: readonly InsightsPost[], sort: InsightsSort): InsightsPost[] {
+export interface InsightsSortablePost {
+  readingMinutes: number
+  publishedAt: string
+}
+
+export function insightsSortPosts<T extends InsightsSortablePost>(
+  posts: readonly T[],
+  sort: InsightsSort,
+): T[] {
   const list = [...posts]
   if (sort === 'shortest') return list.sort((a, b) => a.readingMinutes - b.readingMinutes)
   // `mostRead` fällt bewusst auf `newest` zurück — die Oberfläche lässt es gar

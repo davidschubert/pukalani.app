@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type { InsightsLocale, InsightsPost } from '../../shared/insightsPost'
-import { insightsPublicFassung, insightsTopicLabel } from '../../shared/insightsPost'
+import type { InsightsLocale } from '../../shared/insightsPost'
+import { insightsPublicKopf, insightsTopicLabel } from '../../shared/insightsPost'
+import type { InsightsPostCardView } from '../../shared/insightsPublic'
 import { insightsDay } from '../utils/insightsFormat'
 
 /**
@@ -21,7 +22,13 @@ import { insightsDay } from '../utils/insightsFormat'
  * Rohübersetzung wäre der Bruch von §3.2.
  */
 const props = withDefaults(defineProps<{
-  post: InsightsPost
+  /**
+   * Der SCHMALSTE Typ, der reicht (BI1 I3): so passt sowohl der volle Beitrag
+   * (Redaktion, Prototyp) als auch das Listen-Item der öffentlichen Route, das
+   * bewusst KEINEN Fliesstext trägt. Eine Karte, die `InsightsPost` verlangte,
+   * zwänge die Liste dazu, zwei Artikel-Fassungen je Kachel mitzuschicken.
+   */
+  post: InsightsPostCardView
   /** Anzeigesprache des Lesers — NICHT die Grundsprache des Beitrags. */
   locale: InsightsLocale
   to: string
@@ -35,7 +42,10 @@ const props = withDefaults(defineProps<{
 
 const { t } = useI18n()
 
-const view = computed(() => insightsPublicFassung(props.post, props.locale))
+// Titel und Vorspann in der richtigen Sprache — OHNE Fliesstext. Die
+// Sprach-Entscheidung ist dieselbe wie auf der Beitragsseite
+// (`insightsPublicKopf` ist der gemeinsame Kern von `insightsPublicFassung`).
+const view = computed(() => insightsPublicKopf(props.post, props.locale))
 const formatLabel = computed(() => t(`insights.format.${props.post.format}`))
 const day = computed(() => insightsDay(props.post.publishedAt, props.locale))
 const topicLabels = computed(() => props.post.topics.map(key => insightsTopicLabel(key)))

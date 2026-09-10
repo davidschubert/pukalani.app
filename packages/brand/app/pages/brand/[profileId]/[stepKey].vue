@@ -3079,9 +3079,6 @@ const kitRailLayer = computed<BwRailLayer>(() => {
     label: t('brand.kitLayer.label'),
     note: t('brand.kitLayer.progress', { done: doneCount, total: onPath.length }),
     info,
-    // KEIN Ergebnis-Punkt: die Lieferseite („Kit", `brand.kitLayer.result`)
-    // kommt mit K6 und hätte heute keine Adresse — ein Punkt ohne Ziel ist die
-    // Sorte Vorschuss, die niemand einlöst (dieselbe Regel wie in K0).
     steps: onPath.map((entry): BwRailStep => {
       const current = entry.stepKey === stepKey.value
       return {
@@ -3101,7 +3098,29 @@ const kitRailLayer = computed<BwRailLayer>(() => {
             }
           : {}),
       }
-    }),
+    }).concat([
+      /*
+       * DER ERGEBNIS-PUNKT „KIT" (K6) — die Lieferseite `/brand/:id/kit`.
+       *
+       * Er ist KEIN Baustein der Registry: er steht in keiner Journey, in
+       * keinem Fortschritts-Nenner und in keiner Abnahme. Er ist ein LINK am
+       * Ende der Schicht, genau wie `design-result` am Ende von Schicht 2 —
+       * deshalb liest ihn auch keiner der vier Registry-Leser (Rail, Dokument,
+       * Leseansicht, Fortschritts-Cache) als Kapitel.
+       *
+       * `done`, sobald alle Kapitel DIESES Weges stehen: dann ist das Kit
+       * vollständig, was es zu holen gibt. Vorher `open` — die Dateien gibt es
+       * trotzdem schon, nur eben mit weniger darin.
+       */
+      {
+        id: 'kit-result',
+        kind: 'result',
+        label: t('brand.kitLayer.result'),
+        icon: '',
+        state: doneCount === onPath.length && onPath.length > 0 ? 'done' : 'open',
+        to: localePath(`/brand/${profileId.value}/kit`),
+      },
+    ]),
   }
 })
 

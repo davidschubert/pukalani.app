@@ -4,7 +4,8 @@ import { BRAND_DNA_DIMENSION_IDS } from '../shared/brandDesignVocab'
 import { brandDnaMixSlotValue } from '../shared/brandDesignDna'
 import { brandColorRoles, brandColorRolesSlotValue } from '../shared/brandDesignColor'
 import { BRAND_TYPE_DEFAULT_RULES, brandTypeRulesSlotValue } from '../shared/brandDesignType'
-import { BRAND_KIT_DAILY_LIMIT } from '../shared/brandKitLimits'
+import { strFromU8, unzipSync } from 'fflate'
+import { BRAND_KIT_DAILY_LIMIT, BRAND_KIT_ZIP_WEIGHT } from '../shared/brandKitLimits'
 import { KAILUA_COFFEE_DESIGN } from '../shared/examples/kailuaCoffeeDesign'
 import type { BrandKitManifest } from '../shared/types/brandKit'
 
@@ -35,6 +36,7 @@ let headers: Record<string, string>
 let hits: string[]
 let hitCount: number
 let fileParam: string
+let nameParam: string
 
 /**
  * DIE SECHS ABGENOMMENEN DESIGN-KAPITEL EINER MARKE — nur die TRAGENDEN
@@ -113,7 +115,7 @@ vi.stubGlobal('assertBrandOwnerAccess', (_event: H3Event, row: FakeRow, userId: 
   if (row.ownerId !== userId) throw createError({ status: 404, statusText: 'Not Found' })
 })
 vi.stubGlobal('getRouterParam', (_event: H3Event, name: string) =>
-  (name === 'id' ? 'p1' : name === 'file' ? fileParam : ''))
+  (name === 'id' ? 'p1' : name === 'file' ? fileParam : name === 'name' ? nameParam : ''))
 vi.stubGlobal('setHeader', (_event: H3Event, name: string, value: string | number) => {
   headers[name] = String(value)
 })
@@ -132,6 +134,10 @@ const manifestRoute = (await import('../server/api/brand/profiles/[id]/kit.get')
   .default as unknown as (event: H3Event) => Promise<BrandKitManifest>
 const fileRoute = (await import('../server/api/brand/profiles/[id]/kit/[file].get'))
   .default as unknown as (event: H3Event) => Promise<string>
+const markRoute = (await import('../server/api/brand/profiles/[id]/kit/marks/[name].get'))
+  .default as unknown as (event: H3Event) => Promise<string>
+const zipRoute = (await import('../server/api/brand/profiles/[id]/kit.zip.get'))
+  .default as unknown as (event: H3Event) => Promise<Buffer>
 
 const event = { context: {} } as unknown as H3Event
 
@@ -164,6 +170,7 @@ beforeEach(() => {
   hits = []
   hitCount = 0
   fileParam = 'tokens.json'
+  nameParam = 'kailua-coffee-co-wordmark-primary.svg'
   vi.clearAllMocks()
 })
 
@@ -193,13 +200,22 @@ describe('das Manifest', () => {
     for (const row of stepRows) row.state = 'open'
     const manifest = await manifestRoute(event)
     expect(manifest.designReady).toBe(false)
-    expect(manifest.stand).toBe('')
+    // SEIT K6: der DESIGN-Stand ist leer, der Stand des Kits nicht — `brand.md`
+    // gibt es auch ohne Preset, und es ändert sich mit jedem Kapitel.
+    expect(manifest.designStand).toBe('')
+    expect(manifest.stand).toBe('2026-09-06T08:00:00.000Z')
     for (const id of ['tokens.json', 'tokens.css', 'licenses.md']) {
       expect(manifest.files.find(file => file.id === id))
         .toMatchObject({ available: false, reason: 'design_missing' })
     }
-    // Ohne Stand steht kein Datum im Dateinamen (§2.6).
+  })
+
+  it('lässt das Datum im Dateinamen weg, wenn es gar keinen Stand gibt (§2.6)', async () => {
+    for (const row of stepRows) row.$updatedAt = ''
+    const manifest = await manifestRoute(event)
+    expect(manifest.stand).toBe('')
     expect(manifest.files[0]!.filename).toBe('kailua-coffee-co-tokens.json')
+    expect(manifest.bundle.filename).toBe('kailua-coffee-co-brand-kit.zip')
   })
 })
 
@@ -281,8 +297,10 @@ describe('der Download', () => {
     for (const row of stepRows) row.state = 'open'
     const error = await expectThrown(() => fileRoute(event))
     expect(error.status).toBe(409)
-    expect(error.data?.code).toBe('kit_file_unavailable')
-    expect(error.data?.reason).toBe('design_missing')
+    expect(error.data?.code).toBe('kit_file_design_missing')
+    // KEIN zweites Feld: der zentrale Handler hebt nur `code` ins Envelope —
+    // ein `reason` daneben wäre eine Auskunft, die nie ankommt.
+    expect(error.data?.reason).toBeUndefined()
     expect(eventRows).toEqual([])
   })
 
@@ -329,5 +347,241 @@ describe('der Download', () => {
     // wenn der Deckel bei 1 läge.
     hitCount = BRAND_KIT_DAILY_LIMIT - 2
     await expect(fileRoute(event)).resolves.toContain('$type')
+  })
+})
+
+/* ── K6: ZEICHEN, BÜNDEL UND DER STAND ÜBER ALLE KAPITEL ─────────────────── */
+
+/** Eine Foundation-Zeile, jünger als jedes Design-Kapitel. */
+function foundationRow(stepKey: string, updatedAt: string): FakeRow {
+  return {
+    $id: `p1_${stepKey}`,
+    profileId: 'p1',
+    stepKey,
+    state: 'done',
+    slots: '{}',
+    $updatedAt: updatedAt,
+  }
+}
+
+describe('der Stand des Kits', () => {
+  it('nimmt das jüngste Kapitel ALLER Schichten, nicht nur der Design-Kapitel', async () => {
+    stepRows.push(foundationRow('story', '2026-09-20T10:00:00.000Z'))
+    const manifest = await manifestRoute(event)
+    expect(manifest.stand).toBe('2026-09-20T10:00:00.000Z')
+    // Der DESIGN-Stand bleibt, was er war — er beantwortet eine andere Frage.
+    expect(manifest.designStand).toBe('2026-09-06T08:00:00.000Z')
+    expect(manifest.foundationStand).toBe('2026-09-20T10:00:00.000Z')
+    // … und er steht im Dateinamen jeder Datei.
+    expect(manifest.files[0]!.filename).toBe('kailua-coffee-co-tokens-2026-09-20.json')
+    expect(manifest.bundle.filename).toBe('kailua-coffee-co-brand-kit-2026-09-20.zip')
+  })
+
+  it('trägt auch OHNE Preset ein Datum — das war vor K6 nicht so', async () => {
+    for (const row of stepRows) row.state = 'open'
+    stepRows.push(foundationRow('story', '2026-09-20T10:00:00.000Z'))
+    const manifest = await manifestRoute(event)
+    expect(manifest.designReady).toBe(false)
+    expect(manifest.designStand).toBe('')
+    expect(manifest.stand).toBe('2026-09-20T10:00:00.000Z')
+  })
+})
+
+describe('das Manifest nach K6', () => {
+  it('nennt acht Zeichen, das Bündel und die drei Kapitel', async () => {
+    const manifest = await manifestRoute(event)
+    expect(manifest.marks).toHaveLength(8)
+    expect(manifest.marks[0]).toMatchObject({
+      id: 'marks/kailua-coffee-co-wordmark-primary.svg',
+      filename: 'kailua-coffee-co-wordmark-primary.svg',
+      setting: 'wordmark',
+      variant: 'primary',
+    })
+    expect(manifest.marks[0]!.bytes).toBeGreaterThan(100)
+    expect(manifest.bundle).toEqual({
+      filename: 'kailua-coffee-co-brand-kit-2026-09-06.zip',
+      available: true,
+      weight: BRAND_KIT_ZIP_WEIGHT,
+      missing: 0,
+    })
+    expect(manifest.chapters.map(entry => entry.stepKey))
+      .toEqual(['nomenclature', 'aiguide', 'presskit'])
+    /*
+     * DIE ZUSTÄNDE KOMMEN AUS DER JOURNEY, NICHT AUS EINER ZWEITEN RECHNUNG:
+     * diese Marke hat nur Design-Zeilen und keine fertige Foundation, und ihre
+     * Weiche W4 ist unentschieden — die Journey sagt deshalb `skipped` für
+     * `nomenclature` und `locked` für die zwei anderen. Genau das steht im
+     * Manifest, ohne dass es hier eine zweite Zustandslogik gäbe. Der OFFENE
+     * Fall braucht eine ganze Marke und wird darum live bewiesen
+     * (`verify-brand-kit.mjs`, Abschnitt 9).
+     */
+    expect(manifest.chapters.map(entry => entry.state)).toEqual(['skipped', 'locked', 'locked'])
+    expect(manifest.contentLocale).toBe('de')
+    // Weiterhin: die Seite bucht nichts (§2.11).
+    expect(hits).toEqual([])
+  })
+
+  it('zählt ohne Preset VIER fehlende Kacheln — drei Dateien plus die Zeichen', async () => {
+    for (const row of stepRows) row.state = 'open'
+    const manifest = await manifestRoute(event)
+    expect(manifest.marks).toEqual([])
+    expect(manifest.bundle.missing).toBe(4)
+    expect(manifest.bundle.available).toBe(true)
+  })
+})
+
+describe('eine Zeichen-Datei', () => {
+  it('liefert das SVG mit Typ, Dateinamen und ohne Zwischenspeicher', async () => {
+    const svg = await markRoute(event)
+    expect(svg.startsWith('<svg')).toBe(true)
+    expect(svg).toContain('<title>Kailua Coffee Co. — wordmark primary</title>')
+    expect(headers['Content-Type']).toBe('image/svg+xml; charset=utf-8')
+    expect(headers['Cache-Control']).toBe('private, no-store')
+    expect(headers['Content-Disposition']).toBe(
+      'attachment; filename="kailua-coffee-co-wordmark-primary.svg"; '
+      + 'filename*=UTF-8\'\'Kailua%20Coffee%20Co.%20wordmark%20primary%202026-09-06.svg',
+    )
+    expect(hits).toEqual(['brand-kit-day:p1'])
+  })
+
+  it('schreibt ein Ereignis OHNE den Markennamen — die Setzung, nicht der Dateiname', async () => {
+    await markRoute(event)
+    expect(eventRows).toHaveLength(1)
+    const payload = JSON.parse(String(eventRows[0]!.payload)) as Record<string, unknown>
+    expect(payload).toEqual({ file: 'marks/wordmark-primary.svg', design: true })
+    expect(JSON.stringify(payload)).not.toContain('kailua')
+  })
+
+  it('antwortet auf einen fremden Namen 404 — und baut nie einen Pfad', async () => {
+    for (const evil of ['', 'x.svg', '../../etc/passwd', 'marks/kailua-coffee-co-wordmark-primary.svg']) {
+      nameParam = evil
+      const error = await expectThrown(() => markRoute(event))
+      expect(error.status, evil).toBe(404)
+    }
+  })
+
+  it('antwortet ohne Preset 409 `kit_file_design_missing` — nicht 404', async () => {
+    for (const row of stepRows) row.state = 'open'
+    const error = await expectThrown(() => markRoute(event))
+    expect(error.status).toBe(409)
+    expect(error.data?.code).toBe('kit_file_design_missing')
+    expect(error.data?.reason).toBeUndefined()
+  })
+
+  it('steht hinter denselben drei Türen: fremd ⇒ 404, gesperrt ⇒ 403', async () => {
+    profileRow.ownerId = 'u2'
+    expect((await expectThrown(() => markRoute(event))).status).toBe(404)
+    profileRow.ownerId = 'u1'
+    profileRow.derivationUnlockedAt = ''
+    profileRow.derivationUnlockedVia = ''
+    const error = await expectThrown(() => markRoute(event))
+    expect(error.status).toBe(403)
+    expect(error.data?.code).toBe('derivation_locked')
+    expect(hits).toEqual([])
+  })
+})
+
+describe('das Bündel', () => {
+  it('liefert ein gültiges Zip mit allen Dateien und den Zeichen', async () => {
+    const zip = await zipRoute(event)
+    const back = unzipSync(new Uint8Array(zip))
+    const names = Object.keys(back).sort()
+    expect(names).toEqual([
+      'LICENSES.md',
+      'README.md',
+      'brand.json',
+      'brand.md',
+      'marks/kailua-coffee-co-monogram-icon.svg',
+      'marks/kailua-coffee-co-monogram-inverted.svg',
+      'marks/kailua-coffee-co-monogram-mono.svg',
+      'marks/kailua-coffee-co-monogram-primary.svg',
+      'marks/kailua-coffee-co-wordmark-icon.svg',
+      'marks/kailua-coffee-co-wordmark-inverted.svg',
+      'marks/kailua-coffee-co-wordmark-mono.svg',
+      'marks/kailua-coffee-co-wordmark-primary.svg',
+      'tokens.css',
+      'tokens.json',
+    ])
+    // Im Zip heisst eine Datei, wie sie heisst — der Marken-Stamm steht am ZIP.
+    expect(strFromU8(back['README.md']!)).toContain('# Brand Kit — Kailua Coffee Co.')
+    expect(strFromU8(back['README.md']!)).toContain('`marks/` — 8 Setzungen als SVG')
+    expect(strFromU8(back['tokens.json']!)).toContain('"$type": "color"')
+  })
+
+  it('setzt Typ, Länge, Dateinamen und `no-store`', async () => {
+    const zip = await zipRoute(event)
+    expect(headers['Content-Type']).toBe('application/zip')
+    expect(headers['Cache-Control']).toBe('private, no-store')
+    expect(headers['Content-Length']).toBe(String(zip.byteLength))
+    expect(headers['Content-Disposition']).toBe(
+      'attachment; filename="kailua-coffee-co-brand-kit-2026-09-06.zip"; '
+      + 'filename*=UTF-8\'\'Kailua%20Coffee%20Co.%20brand%20kit%202026-09-06.zip',
+    )
+  })
+
+  it('bucht FÜNF Treffer auf den Eimer der Marke (§2.11)', async () => {
+    await zipRoute(event)
+    expect(hits).toEqual(Array.from({ length: BRAND_KIT_ZIP_WEIGHT }, () => 'brand-kit-day:p1'))
+    expect(eventRows).toHaveLength(1)
+    const payload = JSON.parse(String(eventRows[0]!.payload)) as Record<string, unknown>
+    expect(payload).toEqual({ file: 'kit.zip', design: true })
+  })
+
+  it('weist ab, sobald der Eimer voll ist — und rechnet dann gar nicht erst', async () => {
+    hitCount = BRAND_KIT_DAILY_LIMIT
+    const error = await expectThrown(() => zipRoute(event))
+    expect(error.status).toBe(429)
+    expect(error.data?.code).toBe('brand_kit_limit')
+    expect(eventRows).toEqual([])
+  })
+
+  it('liegt ohne Preset kleiner da — und die README sagt, was fehlt', async () => {
+    for (const row of stepRows) row.state = 'open'
+    const back = unzipSync(new Uint8Array(await zipRoute(event)))
+    expect(Object.keys(back).sort()).toEqual(['README.md', 'brand.json', 'brand.md'])
+    const readme = strFromU8(back['README.md']!)
+    expect(readme).toContain('## Was fehlt')
+    expect(readme).toContain('`marks/` — kommt mit Brand Design')
+    expect(readme).toContain('`tokens.json` — kommt mit Brand Design')
+  })
+
+  it('steht hinter denselben drei Türen: fremd ⇒ 404, gesperrt ⇒ 403', async () => {
+    profileRow.ownerId = 'u2'
+    expect((await expectThrown(() => zipRoute(event))).status).toBe(404)
+    profileRow.ownerId = 'u1'
+    profileRow.derivationUnlockedAt = ''
+    profileRow.derivationUnlockedVia = ''
+    const error = await expectThrown(() => zipRoute(event))
+    expect(error.status).toBe(403)
+    expect(error.data?.code).toBe('derivation_locked')
+    expect(hits).toEqual([])
+  })
+
+  it('antwortet mit einem kleinen Deckel 413 `kit_too_large` (§2.6)', async () => {
+    /*
+     * DER DECKEL IST EIN IMPORT, KEIN SCHALTER: der Test tauscht ihn für DIESEN
+     * einen Lauf gegen 64 Bytes aus. Damit ist der 413-Zweig bewiesen, ohne
+     * dass es irgendwo eine Env-Variable oder einen Prod-Knopf gibt, den
+     * jemand versehentlich umlegen könnte.
+     */
+    vi.resetModules()
+    vi.doMock('../shared/brandKitLimits', async () => ({
+      ...(await vi.importActual<typeof import('../shared/brandKitLimits')>('../shared/brandKitLimits')),
+      BRAND_KIT_ZIP_MAX_BYTES: 64,
+    }))
+    try {
+      const capped = (await import('../server/api/brand/profiles/[id]/kit.zip.get'))
+        .default as unknown as (event: H3Event) => Promise<Buffer>
+      const error = await expectThrown(() => capped(event))
+      expect(error.status).toBe(413)
+      expect(error.data?.code).toBe('kit_too_large')
+      // Der Eimer wurde VORHER gebucht — der Deckel steht hinter der Drossel.
+      expect(hits).toHaveLength(BRAND_KIT_ZIP_WEIGHT)
+      expect(eventRows).toEqual([])
+    }
+    finally {
+      vi.doUnmock('../shared/brandKitLimits')
+      vi.resetModules()
+    }
   })
 })

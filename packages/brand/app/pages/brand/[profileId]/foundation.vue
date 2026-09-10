@@ -414,39 +414,141 @@ interface FdExportItem {
   sub?: string
   locked?: boolean
   disabled?: boolean
+  /** Ein echtes Ziel — Download-Route oder Seite. Downloads sind Navigation. */
+  to?: string
+  target?: '_blank'
+  external?: boolean
+  download?: boolean
+  children?: FdExportItem[]
   onSelect?: () => void
 }
 
+/**
+ * DIE ADRESSE DER KIT-DATEIEN DIESER MARKE (K6).
+ *
+ * Sie steht hier als eine Zeile und nicht in drei Einträgen: der Präfix ist
+ * derselbe wie auf der Lieferseite, und getippte Adressen sind die Sorte
+ * Doppelung, die beim ersten Umzug auseinanderfällt.
+ */
+const kitBase = computed(() => `/api/brand/profiles/${encodeURIComponent(profileId.value)}/kit`)
+const kitPageTo = computed(() => localePath(`/brand/${profileId.value}/kit`))
+
+/**
+ * IST DIE ABLEITUNG FREIGESCHALTET? — gefragt wird die JOURNEY (`store.kitOpen`),
+ * nicht `profile.derivationUnlockedAt`.
+ *
+ * Dieselbe Regel wie bei `designTo` oben: die Freischaltung ist nur die eine
+ * Hälfte der Bedingung, die ganze Rechnung steht in der puren Regel, und hier
+ * steht nur ihr Ergebnis. So sagt das Menü dasselbe wie die Leiste daneben.
+ */
+const kitOpen = computed(() => store.kitOpen)
+
+/**
+ * DAS EXPORT-MENÜ ZEIGT ALLE AUSGABEFORMEN DER SUITE — frei und gesperrt
+ * nebeneinander, dieselbe Ehrlichkeit wie die visuelle Schranke. Ein Menü, das
+ * nur „Drucken" kennt, verschweigt, was es noch gibt; ein Menü ohne Schloss
+ * verspricht, was es nicht liefert.
+ *
+ * SEIT K6 SIND DIE DREI EINTRÄGE ECHT — sobald die Ableitung freigeschaltet
+ * ist. Brand Context und Design-Tokens klappen zu ihren zwei Dateien auf
+ * (`brand.md`/`brand.json`, `tokens.json`/`tokens.css`), Assets führt zum
+ * Bündel und zur Lieferseite. Jeder Datei-Eintrag ist eine NAVIGATION auf die
+ * Route, kein `$fetch`: nur so sieht der Browser den `Content-Disposition`-Kopf
+ * und legt die Datei unter ihrem richtigen Namen ab.
+ *
+ * OHNE FREISCHALTUNG bleiben sie gesperrt wie zuvor — aber nicht mehr tot: das
+ * Etikett führt auf die Lieferseite, und die zeigt die Schranke mit dem
+ * Erstgespräch (§2.7). Ein Schloss, hinter dem gar nichts ist, erklärt nichts.
+ *
+ * OHNE PRESET sind die Token-Einträge `disabled` mit dem Grund daneben — die
+ * Route antwortete darauf mit 409, und ein Download, der als Fehlerseite
+ * endet, ist schlechter als ein Eintrag, der vorher sagt, was fehlt.
+ */
 const exportItems = computed<FdExportItem[][]>(() => {
   const kit = t('brand.foundation.export.kit')
+  const needsDesign = t('brand.foundation.export.needsDesign')
+  const hasDesign = Boolean(view.value?.designStand)
+
+  const printGroup: FdExportItem[] = [{
+    label: t('brand.foundation.export.print'),
+    icon: 'i-ph-printer',
+    sub: t('brand.foundation.export.printSub'),
+    onSelect: print,
+  }]
+
+  if (!kitOpen.value) {
+    return [
+      printGroup,
+      [
+        {
+          label: t('brand.foundation.export.context'),
+          icon: 'i-ph-brackets-curly',
+          sub: `${t('brand.foundation.export.contextSub')} · ${kit}`,
+          locked: true,
+          disabled: true,
+        },
+        {
+          label: t('brand.foundation.export.tokens'),
+          icon: 'i-ph-palette',
+          sub: `${t('brand.foundation.export.tokensSub')} · ${kit}`,
+          locked: true,
+          disabled: true,
+        },
+        {
+          label: t('brand.foundation.export.assets'),
+          icon: 'i-ph-file-zip',
+          sub: `${t('brand.foundation.export.assetsSub')} · ${kit}`,
+          locked: true,
+          disabled: true,
+        },
+        // Das Etikett wird ein Link zur Schranke (§2.7).
+        {
+          label: t('brand.foundation.export.gate'),
+          icon: 'i-ph-arrow-right',
+          sub: kit,
+          to: kitPageTo.value,
+        },
+      ],
+    ]
+  }
+
+  const file = (name: string): FdExportItem => ({
+    label: name,
+    to: `${kitBase.value}/${name}`,
+    external: true,
+    download: true,
+  })
+
   return [
-    [{
-      label: t('brand.foundation.export.print'),
-      icon: 'i-ph-printer',
-      sub: t('brand.foundation.export.printSub'),
-      onSelect: print,
-    }],
+    printGroup,
     [
       {
         label: t('brand.foundation.export.context'),
         icon: 'i-ph-brackets-curly',
-        sub: `${t('brand.foundation.export.contextSub')} · ${kit}`,
-        locked: true,
-        disabled: true,
+        sub: t('brand.foundation.export.contextSub'),
+        children: [file('brand.md'), file('brand.json')],
       },
       {
         label: t('brand.foundation.export.tokens'),
         icon: 'i-ph-palette',
-        sub: `${t('brand.foundation.export.tokensSub')} · ${kit}`,
-        locked: true,
-        disabled: true,
+        sub: hasDesign ? t('brand.foundation.export.tokensSub') : needsDesign,
+        ...(hasDesign
+          ? { children: [file('tokens.json'), file('tokens.css')] }
+          : { locked: true, disabled: true }),
       },
       {
         label: t('brand.foundation.export.assets'),
         icon: 'i-ph-file-zip',
-        sub: `${t('brand.foundation.export.assetsSub')} · ${kit}`,
-        locked: true,
-        disabled: true,
+        sub: t('brand.foundation.export.assetsSub'),
+        children: [
+          {
+            label: t('brand.foundation.export.bundle'),
+            to: `${kitBase.value}.zip`,
+            external: true,
+            download: true,
+          },
+          { label: t('brand.foundation.export.openKit'), to: kitPageTo.value },
+        ],
       },
     ],
   ]

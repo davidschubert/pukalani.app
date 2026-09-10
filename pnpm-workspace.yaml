@@ -109,6 +109,10 @@ catalog:
   # ^4.5.1, unhead ^3.2.3, vue-router ^5.2.0, h3 ^1.15.11 — dieselbe Linie.
   '@nuxtjs/i18n': ^10.6.0
   eslint: ^10.8.0
+  # In-Memory-Zip für das Brand-Kit-Bündel (BK1 K6, Konzept §2.17). Pur, ohne
+  # Abhängigkeiten, läuft in Node und im Browser — gebraucht wird nur
+  # `zipSync`/`strToU8` in `packages/brand/shared/brandKitZip.ts` (Server).
+  fflate: ^0.8.3
   # Web-SDK auf 27 (AW2 Stufe 4): setzt Response-Format 2.0.0 voraus, also
   # Appwrite-Server 2.0 — dev läuft dort, prod zieht nach. Aufgefangene
   # Brüche: `presences.list/get/upsert/update` sind nicht mehr generisch

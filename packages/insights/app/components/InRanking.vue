@@ -64,9 +64,17 @@ const { t } = useI18n()
         </div>
 
         <div v-else class="min-w-0">
-          <NuxtLink :to="resolveBrandHref(entry.brandId)" class="truncate font-medium hover:underline">
+          <!-- Ein Platz OHNE Adresse bleibt ein Name (BI1 I3): die Marke steht
+               nicht öffentlich, oder das Markenprofil ist noch gesperrt. Ein
+               `NuxtLink` auf '' zeigte auf die aktuelle Seite — ein Link, der
+               nirgendwohin führt, ist schlimmer als gar keiner. -->
+          <NuxtLink
+            v-if="resolveBrandHref(entry.brandId)"
+            :to="resolveBrandHref(entry.brandId)" class="truncate font-medium hover:underline"
+          >
             {{ resolveBrandName(entry.brandId) }}
           </NuxtLink>
+          <p v-else class="truncate font-medium">{{ resolveBrandName(entry.brandId) }}</p>
           <p class="mt-0.5 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
             {{ locale === 'de' ? entry.reasonDe : entry.reasonEn }}
           </p>
@@ -83,6 +91,16 @@ const { t } = useI18n()
       <p class="text-sm" style="color: var(--bw-ink-soft)">{{ t('insights.ranking.ctaTitle') }}</p>
       <slot name="cta">
         <UButton :label="t('insights.ranking.ctaLabel')" icon="i-ph-gauge" class="rounded-full" />
+      </slot>
+    </div>
+
+    <!-- Der Korrekturweg (§9.5, §11.2 Frage 5) — dieselbe Karte wie im
+         Markenprofil und im Duell. Ein Ranking ordnet zehn fremde Marken; der
+         Entfernen-Wunsch aus Entscheidung 11 beginnt genau hier. -->
+    <div class="bw-card mt-4 flex flex-wrap items-center justify-between gap-4 p-8">
+      <p class="max-w-xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('insights.profile.correctionNote') }}</p>
+      <slot name="correction">
+        <UButton :label="t('insights.profile.correction')" color="neutral" variant="ghost" class="rounded-full" style="background: var(--bw-surface)" />
       </slot>
     </div>
   </div>

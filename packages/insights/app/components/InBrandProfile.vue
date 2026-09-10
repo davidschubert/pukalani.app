@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { InsightsBrand, InsightsBrandScore } from '../../shared/insightsPost'
+import type { InsightsBrandScore } from '../../shared/insightsPost'
+import type { InsightsBrandProfileView } from '../../shared/insightsPublic'
 import { insightsHost } from '../utils/insightsFormat'
 
 /**
@@ -31,7 +32,13 @@ import { insightsHost } from '../utils/insightsFormat'
  * ist. Ein 404 sähe aus wie ein Fehler und lüde zum Nachfragen ein.
  */
 defineProps<{
-  brand: InsightsBrand
+  /**
+   * Das ÖFFENTLICHE Markenprofil (BI1 I3): ohne `claimedBy`, `checkId` und
+   * `publicationId` — drei Fremdschlüssel und ein Stempel über einen Vorgang
+   * zwischen uns und einem Dritten. Die Zeilen-Id fehlt bewusst ebenfalls; sie
+   * gehört der Seite (Korrekturziel), nicht der Darstellung.
+   */
+  brand: InsightsBrandProfileView
   score?: InsightsBrandScore | null
   locale: string
   /** Die Farbwelt-Kachel; aufgelöst von der Seite (brand-Layer). */

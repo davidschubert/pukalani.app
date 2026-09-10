@@ -7,6 +7,38 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-10 — Brand Insights (BI1) Kanalliste: Ogilvy und Harry Dry ersetzt statt gestrichen
+
+**Anlass:** der Alters-Deckel aus der I4-Schärfung hat sichtbar gemacht, was vorher nur alt
+aussah — im Prod-Lauf vom 2026-09-10 lieferten **Ogilvy** (letzter Upload 2024-12-02, 646 Tage)
+und **Marketing Examples / Harry Dry** (2024-07-20, 781 Tage) **null Zeilen** bei je einer
+Einheit Kosten pro Lauf. Beide waren zugleich der EINZIGE Kanal ihres Clusters
+(`brand-psychology` bzw. `brand-language`).
+
+**Entscheidungen (David, 2026-09-10):** (1) **Ogilvy → Nudgestock**
+(UCBOzmOV9UHpTEYNr6NqOZ2g) — Ogilvys eigenes Behavioural-Science-Festival, also dieselbe Nische
+und dasselbe Haus. Bewusst **dünn und stoßweise**: rund 3 Uploads je 180 Tage, davon zeitweise
+Ankündigungen; die Vorträge kommen im Schwung nach dem Festival im Juni. Ein Kanal, der
+halbjährlich etwas Gutes lädt, gehört in die Liste (dieselbe Begründung wie beim verworfenen
+Kanal-Deckel oben). (2) **Marketing Examples / Harry Dry → StoryBrand With Donald Miller**
+(UC_RirP9QR49zw2HOZ95dKrA) — Messaging, Elevator Pitch, Tonalität sind der Kern von
+`brand-language`; täglich aktiv. Dazwischen Shorts und Workshop-Werbung, die der Alters-Deckel
+nicht filtert, die Relevanz-Schlagwörter aber schon.
+
+**Verworfen:** beide ersatzlos zu streichen (die saubere Variante — sie hätte zwei von sieben
+Clustern ohne eigenen Kanal gelassen, `rebranding` ist bereits einer; David wollte die Cluster
+besetzt) · **Ogilvy Consulting** (UCSOuQD9x_ia3zfuFguWU9Zw, letzter Upload 825 Tage) und
+**Copyblogger** (UCK1xA5o_4Cliy4Q4ltTq8dw, 923 Tage) — beide ebenso tot wie die Kanäle, die sie
+ersetzen sollten · **Marketing Week** (6637 Tage).
+
+**Prüfweg ohne API-Schlüssel** (der Schlüssel liegt nur in der Prod-.env): Handle → `externalId`
+aus dem Kanal-HTML, dann `https://www.youtube.com/feeds/videos.xml?channel_id=UC…` für Titel UND
+jüngsten Upload. Damit ist die Lehre aus dem Pentagram-Befund maschinell prüfbar geworden — und
+sie hat sofort gegriffen: **`@BusinessMadeSimple` löst auf einen Kanal namens „Cameron Belling"
+auf**, war also derselbe Fehler ein zweites Mal und ist gar nicht erst in die Liste gekommen.
+
+---
+
 ## 2026-09-10 — Brand Insights (BI1) I4 Themenradar: vier Beschlüsse aus dem Bau und dem ersten Prod-Lauf
 
 **Entscheidungen:** (1) **Aufbewahrung = täglich neu + 30-Tage-Netz** (Plan §9.6 liess beides

@@ -1,9 +1,10 @@
 # Brand Book & Kit (Produkt 03) — Strategie
 
-Status: **Phase 5 — K0–K5 GEBAUT (K0–K4 auf main dae02441, K5 2026-09-09;
-Stand je Paket mit Gelernt in §2.18). K6–K8 folgen je in einer EIGENEN
-Session (WORKFLOW „Sitzungsführung je Phase"); offene Gates: Davids Blick
-auf `brand.md` (K3) und die Leseansicht (K4); Inhalts-Gate K5 FREIGEGEBEN
+Status: **Phase 5 — K0–K6 GEBAUT (K0–K4 auf main dae02441, K5 2026-09-09,
+K6 2026-09-09 auf main 2a4f6a26; Stand je Paket mit Gelernt in §2.18). K7 und
+K8 folgen je in einer EIGENEN Session (WORKFLOW „Sitzungsführung je Phase");
+offene Gates: Davids Blick auf `brand.md` (K3), die Leseansicht (K4) und die
+Lieferseite (K6, Screenshot liegt vor); Inhalts-Gate K5 FREIGEGEBEN
 2026-09-09.** Prototyp freigegeben
 2026-09-09 („Prototyp freigegeben, K0 starten"), Pakete nach §2.18
 VERBINDLICH.
@@ -876,7 +877,15 @@ Route `GET …/kit/workshop` (`private, no-store`, Datentür von K1: fremd 404,
 ohne Freischaltung 403). Schreiber UND K4-Leser gehen durch dieselben Helfer
 in `shared/brandKitSlots.ts`; die Muster-Tabelle im Book trägt jetzt eine
 vierte Spalte „Herkunft". Beweis: 3117 Tests (+51), Lint, Typecheck 0,
-`check:i18n-keys`, `check:bilanz`, `check:manifests`. NICHT bewiesen:
+`check:i18n-keys`, `check:bilanz`, `check:manifests`. **LIVE seit 2026-09-10**
+(Build `b976197d`, ein späterer Commit mit K5 als Vorfahr — der eigene SHA
+`d215b420` erschien nie am Health-Endpunkt, weil Nachbarsitzungen weiter
+pushten und der Deploy den jüngeren Stand baute): die neue Route antwortet
+ohne Login 404 mit dem DATENTÜR-Envelope (`{"ok":false,"code":"NOT_FOUND",
+"message":"Not Found"}`, wortgleich mit der bekannten K2-Route
+`kit/tokens.json`), während eine wirklich unbekannte Route Nitros eigenes
+404 mit Pfad im Text liefert — die Route ist also ausgeliefert und die
+Datentür greift. NICHT bewiesen:
 Otto/Nika gegen ein echtes Modell, die drei neuen Zusagen 31–33 in
 `verify-brand-sessions.mjs` (geschrieben, nie gefahren — braucht Davids Ja zu
 einem Lauf gegen Prod mit Aufräumen), Klick-Beweis in der Werkstatt.
@@ -894,9 +903,57 @@ regeln; die stehen jetzt drin und sind Teil des Inhalts-Gates. (4)
 passt nicht hinein, Mehrfachwahl braucht ihre eigene Klemmung. (5) Statische
 Route schlägt Parameter-Route (`kit/workshop` neben `kit/[file]`) — im Repo
 an sieben Stellen im Betrieb belegt (`check/ranking` neben `check/[id]`),
-kein Messlauf nötig. Offen: der Live-Persona-Audit (Kailua + zwei
+kein Messlauf nötig; auf Prod bleibt die Vorrangfrage
+mangels Login unentschieden, weil beide Routen ohne Konto dasselbe 404
+zeigen. Offen: der Live-Persona-Audit (Kailua + zwei
 Testmarken) aus der Beweis-Spalte ist NICHT Teil von K5 geworden — er gehört
 zu K8 (Audit + Live), wenn die Lieferseite steht.
+
+**Stand K6 (GEBAUT 2026-09-09, main 2a4f6a26; Davids Blick auf die Seite
+offen — der Screenshot liegt ihm vor):** die Lieferung steht.
+`renderBrandMarkFiles` macht aus den acht Setzungen des Presets acht Dateien
+`marks/<slug>-<setting>-<variant>.svg` (Markenname XML-escaped, Dateiname nur
+`[a-z0-9-]`) — KEINE zweite Ableitung, die SVG-Quelltexte stehen fertig im
+Preset. `buildBrandKitZip` packt in-memory über `fflate` (Level 6,
+Zeitstempel = Stand, also zwei Läufe byte-gleich), Deckel 5 MB als pure Regel
+`decideBrandKitZipSize` ⇒ 413 `kit_too_large`. Die zwei neuen Routen (`kit.zip`,
+`kit/marks/:name`) stehen hinter denselben vier Türen wie die Datei-Route
+(404 → 403 `derivation_locked` → 429 `brand_kit_limit` → 409), das Bündel
+zählt fünffach. `brandKitStand` ist das jüngste `$updatedAt` ALLER Kapitel —
+damit trägt das Kit auch ohne Preset ein Datum (der K3-Rest ist erledigt). Das
+Manifest trägt jetzt `marks`, `bundle`, `chapters`, Foundation- und
+Design-Stand und die Inhaltssprache. Die Seite `/brand/:id/kit` folgt der
+freigegebenen Prototyp-Optik; ohne Preset zeigen Tokens, Zeichen und Lizenzen
+die ruhige Sperr-Fläche `BwKitLocked` mit Erstgespräch, ohne Preis. Rail-
+Ergebnispunkt „Kit" und die Export-Karte der Leseansicht sind echt (Klick-
+Beweis: das Assets-Untermenü führt auf `…/kit.zip` und auf die Lieferseite).
+Beweis: 3181 Tests (+37), Lint, Typecheck 0, `check:i18n-keys`,
+`check:single-copy`, `check:manifests`, `check:bilanz`, **`verify:kit` 58/58**
+(Abschnitt 9 „Die Lieferung" ist neu und prüft Manifest, sechs Dateien mit
+`private, no-store`, acht Zeichen, ein gültiges Zip mit README und `marks/`,
+409 ohne Preset, 404 fremd, 403 gesperrt, 429 nach zwölf Bündeln und die
+SSR-Seite mit und ohne Anmeldung).
+**Gelernt:** (1) ES GIBT JETZT DOCH EINE LOKALE DEV-INSTANZ für `branding` —
+die K1-Lehre „nur Prod" galt, weil das Projekt lokal fehlte, nicht weil es
+nicht ginge: der Console-Signup der OrbStack-Appwrite ist offen
+(`_APP_CONSOLE_WHITELIST_*` leer), also Konto → Team → Projekt `branding` →
+Projekt-Key → `POST /v1/tablesdb` für `main` → `pnpm migrate --app branding`,
+und `verify:kit` läuft ohne ein einziges Prod-Konto. (2) DER GRUND MUSS DER
+CODE SEIN: der zentrale Handler hebt aus `error.data` genau `code` ins
+Envelope — das seit K2 danebenstehende `reason: 'design_missing'` kam beim
+Client NIE an (dieselbe tote Hälfte wie `last_admin` vor dem 2026-07-29). Die
+Gründe heissen jetzt selbst `kit_file_design_missing` /
+`kit_file_not_built_yet`; ein Unit-Test nagelt fest, dass daneben nichts
+steht. Gefunden hat es der Verify-Lauf, nicht der Unit-Test — der prüfte
+`error.data.code` und sah die Envelope-Grenze naturgemäss nicht. (3) DER
+STAND IM KOPF UND DER STAND IM DATEINAMEN SIND DERSELBE TAG: der Stempel
+schneidet den Kalendertag in UTC, die Anzeige formatierte den Zeitpunkt in der
+Zone des Lesers — abends stand „9. September" über einem Bündel namens
+`…-2026-09-10.zip`. Jetzt liest die Anzeige den Stempel. (4) Zeichen mit
+verschiedenen Seitenverhältnissen (Wortmarke 400×120, Monogramm 160×120)
+brauchen eine feste Bühne, in die sie HINEINPASSEN — auf volle Breite gezogen
+stand jede Beschriftung auf einer anderen Linie und das Raster sah aus wie ein
+Fehler.
 
 ### 2.19 Offene Entscheidungen für die Freigabe
 

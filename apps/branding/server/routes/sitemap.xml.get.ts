@@ -1,6 +1,8 @@
 import type { H3Event } from 'h3'
 import {
   BRANDING_DISCOVER_PRIORITY,
+  BRANDING_INSIGHTS_ENTRY_PRIORITY,
+  BRANDING_RANKINGS_PRIORITY,
   BRANDING_ROUTES,
   type BrandingSitemapEntry,
   brandingBaseUrl,
@@ -25,6 +27,18 @@ import {
  * Zeile (`updatedAt`, sonst `publishedAt`). Die festen Seiten tragen keins:
  * ein erfundenes ist schlechter als keins.
  *
+ * ── UND SEIT BI1 I3 DIE INSIGHTS-ADRESSEN ────────────────────────────────
+ * Journal-Beiträge, Themencluster, Markenprofile und die Ranking-Übersicht.
+ * WELCHE es gibt, weiss nur der insights-Layer (Riegel `publicFormats`,
+ * Zustände, redigierte Fassungen, Adress-Regel je Format) — er liefert die
+ * Liste über `listInsightsSitemapEntries()`. Eine eigene Rechnung hier wäre
+ * eine zweite Antwort auf „ist das öffentlich?", und die erste (die Route)
+ * würde 404 sagen, während die zweite den Crawler einlädt.
+ *
+ * `locales` je Eintrag ist die zweite Hälfte von §9.5: ein Beitrag ohne
+ * redigierte Übersetzung meldet nur seine Grundsprache — im Seitenkopf UND
+ * hier.
+ *
  * ── FAIL-SOFT: DIE FESTEN SEITEN KOMMEN IMMER ────────────────────────────
  * Fällt der Read aus (Instanz weg, Tabelle fehlt vor brand-020), bleibt die
  * Sitemap bei den festen Routen. Eine kürzere Sitemap ist besser als ein 500
@@ -38,6 +52,7 @@ export default defineEventHandler(async (event) => {
   const entries: BrandingSitemapEntry[] = [
     ...BRANDING_ROUTES,
     ...(await discoverEntries(event)),
+    ...(await insightsEntries(event)),
   ]
 
   setHeader(event, 'content-type', 'application/xml; charset=utf-8')
@@ -71,6 +86,35 @@ async function discoverEntries(event: H3Event): Promise<BrandingSitemapEntry[]> 
   }
   catch (error) {
     logEvent('warn', 'branding.sitemap_discover_unavailable', {
+      message: error instanceof Error ? error.message : 'unknown',
+    })
+    return []
+  }
+}
+
+/**
+ * Die Insights-Adressen als Sitemap-Einträge (BI1 I3).
+ *
+ * Die PRIORITÄT vergibt die App, nicht der Layer: sie ist eine Aussage über
+ * das VERHÄLTNIS der Seiten DIESER Site zueinander, und die kennt nur, wer
+ * alle kennt. Der Layer liefert Pfad, Datum und Sprachen.
+ *
+ * FAIL-SOFT wie bei den Anatomien: fällt der Read aus (Instanz weg, Tabellen
+ * fehlen vor insights-001), bleibt die Sitemap bei allem anderen. Eine kürzere
+ * Sitemap ist besser als ein 500 auf einer Crawler-Adresse — gemeldet wird es
+ * trotzdem, sonst verschwindet der halbe Bereich still aus dem Index.
+ */
+async function insightsEntries(event: H3Event): Promise<BrandingSitemapEntry[]> {
+  try {
+    return (await listInsightsSitemapEntries(event)).map(entry => ({
+      path: entry.path,
+      priority: entry.path === '/rankings' ? BRANDING_RANKINGS_PRIORITY : BRANDING_INSIGHTS_ENTRY_PRIORITY,
+      lastmod: entry.lastmod,
+      locales: entry.locales,
+    }))
+  }
+  catch (error) {
+    logEvent('warn', 'branding.sitemap_insights_unavailable', {
       message: error instanceof Error ? error.message : 'unknown',
     })
     return []

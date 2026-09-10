@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
   INSIGHTS_CORRECTION_PII_RETENTION_DAYS,
+  createInsightsCorrectionSubmitSchema,
+  decideInsightsCorrectionQuota,
+  insightsCorrectionDayKey,
   insightsCorrectionDecisionAllowed,
+  insightsCorrectionHourKey,
   insightsCorrectionRetentionAt,
   insightsCorrectionSchema,
   insightsCorrectionSweepDue,
@@ -156,5 +160,80 @@ describe('insightsCorrectionDecisionAllowed', () => {
     // ist der ältere und der härtere Grund — sonst hörte der Betreiber
     // „bitte begründen" für eine Zeile, die er ohnehin nicht mehr ändern darf.
     expect(insightsCorrectionDecisionAllowed('declined', 'declined', '')).toEqual({ ok: false, code: 'already_decided' })
+  })
+})
+
+// ── Der öffentliche Weg (BI1 I3, §9.5) ─────────────────────────────────────
+
+describe('createInsightsCorrectionSubmitSchema', () => {
+  const base = {
+    targetKind: 'brand' as const,
+    targetId: 'row-123_ab-CD',
+    kind: 'correction' as const,
+    field: 'foundedYear',
+    proposed: '1987',
+    reason: '',
+    contactEmail: '',
+  }
+
+  it('nimmt einen gewöhnlichen Vorschlag an', () => {
+    const parsed = createInsightsCorrectionSubmitSchema().safeParse(base)
+    expect(parsed.success).toBe(true)
+  })
+
+  it('erlaubt den Honigtopf — er reist IMMER mit (.strict())', () => {
+    expect(createInsightsCorrectionSubmitSchema().safeParse({ ...base, hp: '' }).success).toBe(true)
+    expect(createInsightsCorrectionSubmitSchema().safeParse({ ...base, hp: 'bot' }).success).toBe(true)
+  })
+
+  it('lehnt einen UNBEKANNTEN Schlüssel ab (.strict())', () => {
+    const parsed = createInsightsCorrectionSubmitSchema().safeParse({ ...base, status: 'accepted' })
+    expect(parsed.success).toBe(false)
+  })
+
+  it('ein Entfernungs-Wunsch OHNE Begründung geht nicht', () => {
+    const parsed = createInsightsCorrectionSubmitSchema().safeParse({ ...base, kind: 'removal', reason: '' })
+    expect(parsed.success).toBe(false)
+    // GEGENPROBE: mit Begründung geht er.
+    const ok = createInsightsCorrectionSubmitSchema().safeParse({
+      ...base,
+      kind: 'removal',
+      reason: 'Wir möchten nicht genannt werden.',
+    })
+    expect(ok.success).toBe(true)
+  })
+
+  it('prüft die Form der Ziel-Id', () => {
+    expect(createInsightsCorrectionSubmitSchema().safeParse({ ...base, targetId: 'mit leer' }).success).toBe(false)
+    expect(createInsightsCorrectionSubmitSchema().safeParse({ ...base, targetId: '' }).success).toBe(false)
+    expect(createInsightsCorrectionSubmitSchema().safeParse({ ...base, targetId: 'a'.repeat(65) }).success).toBe(false)
+  })
+
+  it('schreibt eine angegebene Adresse KLEIN, leer bleibt gültig', () => {
+    const parsed = createInsightsCorrectionSubmitSchema().safeParse({ ...base, contactEmail: 'Max@Example.COM' })
+    expect(parsed.success && parsed.data.contactEmail).toBe('max@example.com')
+    expect(createInsightsCorrectionSubmitSchema().safeParse({ ...base, contactEmail: '' }).success).toBe(true)
+    expect(createInsightsCorrectionSubmitSchema().safeParse({ ...base, contactEmail: 'keine-adresse' }).success).toBe(false)
+  })
+})
+
+describe('decideInsightsCorrectionQuota', () => {
+  it('der DRITTE Vorschlag einer Stunde geht durch, der vierte nicht', () => {
+    expect(decideInsightsCorrectionQuota(3, 3)).toBeNull()
+    expect(decideInsightsCorrectionQuota(4, 4)).toBe('rate_limited_hour')
+  })
+
+  it('der ZEHNTE am Tag geht durch, der elfte nicht', () => {
+    expect(decideInsightsCorrectionQuota(1, 10)).toBeNull()
+    expect(decideInsightsCorrectionQuota(1, 11)).toBe('rate_limited_day')
+  })
+
+  it('bei Gleichstand gewinnt die STUNDE — sie ist der engere Deckel', () => {
+    expect(decideInsightsCorrectionQuota(4, 11)).toBe('rate_limited_hour')
+  })
+
+  it('die Eimer haben EIGENE Namensräume — nie die des brand-Layers', () => {
+    expect(insightsCorrectionHourKey('abc')).toBe('insights:correction:h:abc')
+    expect(insightsCorrectionDayKey('abc')).toBe('insights:correction:d:abc')
   })
 })

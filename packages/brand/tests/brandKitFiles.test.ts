@@ -6,6 +6,7 @@ import {
   brandKitContentDisposition,
   brandKitDownloadName,
   brandKitFile,
+  brandKitFileErrorCode,
   brandKitReadableName,
   brandKitSlug,
   brandKitStandStamp,
@@ -204,5 +205,21 @@ describe('LICENSES.md', () => {
     expect(empty).toContain('Dateien bei der Quelle laden')
     expect(empty).not.toContain('| Familie |')
     expect(brandLicenseRows(null, 'de')).toEqual([])
+  })
+})
+
+describe('brandKitFileErrorCode — der Grund reist als Code', () => {
+  it('nennt beide Gründe mit eigenem Schlüssel', () => {
+    expect(brandKitFileErrorCode('design_missing')).toBe('kit_file_design_missing')
+    expect(brandKitFileErrorCode('not_built_yet')).toBe('kit_file_not_built_yet')
+  })
+
+  it('bleibt ein Schlüssel, den der zentrale Handler durchlässt', () => {
+    // core/server/error.ts lässt nur `^[a-z][a-z0-9_]{0,63}$` durch — ein
+    // Grund, der daran scheitert, käme beim Client als „irgendwas ging
+    // schief" an (dieselbe tote Hälfte wie `last_admin` vor dem 2026-07-29).
+    for (const reason of ['design_missing', 'not_built_yet'] as const) {
+      expect(brandKitFileErrorCode(reason)).toMatch(/^[a-z][a-z0-9_]{0,63}$/)
+    }
   })
 })

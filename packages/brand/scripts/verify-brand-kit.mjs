@@ -36,6 +36,21 @@
  *     403, und sie trägt BEIDE Spalten je Marke.
  *  8. DER MARKTVERGLEICH LIEST DIESELBE REGEL: gesperrt ohne beides, offen mit
  *     Feld (`grant: 'derivation'`), offen mit Beta (`grant: 'beta'`).
+ *  9. DIE LIEFERUNG (K6): das Manifest nennt Zeichen und Bündel; jede Datei
+ *     der Registry kommt mit `private, no-store` und `Content-Disposition`;
+ *     jedes Zeichen ist ein SVG; das Bündel ist ein LESBARES Zip mit README
+ *     und `marks/`; ohne Preset antworten Tokens und Zeichen 409
+ *     `kit_file_design_missing` und das Bündel enthält nur die drei Context-Dateien;
+ *     ein fremdes Konto bekommt überall 404, eine gesperrte Marke 403; das
+ *     Bündel zählt FÜNFFACH (nach zwölf Zips ist das dreizehnte 429); und die
+ *     Lieferseite rendert serverseitig mit Cookie und ist ohne Cookie 404.
+ *
+ * ── `--keep-kailua` ──────────────────────────────────────────────────────
+ * Legt am Ende zusätzlich ein Beta-Konto mit der Marke „Kailua Coffee Co."
+ * an — Foundation gesät, Design gesät und abgenommen, Ableitung frei — und
+ * räumt genau DIESE beiden nicht weg. Am Schluss stehen `BRAND_ID` und
+ * `COOKIE` in der Ausgabe, damit ein Mensch die Lieferseite im Browser
+ * ansehen kann. Nur lokal gedacht; ohne die Option bleibt nichts stehen.
  *
  * ── DIE GEGENPROBE IST EINGEBAUT ─────────────────────────────────────────
  * Jede „offen"-Zusage hat hier ihre „zu"-Hälfte an DERSELBEN Route, und beide
@@ -60,8 +75,10 @@
  *
  *   pnpm --filter branding exec nuxi dev --port 3016
  *   BRANDING_PORT=3016 pnpm --filter @pukalani/brand verify:kit
+ *   BRANDING_PORT=3016 pnpm --filter @pukalani/brand verify:kit -- --keep-kailua
  */
 import { request } from 'node:http'
+import { strFromU8, unzipSync } from 'fflate'
 import { Client, ID, Query, TablesDB, Users } from 'node-appwrite'
 
 const PORT = Number(process.env.BRANDING_PORT || 3016)
@@ -84,6 +101,9 @@ const users = new Users(client)
 let pass = 0
 let fail = 0
 const cleanup = { users: [], profiles: [], access: [], admission: null }
+
+/** Was `--keep-kailua` stehen lässt — am Ende gedruckt, sonst `null`. */
+let kept = null
 
 function check(label, ok, detail = '') {
   if (ok) {
@@ -133,6 +153,62 @@ function call(path, { method = 'GET', body, cookie } = {}) {
 const KIT_STEPS = ['nomenclature', 'aiguide', 'presskit']
 
 const stamp = Date.now()
+
+/** Behält Konto und Marke „Kailua Coffee Co." für den Blick im Browser. */
+const KEEP_KAILUA = process.argv.includes('--keep-kailua')
+
+/**
+ * DIE SECHS DESIGN-KAPITEL ALS SAAT — dieselben Werte wie in
+ * `verify-brand-design.mjs` (dort sind sie der Gegenstand, hier die
+ * VORBEDINGUNG).
+ *
+ * Getragen wird das Preset von sieben Werten: DNA, Basisfarbe, Akzent,
+ * Neutral-Tönung, Paar, Hierarchie und Tempo. `j.examples` steht bewusst NICHT
+ * dabei — die acht Setzungen werden aus Paar, Farbwelt und Markennamen
+ * GERECHNET (`markExamplesOf`), nie aus dem Slot gelesen. Genau das ist der
+ * Punkt dieses Abschnitts: die Zeichen im Bündel entstehen aus den
+ * Entscheidungen, nicht aus einer Ablage.
+ */
+const DESIGN_STEP_KEYS = ['dna', 'color', 'type', 'mark', 'imagery', 'motion']
+const BASE_HEX = '#4a3123'
+const ACCENT_HEX = '#22392f'
+
+const DNA_MIX = [
+  '## Visueller Stil\nRedaktionell · Eine Stufe ruhiger · Aus eurer Foundation',
+  '## Ästhetische Epoche\nZeitlos · Eine Stufe ruhiger · Aus eurer Foundation',
+  '## Formsprache\nWeich gerundet · Eine Stufe ruhiger · Aus eurer Foundation',
+  '## Typografie-Charakter\nBuchhafte Serif · Eine Stufe ruhiger · Aus eurer Foundation',
+  '## Farb-Charakter\nErdig gedämpft · Eine Stufe ruhiger · Aus eurer Foundation',
+  '## Bildwelt\nNah am Handwerk · Eine Stufe ruhiger · Aus eurer Foundation',
+  '## Komposition\nRuhig und luftig · Eine Stufe ruhiger · Aus eurer Foundation',
+  '## Materialität\nPapier, matt · Eine Stufe ruhiger · Aus eurer Foundation',
+  '## Bewegungs-Charakter\nRuhig · Eine Stufe ruhiger · Aus eurer Foundation',
+  '## Grundstimmung\nWarm einladend · Eine Stufe ruhiger · Aus eurer Foundation',
+].join('\n\n')
+
+const ROLES_PLACEHOLDER = ['Grund & Text', 'Wärme & Flächen', 'Helle Flächen', 'Akzent & Signal', 'Papier & Ruhe']
+  .map(label => `## ${label}\n${BASE_HEX} · Rampe 900 · Platzhalter`).join('\n\n')
+
+const TYPE_RULES = [
+  '## Überschrift-Gewicht\n600 · Gilt für Überschriften und die Wortmarke; der Fliesstext bleibt im Normalschnitt.',
+  '## Laufweite\n-0,5 px · Feinkorrektur der Überschrift. Der Fliesstext wird nie gesperrt.',
+  '## Versalien\nNein · Versalien sind eine Ausnahme, kein Stil — sie kosten Lesbarkeit.',
+  "## Mono-Rolle\n'Geist Mono', ui-monospace, SFMono-Regular, monospace · Fest: Herkunftsangaben, Preise, Zahlen und Code — sonst nirgends.",
+].join('\n\n')
+
+const DESIGN_VALUES = {
+  dna: { 'g.mix': DNA_MIX },
+  color: {
+    'h.base': BASE_HEX,
+    'h.neutral': 'warm',
+    'h.accent': ACCENT_HEX,
+    'h.roles': ROLES_PLACEHOLDER,
+  },
+  type: { 'i.pair': 'editorial', 'i.scale': 'calm', 'i.rules': TYPE_RULES },
+  mark: { 'j.kind': 'word', 'j.pick': 'wordmark' },
+  imagery: {},
+  motion: { 'l.tempo': 'calm' },
+}
 
 /**
  * EIN KONTO. `beta: true` legt die `brand_access`-Zeile an — DAS ist die
@@ -249,6 +325,41 @@ async function completeFoundation(profileId) {
 /** Die Journey-Zeile eines Kapitels aus der Detail-Antwort. */
 function journeyEntry(detail, stepKey) {
   return (detail.json?.journey ?? []).find(entry => entry.stepKey === stepKey) ?? null
+}
+
+/**
+ * SCHICHT 2 AUF FERTIG — freischalten, säen, abnehmen.
+ *
+ * Die Kapitel-Zeilen entstehen erst mit der Freischaltung (`design-unlock`);
+ * ohne sie gäbe es keine Zeile, in die gesät werden könnte. Danach wird der
+ * Zeilen-Zustand direkt auf `done` gesetzt: der WEG dorthin ist Gegenstand von
+ * `verify-brand-design.mjs`, hier ist er nur die Vorbedingung.
+ */
+async function seedDesign(profileId, operatorCookie) {
+  const unlocked = await call(`/api/brand/admin/profiles/${profileId}/design-unlock`, {
+    method: 'POST', cookie: operatorCookie,
+  })
+  if (unlocked.status !== 200) {
+    console.error(`✗ Schicht 2 liess sich für ${profileId} nicht freischalten (${unlocked.status}): `
+      + unlocked.text.slice(0, 200))
+    return false
+  }
+  for (const stepKey of DESIGN_STEP_KEYS) {
+    const values = DESIGN_VALUES[stepKey]
+    if (Object.keys(values).length > 0) await seedConfirmed(profileId, stepKey, values)
+    await tablesDB.updateRow({
+      databaseId, tableId: 'brand_steps', rowId: `${profileId}_${stepKey}`, data: { state: 'done' },
+    })
+  }
+  return true
+}
+
+/** Ableitung freischalten — die Betreiber-Handlung, ohne sie zu prüfen. */
+async function unlockDerivation(profileId, operatorCookie) {
+  const res = await call(`/api/brand/admin/profiles/${profileId}/derivation-unlock`, {
+    method: 'POST', cookie: operatorCookie,
+  })
+  return res.status === 200
 }
 
 async function eventTypes(profileId) {
@@ -516,6 +627,224 @@ try {
   check('… und dasselbe ohne Sprach-Präfix',
     oldPageEn.status === 301 && oldPageEn.headers.location === '/dashboard/brand-unlocks',
     `${oldPageEn.status} ${oldPageEn.headers.location}`)
+
+  // ══ 9 · DIE LIEFERUNG (K6) ═════════════════════════════════════════════
+  console.log('\n9 · Die Lieferung: Manifest, Dateien, Zeichen, Bündel')
+
+  /*
+   * DREI FRISCHE MARKEN, WEIL DREI ZUSTÄNDE GEPRÜFT WERDEN: eine mit
+   * abgenommenem Design (das volle Kit), eine ohne (die drei Context-Dateien)
+   * und eine nur für den Eimer — der zählt je MARKE, und ein geteilter Zähler
+   * machte aus dem Deckel-Beweis eine Frage der Reihenfolge.
+   */
+  const brandFull = await makeBrand(owner.cookie, 'Kailua Coffee Co.')
+  const brandPlain = await makeBrand(owner.cookie, 'Lani Kontor')
+  const brandBucket = await makeBrand(owner.cookie, 'Eimer Test')
+  for (const id of [brandFull, brandPlain, brandBucket]) await completeFoundation(id)
+  const seeded = await seedDesign(brandFull, operator.cookie)
+  const unlockedAll = (await Promise.all(
+    [brandFull, brandPlain, brandBucket].map(id => unlockDerivation(id, operator.cookie)),
+  )).every(Boolean)
+  check('drei Marken für die Lieferung: eine mit Design, zwei ohne — alle frei',
+    seeded && unlockedAll, `${brandFull} · ${brandPlain} · ${brandBucket}`)
+
+  const kitFull = `/api/brand/profiles/${brandFull}/kit`
+  const kitPlain = `/api/brand/profiles/${brandPlain}/kit`
+
+  const manifest = await call(kitFull, { cookie: owner.cookie })
+  check('das Manifest nennt Marke, Stand, sechs Dateien, acht Zeichen und das Bündel',
+    manifest.status === 200
+    && manifest.json?.designReady === true
+    && (manifest.json?.files ?? []).length === 6
+    && (manifest.json?.marks ?? []).length === 8
+    && manifest.json?.bundle?.filename === `kailua-coffee-co-brand-kit-${(manifest.json?.stand ?? '').slice(0, 10)}.zip`
+    && manifest.json?.bundle?.weight === 5
+    && manifest.json?.bundle?.missing === 0,
+    `${manifest.status} ${JSON.stringify({
+      ready: manifest.json?.designReady,
+      files: (manifest.json?.files ?? []).length,
+      marks: (manifest.json?.marks ?? []).length,
+      bundle: manifest.json?.bundle,
+    })}`)
+  check('… und es trägt die drei Kit-Kapitel mit ihrem Zustand',
+    (manifest.json?.chapters ?? []).length === 3
+    && (manifest.json?.chapters ?? []).every(entry => typeof entry.state === 'string'),
+    JSON.stringify(manifest.json?.chapters ?? null))
+  check('… der Stand ist der JÜNGSTE aller Kapitel, nicht nur der Design-Kapitel',
+    Boolean(manifest.json?.stand)
+    && manifest.json.stand >= (manifest.json.designStand ?? '')
+    && manifest.json.stand >= (manifest.json.foundationStand ?? ''),
+    JSON.stringify({
+      stand: manifest.json?.stand,
+      design: manifest.json?.designStand,
+      foundation: manifest.json?.foundationStand,
+    }))
+
+  const fileIds = ['tokens.json', 'tokens.css', 'licenses.md', 'brand.md', 'brand.json', 'readme.md']
+  const fileResults = []
+  for (const id of fileIds) {
+    const res = await call(`${kitFull}/${id}`, { cookie: owner.cookie })
+    fileResults.push({ id, res })
+  }
+  check('jede der sechs Dateien kommt mit 200, `private, no-store` und Dateinamen',
+    fileResults.every(entry => entry.res.status === 200
+      && entry.res.headers['cache-control'] === 'private, no-store'
+      && String(entry.res.headers['content-disposition'] ?? '').includes('filename*=UTF-8')),
+    JSON.stringify(fileResults.map(entry => [entry.id, entry.res.status,
+      entry.res.headers['cache-control']])))
+  check('… und jede trägt ihren eigenen Inhaltstyp',
+    fileResults.find(entry => entry.id === 'tokens.json').res.headers['content-type']
+      ?.startsWith('application/json')
+    && fileResults.find(entry => entry.id === 'tokens.css').res.headers['content-type']
+      ?.startsWith('text/css')
+    && fileResults.find(entry => entry.id === 'brand.md').res.headers['content-type']
+      ?.startsWith('text/markdown'),
+    JSON.stringify(fileResults.map(entry => [entry.id, entry.res.headers['content-type']])))
+
+  const markNames = (manifest.json?.marks ?? []).map(mark => mark.filename)
+  const markResults = []
+  for (const name of markNames) {
+    markResults.push(await call(`${kitFull}/marks/${name}`, { cookie: owner.cookie }))
+  }
+  check('alle acht Zeichen kommen als SVG — mit Titel und ohne Zwischenspeicher',
+    markResults.length === 8
+    && markResults.every(res => res.status === 200
+      && String(res.headers['content-type'] ?? '').startsWith('image/svg+xml')
+      && res.headers['cache-control'] === 'private, no-store'
+      && res.text.startsWith('<svg') && res.text.includes('<title>')),
+    JSON.stringify(markResults.map(res => [res.status, res.headers['content-type']])))
+  const foreignMark = await call(`${kitFull}/marks/gibt-es-nicht.svg`, { cookie: owner.cookie })
+  check('… ein erfundener Zeichen-Name ist 404, kein Pfad',
+    foreignMark.status === 404, String(foreignMark.status))
+
+  /** Das Bündel als Bytes — `call` liefert Text, deshalb hier ein eigener Weg. */
+  const fetchZip = (path, cookie) => new Promise((resolve, reject) => {
+    const req = request({
+      host: '::1', port: PORT, path, method: 'GET',
+      headers: { host: HOST, ...(cookie ? { cookie } : {}) },
+    }, (res) => {
+      const chunks = []
+      res.on('data', chunk => chunks.push(chunk))
+      res.on('end', () => resolve({
+        status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks),
+      }))
+    })
+    req.on('error', reject)
+    req.end()
+  })
+
+  const zip = await fetchZip(`${kitFull}.zip`, owner.cookie)
+  let zipNames = []
+  try {
+    zipNames = Object.keys(unzipSync(new Uint8Array(zip.body)))
+  }
+  catch { /* kein gültiges Zip — die Prüfung darunter wird rot */ }
+  check('das Bündel ist ein gültiges Zip mit allen Dateien und acht Zeichen',
+    zip.status === 200
+    && zip.headers['content-type'] === 'application/zip'
+    && zip.headers['cache-control'] === 'private, no-store'
+    && String(zip.headers['content-disposition'] ?? '').includes('brand-kit')
+    && zipNames.includes('README.md')
+    && zipNames.filter(name => name.startsWith('marks/')).length === 8
+    && zipNames.length === 14,
+    `${zip.status} ${zip.headers['content-type']} ${JSON.stringify(zipNames)}`)
+  check('… und die README im Bündel nennt den Ordner `marks/`',
+    (() => {
+      try {
+        return strFromU8(unzipSync(new Uint8Array(zip.body))['README.md']).includes('`marks/`')
+      }
+      catch { return false }
+    })(),
+    'README.md')
+
+  // ── Ohne Preset: dieselbe Marke, nur ohne Schicht 2 ────────────────────
+  const plainTokens = await call(`${kitPlain}/tokens.json`, { cookie: owner.cookie })
+  check('ohne Design antworten die Token-Dateien 409 `kit_file_design_missing`',
+    plainTokens.status === 409
+    && plainTokens.json?.reason === 'kit_file_design_missing',
+    `${plainTokens.status} ${plainTokens.text.slice(0, 160)}`)
+  const plainMark = await call(`${kitPlain}/marks/lani-kontor-wordmark-primary.svg`, { cookie: owner.cookie })
+  check('… und ein Zeichen ebenso — 409 mit Grund, nicht 404',
+    plainMark.status === 409 && plainMark.json?.reason === 'kit_file_design_missing',
+    `${plainMark.status} ${plainMark.text.slice(0, 160)}`)
+
+  const plainZip = await fetchZip(`${kitPlain}.zip`, owner.cookie)
+  let plainNames = []
+  try {
+    plainNames = Object.keys(unzipSync(new Uint8Array(plainZip.body))).sort()
+  }
+  catch { /* s. o. */ }
+  check('… das Bündel gibt es trotzdem — mit den drei Context-Dateien',
+    plainZip.status === 200
+    && plainNames.join(',') === 'README.md,brand.json,brand.md',
+    `${plainZip.status} ${JSON.stringify(plainNames)}`)
+
+  // ── Die drei Türen ────────────────────────────────────────────────────
+  const strangerManifest = await call(kitFull, { cookie: stranger.cookie })
+  const strangerFile = await call(`${kitFull}/brand.md`, { cookie: stranger.cookie })
+  const strangerMark = await call(`${kitFull}/marks/${markNames[0]}`, { cookie: stranger.cookie })
+  const strangerZip = await fetchZip(`${kitFull}.zip`, stranger.cookie)
+  check('ein fremdes Konto bekommt überall 404 — Manifest, Datei, Zeichen, Bündel',
+    [strangerManifest.status, strangerFile.status, strangerMark.status, strangerZip.status]
+      .every(status => status === 404),
+    JSON.stringify([strangerManifest.status, strangerFile.status, strangerMark.status, strangerZip.status]))
+
+  // `brandA` ist seit Abschnitt 5 wieder gesperrt — die Gegenprobe im selben Lauf.
+  const lockedZip = await fetchZip(`/api/brand/profiles/${brandA}/kit.zip`, owner.cookie)
+  const lockedBody = JSON.parse(lockedZip.body.toString('utf8') || '{}')
+  check('eine gesperrte Marke antwortet auf das Bündel 403 `derivation_locked`',
+    lockedZip.status === 403 && lockedBody.reason === 'derivation_locked',
+    `${lockedZip.status} ${lockedZip.body.toString('utf8').slice(0, 160)}`)
+
+  // ── Der Eimer: das Bündel zählt fünffach ──────────────────────────────
+  const bucketPath = `/api/brand/profiles/${brandBucket}/kit.zip`
+  const bucketStatuses = []
+  for (let round = 0; round < 12; round++) {
+    bucketStatuses.push((await fetchZip(bucketPath, owner.cookie)).status)
+  }
+  const thirteenth = await fetchZip(bucketPath, owner.cookie)
+  const thirteenthBody = JSON.parse(thirteenth.body.toString('utf8') || '{}')
+  check('das Bündel zählt FÜNFFACH: zwölf gehen durch, das dreizehnte ist 429 `brand_kit_limit`',
+    bucketStatuses.every(status => status === 200)
+    && thirteenth.status === 429
+    && thirteenthBody.reason === 'brand_kit_limit',
+    `${JSON.stringify([...new Set(bucketStatuses)])} → ${thirteenth.status} `
+    + thirteenth.body.toString('utf8').slice(0, 120))
+
+  // ── Die Lieferseite selbst ────────────────────────────────────────────
+  const page = await call(`/de/brand/${brandFull}/kit`, { cookie: owner.cookie })
+  check('die Lieferseite rendert serverseitig und trägt den Markennamen',
+    page.status === 200 && page.text.includes('Kailua Coffee Co.'),
+    `${page.status} ${page.text.length} Zeichen`)
+  const pageGuest = await call(`/de/brand/${brandFull}/kit`)
+  check('… und ohne Anmeldung ist sie 404 (Datentür)',
+    pageGuest.status === 404, String(pageGuest.status))
+
+  // ══ 10 · DER BLICK IM BROWSER (nur mit --keep-kailua) ═══════════════════
+  if (KEEP_KAILUA) {
+    console.log('\n10 · Eine Marke zum Ansehen (--keep-kailua)')
+    /* Alles, was AB HIER angelegt wird, bleibt stehen: die Listen werden am
+     * Ende dieses Blocks auf ihre Länge von jetzt zurückgeschnitten. Das ist
+     * genauer als „die letzten drei entfernen" — es bleibt richtig, wenn hier
+     * später eine weitere Zeile dazukommt. */
+    const keepMark = {
+      profiles: cleanup.profiles.length,
+      users: cleanup.users.length,
+      access: cleanup.access.length,
+    }
+    const keepOwner = await makeAccount('keep', { beta: true })
+    const keepBrand = await makeBrand(keepOwner.cookie, 'Kailua Coffee Co.')
+    await completeFoundation(keepBrand)
+    const keepSeeded = await seedDesign(keepBrand, operator.cookie)
+    const keepFree = await unlockDerivation(keepBrand, operator.cookie)
+    const keepPage = await call(`/de/brand/${keepBrand}/kit`, { cookie: keepOwner.cookie })
+    check('die Marke zum Ansehen steht — Foundation, Design, Ableitung, Seite',
+      keepSeeded && keepFree && keepPage.status === 200, `${keepPage.status}`)
+    cleanup.profiles.length = keepMark.profiles
+    cleanup.users.length = keepMark.users
+    cleanup.access.length = keepMark.access
+    kept = { brandId: keepBrand, cookie: keepOwner.cookie, port: PORT }
+  }
 }
 catch (error) {
   fail++
@@ -556,6 +885,13 @@ finally {
     else {
       await tablesDB.deleteRow({ databaseId, tableId: 'app_config', rowId: 'global' }).catch(() => {})
     }
+  }
+
+  if (kept) {
+    console.log('\n── Zum Ansehen im Browser (räumt sich NICHT weg) ─────────────────')
+    console.log(`BRAND_ID=${kept.brandId}`)
+    console.log(`COOKIE=${kept.cookie}`)
+    console.log(`URL=http://localhost:${kept.port}/de/brand/${kept.brandId}/kit`)
   }
 
   console.log(`\n${fail === 0 ? '✔' : '✗'} ${pass}/${pass + fail} Prüfungen bestanden`)

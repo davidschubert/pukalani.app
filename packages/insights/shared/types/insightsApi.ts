@@ -1,12 +1,22 @@
 import type {
   InsightsBrand,
+  InsightsBrandScore,
   InsightsBrandState,
+  InsightsDuelFact,
   InsightsFormat,
   InsightsLocale,
   InsightsPost,
+  InsightsRanking,
   InsightsReviewIssue,
   InsightsState,
 } from '../insightsPost'
+import type {
+  InsightsPublicBrand,
+  InsightsPublicBrandRef,
+  InsightsPublicDuelSide,
+  InsightsPublicPost,
+  InsightsPublicPostListItem,
+} from '../insightsPublic'
 import type { InsightsRadarStoredVideo } from '../insightsRadar'
 import type {
   InsightsCorrection,
@@ -314,4 +324,122 @@ export interface InsightsCorrectionsListResponse {
 /** Die Entscheidung über einen Vorschlag — die Zeile, wie sie danach dasteht. */
 export interface InsightsCorrectionDecisionResponse {
   item: InsightsCorrectionListItem
+}
+
+// ── Die öffentlichen Seiten (BI1 I3, §9.2/§9.5) ────────────────────────────
+
+/**
+ * DIE ANTWORT-TYPEN DER LESEROUTEN.
+ *
+ * ── EINE DISKRIMINIERTE UNION, WEIL ES ZWEI ANTWORTEN GIBT ───────────────
+ * Eine Adresse kann eine SEITE sein oder eine WEITERLEITUNG (§9.2:
+ * umbenannter Slug, umgedrehtes Duell ⇒ 301). Beides in einem Objekt mit
+ * optionalen Feldern wäre eine Form, die vier Zustände zulässt, von denen
+ * zwei unmöglich sind — und die Seite müsste raten, welcher gilt. `kind`
+ * macht daraus zwei, und der Typ erzwingt, dass beide behandelt werden.
+ *
+ * Die Route liefert im Weiterleitungs-Fall NUR den Slug, nie einen Pfad: den
+ * baut die SEITE mit `localePath()`, weil nur sie die Sprache des Lesers
+ * kennt. Ein Pfad aus dem Server wäre auf `/de/…` die englische Adresse.
+ */
+export interface InsightsPublicRedirect {
+  kind: 'redirect'
+  slug: string
+}
+
+/** Die Journal-Liste (`GET /api/insights/public/posts`). */
+export interface InsightsPublicListResponse {
+  posts: InsightsPublicPostListItem[]
+}
+
+/** Ein Artikel samt seiner erwähnten Marken. */
+export interface InsightsPublicPostPayload {
+  kind: 'post'
+  post: InsightsPublicPost
+  brands: InsightsPublicBrandRef[]
+  /** Nur in der Betreiber-Vorschau gesetzt (`?preview=1`) — die Seite trägt dann `noindex`. */
+  preview?: true
+}
+
+export type InsightsPublicPostResponse = InsightsPublicPostPayload | InsightsPublicRedirect
+
+/**
+ * EIN MARKENPROFIL (`GET /api/insights/public/brands/<slug>`).
+ *
+ * `posts` sind die öffentlichen Beiträge, die diese Marke erwähnen (höchstens
+ * zwölf — eine Marken-Seite ist ein Dossier und kein Archiv), `relations` die
+ * Wettbewerber, die selbst öffentlich stehen.
+ *
+ * BEI `state: 'removed'` SIND `marks`, `history`, `sources` UND `relations`
+ * LEER (die Route räumt sie aus): über eine auf Wunsch entfernte Marke wird
+ * nichts mehr behauptet — die Seite sagt nur noch, DASS und WANN.
+ */
+export interface InsightsPublicBrandPayload {
+  kind: 'brand'
+  brand: InsightsPublicBrand
+  score: InsightsBrandScore | null
+  /** Die Farbwelt-Kachel des Hero — aufgelöst über den brand-Vertrag. */
+  gradient: readonly [string, string]
+  posts: InsightsPublicPostListItem[]
+  relations: { id: string, name: string, slug: string }[]
+  preview?: true
+}
+
+export type InsightsPublicBrandResponse = InsightsPublicBrandPayload | InsightsPublicRedirect
+
+/**
+ * EIN DUELL (`GET /api/insights/public/duels/<slug>`).
+ *
+ * `left` ist die Marke, deren Slug im Duell-Slug VORNE steht — die Tafel soll
+ * in derselben Reihenfolge stehen wie die Adresse, sonst liest man eine
+ * andere Aufstellung, als man angeklickt hat.
+ *
+ * Fehlt eine der beiden Marken oder ihr Score, antwortet die Route 404: die
+ * Tafel vergleicht acht Dimensionen: eine halbe Tafel wäre ein Vergleich, der
+ * nichts vergleicht.
+ */
+export interface InsightsPublicDuelPayload {
+  kind: 'duel'
+  post: InsightsPublicPost
+  left: InsightsPublicDuelSide
+  right: InsightsPublicDuelSide
+  facts: InsightsDuelFact[]
+  preview?: true
+}
+
+export type InsightsPublicDuelResponse = InsightsPublicDuelPayload | InsightsPublicRedirect
+
+/** Die Ranking-Übersicht (`GET /api/insights/public/rankings`). */
+export interface InsightsPublicRankingsResponse {
+  posts: InsightsPublicPostListItem[]
+}
+
+/**
+ * EINE RANKING-AUSGABE (`GET /api/insights/public/rankings/<slug>`).
+ *
+ * `brands` ist eine KARTE Zeilen-Id → Name/Adresse und keine Liste: die
+ * Einträge tragen Ids (§9.3), der Leser will Namen, und eine Liste zwänge die
+ * Seite bei zehn Plätzen zu zehn linearen Suchen. Nur ÖFFENTLICHE Marken
+ * stehen darin — wer fehlt, wird als Name ohne Link gezeigt.
+ */
+export interface InsightsPublicRankingPayload {
+  kind: 'ranking'
+  post: InsightsPublicPost
+  ranking: InsightsRanking
+  brands: Record<string, { name: string, slug: string }>
+  preview?: true
+}
+
+export type InsightsPublicRankingResponse = InsightsPublicRankingPayload | InsightsPublicRedirect
+
+/**
+ * DER KORREKTURVORSCHLAG (`POST /api/insights/public/corrections`).
+ *
+ * `ok: true` ist ein LITERAL und sagt nichts über den Zustand des Ziels, über
+ * frühere Vorschläge oder darüber, ob der Honigtopf zugeschlagen hat: „ist
+ * eingegangen" ist alles, was der Absender in diesem Moment wirklich weiss
+ * (wörtlich wie beim Melden im brand-Layer).
+ */
+export interface InsightsCorrectionSubmitResponse {
+  ok: true
 }
