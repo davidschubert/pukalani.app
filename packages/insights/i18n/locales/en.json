@@ -121,9 +121,30 @@
       "opportunityNone": "no score",
       "signals": "from {count} of {total} signals",
       "formula": "Normalised to 100: the average of the signals we have (0–20 each), computed from {count} of {total} signals. Three of them work today: performance (views ÷ subscribers), age (half-life 90 days) and relevance (closeness to our topics). Search demand and competition are missing as long as there is no data source for them.",
-      "empty": "No run yet. The radar needs an API key.",
-      "pendingTitle": "The topic radar arrives with package I4",
-      "pendingText": "It needs a YouTube API key. Only the public figures of the API are stored per video, for at most {days} days — no comment texts, no user names."
+      "empty": "No run yet. The radar fetches its numbers once a day — or at the press of a button.",
+      "missingTitle": "The API key is missing",
+      "missingText": "Without a key the radar fetches nothing. The server environment needs the line NUXT_INSIGHTS_YOUTUBE_KEY. Only the public figures of the API are then stored per video, for at most {days} days — no comment texts, no user names.",
+      "statusKey": "Key",
+      "keyPresent": "present",
+      "keyMissing": "missing",
+      "statusChannels": "Channels",
+      "channelsCount": "no channel | one channel | {count} channels",
+      "statusQuota": "Cost per run",
+      "quotaOf": "{units} of {total} units",
+      "statusLastRun": "Last run",
+      "lastRunNever": "none yet",
+      "run": "Run now",
+      "runDone": "Done: {channels} channels, {videos} videos, {upserted} stored, {deleted} removed.",
+      "runErrors": "one error on the way | one error on the way | {count} errors on the way",
+      "runFailed": "The run did not work.",
+      "rateLimited": "Too many runs this hour. Try again shortly.",
+      "notConfigured": "Without an API key the radar cannot fetch anything.",
+      "skipped": {
+        "not_configured": "No API key present — the run fetched nothing.",
+        "no_channels": "No channels configured — the run fetched nothing.",
+        "quota_estimate": "The run would have been too expensive. The channel list is too long.",
+        "running": "One is already running. Wait a moment."
+      }
     },
     "editor": {
       "title": "Desk",

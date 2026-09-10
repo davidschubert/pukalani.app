@@ -27,11 +27,14 @@ import {
   INSIGHTS_CORRECTION_STATUSES,
   INSIGHTS_CORRECTION_TARGET_KINDS,
 } from './insightsCorrection'
+import type { InsightsRadarStoredVideo } from './insightsRadar'
+import { INSIGHTS_RADAR_TOPIC_FALLBACK } from './insightsRadar'
 
 /**
- * DER ABLAGE-VERTRAG VON BRAND INSIGHTS (Migrationen insights-001…003,
- * Plan §9.3) — wie ein Beitrag, ein Markenprofil und ein Korrekturvorschlag
- * als Appwrite-ZEILE liegen, und die reine Abbildung in beide Richtungen.
+ * DER ABLAGE-VERTRAG VON BRAND INSIGHTS (Migrationen insights-001…004,
+ * Plan §9.3 und §9.6) — wie ein Beitrag, ein Markenprofil, ein
+ * Korrekturvorschlag und ein Radar-Video als Appwrite-ZEILE liegen, und die
+ * reine Abbildung in beide Richtungen.
  *
  * ── ZWEI EBENEN, ZWEI DATEIEN (Muster: market) ───────────────────────────
  * `insightsPost.ts` und `insightsCorrection.ts` sind der PRODUKT-Vertrag: was
@@ -81,8 +84,10 @@ import {
 export const INSIGHTS_POSTS_TABLE = 'insights_posts'
 export const INSIGHTS_BRANDS_TABLE = 'insights_brands'
 export const INSIGHTS_CORRECTIONS_TABLE = 'insights_corrections'
+/** Der Themenradar (insights-004, BI1 I4) — kurzlebig, s. Kopf der Migration. */
+export const INSIGHTS_TOPICS_TABLE = 'insights_topics'
 
-// ── Zeilen (insights-001 … insights-003) ───────────────────────────────────
+// ── Zeilen (insights-001 … insights-004) ───────────────────────────────────
 
 /** Ein Beitrag (insights-001). Alle Listen-Spalten sind JSON (s. Kopf). */
 export type InsightsPostRow = Models.Row & {
@@ -154,6 +159,35 @@ export type InsightsBrandRow = Models.Row & {
   removedAt?: string | null
   removalReason?: string
   claimedBy?: string
+}
+
+/**
+ * EIN VIDEO IM THEMENRADAR (insights-004).
+ *
+ * Alle Zahlen-Spalten sind optional, obwohl der Sweep sie IMMER schreibt: eine
+ * Appwrite-Spalte mit Vorgabewert liefert bei einer Zeile, die vor der Spalte
+ * entstanden ist, `undefined` — und der Radar ist die eine Tabelle dieses
+ * Layers, in der ein solcher Übergang wirklich vorkommt (sie wird täglich neu
+ * beschrieben, während ein Deploy läuft).
+ */
+export type InsightsTopicRow = Models.Row & {
+  videoId: string
+  channelId: string
+  channelTitle: string
+  channelSubscribers?: number
+  title: string
+  views?: number
+  likes?: number
+  commentCount?: number
+  /** datetime — der Vertrag kennt nur den Kalendertag (s. `toInsightsRadarVideo`). */
+  publishedAt?: string | null
+  fetchedAt?: string | null
+  topic: string
+  /** UNSERE Zahl (0–1). */
+  relevance?: number
+  /** UNSERE Zahl (0–100) — `null` heisst „kein Signal", nie „schlecht". */
+  opportunity?: number | null
+  opportunitySignals?: number
 }
 
 /** Ein Korrekturvorschlag oder Entfernungs-Wunsch (insights-003). */
@@ -407,5 +441,82 @@ export function fromInsightsCorrection(
     contactEmail: correction.contactEmail,
     status: correction.status,
     decisionNote: correction.decisionNote,
+  }
+}
+
+// ── Themenradar: Zeile ⇄ Vertrag ───────────────────────────────────────────
+
+/**
+ * ZEILE → VERTRAG (insights-004, BI1 I4).
+ *
+ * ── DATUM: SPALTE IST `datetime`, VERTRAG IST KALENDERTAG ───────────────
+ * `insightsRadarVideoSchema` verlangt `YYYY-MM-DD` (dieselbe `dateSchema` wie
+ * bei den Quellen), die Spalte ist ein `datetime`. Das ist kein Widerspruch,
+ * sondern die richtige Arbeitsteilung: Appwrite braucht für den Fristen-Filter
+ * (`fetchedAt < heute − 30 Tage`) eine echte Zeit, die Redaktion braucht einen
+ * TAG — „vor 12 Tagen" rechnet niemand aus einer Uhrzeit, und eine Uhrzeit in
+ * der Tabelle wäre eine Genauigkeit, die die Zahl darunter nicht hat. Beim
+ * Lesen fallen deshalb die ersten zehn Zeichen an.
+ *
+ * ── FAIL-SOFT WIE ÜBERALL IN DIESER DATEI ───────────────────────────────
+ * Eine kaputte Radar-Zeile darf die Radar-Tabelle nicht mitnehmen. Unbekannte
+ * Cluster fallen auf `INSIGHTS_RADAR_TOPIC_FALLBACK` (Begründung dort: der
+ * Ersatzwert entscheidet hier über eine RUBRIK, nicht über Sichtbarkeit),
+ * fehlende Zahlen auf 0 — und `opportunity` auf `null`, NICHT auf 0: eine 0
+ * wäre die Aussage „das Video taugt nichts", wo in Wahrheit nichts gemessen
+ * wurde (wörtlich die Regel aus `insightsOpportunity`).
+ */
+export function toInsightsRadarVideo(row: InsightsTopicRow): InsightsRadarStoredVideo {
+  const clampUnit = (value: number | undefined) =>
+    typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0
+  return {
+    videoId: row.videoId,
+    channelId: row.channelId,
+    channelTitle: row.channelTitle,
+    channelSubscribers: Math.max(0, Math.round(row.channelSubscribers ?? 0)),
+    title: row.title,
+    views: Math.max(0, Math.round(row.views ?? 0)),
+    likes: Math.max(0, Math.round(row.likes ?? 0)),
+    commentCount: Math.max(0, Math.round(row.commentCount ?? 0)),
+    publishedAt: (row.publishedAt ?? '').slice(0, 10),
+    fetchedAt: (row.fetchedAt ?? '').slice(0, 10),
+    topic: oneOf<InsightsTopicKey>(INSIGHTS_TOPIC_KEYS, row.topic, INSIGHTS_RADAR_TOPIC_FALLBACK),
+    relevance: clampUnit(row.relevance),
+    opportunity: typeof row.opportunity === 'number' && Number.isFinite(row.opportunity)
+      ? Math.max(0, Math.min(100, Math.round(row.opportunity)))
+      : null,
+    opportunitySignals: Math.max(0, Math.round(row.opportunitySignals ?? 0)),
+  }
+}
+
+/** Die schreibbaren Felder einer Radar-Zeile. */
+export type InsightsTopicRowData = Omit<InsightsTopicRow, keyof Models.Row>
+
+/**
+ * VERTRAG → ZEILE.
+ *
+ * Die beiden Datums-Werte kommen als KALENDERTAG herein und gehen als
+ * UTC-Mitternacht hinaus: ein `datetime` verträgt keine blosse `YYYY-MM-DD`
+ * bei allen Appwrite-Ständen zuverlässig, und ein selbst gesetzter Zeitpunkt
+ * ist ehrlicher als einer, den der Server sich denkt. Wer die genaue
+ * Abrufzeit braucht, liest `$updatedAt` — die schreibt Appwrite ohnehin.
+ */
+export function fromInsightsRadarVideo(video: InsightsRadarStoredVideo): InsightsTopicRowData {
+  const asDateTime = (day: string) => (day ? `${day.slice(0, 10)}T00:00:00.000Z` : null)
+  return {
+    videoId: video.videoId,
+    channelId: video.channelId,
+    channelTitle: video.channelTitle.slice(0, 160),
+    channelSubscribers: video.channelSubscribers,
+    title: video.title.slice(0, 300),
+    views: video.views,
+    likes: video.likes,
+    commentCount: video.commentCount,
+    publishedAt: asDateTime(video.publishedAt),
+    fetchedAt: asDateTime(video.fetchedAt),
+    topic: video.topic,
+    relevance: video.relevance,
+    opportunity: video.opportunity,
+    opportunitySignals: video.opportunitySignals,
   }
 }

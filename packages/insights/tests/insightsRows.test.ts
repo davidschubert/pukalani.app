@@ -2,16 +2,20 @@ import type { Models } from 'node-appwrite'
 import { describe, expect, it } from 'vitest'
 import type { InsightsBrand, InsightsPost } from '../shared/insightsPost'
 import { INSIGHTS_SLUG_HISTORY_MAX, insightsSlugHistoryPush } from '../shared/insightsPost'
-import type { InsightsBrandRow, InsightsPostRow } from '../shared/insightsRows'
+import type { InsightsBrandRow, InsightsPostRow, InsightsTopicRow } from '../shared/insightsRows'
 import {
   INSIGHTS_BRANDS_TABLE,
   INSIGHTS_CORRECTIONS_TABLE,
   INSIGHTS_POSTS_TABLE,
+  INSIGHTS_TOPICS_TABLE,
   fromInsightsBrand,
   fromInsightsPost,
+  fromInsightsRadarVideo,
   toInsightsBrand,
   toInsightsPost,
+  toInsightsRadarVideo,
 } from '../shared/insightsRows'
+import { INSIGHTS_RADAR_TOPIC_FALLBACK } from '../shared/insightsRadar'
 
 /**
  * DIE RUNDREISE ZEILE ⇄ VERTRAG (Migrationen insights-001…003).
@@ -262,5 +266,102 @@ describe('insightsSlugHistoryPush', () => {
     const history = ['a']
     insightsSlugHistoryPush(history, 'b')
     expect(history).toEqual(['a'])
+  })
+})
+
+describe('Themenradar: Zeile ⇄ Vertrag (insights-004)', () => {
+  const radarMeta: Models.Row = { ...rowMeta, $id: 'radar-1', $tableId: INSIGHTS_TOPICS_TABLE }
+
+  function fullRow(extra: Partial<InsightsTopicRow> = {}): InsightsTopicRow {
+    return {
+      ...radarMeta,
+      videoId: 'vid-1',
+      channelId: 'UC-b3c7kxa5vU-bnmaROgvog',
+      channelTitle: 'The Futur',
+      channelSubscribers: 1_000_000,
+      title: 'Brand strategy for beginners',
+      views: 50_000,
+      likes: 900,
+      commentCount: 30,
+      publishedAt: '2026-09-01T10:00:00.000Z',
+      fetchedAt: '2026-09-09T00:00:00.000Z',
+      topic: 'brand-strategy',
+      relevance: 0.75,
+      opportunity: 61,
+      opportunitySignals: 3,
+      ...extra,
+    }
+  }
+
+  it('liest die Zahlen und schneidet die Datumswerte auf den KALENDERTAG', () => {
+    const video = toInsightsRadarVideo(fullRow())
+    expect(video).toEqual({
+      videoId: 'vid-1',
+      channelId: 'UC-b3c7kxa5vU-bnmaROgvog',
+      channelTitle: 'The Futur',
+      channelSubscribers: 1_000_000,
+      title: 'Brand strategy for beginners',
+      views: 50_000,
+      likes: 900,
+      commentCount: 30,
+      publishedAt: '2026-09-01',
+      fetchedAt: '2026-09-09',
+      topic: 'brand-strategy',
+      relevance: 0.75,
+      opportunity: 61,
+      opportunitySignals: 3,
+    })
+  })
+
+  it('die Rundreise hält — der Kalendertag geht als UTC-Mitternacht zurück', () => {
+    const back = fromInsightsRadarVideo(toInsightsRadarVideo(fullRow()))
+    expect(back.publishedAt).toBe('2026-09-01T00:00:00.000Z')
+    expect(back.fetchedAt).toBe('2026-09-09T00:00:00.000Z')
+    expect(back.videoId).toBe('vid-1')
+    expect(back.opportunity).toBe(61)
+  })
+
+  it('KEINE ZAHL BLEIBT KEINE ZAHL: `opportunity` fällt auf null, nicht auf 0', () => {
+    expect(toInsightsRadarVideo(fullRow({ opportunity: undefined })).opportunity).toBeNull()
+    expect(toInsightsRadarVideo(fullRow({ opportunity: null })).opportunity).toBeNull()
+    // GEGENPROBE: eine echte 0 überlebt als 0 — sie ist eine Messung.
+    expect(toInsightsRadarVideo(fullRow({ opportunity: 0 })).opportunity).toBe(0)
+  })
+
+  it('fail-soft: unbekanntes Cluster, fehlende Zahlen, leere Daten reissen nichts mit', () => {
+    const video = toInsightsRadarVideo(fullRow({
+      topic: 'gab-es-mal',
+      channelSubscribers: undefined,
+      views: undefined,
+      likes: undefined,
+      commentCount: undefined,
+      relevance: undefined,
+      opportunitySignals: undefined,
+      publishedAt: null,
+      fetchedAt: null,
+    }))
+    // Der Ersatzwert ist hier bewusst der WEITESTE (Begründung in insightsRadar.ts).
+    expect(video.topic).toBe(INSIGHTS_RADAR_TOPIC_FALLBACK)
+    expect(video.channelSubscribers).toBe(0)
+    expect(video.views).toBe(0)
+    expect(video.relevance).toBe(0)
+    expect(video.publishedAt).toBe('')
+    expect(video.fetchedAt).toBe('')
+  })
+
+  it('klemmt Werte, die ausserhalb ihrer Skala liegen', () => {
+    const video = toInsightsRadarVideo(fullRow({ relevance: 4.2, opportunity: 999, views: -5 }))
+    expect(video.relevance).toBe(1)
+    expect(video.opportunity).toBe(100)
+    expect(video.views).toBe(0)
+  })
+
+  it('kürzt zu lange Zeichenketten auf die Spaltenbreite', () => {
+    const back = fromInsightsRadarVideo(toInsightsRadarVideo(fullRow({
+      title: 'x'.repeat(400),
+      channelTitle: 'y'.repeat(400),
+    })))
+    expect(back.title).toHaveLength(300)
+    expect(back.channelTitle).toHaveLength(160)
   })
 })

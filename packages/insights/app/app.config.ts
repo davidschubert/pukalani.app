@@ -23,6 +23,44 @@ export default defineAppConfig({
   pukalani: {
     insights: {
       enabled: false,
+
+      /**
+       * DER THEMENRADAR (BI1 I4, §9.6) — seine KANALLISTE ist Konfiguration.
+       *
+       * ── WARUM EINE LISTE UND KEINE SUCHE (Leitplanke c) ────────────────
+       * `search.list` kostet 100 Einheiten je Aufruf und hat einen eigenen
+       * Tages-Eimer von rund 100 Aufrufen; `playlistItems.list` und
+       * `videos.list` kosten je EINE. Entdeckt wird deshalb über eine von Hand
+       * gepflegte Kanalliste — das ist keine Notlösung, sondern der Zuschnitt:
+       * ein Radar, der findet, was WIR für relevant halten, ist ehrlicher als
+       * einer, der Googles Suchranking nacherzählt.
+       *
+       * ── DER LAYER-DEFAULT IST LEER, UND DAS IST DIE AUSSAGE ────────────
+       * Eine Kanalliste ist eine REDAKTIONELLE Entscheidung. Sie gehört der
+       * App, die die Redaktion betreibt (`apps/branding/app/app.config.ts`),
+       * nicht dem Layer — sonst erbte eine zweite Brand-Site fremde Kanäle,
+       * ohne dass jemand sie ausgesucht hätte. Leere Liste ⇒ der Sweep tut
+       * nichts und meldet `no_channels`.
+       *
+       * Die FORM steht trotzdem hier, damit sie EINEN Ort hat:
+       * `{ channelId: 'UC…', topic: <Cluster-Schlüssel>, title?: '…' }`.
+       * Was diese Form nicht erfüllt, wirft `readInsightsRadarConfig`
+       * (`shared/insightsRadar.ts`) still heraus — ein Handle statt einer Id
+       * ist der wahrscheinlichste Tippfehler, und er würde sonst zu einem 404
+       * je Lauf, den niemand einem Konfigurationsfehler zuordnet.
+       */
+      radar: {
+        channels: [] as { channelId: string, topic: string, title?: string }[],
+        /**
+         * Wie viele der jüngsten Uploads je Kanal ein Lauf liest.
+         *
+         * 20 ist der Zuschnitt „was in den letzten Wochen lief" — der Radar
+         * ist ein Signal, kein Archiv. Der harte Deckel liegt bei 50
+         * (`playlistItems.list` liefert nicht mehr je Seite, und Blättern
+         * kostete je Seite eine weitere Einheit).
+         */
+        maxVideosPerChannel: 20,
+      },
     },
 
     admin: {
