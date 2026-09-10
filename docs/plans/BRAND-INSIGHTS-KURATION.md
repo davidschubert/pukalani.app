@@ -320,11 +320,16 @@ hängen mit dran. Vor allem aber: **es gibt noch keine öffentlichen Seiten.**
 Paket I3 ist am Anwalts-Gate (BI1-3/BI1-4). Kommentare unter Artikeln sind
 deshalb ein eigenes Paket **nach I3**, nicht Teil dieser Runde.
 
-**Nachtrag 2026-09-10:** I3 IST inzwischen gebaut — die öffentlichen Seiten
-stehen, je Format hinter einem eigenen Riegel im Layer, der bis zur
-Anwaltsantwort zu bleibt. K7 hängt damit nicht mehr an I3, sondern nur noch am
-Riegel für Artikel: solange kein Artikel öffentlich ist, gibt es unter keinem
-etwas zu kommentieren.
+**Nachtrag 2026-09-10 — K7 ist NICHT mehr blockiert.** I3 ist gebaut, und der
+Riegel steht je Format: `pukalani.insights.publicFormats` hat als Vorgabe
+**`['article']`**. Artikel sind also schon öffentlich; am Anwalt hängen nur
+Markenprofil, Duell und Ranking, weil dort über FREMDE Marken geurteilt wird.
+Ein Artikel ist unser eigener Text zu einem Thema — die Frage stellt sich nicht.
+
+**Damit ist K7 ab sofort machbar** und braucht nur noch, was jedes neue Produkt
+in einer App braucht: `comments` ins Manifest und in `extends`, seine
+Migrationen auf die `branding`-Instanz, ein GDPR-Beitrag und Moderation. Der
+Anwalt ist dafür kein Gate.
 
 ---
 
@@ -338,12 +343,13 @@ etwas zu kommentieren.
 | **K4** | **Fundstücke + Schalter** — Migration `insights-006`, Link-Wurf, Urteil in beiden Listen, YouTube-Link je Zeile, Filter „nur Interessante"; Sweep zieht die Zahlen mit | Davids Ja zur Prod-Migration | M |
 | **K5** | **Brief aus Video** — Prompt `insights-b-1`, Knopf auf den Fundstücken, Beitrag als Entwurf mit Video-Quelle | Entscheidung C (§9) · K4 · **Routen-Probe** | S–M |
 | **K6** | **SEO/GEO-Artikelregeln** — Prompt `insights-d-2`, siebte Prüfregel | — | S |
-| **K7** | **Kommentare unter Artikeln** — `comments` in `apps/branding` montieren | I3 ist da (2026-09-10); Gate ist jetzt der **Artikel-Riegel** (Anwalt) | M |
+| **K7** | **Kommentare unter Artikeln** — `comments` in `apps/branding` montieren | **kein Gate mehr** — Artikel sind seit I3 öffentlich (`publicFormats: ['article']`) | M |
 
 **Nach Davids Entscheidungen vom 2026-09-09 (§9):** K1 entfällt, K2 läuft
 sofort (kein Gate, keine Migration), K3 ist beauftragt und braucht ein Ja zur
-Prod-Migration, K5 wartet auf die Routen-Probe aus §9. K7 wartet darauf, dass
-der Artikel-Riegel aus I3 aufgeht — also auf dieselben Anwaltsantworten.
+Prod-Migration, K5 wartet auf die Routen-Probe aus §9. **K7 hat seit I3 kein
+Gate mehr** — Artikel sind öffentlich, der Anwalt hält nur Profil, Duell und
+Ranking.
 
 ## 8. Was dieses Vorhaben NICHT tut
 
