@@ -86,6 +86,7 @@ async function runNow(): Promise<void> {
           videos: result.videos,
           upserted: result.upserted,
           deleted: result.deleted,
+          tooOld: result.tooOld,
         }),
         color: result.errors > 0 ? 'warning' : 'success',
         description: result.errors > 0 ? t('insights.radar.runErrors', { count: result.errors }) : undefined,
@@ -191,6 +192,7 @@ async function runNow(): Promise<void> {
           :locale="readerLocale"
           :today="today"
           :resolve-relevance="resolveRelevance"
+          :max-age-days="data?.maxVideoAgeDays"
         />
       </div>
     </template>

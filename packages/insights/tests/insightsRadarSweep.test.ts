@@ -46,9 +46,12 @@ const tablesDB = {
     const parsed = (queries ?? []).map(query => JSON.parse(query) as { method: string, attribute?: string, values?: unknown[] })
     const lessThan = parsed.find(query => query.method === 'lessThan')
     if (lessThan) {
+      // Die zwei Netze fragen verschiedene Spalten (`fetchedAt`, `publishedAt`)
+      // — der Fake liest die Spalte aus der Abfrage, statt eine zu raten.
+      const attribute = String(lessThan.attribute ?? 'fetchedAt')
       const cutoff = String(lessThan.values?.[0] ?? '')
       const due = rows
-        .filter(row => (row.fetchedAt ?? '') < cutoff)
+        .filter(row => typeof row[attribute] === 'string' && String(row[attribute]) < cutoff)
         .sort((a, b) => String(a.fetchedAt).localeCompare(String(b.fetchedAt)))
       return { rows: due.slice(0, 200), total: due.length }
     }
@@ -184,7 +187,7 @@ describe('runInsightsRadarSweep — die Gates', () => {
 describe('runInsightsRadarSweep — der Lauf', () => {
   it('schreibt je Video eine Zeile mit den API-Zahlen und UNSEREN Zahlen', async () => {
     const result = await runInsightsRadarSweep(deps(), NOW)
-    expect(result).toMatchObject({ channels: 1, videos: 1, upserted: 1, deleted: 0, errors: 0, quotaUnits: 3 })
+    expect(result).toMatchObject({ channels: 1, videos: 1, upserted: 1, deleted: 0, tooOld: 0, errors: 0, quotaUnits: 3 })
     expect(rows).toHaveLength(1)
     const row = rows[0]!
     expect(row.videoId).toBe('vid-1')
@@ -298,6 +301,43 @@ describe('runInsightsRadarSweep — Upsert und 30-Tage-Netz', () => {
     const result = await runInsightsRadarSweep(deps(), NOW)
     expect(result.deleted).toBe(1)
     expect(rows.map(row => row.videoId).sort()).toEqual(['bleibt', 'vid-1'])
+  })
+
+  it('der Alters-Deckel: ein Jahre altes Video bekommt KEINE Zeile, und es wird gezählt', async () => {
+    // Uploads-Playlist eines Kanals, der seit 2012 nichts hochlädt — die API
+    // liefert brav sein „jüngstes" Video. Ohne Datum (leerer String) bleibt
+    // ein Video drin: der Deckel schliesst aus, was nachweislich alt ist.
+    const fetchJson = async (url: string): Promise<unknown> => {
+      const base = await fakeApi({ videoIds: ['alt', 'frisch', 'undatiert'] })(url)
+      if (!url.includes('/videos?')) return base
+      const items = (base as { items: { id: string, snippet: Record<string, unknown> }[] }).items
+      for (const item of items) {
+        if (item.id === 'alt') item.snippet.publishedAt = '2012-05-01T10:00:00Z'
+        if (item.id === 'undatiert') item.snippet.publishedAt = ''
+      }
+      return { items }
+    }
+    const result = await runInsightsRadarSweep(deps({ fetchJson }), NOW)
+    expect(result).toMatchObject({ videos: 2, upserted: 2, tooOld: 1, errors: 0 })
+    expect(rows.map(row => row.videoId).sort()).toEqual(['frisch', 'undatiert'])
+  })
+
+  it('der Alters-Deckel räumt auch Zeilen, die ein früherer Lauf noch gespeichert hat', async () => {
+    rows.push(
+      // Heute geholt (das 30-Tage-Netz lässt sie stehen), aber 2020 veröffentlicht.
+      { $id: 'alt', videoId: 'von-2020', fetchedAt: '2026-09-08T00:00:00.000Z', publishedAt: '2020-03-01T00:00:00.000Z' },
+      { $id: 'frisch', videoId: 'bleibt', fetchedAt: '2026-09-08T00:00:00.000Z', publishedAt: '2026-08-20T00:00:00.000Z' },
+    )
+    const result = await runInsightsRadarSweep(deps(), NOW)
+    expect(result.deleted).toBe(1)
+    expect(rows.map(row => row.videoId).sort()).toEqual(['bleibt', 'vid-1'])
+    // Der Deckel ist eine App-Vorgabe: mit 3.000 Tagen bliebe die Zeile von 2020.
+    rows.push({ $id: 'alt2', videoId: 'von-2020', fetchedAt: '2026-09-08T00:00:00.000Z', publishedAt: '2020-03-01T00:00:00.000Z' })
+    const lenient = await runInsightsRadarSweep(deps({
+      readAppConfig: () => ({ pukalani: { insights: { radar: { channels: [{ channelId: CHANNEL, topic: 'brand-strategy' }], maxVideoAgeDays: 3_000 } } } }),
+    }), NOW)
+    // 3.000 liegt über dem Deckel von 365 Tagen — die Zeile fällt trotzdem.
+    expect(lenient.deleted).toBe(1)
   })
 
   it('fehlt die Tabelle, ist der Lauf still — der Layer kann ohne Migration im Bau sein', async () => {

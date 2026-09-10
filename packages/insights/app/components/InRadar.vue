@@ -52,6 +52,13 @@ const props = defineProps<{
    * geratener Mittelwert (früher 0.5) wäre eine erfundene Messung.
    */
   resolveRelevance?: (video: InsightsRadarVideo) => number | undefined
+  /**
+   * Der Alters-Deckel des Laufs (Tage ab Veröffentlichung), wie ihn der
+   * Server meldet — die Ansicht sagt ihn dazu, damit niemand ein fehlendes
+   * Video für ein vergessenes hält. Ohne Wert (Prototyp, Playground) fehlt
+   * nur die Zeile.
+   */
+  maxAgeDays?: number
 }>()
 
 const { t } = useI18n()
@@ -104,6 +111,7 @@ function formulaFor(opportunity: InsightsOpportunity): string {
     <p class="mt-1 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('insights.radar.lead') }}</p>
     <p class="bw-pending mt-2">{{ t('insights.radar.retention', { days: INSIGHTS_RADAR_RETENTION_DAYS }) }}</p>
     <p class="bw-pending mt-1">{{ t('insights.radar.noComments') }}</p>
+    <p v-if="props.maxAgeDays" class="bw-pending mt-1">{{ t('insights.radar.maxAge', { days: props.maxAgeDays }) }}</p>
 
     <CoreEmptyState
       v-if="rows.length === 0"

@@ -116,8 +116,14 @@ export interface InsightsRadarSweepResult {
   videos: number
   /** Wie viele Zeilen angelegt oder aktualisiert wurden. */
   upserted: number
-  /** Wie viele Zeilen das 30-Tage-Netz entfernt hat. */
+  /** Wie viele Zeilen die zwei Netze entfernt haben (30 Tage Abruf, Alters-Deckel). */
   deleted: number
+  /**
+   * Wie viele gelieferte Videos der Alters-Deckel NICHT gespeichert hat
+   * (`maxVideoAgeDays`). Gezählt, nicht verschwiegen: ein Kanal, der nur
+   * noch Altes liefert, soll in der Zahl auffallen — er gehört aus der Liste.
+   */
+  tooOld: number
   /** Fehlgeschlagene Kanäle und Schreibvorgänge — fail-soft, aber gezählt. */
   errors: number
   /** Was der Lauf nach der Formel aus §9.6 gekostet hat (Schätzung). */
@@ -192,7 +198,7 @@ export async function runInsightsRadarSweep(
   now: Date = new Date(),
 ): Promise<InsightsRadarSweepResult> {
   const result: InsightsRadarSweepResult = {
-    channels: 0, videos: 0, upserted: 0, deleted: 0, errors: 0, quotaUnits: 0,
+    channels: 0, videos: 0, upserted: 0, deleted: 0, tooOld: 0, errors: 0, quotaUnits: 0,
   }
 
   if (sweepRunning) return { ...result, skipped: 'running' }
@@ -223,7 +229,7 @@ export async function runInsightsRadarSweep(
     // OHNE Event, auch im Request: `useAppConfig()` nimmt in Nitro kein
     // Argument — die App-Config wird zur Bauzeit eingebacken und ist eine
     // Konstante des Prozesses, keine Eigenschaft eines Requests.
-    const { channels, maxVideos } = readInsightsRadarConfig(
+    const { channels, maxVideos, maxVideoAgeDays } = readInsightsRadarConfig(
       deps.readAppConfig?.() ?? useAppConfig(),
     )
     if (channels.length === 0) return { ...result, skipped: 'no_channels' }
@@ -314,6 +320,16 @@ export async function runInsightsRadarSweep(
           const info = meta.get(item.snippet.channelId || channel.channelId)
           const { topic, relevance } = insightsRadarClassify(item.snippet.title, channel.topic)
           const publishedDay = toDay(item.snippet.publishedAt)
+          // DER ALTERS-DECKEL (Schärfung 2026-09-10): die Uploads-Playlist
+          // liefert die JÜNGSTEN Videos eines Kanals — bei einem Kanal, der
+          // seit Jahren nichts hochlädt, sind das Videos von 2020 oder 2012,
+          // und das 30-Tage-Netz sieht nur, dass wir sie HEUTE geholt haben.
+          // Ein Video ohne lesbares Datum bleibt drin: der Deckel schliesst
+          // aus, was nachweislich alt ist, nicht, was er nicht kennt.
+          if (publishedDay && daysBetween(publishedDay, fetchedDay) > maxVideoAgeDays) {
+            result.tooOld += 1
+            continue
+          }
           const subscribers = info?.subscribers ?? 0
           const opportunity = insightsOpportunity({
             // OHNE ABONNENTENZAHL GIBT ES KEIN PERFORMANCE-SIGNAL, nicht das
@@ -363,17 +379,28 @@ export async function runInsightsRadarSweep(
     result.upserted = upsert.upserted
     result.errors += upsert.errors
 
-    // ── 5. Das 30-Tage-Netz ──────────────────────────────────────────────
+    // ── 5. Die zwei Netze ────────────────────────────────────────────────
+    // (a) 30 Tage nach dem ABRUF (III.E.4): was der Lauf nicht mehr erreicht.
     const cutoff = new Date(now.getTime() - INSIGHTS_RADAR_RETENTION_DAYS * 86_400_000)
-    const swept = await deleteExpiredRadarRows(tablesDB, databaseId, cutoff, log)
-    result.deleted = swept.deleted
-    result.errors += swept.errors
+    const swept = await deleteExpiredRadarRows(tablesDB, databaseId, 'fetchedAt', cutoff, log)
+    // (b) der Alters-Deckel nach der VERÖFFENTLICHUNG: Zeilen, die ein
+    // früherer Lauf (oder eine grosszügigere Grenze) noch gespeichert hat.
+    // Ohne dieses Netz stünden sie bis zu 30 Tage weiter in der Liste — der
+    // Deckel oben verhindert nur, dass sie ERNEUT geschrieben werden.
+    // `publishedAt` trägt keinen Index (Migration insights-004); der Filter
+    // läuft auf Appwrite 2.0 ohne (lesend gegen Prod geprüft 2026-09-10,
+    // 32 Zeilen), sortiert wird über den indizierten `fetchedAt`.
+    const ageCutoff = new Date(now.getTime() - maxVideoAgeDays * 86_400_000)
+    const aged = await deleteExpiredRadarRows(tablesDB, databaseId, 'publishedAt', ageCutoff, log)
+    result.deleted = swept.deleted + aged.deleted
+    result.errors += swept.errors + aged.errors
 
     log('info', 'insights.radar_swept', {
       channels: result.channels,
       videos: result.videos,
       upserted: result.upserted,
       deleted: result.deleted,
+      tooOld: result.tooOld,
       errors: result.errors,
       quotaUnits: result.quotaUnits,
     })
@@ -524,6 +551,8 @@ function hasCode(error: unknown, code: number): boolean {
 async function deleteExpiredRadarRows(
   tablesDB: TablesDbLike,
   databaseId: string,
+  /** Welches Datum abläuft: der Abruf (30-Tage-Netz) oder die Veröffentlichung (Alters-Deckel). */
+  attribute: 'fetchedAt' | 'publishedAt',
   cutoff: Date,
   log: (level: 'info' | 'warn', name: string, data: Record<string, unknown>) => void,
 ): Promise<{ deleted: number, errors: number }> {
@@ -537,7 +566,7 @@ async function deleteExpiredRadarRows(
         databaseId,
         tableId: INSIGHTS_TOPICS_TABLE,
         queries: [
-          Query.lessThan('fetchedAt', cutoff.toISOString()),
+          Query.lessThan(attribute, cutoff.toISOString()),
           Query.orderAsc('fetchedAt'),
           Query.limit(DELETE_BATCH),
         ],
@@ -547,7 +576,7 @@ async function deleteExpiredRadarRows(
     catch (error) {
       if (isTableMissing(error)) return { deleted, errors }
       errors += 1
-      log('warn', 'insights.radar_retention_failed', { message: insightsYoutubeSafeMessage(error) })
+      log('warn', 'insights.radar_retention_failed', { attribute, message: insightsYoutubeSafeMessage(error) })
       return { deleted, errors }
     }
 

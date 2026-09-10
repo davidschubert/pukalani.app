@@ -405,7 +405,14 @@ export default defineAppConfig({
           { channelId: 'UCN7dywl5wDxTu1RM3eJ_h9Q', topic: 'visual-identity', title: 'Flux Academy' }, // @FluxAcademy, geprüft 2026-09-09
           { channelId: 'UCoeJKtPJLoIBqWq4o8TDLpA', topic: 'visual-identity', title: 'Satori Graphics' }, // @SatoriGraphics, geprüft 2026-09-09
           { channelId: 'UCIp9sEZiv36cDG7cEnrVU7Q', topic: 'visual-identity', title: 'Will Paterson' }, // @WillPatersonDesign, geprüft 2026-09-09
-          { channelId: 'UCTXgprkT2GFY9eKZiz5Egew', topic: 'rebranding', title: 'Pentagram' }, // @PentagramDesign, geprüft 2026-09-09
+          // Pentagram STAND HIER und ist raus (2026-09-10): `@PentagramDesign`
+          // (UCTXgprkT2GFY9eKZiz5Egew) ist ein Privatkonto namens
+          // „pentagramdesign" mit einem Dublin-Video von 2012, `@pentagram`
+          // eine Metal-Band. Das Designbüro hat keinen YouTube-Kanal unter
+          // seinem Namen — die Id war echt, die Identität nicht. Lehre: ein
+          // Kanal ist erst geprüft, wenn TITEL und JÜNGSTER UPLOAD zur
+          // Erwartung passen, nicht nur die Id. `rebranding` bleibt damit ohne
+          // eigenen Kanal und wird über die Titel erreicht (s. o.).
           // Erlebnis & Sprache
           { channelId: 'UC2oCugzU6W8-h95W7eBTUEg', topic: 'brand-experience', title: 'Nielsen Norman Group' }, // @NNgroup, geprüft 2026-09-09
           { channelId: 'UC13ogyrw3DUgjlAIcWmWG3A', topic: 'brand-language', title: 'Marketing Examples' }, // @MarketingExamples, geprüft 2026-09-09

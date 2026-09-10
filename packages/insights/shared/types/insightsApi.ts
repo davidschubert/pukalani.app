@@ -244,6 +244,8 @@ export interface InsightsRadarResponse {
   lastRunAt: string | null
   /** Der Stichtag der SERVER-Uhr (`YYYY-MM-DD`) — gegen ihn rechnet das Alter. */
   today: string
+  /** Älter als so viele Tage (ab Veröffentlichung) speichert der Lauf nichts — die Ansicht sagt es dazu. */
+  maxVideoAgeDays: number
   videos: InsightsRadarVideoItem[]
 }
 
@@ -259,6 +261,8 @@ export interface InsightsRadarRunResponse {
   videos: number
   upserted: number
   deleted: number
+  /** Gelieferte Videos, die der Alters-Deckel nicht gespeichert hat. */
+  tooOld: number
   errors: number
   quotaUnits: number
   skipped?: 'not_configured' | 'no_channels' | 'quota_estimate' | 'running'

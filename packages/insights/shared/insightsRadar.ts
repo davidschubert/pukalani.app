@@ -64,6 +64,24 @@ export const INSIGHTS_RADAR_MAX_VIDEOS_DEFAULT = 20
 export const INSIGHTS_RADAR_MAX_VIDEOS_CAP = 50
 
 /**
+ * WIE ALT EIN VIDEO HÖCHSTENS SEIN DARF, DAMIT DER LAUF ES SPEICHERT (Vorgabe,
+ * in Tagen ab Veröffentlichung). Schärfung nach dem ersten Prod-Lauf
+ * (2026-09-10): drei Kanäle der Liste luden seit Jahren nichts hoch, und
+ * `playlistItems.list` liefert dann die jüngsten Uploads von 2020 oder 2012 —
+ * mit Opportunity 17–50 standen sie in der Morgenliste neben dem, was diese
+ * Woche läuft. Das 30-Tage-Netz (`INSIGHTS_RADAR_RETENTION_DAYS`) hilft dort
+ * nicht: es rechnet mit dem ABRUF-Datum, und abgerufen wurden sie heute.
+ *
+ * 180 Tage sind ZWEI Halbwertszeiten des Alters-Signals (90 Tage, §9.6): das
+ * Signal steht dann bei 5 von 20 — der Radar sagt selbst, dass so ein Video
+ * nicht mehr „läuft". Die Grenze ist eine Redaktions-Vorgabe und darum je App
+ * überschreibbar (`pukalani.insights.radar.maxVideoAgeDays`), aber gedeckelt:
+ * ein Jahr ist das Äusserste, was noch „was jetzt läuft" heissen kann.
+ */
+export const INSIGHTS_RADAR_MAX_VIDEO_AGE_DEFAULT = 180
+export const INSIGHTS_RADAR_MAX_VIDEO_AGE_CAP = 365
+
+/**
  * WELCHES CLUSTER EINE ZEILE BEKOMMT, DIE KEINES LESBAR MITBRINGT.
  *
  * Der Fall entsteht nur beim LESEN einer Zeile, deren `topic` ein Cluster
@@ -112,9 +130,11 @@ export function insightsUploadsPlaylistId(channelId: string): string | null {
 export function readInsightsRadarConfig(appConfig: unknown): {
   channels: InsightsRadarChannel[]
   maxVideos: number
+  /** Videos, die älter sind, speichert der Lauf nicht (Tage ab Veröffentlichung). */
+  maxVideoAgeDays: number
 } {
   const radar = (appConfig as { pukalani?: { insights?: { radar?: unknown } } } | null)
-    ?.pukalani?.insights?.radar as { channels?: unknown, maxVideosPerChannel?: unknown } | undefined
+    ?.pukalani?.insights?.radar as { channels?: unknown, maxVideosPerChannel?: unknown, maxVideoAgeDays?: unknown } | undefined
 
   const seen = new Set<string>()
   const channels: InsightsRadarChannel[] = []
@@ -136,7 +156,10 @@ export function readInsightsRadarConfig(appConfig: unknown): {
   const raw = typeof radar?.maxVideosPerChannel === 'number' ? radar.maxVideosPerChannel : INSIGHTS_RADAR_MAX_VIDEOS_DEFAULT
   const maxVideos = Math.max(1, Math.min(INSIGHTS_RADAR_MAX_VIDEOS_CAP, Math.floor(raw) || INSIGHTS_RADAR_MAX_VIDEOS_DEFAULT))
 
-  return { channels, maxVideos }
+  const rawAge = typeof radar?.maxVideoAgeDays === 'number' ? radar.maxVideoAgeDays : INSIGHTS_RADAR_MAX_VIDEO_AGE_DEFAULT
+  const maxVideoAgeDays = Math.max(1, Math.min(INSIGHTS_RADAR_MAX_VIDEO_AGE_CAP, Math.floor(rawAge) || INSIGHTS_RADAR_MAX_VIDEO_AGE_DEFAULT))
+
+  return { channels, maxVideos, maxVideoAgeDays }
 }
 
 // ── Die Schlagwortliste je Cluster ─────────────────────────────────────────

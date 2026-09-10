@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { INSIGHTS_TOPIC_KEYS } from '../shared/insightsPost'
 import {
+  INSIGHTS_RADAR_MAX_VIDEO_AGE_CAP,
+  INSIGHTS_RADAR_MAX_VIDEO_AGE_DEFAULT,
   INSIGHTS_RADAR_MAX_VIDEOS_CAP,
   INSIGHTS_RADAR_MAX_VIDEOS_DEFAULT,
   INSIGHTS_RADAR_RELEVANCE_BASE,
@@ -72,6 +74,19 @@ describe('readInsightsRadarConfig', () => {
     expect(read(0)).toBe(INSIGHTS_RADAR_MAX_VIDEOS_DEFAULT)
     expect(read(-3)).toBe(1)
     expect(read('zwanzig')).toBe(INSIGHTS_RADAR_MAX_VIDEOS_DEFAULT)
+  })
+
+  it('der Alters-Deckel: 180 Tage Vorgabe, höchstens ein Jahr, Unsinn fällt auf die Vorgabe', () => {
+    const read = (value: unknown) => readInsightsRadarConfig({
+      pukalani: { insights: { radar: { channels: [], maxVideoAgeDays: value } } },
+    }).maxVideoAgeDays
+    expect(INSIGHTS_RADAR_MAX_VIDEO_AGE_DEFAULT).toBe(180)
+    expect(readInsightsRadarConfig({}).maxVideoAgeDays).toBe(INSIGHTS_RADAR_MAX_VIDEO_AGE_DEFAULT)
+    expect(read(90)).toBe(90)
+    expect(read(3_000)).toBe(INSIGHTS_RADAR_MAX_VIDEO_AGE_CAP)
+    expect(read(0)).toBe(INSIGHTS_RADAR_MAX_VIDEO_AGE_DEFAULT)
+    expect(read(-1)).toBe(1)
+    expect(read('ewig')).toBe(INSIGHTS_RADAR_MAX_VIDEO_AGE_DEFAULT)
   })
 
   it('gibt bei fehlender Konfiguration eine leere Liste, keinen Wurf', () => {

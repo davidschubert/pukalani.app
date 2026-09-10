@@ -35,7 +35,7 @@ import type { InsightsRadarResponse, InsightsRadarVideoItem } from '../../../../
 export default defineEventHandler(async (event): Promise<InsightsRadarResponse> => {
   requirePermission(event, 'insights.manage')
 
-  const { channels, maxVideos } = readInsightsRadarConfig(useAppConfig())
+  const { channels, maxVideos, maxVideoAgeDays } = readInsightsRadarConfig(useAppConfig())
   const configured = !!useRuntimeConfig(event).insightsYoutubeKey
 
   const { tablesDB, databaseId } = insightsDb(event)
@@ -61,6 +61,7 @@ export default defineEventHandler(async (event): Promise<InsightsRadarResponse> 
     quotaEstimate: insightsRadarQuotaEstimate(channels.length, maxVideos),
     lastRunAt: listed?.rows[0]?.fetchedAt ?? null,
     today: new Date().toISOString().slice(0, 10),
+    maxVideoAgeDays,
     videos,
   }
 })
