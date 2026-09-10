@@ -421,6 +421,12 @@ beide sind billig zu beantworten:
    überhaupt erreichbar?** Mit `allow_fallbacks: false` gibt es kein Ausweichen
    — entweder die Route ist erlaubt, oder der Lauf schlägt fehl. Das ist **eine
    Probe-Anfrage mit unserem Schlüssel**, kein Konzept.
+
+   *So weit ohne Schlüssel geprüft (2026-09-09):* `google/gemini-2.5-flash`
+   steht in OpenRouters ZDR-gefilterter Modell-Liste (`/models?zdr=true`) —
+   mindestens EINE seiner sieben Routen ist also ZDR-fähig. **Welche**, sagt
+   die öffentliche Auskunft nicht: die Endpunkt-Liste kennt kein ZDR-Feld und
+   ignoriert den Filter. Genau deshalb bleibt die Probe die Entscheidung.
 2. **Wenn ja: Wollen wir für diesen einen Zweck den EU-Weg verlassen?** Das
    berührt BS1 (AVV, Datenschutzerklärung, Anwaltsrunde) — allerdings mit einem
    milden Gegenstand: hineingereicht wird eine **öffentliche YouTube-Adresse**,
