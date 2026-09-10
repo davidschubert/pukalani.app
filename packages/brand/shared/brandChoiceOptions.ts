@@ -66,6 +66,7 @@ import {
 } from './brandDesignVocab'
 import { BRAND_FONT_PAIRS } from './brandFontPairs'
 import { BRAND_DIRECTION_OPTIONS } from './brandDirections'
+import { BRAND_AI_REVIEWS, BRAND_AI_SCOPES, type BrandKitTerm } from './brandKitVocab'
 
 /** Eine legale Option einer GESCHLOSSENEN Auswahl. */
 export interface BrandChoiceOption {
@@ -591,7 +592,84 @@ export const BRAND_STAGE_CHOICE_SLOTS: readonly string[] = [
   ...DESIGN_CONTRACTS.map(contract => contract.slotId),
 ]
 
-const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, {
+/**
+ * DIE ZWEI AUSWAHL-SESSIONS DER SCHICHT 3 (Konzept BRAND-BOOK-KIT §2.3,
+ * Paket K5) — `n.scope` und `n.review`.
+ *
+ * ── WARUM SIE EINEN VERTRAG BRAUCHEN, OBWOHL NIEMAND SIE ENTWIRFT ────────
+ * Beide stehen auf `generator: 'none'`; kein Modell schreibt hier je einen
+ * Wert. Der Vertrag ist trotzdem Pflicht, und zwar aus DREI Gründen, von denen
+ * jeder für sich reichte:
+ *  1. Die KARTEN kommen aus ihm (`choiceCardsFor`) — vier bzw. drei Karten mit
+ *     Name, Wirkung und Beispiel. Ohne ihn stünde dort ein Textfeld, und in
+ *     `brand.md` läse eine Maschine irgendwann „eigentlich nur Social, ausser
+ *     bei Kampagnen".
+ *  2. Die LOG-KARTE liest ihn (`brandChoiceDisplayLabel`): sonst steht im
+ *     Handbuch und in der Werkstatt die rohe Id `text-only`.
+ *  3. Diese zwei Werte reisen WÖRTLICH in `brand.md` und `brand.json` (§2.6)
+ *     und werden dort von einem Agenten ausgewertet — sie sind der Grund,
+ *     warum `brandKitVocab.ts` überhaupt existiert.
+ *
+ * Die MENGE steht dort und wird hier nur übersetzt: eine zweite Liste wäre
+ * genau die zweite Wahrheit, gegen die beide Dateien geschrieben sind.
+ */
+function kitOptions(
+  terms: readonly BrandKitTerm[],
+  copyKeys: Readonly<Record<string, string>>,
+): readonly BrandChoiceOption[] {
+  return terms.map(term => ({
+    id: term.id,
+    label: term.en,
+    hint: term.noteEn,
+    display: { de: term.de, en: term.en },
+    // AUSGESCHRIEBEN, nicht gerechnet (s. Kopf von `BrandChoiceOption.copyKey`):
+    // `text-only` trägt einen Bindestrich, und ein Schlüssel-Pfad verträgt ihn
+    // schlecht. Eine versteckte Umwandlung wäre eine Kopplung, die kein
+    // Wächter sieht — `check:i18n-keys` prüft Config-Schlüssel, nicht
+    // gerechnete.
+    copyKey: copyKeys[term.id] ?? '',
+  }))
+}
+
+const KIT_CONTRACTS: readonly BrandChoiceContract[] = [
+  {
+    slotId: 'n.scope',
+    kind: 'closed',
+    options: kitOptions(BRAND_AI_SCOPES, {
+      drafts: 'brand.choice.aiScope.drafts',
+      'text-only': 'brand.choice.aiScope.textOnly',
+      internal: 'brand.choice.aiScope.internal',
+      none: 'brand.choice.aiScope.none',
+    }),
+    strayRule: 'Do not invent a fifth scope, do not combine two, and do not answer with a workflow — '
+      + 'the field holds one id and nothing else. Who checks the text is the NEXT session.',
+    fallbackQuestion: {
+      de: 'Was darf eine Maschine in eurem Namen schreiben — Entwürfe für alles, nur Text, '
+        + 'nur intern, oder nichts Kundenseitiges?',
+      en: 'What may a machine write in your name — drafts for everything, text only, '
+        + 'internal only, or nothing customer-facing?',
+    },
+  },
+  {
+    slotId: 'n.review',
+    kind: 'closed',
+    options: kitOptions(BRAND_AI_REVIEWS, {
+      every: 'brand.choice.aiReview.every',
+      sample: 'brand.choice.aiReview.sample',
+      channel: 'brand.choice.aiReview.channel',
+    }),
+    strayRule: 'There are exactly three rules — do not invent a fourth, do not answer "it depends" '
+      + 'without naming the channel (that IS the third rule), and do not describe the scope again.',
+    fallbackQuestion: {
+      de: 'Wer liest einen Text, bevor er rausgeht — jemand bei jeder Veröffentlichung, '
+        + 'stichprobenartig, oder je nach Kanal?',
+      en: 'Who reads a text before it goes out — someone for every publication, as a spot check, '
+        + 'or depending on the channel?',
+    },
+  },
+]
+
+const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, ...KIT_CONTRACTS, {
   /**
    * DIE WEICHE (`g.source`) — geschlossen, zwei Optionen (s.
    * `BRAND_DNA_SOURCES`).

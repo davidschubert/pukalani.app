@@ -7,7 +7,12 @@ import {
   swapBrandChoiceValueLine,
 } from '../../shared/brandChoiceOptions'
 import type { BrandSlot } from '../../shared/slotRegistry'
-import type { BrandGeneratorContext, BrandGeneratorResult, BrandSlotGenerator } from './brandGenerators'
+import type {
+  BrandGeneratorContext,
+  BrandGeneratorResult,
+  BrandSlotDependency,
+  BrandSlotGenerator,
+} from './brandGenerators'
 import { type BrandSlotInstructionOptions, formatGeorgeInputs, georgeSystemPrompt } from './georgePrompt'
 import { createGeorgeTurnScrubber, parseGeorgeTurn } from './georgeTurn'
 import { BRAND_PROVIDER_ROUTING } from './brandProviderRouting'
@@ -184,6 +189,30 @@ export interface AdvisorSlotVerifyInput {
   draft: string
   /** Sprache der OBERFLÄCHE — eine Rückfrage ist Chat und folgt Regel 9. */
   uiLocale: string
+  /**
+   * DIE QUELL-SLOTS DIESES FELDES — dieselben, die auch in den Prompt gingen
+   * (K5).
+   *
+   * Bis K5 kam die Nachprüfung mit dem Entwurf allein aus: eine geschlossene
+   * Auswahl misst sich an ihrem eigenen Vertrag. Die zwei Entwurfs-Sessions
+   * der dritten Schicht messen sich an einem ANDEREN Feld — `m.patterns` an
+   * den gewählten Typen (`m.types`), `n.guardrails` an den Meiden-Listen —,
+   * und ohne diese Zeile müsste jede Prüfung sich ihre Quelle selbst holen:
+   * ein zweiter Appwrite-Zugriff mitten in einer puren Rechnung, mit der
+   * Chance, einen ANDEREN Stand zu sehen als der Prompt eine Sekunde vorher.
+   *
+   * Es ist dieselbe Liste, kein Abbild — der Aufrufer reicht `context.dependencies`
+   * unverändert durch.
+   */
+  dependencies: readonly BrandSlotDependency[]
+}
+
+/** Der Wert eines Quell-Slots aus der Liste — '' heisst „leer oder nicht dabei". */
+export function advisorDependencyValue(
+  dependencies: readonly BrandSlotDependency[],
+  slotId: string,
+): string {
+  return dependencies.find(entry => entry.slotId === slotId)?.value ?? ''
 }
 
 /**
@@ -324,6 +353,7 @@ export function createAdvisorSlotGenerator(options: AdvisorSlotGeneratorOptions)
         slot: context.slot,
         draft: turn.draft,
         uiLocale: context.uiLocale,
+        dependencies: context.dependencies,
       })
       if ('question' in verdict) {
         return { ...base, draft: '', message: verdict.question, outcome: 'question' }

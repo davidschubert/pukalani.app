@@ -929,6 +929,45 @@
       "r2": "Was fliegt bewusst raus — und warum gerade das?"
     },
     "choice": {
+      "aiScope": {
+        "drafts": {
+          "label": "Entwürfe für alles",
+          "hint": "KI darf jeden Text vorschlagen — Website, Social, Mail, Verpackung. Veröffentlicht wird nichts ohne Mensch.",
+          "example": "Die Produkttexte entstehen als Entwurf, eine Person gibt sie frei."
+        },
+        "textOnly": {
+          "label": "Nur Text",
+          "hint": "Texte ja, Bilder und Zeichen nie. Passt zu Marken, deren Bildsprache an Fotografie hängt.",
+          "example": "Der Newsletter ja, das Motiv darüber nie."
+        },
+        "internal": {
+          "label": "Nur intern",
+          "hint": "Notizen, Zusammenfassungen, Übersetzungen — nichts, was ein Kunde je sieht.",
+          "example": "Gesprächsnotizen und Übersetzungen fürs Team."
+        },
+        "none": {
+          "label": "Nichts Kundenseitiges",
+          "hint": "Die strengste Fassung: KI bleibt aus der Marke heraus. Ehrlich, aber teuer im Alltag.",
+          "example": "Jeder Satz der Marke stammt von einem Menschen."
+        }
+      },
+      "aiReview": {
+        "every": {
+          "label": "Jede Veröffentlichung durch einen Menschen",
+          "hint": "Eine Person liest, bevor es rausgeht — und trägt es dann auch.",
+          "example": "Nichts geht online, das nicht jemand gelesen hat."
+        },
+        "sample": {
+          "label": "Stichprobe",
+          "hint": "Jeder fünfte Text wird geprüft. Schneller, aber der Fehler steht dann schon draussen.",
+          "example": "Freitags werden fünf Beiträge der Woche gegengelesen."
+        },
+        "channel": {
+          "label": "Kanal-abhängig",
+          "hint": "Website und Verpackung immer, Social nur stichprobenartig.",
+          "example": "Die Preisseite immer, ein Story-Post nicht."
+        }
+      },
       "exampleLabel": "Bekannt",
       "model": {
         "brandedHouse": {
@@ -1093,7 +1132,7 @@
       "george": {
         "subtitle": "Dein Markenberater",
         "placeholder": "Antwort schreiben — oder {voice} etwas fragen",
-      "addToPlaceholder": "Ergänzung zu „{field}“ schreiben",
+        "addToPlaceholder": "Ergänzung zu „{field}“ schreiben",
         "nothingOpen": "In diesem Kapitel ist nichts mehr offen — bestätige es, wenn es passt.",
         "questionsDone": "Meine Fragen sind durch — die offenen Felder unten formen wir jetzt hier im Gespräch.",
         "nextDraft": "Fangen wir mit „{field}“ an: Klick auf „{voice}, entwirf das“, dann lege ich dir eine erste Fassung aus deinen bisherigen Antworten vor — oder erzähl mir hier, was dir dazu durch den Kopf geht.",
@@ -1190,7 +1229,9 @@
           "startcardIndustry": "deine Branche (aus dem Startbogen)",
           "competitorNames": "Namen von Wettbewerbern — lies deine Website ein oder trag sie selbst ein",
           "sourceTexts": "vorhandene Texte — lies dafür deine Website ein",
-          "sourceSlots": "mindestens eine der Antworten, auf denen dieses Feld aufbaut"
+          "sourceSlots": "mindestens eine der Antworten, auf denen dieses Feld aufbaut",
+          "nameTypes": "die Sorten von Dingen, die ihr benennt — die Frage davor in diesem Kapitel",
+          "toneWords": "eure Ton-Wörter aus dem Kapitel Stimme"
         }
       },
       "progressConfirmed": "{confirmed} von {total} bestätigt",
@@ -2499,6 +2540,7 @@
         "nameType": "Typ",
         "pattern": "Muster",
         "example": "Beispiel",
+        "source": "Herkunft",
         "usage": "Verwendung",
         "minSize": "Mindestgröße",
         "role": "Rolle",
@@ -3392,6 +3434,118 @@
       "toggleToDark": "Dunkle Ansicht zeigen",
       "toggleToLight": "Helle Ansicht zeigen",
       "reducedMotion": "Weniger Bewegung eingestellt — Übergänge stehen still. Werte: {duration} ms · {easing} · Versatz {stagger} ms."
+    },
+    "kit": {
+      "moves": {
+        "nomenclature": {
+          "m1": {
+            "text": "Namen sind billig, bis sie auf einem Schild stehen. Sagt mir zuerst, welche Sorten von Dingen ihr überhaupt benennt — dann schlage ich je Sorte EIN Muster vor, kein Sortiment.",
+            "help": "Nur auf dem Weg mit Markenarchitektur — ohne Untermarken gäbe es nichts zu bestätigen."
+          },
+          "m2": {
+            "text": "Beim Namen halte ich mich an Otto: erst überleben, dann gefallen. Die Muster unten sind hergeleitet, nicht erfunden — wenn euch eines nicht gefällt, korrigiert es, aber sagt mir, welche Regel dann stattdessen gilt."
+          },
+          "m3": {
+            "text": "Und der Prüfstein für jeden künftigen Namen: Kann man ihn am Telefon buchstabieren? Wenn nicht, kostet er euch jeden Tag ein bisschen Geld."
+          }
+        },
+        "aiguide": {
+          "m1": {
+            "text": "Zwei Fragen entscheiden das ganze Kapitel: Was darf eine Maschine in eurem Namen schreiben — und wer liest, bevor es rausgeht. Alles danach sind Leitplanken, keine neuen Entscheidungen."
+          },
+          "m2": {
+            "text": "Die Leitplanken lese ich mit Nikas Ohr gegen: eure Ton-Wörter, eure Tabu-Wörter, eure Werte, eure Namens-Regeln. Ich habe nichts erfunden — ich habe sortiert. Streicht, was nicht stimmt.",
+            "help": "Ton-Parameter aus euren Ton-Wörtern · Tabus aus eurer Meiden-Liste · Schreibweisen aus euren Namens-Regeln."
+          },
+          "m3": {
+            "text": "Die drei Vorlagen darunter sind pur gerechnet: kein Modell hat sie geschrieben. Kopiert sie in euer KI-Werkzeug — und wenn eine Leitplanke sich ändert, ändern sie sich mit."
+          }
+        },
+        "presskit": {
+          "m1": {
+            "text": "Hier entsteht nichts Neues — ich stelle zusammen, was ihr längst entschieden habt. Zwei Dinge muss trotzdem ein Mensch sagen: welche Fakten reisen dürfen und wer für Presse ansprechbar ist."
+          },
+          "m2": {
+            "text": "Eure harten Zahlen aus dem Kontext bleiben intern. Ins Pressekit kommt nur, was ihr hier einzeln anhakt — Voreinstellung ist: keiner.",
+            "help": "Die Auswahl wird als eigener Wert gespeichert; die Rohliste reist nie."
+          }
+        }
+      },
+      "nomenclature": {
+        "note": "Dieses Kapitel gibt es nur auf dem Weg mit Markenarchitektur — ohne Untermarken gäbe es kein Muster, das zu bestätigen wäre."
+      },
+      "types": {
+        "title": "Wofür braucht ihr Namen?",
+        "tag": "Mehrfachwahl",
+        "intro": "Wählt die Sorten, die es bei euch heute gibt oder für die ihr schon plant. Was ihr nicht benennt, bleibt aus der Liste."
+      },
+      "patterns": {
+        "title": "Ein Muster je Sorte",
+        "tag": "Entwurf",
+        "intro": "Je gewählter Sorte eine Regel, ein Beispiel und die Stelle, aus der sie folgt.",
+        "empty": "Noch kein Muster — der Entwurf entsteht unten auf der Karte.",
+        "column": {
+          "type": "Sorte",
+          "pattern": "Muster",
+          "example": "Beispiel",
+          "source": "Herkunft"
+        }
+      },
+      "rules": {
+        "title": "Die Regeln",
+        "tag": "Vorschlag",
+        "intro": "Aus den Mustern gerechnet: Reihenfolge, Schreibweise, Trennzeichen und was nie passiert. Übernehmt sie oder ändert sie auf der Karte.",
+        "empty": "Sobald ein Muster steht, rechne ich die Regeln daraus.",
+        "apply": "Regeln übernehmen",
+        "applied": "Übernommen"
+      },
+      "prompts": {
+        "title": "Drei Vorlagen zum Kopieren",
+        "tag": "Pur gerechnet",
+        "intro": "System-Prompt, Social-Post, E-Mail an Kunden — aus euren Werten und euren Leitplanken. Kein Modell war beteiligt.",
+        "loading": "Rechne die Vorlagen …",
+        "empty": "Die Vorlagen entstehen, sobald die Leitplanken stehen.",
+        "copy": "Kopieren",
+        "copied": "Kopiert",
+        "apply": "Vorlagen übernehmen",
+        "applied": "Übernommen"
+      },
+      "facts": {
+        "title": "Welche Fakten dürfen reisen?",
+        "tag": "Opt-in je Eintrag",
+        "intro": "Eure Zahlen aus dem Kontext bleiben intern. Hakt einzeln an, was ins Pressekit darf.",
+        "loading": "Hole eure Fakten …",
+        "empty": "Ihr habt im Kontext keine Fakten hinterlegt — das Pressekit funktioniert auch ohne.",
+        "hint": "Voreinstellung ist: keiner. Was ihr hier anhakt, wird als eigener Wert gespeichert; die Rohliste reist nie."
+      },
+      "contact": {
+        "title": "Presse-Kontakt",
+        "tag": "Optional",
+        "intro": "Eine Person, an die sich Presse wendet — Name, Rolle, E-Mail.",
+        "loading": "Suche vorhandene Ansprechpartner …",
+        "public": "Diese Angabe reist öffentlich im Pressekit und in jeder Datei, die ihr herausgebt. Eine Telefonnummer nehmen wir bewusst nicht auf.",
+        "template": {
+          "account": "Konto-Inhaber",
+          "intro": "Kontakt aus dem Erstgespräch",
+          "manual": "Oder tragt jemand anderen ein — die Karten füllen die Felder nur vor."
+        },
+        "field": {
+          "name": "Name",
+          "role": "Rolle",
+          "email": "E-Mail"
+        },
+        "apply": "Kontakt übernehmen",
+        "applied": "Übernommen"
+      },
+      "summary": {
+        "title": "So liest sich euer Pressekit",
+        "tag": "Nur lesen",
+        "intro": "Zusammengestellt aus dem, was oben steht. Was fehlt, steht als fehlend da — nichts wird ersetzt.",
+        "loading": "Stelle das Pressekit zusammen …",
+        "empty": "Sobald Tagline, Boilerplates und Fakten stehen, sieht man hier das ganze Kit.",
+        "apply": "Vorschau übernehmen",
+        "applied": "Übernommen"
+      }
     }
   }
 }

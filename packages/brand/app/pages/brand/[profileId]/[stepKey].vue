@@ -1765,6 +1765,8 @@ const READINESS_KEYS: Record<BrandReadinessNeed, string> = {
   'competitor_names': 'competitorNames',
   'source_texts': 'sourceTexts',
   'source_slots': 'sourceSlots',
+  'name_types': 'nameTypes',
+  'tone_words': 'toneWords',
 }
 
 function readinessNote(readiness: BrandSlotReadiness): string | null {
@@ -1893,6 +1895,15 @@ const RENDERED_ABOVE = new Set([
   // Der ROHE Wert von `i.rules` wären vier beschriftete Blöcke unter dem
   // Specimen, das sie gerade gezeigt hat.
   'i.pair', 'i.scale', 'i.rules',
+  /*
+   * SCHICHT 3 (K5): die Sessions, deren Wert schon auf der Werkbank darüber
+   * steht. `m.patterns` und `n.guardrails` sind NICHT dabei — sie sind
+   * ENTWÜRFE, und der Mensch redigiert sie im Bühnen-Editor auf ihrer Karte;
+   * `n.scope`/`n.review` sind Karten-Wahlen und stehen ohnehin als Wert da.
+   */
+  'm.types', 'm.rules',
+  'n.prompts',
+  'p.facts', 'p.contact', 'p.summary',
 ])
 
 function renderedAbove(slotId: string): boolean {
@@ -3401,6 +3412,49 @@ function applyMotionPick(slotId: string, value: string): void {
   onInput(slotId, value)
 }
 
+// ── Die drei Kapitel von Book & Kit (K5, §2.2–§2.4) ───────────────────────
+
+/**
+ * DIESELBE ARBEITSTEILUNG WIE IN SCHICHT 2 — mit EINER Verschiebung: es
+ * rechnet nicht der Browser, sondern der SERVER, und die Seite schreibt.
+ *
+ * Der Grund steht im Kopf von `useBrandKitWorkshop`: die Prompt-Vorlagen
+ * brauchen die ganze Foundation, die Pressekit-Vorschau vier fremde Kapitel,
+ * und die Fakten (`a.facts`) dürfen den Browser überhaupt nur über einen
+ * Eigentümer-Pfad erreichen. Der Store der Werkstatt trägt immer nur den
+ * offenen Baustein.
+ */
+const kitWorkshop = useBrandKitWorkshop(profileId)
+
+const showNomenclaturePanel = computed(() => stepKey.value === 'nomenclature')
+const showAiguidePanel = computed(() => stepKey.value === 'aiguide')
+const showPresskitPanel = computed(() => stepKey.value === 'presskit')
+
+const NOMENCLATURE_SLOTS = ['m.types', 'm.patterns', 'm.rules'] as const
+const AIGUIDE_SLOTS = ['n.scope', 'n.review', 'n.guardrails', 'n.prompts'] as const
+const PRESSKIT_SLOTS = ['p.facts', 'p.contact', 'p.summary'] as const
+
+const confirmedNomenclatureSlots = computed(() =>
+  NOMENCLATURE_SLOTS.filter(slotId => store.slotConfirmed(slotId)))
+const confirmedAiguideSlots = computed(() =>
+  AIGUIDE_SLOTS.filter(slotId => store.slotConfirmed(slotId)))
+const confirmedPresskitSlots = computed(() =>
+  PRESSKIT_SLOTS.filter(slotId => store.slotConfirmed(slotId)))
+
+/**
+ * EINE WAHL AUS EINEM KIT-PANEL — derselbe Weg wie jede Eingabe.
+ *
+ * KEIN selbst-vorbelegender Beobachter wie in den Design-Kapiteln: dort
+ * entsteht NICHTS von Hand, hier schon (`m.rules` ist `stage-edit`,
+ * `p.contact` ein Formular). Ein Automatismus überschriebe genau die Fassung,
+ * die jemand gerade tippt. Übernommen wird deshalb auf Klick — der Knopf ist
+ * in den Panels, der Schreibvorgang hier.
+ */
+function applyKitPick(slotId: string, value: string): void {
+  if (store.slotConfirmed(slotId)) return
+  onInput(slotId, value)
+}
+
 /** Die Marken des Kontos für den Wähler oben in der Sidebar. */
 const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-circle-flags-de' }
 
@@ -3921,6 +3975,59 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           :confirmed="confirmedMotionSlots"
           @pick="applyMotionPick"
         />
+
+        <!-- DIE NOMENKLATUR (Kapitel `nomenclature`, K5) — Typen, Muster und
+             Regeln auf EINER Werkbank. Wie die Design-Kapitel steht sie ÜBER
+             dem Gespräch; bestätigt wird jede Session unten auf ihrer Karte
+             (`RENDERED_ABOVE`). Die Züge darüber sind GEORGES Sätze über Otto
+             — keine zweite Stimme. -->
+        <template v-if="showNomenclaturePanel">
+          <BwKitMoves chapter="nomenclature" :count="3" />
+          <BwKitPatternsPanel
+            :architecture-rule="kitWorkshop.architectureRule.value"
+            :confirmed="confirmedNomenclatureSlots"
+            @pick="applyKitPick"
+          />
+        </template>
+
+        <!-- DIE AI-GUIDELINES (Kapitel `aiguide`, K5). Umfang und Freigabe
+             sind Katalog-Wahlen und laufen über das Karten-Instrument der
+             Bühne; die LEITPLANKEN entwirft Nikas Technik auf ihrer Karte.
+             Hier steht nur, was PUR gerechnet ist: die drei Vorlagen. -->
+        <template v-if="showAiguidePanel">
+          <BwKitMoves chapter="aiguide" :count="3" />
+          <BwKitPromptsPanel
+            :prompts="kitWorkshop.prompts.value"
+            :pending="kitWorkshop.pending.value"
+            :confirmed="confirmedAiguideSlots"
+            @pick="applyKitPick"
+          />
+        </template>
+
+        <!-- DAS PRESSEKIT (Kapitel `presskit`, K5) — hier entsteht nichts
+             Neues; zwei Dinge muss trotzdem ein Mensch sagen (Fakten-Freigabe,
+             Ansprechperson), das dritte ist die Vorschau. -->
+        <template v-if="showPresskitPanel">
+          <BwKitMoves chapter="presskit" :count="2" />
+          <BwKitFactsPanel
+            :facts="kitWorkshop.facts.value"
+            :pending="kitWorkshop.pending.value"
+            :confirmed="confirmedPresskitSlots"
+            @pick="applyKitPick"
+          />
+          <BwKitContactPanel
+            :templates="kitWorkshop.contactTemplates.value"
+            :pending="kitWorkshop.pending.value"
+            :confirmed="confirmedPresskitSlots"
+            @pick="applyKitPick"
+          />
+          <BwKitSummaryPanel
+            :summary="kitWorkshop.summary.value"
+            :pending="kitWorkshop.pending.value"
+            :confirmed="confirmedPresskitSlots"
+            @pick="applyKitPick"
+          />
+        </template>
 
         <p v-if="phaseIntro" class="bw-label" style="color: var(--bw-muted); padding-left: 2.65rem">{{ phaseIntro }}</p>
 

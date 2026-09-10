@@ -3954,6 +3954,30 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'Two patterns for the same kind, so that nobody knows which one applies.',
       'An example that breaks its own pattern.',
     ],
+    /*
+     * K5: DIESE SESSION HAT EINEN ENTWURFS-AUFTRAG BEKOMMEN.
+     *
+     * In K0 stand hier alles ausser den Verarbeitungsregeln — und ohne sie
+     * wirft `sessionInstruction` (bewusst: „ein stiller Allzweck-Text wäre ein
+     * Entwurf ohne Auftrag"). Der Auftrag ist inhaltlich NICHTS Neues: er sagt
+     * in Regelform, was Ziel und Qualitätsmerkmale darüber schon zusagen. Die
+     * FORM des Wertes steht nicht hier, sondern in `server/utils/ottoPrompt.ts`
+     * — sie hängt an `brandKitSlots.ts` und wird nach dem Lauf gemessen.
+     */
+    rules: [
+      'You are not naming anything here. You are writing the RULE that a name of that kind has to '
+      + 'obey — and one example that obeys it, so the rule can be checked.',
+      'Derive every pattern from a line that is already settled: the architecture model (does the '
+      + 'umbrella brand carry everything, or do the parts stand on their own?), the naming rule, the '
+      + 'decided brand name, a tone word. Name that line as the source. Never derive a pattern from '
+      + 'taste.',
+      'One pattern per chosen kind — the kinds are in the inputs. Do not add a kind they did not '
+      + 'choose, and never write two patterns for the same kind.',
+      'A pattern says what a name IS MADE OF and what it never contains. "Fits the brand" is the '
+      + 'conclusion, not the rule.',
+      'The example is a name this brand could actually give tomorrow — in their language, their '
+      + 'place, their trade. Never a placeholder and never a name that breaks its own pattern.',
+    ],
     form: { person: 'none', tense: 'present' },
     examples: pathExamples(
       {
@@ -4059,6 +4083,27 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A guardrail invented here because it sounds sensible — the list is a summary, not a new decision.',
       'A taboo that contradicts a word the brand uses on its own website.',
       'A line so general that no text could ever break it.',
+    ],
+    /*
+     * K5: DIESE SESSION HAT EINEN ENTWURFS-AUFTRAG BEKOMMEN — dieselbe
+     * Begründung wie bei `m.patterns` darüber (ohne Verarbeitungsregeln wirft
+     * der Prompt-Bauer). Die vier Gruppen und der Trenner stehen in
+     * `server/utils/nikaPrompt.ts`, weil sie an `brandKitSlots.ts` hängen und
+     * nach dem Lauf gemessen werden.
+     */
+    rules: [
+      'You are SORTING, not deciding. Every line restates something the client has already '
+      + 'confirmed — a tone word, a voice sample, a banned word, a value, a naming rule — and says '
+      + 'which one it comes from. If a line has no source above, it does not belong in the list.',
+      'The tone parameters are the tone words, each with the one voice sample that shows it. Do not '
+      + 'add adjectives of your own, and never use a word that stands on their avoid list.',
+      'The taboos ARE the avoid lists, word for word. Do not soften them, do not add new ones, do '
+      + 'not explain them away.',
+      'The spellings name the marks that really exist: the brand title, the tagline, the product '
+      + 'names from their naming rules. A brand without its own naming rules still has a title and a '
+      + 'tagline — that is where its spellings come from.',
+      'The no-go topics are subjects this brand does not speak about at all. If nothing above says '
+      + 'so, ask for one instead of inventing it.',
     ],
     form: { person: 'none', tense: 'present' },
     examples: pathExamples(

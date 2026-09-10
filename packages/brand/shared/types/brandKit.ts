@@ -399,3 +399,54 @@ export interface BrandKitReadmeManifest {
   stand: string
   files: readonly BrandKitReadmeFile[]
 }
+
+// ── Die Werkstatt-Quellen der dritten Schicht (§2.9, Paket K5) ────────────
+
+/**
+ * EINE VORLAGE FÜR DEN PRESSE-KONTAKT (§2.20 Nr. 3).
+ *
+ * Sie FÜLLT das Formular vor; gespeichert wird immer der bestätigte TEXT
+ * (`p.contact`), nie ein Verweis — die Konto-Daten dürfen sich später ändern,
+ * ohne das Pressekit still mitzuändern.
+ *
+ * EINE TELEFONNUMMER GIBT ES HIER NICHT, obwohl die Erstgespräch-Anfrage eine
+ * trägt: sie reist nicht (§2.4, Anti-Muster der Session). Das Feld fehlt im
+ * Vertrag, damit es auch kein künftiger Aufrufer durchreichen kann.
+ */
+export interface BrandKitContactTemplate {
+  /** `account` = Konto-Inhaber · `intro` = Erstgespräch-Anfrage dieser Marke. */
+  id: 'account' | 'intro'
+  name: string
+  role: string
+  email: string
+}
+
+/** Eine der drei puren Prompt-Vorlagen (`n.prompts`). */
+export interface BrandKitWorkshopPrompt {
+  id: string
+  title: string
+  body: string
+}
+
+/**
+ * WAS DIE WERKSTATT DER DRITTEN SCHICHT VOM SERVER BRAUCHT — EINE Antwort für
+ * alle vier puren Quellen (§2.9, K5).
+ *
+ * Sie ist eine EIGENTÜMER-Auskunft (`private, no-store`): `facts` sind die
+ * Einträge von `a.facts`, und die sind `internal`. Sie erreichen den Browser
+ * NUR über diesen Pfad, nie über Share, Publikation oder eine Export-Datei.
+ */
+export interface BrandKitWorkshopResponse {
+  /** Die Inhaltssprache der Marke — in ihr stehen alle Texte hier. */
+  locale: string
+  /** Die Architektur-Regel (`b2.rule`) für die Vorbefüllung von `m.rules`; '' ohne. */
+  architectureRule: string
+  /** Die Einträge von `a.facts`, zur Freigabe je Eintrag. Leer heisst „keine". */
+  facts: string[]
+  /** Die drei Vorlagen, PUR gerechnet (§2.11: null KI-Aufrufe). */
+  prompts: BrandKitWorkshopPrompt[]
+  /** Vorhandene Ansprechpartner-Daten als wählbare Vorlage; kann leer sein. */
+  contactTemplates: BrandKitContactTemplate[]
+  /** Die Pressekit-Vorschau als fertiger `structured`-Wert für `p.summary`. */
+  summary: string
+}

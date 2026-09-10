@@ -929,6 +929,45 @@
       "r2": "What goes — deliberately? And why that?"
     },
     "choice": {
+      "aiScope": {
+        "drafts": {
+          "label": "Drafts for everything",
+          "hint": "AI may draft any text — website, social, mail, packaging. Nothing goes out without a human.",
+          "example": "Product copy starts as a draft, one person releases it."
+        },
+        "textOnly": {
+          "label": "Text only",
+          "hint": "Text yes, images and marks never. Fits brands whose imagery rests on photography.",
+          "example": "The newsletter yes, the picture above it never."
+        },
+        "internal": {
+          "label": "Internal only",
+          "hint": "Notes, summaries, translations — nothing a customer will ever see.",
+          "example": "Meeting notes and translations for the team."
+        },
+        "none": {
+          "label": "Nothing customer-facing",
+          "hint": "The strictest version: AI stays out of the brand. Honest, but expensive day to day.",
+          "example": "Every sentence of the brand comes from a person."
+        }
+      },
+      "aiReview": {
+        "every": {
+          "label": "Every publication reviewed by a human",
+          "hint": "One person reads it before it goes out — and then owns it.",
+          "example": "Nothing goes live that nobody has read."
+        },
+        "sample": {
+          "label": "Spot check",
+          "hint": "Every fifth text gets read. Faster, but by then the mistake is already out there.",
+          "example": "On Fridays five posts of the week get a second pair of eyes."
+        },
+        "channel": {
+          "label": "Depends on the channel",
+          "hint": "Website and packaging always, social only as a spot check.",
+          "example": "The pricing page always, a story post not."
+        }
+      },
       "exampleLabel": "Known for",
       "model": {
         "brandedHouse": {
@@ -1093,7 +1132,7 @@
       "george": {
         "subtitle": "Your brand advisor",
         "placeholder": "Write your answer — or ask a question",
-      "addToPlaceholder": "Add to “{field}”",
+        "addToPlaceholder": "Add to “{field}”",
         "nothingOpen": "Nothing open in this chapter — confirm it when it fits.",
         "questionsDone": "My questions are done — we'll shape the remaining fields right here in the conversation.",
         "nextDraft": "Let’s start with “{field}”: click “{voice}, draft this” and I’ll lay out a first version from what you’ve told me so far — or just tell me here what’s on your mind about it.",
@@ -1190,7 +1229,9 @@
           "startcardIndustry": "your industry (from the start card)",
           "competitorNames": "names of competitors — read your website in, or enter them yourself",
           "sourceTexts": "existing texts — read your website in for that",
-          "sourceSlots": "at least one of the answers this field builds on"
+          "sourceSlots": "at least one of the answers this field builds on",
+          "nameTypes": "the kinds of things you give names to — the question before this one in this chapter",
+          "toneWords": "your tone words from the Voice chapter"
         }
       },
       "progressConfirmed": "{confirmed} of {total} confirmed",
@@ -2499,6 +2540,7 @@
         "nameType": "Type",
         "pattern": "Pattern",
         "example": "Example",
+        "source": "Source",
         "usage": "Use",
         "minSize": "Minimum size",
         "role": "Role",
@@ -3392,6 +3434,118 @@
       "toggleToDark": "Show the dark view",
       "toggleToLight": "Show the light view",
       "reducedMotion": "Reduced motion is set — transitions stand still. Values: {duration} ms · {easing} · offset {stagger} ms."
+    },
+    "kit": {
+      "moves": {
+        "nomenclature": {
+          "m1": {
+            "text": "Names are cheap until they end up on a sign. Tell me first which kinds of things you give names to at all — then I propose ONE pattern per kind, not an assortment.",
+            "help": "Only on the path with brand architecture — without sub-brands there would be nothing to confirm."
+          },
+          "m2": {
+            "text": "On names I go by Otto: survive first, please second. The patterns below are derived, not invented — if you do not like one, correct it, but tell me which rule applies instead."
+          },
+          "m3": {
+            "text": "And the test for every future name: can you spell it out over the phone? If not, it costs you a little money every single day."
+          }
+        },
+        "aiguide": {
+          "m1": {
+            "text": "Two questions settle this whole chapter: what may a machine write in your name — and who reads it before it goes out. Everything after that is guardrails, not new decisions."
+          },
+          "m2": {
+            "text": "I read the guardrails back with Nika's ear: your tone words, your banned words, your values, your naming rules. I invented nothing — I sorted. Strike whatever is wrong.",
+            "help": "Tone parameters from your tone words · taboos from your avoid list · spellings from your naming rules."
+          },
+          "m3": {
+            "text": "The three templates below are computed, not written: no model was involved. Paste them into your AI tool — and when a guardrail changes, they change with it."
+          }
+        },
+        "presskit": {
+          "m1": {
+            "text": "Nothing new happens here — I assemble what you settled long ago. Two things still need a human: which facts may travel, and who the press can talk to."
+          },
+          "m2": {
+            "text": "Your hard numbers from the context stay internal. Only what you tick here goes into the press kit — the default is none.",
+            "help": "The selection is stored as its own value; the raw list never travels."
+          }
+        }
+      },
+      "nomenclature": {
+        "note": "This chapter only exists on the path with brand architecture — without sub-brands there would be no pattern to confirm."
+      },
+      "types": {
+        "title": "What do you need names for?",
+        "tag": "Multiple choice",
+        "intro": "Pick the kinds you have today or are already planning for. What you do not name stays off the list."
+      },
+      "patterns": {
+        "title": "One pattern per kind",
+        "tag": "Draft",
+        "intro": "For every chosen kind: a rule, an example and the place it follows from.",
+        "empty": "No pattern yet — the draft happens on the card below.",
+        "column": {
+          "type": "Kind",
+          "pattern": "Pattern",
+          "example": "Example",
+          "source": "Source"
+        }
+      },
+      "rules": {
+        "title": "The rules",
+        "tag": "Suggestion",
+        "intro": "Computed from the patterns: order, spelling, separators and what never happens. Take them, or change them on the card.",
+        "empty": "As soon as one pattern stands, I compute the rules from it.",
+        "apply": "Take the rules",
+        "applied": "Taken"
+      },
+      "prompts": {
+        "title": "Three templates to copy",
+        "tag": "Computed",
+        "intro": "System prompt, social post, email to customers — from your values and your guardrails. No model was involved.",
+        "loading": "Computing the templates …",
+        "empty": "The templates appear once the guardrails stand.",
+        "copy": "Copy",
+        "copied": "Copied",
+        "apply": "Take the templates",
+        "applied": "Taken"
+      },
+      "facts": {
+        "title": "Which facts may travel?",
+        "tag": "Opt-in per entry",
+        "intro": "Your numbers from the context stay internal. Tick one by one what may go into the press kit.",
+        "loading": "Fetching your facts …",
+        "empty": "You did not record any facts in the context — the press kit works without them.",
+        "hint": "The default is none. What you tick here is stored as its own value; the raw list never travels."
+      },
+      "contact": {
+        "title": "Press contact",
+        "tag": "Optional",
+        "intro": "One person the press can write to — name, role, email.",
+        "loading": "Looking for contacts on file …",
+        "public": "This line travels publicly in the press kit and in every file you hand out. We deliberately do not take a phone number.",
+        "template": {
+          "account": "Account holder",
+          "intro": "Contact from the intro call",
+          "manual": "Or enter somebody else — the cards only fill the fields in."
+        },
+        "field": {
+          "name": "Name",
+          "role": "Role",
+          "email": "Email"
+        },
+        "apply": "Take the contact",
+        "applied": "Taken"
+      },
+      "summary": {
+        "title": "How your press kit reads",
+        "tag": "Read only",
+        "intro": "Assembled from what stands above. Whatever is missing says so — nothing gets substituted.",
+        "loading": "Assembling the press kit …",
+        "empty": "Once tagline, boilerplates and facts stand, the whole kit shows up here.",
+        "apply": "Take the preview",
+        "applied": "Taken"
+      }
     }
   }
 }

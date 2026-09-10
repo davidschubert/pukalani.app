@@ -251,10 +251,14 @@ describe('K4 — Kapitel „Nomenklatur"', () => {
       'brand.foundation.column.nameType',
       'brand.foundation.column.pattern',
       'brand.foundation.column.example',
+      // SEIT K5: die Herkunft hat eine eigene Spalte. Die Werte des Dummys
+      // tragen sie nicht — die Zelle bleibt dann leer, statt die Begründung
+      // hinter das Beispiel zu schieben.
+      'brand.foundation.column.source',
     ])
     // Die Typ-Id wird zur Lesefassung des Katalogs, das Beispiel steht in der
     // dritten Spalte — beides in der INHALTSSPRACHE der Marke.
-    expect(patterns?.rows[0]).toEqual(['Produkt', 'Ort + Erntemonat — kein Fantasiename', 'Kona Februar 2026'])
+    expect(patterns?.rows[0]).toEqual(['Produkt', 'Ort + Erntemonat — kein Fantasiename', 'Kona Februar 2026', ''])
     expect(patterns?.rows).toHaveLength(3)
 
     const rules = chapter?.blocks.find(block => block.kind === 'rules')

@@ -25,6 +25,20 @@ import { BRAND_MARK_KINDS, brandTermById, brandTermLabel } from './brandDesignVo
 import { type BrandDirection, brandDirectionById, BRAND_DIRECTIONS_VERSION } from './brandDirections'
 import { brandFontPair } from './brandFontPairs'
 import { brandLicenseNote, brandLicenseRows } from './brandKitLicenses'
+/*
+ * SEIT K5 LIEST DAS BOOK ÜBER DIESELBEN HELFER, DIE DIE WERKSTATT SCHREIBT
+ * (§2.18 Zeile K5, „gemeinsame Slot-Format-Helfer für Schreiber UND K4-Leser").
+ * Bis K4 stand die Zerlegung der drei Kit-Werte HIER — als einzige Meinung
+ * darüber, wie ein Muster, eine Leitplanken-Gruppe und ein Kontakt aussehen.
+ * Sie war richtig und trotzdem gefährlich: der Schreiber, der sie hätte
+ * bedienen müssen, gab es noch nicht.
+ */
+import {
+  parseBrandGuardrails,
+  parseBrandNamePatterns,
+  parseBrandPressContact,
+  parseBrandPromptTemplates,
+} from './brandKitSlots'
 import { BRAND_AI_REVIEWS, BRAND_AI_SCOPES, BRAND_NAME_TYPES, type BrandKitTerm } from './brandKitVocab'
 import { brandListEntries } from './brandSessions'
 import { isBrandSlotShareable } from './brandSharing'
@@ -707,6 +721,22 @@ function vocabularySides(view: BrandSlotValueView | null): VocabularySides {
   return sides
 }
 
+/**
+ * DIE MEIDEN-SEITE EINES WORT-LEITFADENS, aus dem ROHEN Wert — der EINE Leser
+ * dafür (K5).
+ *
+ * Sie steht hier und nicht beim Aufrufer, weil die FORM hier steht: die zwei
+ * Regeln oben kennen beide Sprachen und beide Schreibweisen. Nikas Prüfung
+ * (`n.guardrails`: „kein Tabu-Wort in den Ton-Parametern") braucht genau diese
+ * Liste, und eine zweite Zerlegung im Server-Plugin wäre eine zweite Meinung
+ * darüber, was ein Tabu ist — mit dem Ergebnis, dass die Prüfung Wörter
+ * durchliesse, die im Handbuch als verboten stehen.
+ */
+export function brandVocabularyAvoidWords(value: string): string[] {
+  if (!value.trim()) return []
+  return vocabularySides(brandSlotValueView('list', value)).avoid
+}
+
 /** Zweite Liste anhängen, ohne Dubletten — der Leitfaden leitet aus dem Tabu ab. */
 function mergeWords(first: readonly string[], second: readonly string[]): string[] {
   const seen = new Set(first.map(comparable))
@@ -1144,39 +1174,36 @@ function nomenclatureBlocks(values: Map<string, string>, locale: string): BrandF
   }
 
   const patterns = viewOf(values, 'm.patterns')
-  if (patterns?.kind === 'blocks') {
-    /*
-     * JE TYP EIN MUSTER MIT BEISPIEL (§2.2) — zwei Schreibweisen, eine
-     * Lesart: der Block trägt Muster und Beispiel entweder auf zwei ZEILEN
-     * oder in einer Zeile durch ` · ` getrennt. Beides gibt es wirklich —
-     * `formatBrandSlotStructured` zieht einen Wert auf EINE Zeile zusammen,
-     * ein Mensch im Bühnen-Editor tippt zwei. Der Mittelpunkt ist dabei die
-     * eindeutigere Marke: die Muster selbst tragen Gedankenstriche („Ort +
-     * Erntemonat — kein Fantasiename"), an denen ein Trenner ohne Not
-     * zerbräche.
-     *
-     * Fehlt das Beispiel, bleibt die Zelle LEER — ein erfundenes wäre ein
-     * Name, den die Marke nie vergeben hat.
-     */
-    const rows = patterns.blocks
-      .map((block) => {
-        const lines = block.body.split('\n').map(line => line.trim()).filter(Boolean)
-        const [pattern = '', ...rest] = lines.length > 1
-          ? lines
-          : (lines[0] ?? '').split(' · ').map(part => part.trim()).filter(Boolean)
-        return [kitTermLabel(BRAND_NAME_TYPES, block.label, locale), pattern, rest.join(' · ')]
-      })
-      .filter(row => (row[1] ?? '').length > 0)
-    if (rows.length > 0) {
-      blocks.push({
-        kind: 'table',
-        labelKey: `${LABEL}.namePatterns`,
-        columnKeys: [`${COLUMN}.nameType`, `${COLUMN}.pattern`, `${COLUMN}.example`],
-        rows,
-      })
-    }
+  /*
+   * JE TYP EIN MUSTER MIT BEISPIEL UND HERKUNFT (§2.2) — zerlegt von
+   * `parseBrandNamePatterns` (K5), das die zwei Schreibweisen kennt: Teile
+   * auf ZEILEN oder in einer Zeile durch ` · ` getrennt. Beides gibt es
+   * wirklich — der kanonische Schreiber zieht auf eine Zeile zusammen, ein
+   * Mensch im Bühnen-Editor tippt untereinander.
+   *
+   * DIE HERKUNFT BEKOMMT SEIT K5 EINE EIGENE SPALTE und steht nicht mehr
+   * hinter dem Beispiel: „Kona Februar 2026" und „aus dem Architektur-Modell
+   * ‚eine Marke'" sind zwei verschiedene Auskünfte. In einer Zelle gemischt
+   * kann man weder die Namen überfliegen noch die Begründungen. Werte aus der
+   * Zeit davor tragen nur zwei Teile — die Spalte bleibt dann leer, wie das
+   * Beispiel es immer schon durfte (ein erfundenes wäre ein Name, den die
+   * Marke nie vergeben hat).
+   */
+  const patternRows = parseBrandNamePatterns(textOf(values, 'm.patterns') ?? '')
+  if (patternRows.length > 0) {
+    blocks.push({
+      kind: 'table',
+      labelKey: `${LABEL}.namePatterns`,
+      columnKeys: [`${COLUMN}.nameType`, `${COLUMN}.pattern`, `${COLUMN}.example`, `${COLUMN}.source`],
+      rows: patternRows.map(row => [
+        kitTermLabel(BRAND_NAME_TYPES, row.type, locale),
+        row.pattern,
+        row.example,
+        row.source,
+      ]),
+    })
   }
-  else {
+  else if (patterns) {
     blocks.push(...blocksAsCards(patterns, `${LABEL}.namePatterns`))
   }
 
@@ -1473,16 +1500,11 @@ function typeUsageBlocks(
  * Name, der zweite die Rolle. `null` heisst „daraus wird kein Kontakt" — der
  * Aufrufer stellt den Wert dann als Text hin, statt ihn zu verlieren.
  */
-function contactBlock(view: BrandSlotValueView | null): { name: string, role: string, email: string } | null {
-  const entries = view?.kind === 'blocks'
-    ? view.blocks.map(block => block.body.trim()).filter(Boolean)
-    : sentenceEntries(view)
-  if (entries.length === 0) return null
-  const email = entries.find(entry => /\S+@\S+\.\S+/u.test(entry)) ?? ''
-  const rest = entries.filter(entry => entry !== email)
-  const name = rest[0] ?? ''
-  if (!name && !email) return null
-  return { name, role: rest[1] ?? '', email: /\S+@\S+\.\S+/u.exec(email)?.[0] ?? '' }
+function contactBlock(value: string | null): { name: string, role: string, email: string } | null {
+  // Die Regel selbst steht seit K5 beim SCHREIBER (`brandKitSlots.ts`) — sie
+  // ist der Leser zu `formatBrandPressContact`, und die zwei gehören
+  // nebeneinander. Hier bleibt nur die Aufrufstelle.
+  return value === null ? null : parseBrandPressContact(value)
 }
 
 /**
@@ -1513,10 +1535,10 @@ function presskitBlocks(
   const facts = sentenceEntries(viewOf(values, 'p.facts'))
   if (facts.length > 0) blocks.push({ kind: 'list', labelKey: `${LABEL}.pressFacts`, items: facts })
 
-  const contactView = viewOf(values, 'p.contact')
-  const contact = contactBlock(contactView)
+  const contactValue = textOf(values, 'p.contact')
+  const contact = contactBlock(contactValue)
   if (contact) blocks.push({ kind: 'contact', ...contact })
-  else if (contactView) blocks.push(...textBlock(textOf(values, 'p.contact'), `${LABEL}.pressContact`))
+  else if (contactValue !== null) blocks.push(...textBlock(contactValue, `${LABEL}.pressContact`))
 
   if (design) {
     const kind = brandTermById(BRAND_MARK_KINDS, design.mark.kind)
@@ -1559,31 +1581,31 @@ function aiGuidelineBlocks(values: Map<string, string>, locale: string): BrandFo
     })
   }
 
-  const guardrails = viewOf(values, 'n.guardrails')
-  if (guardrails?.kind === 'blocks') {
-    for (const group of guardrails.blocks) {
-      const items = ruleEntries(group.body)
-      if (items.length === 0) continue
+  // Die vier Gruppen kommen seit K5 aus DEMSELBEN Leser, den Nikas Prüfung
+  // benutzt (`parseBrandGuardrails`) — sonst könnte ein Entwurf die Invariante
+  // bestehen und im Handbuch trotzdem anders zerfallen.
+  const guardrailGroups = parseBrandGuardrails(textOf(values, 'n.guardrails') ?? '')
+  if (guardrailGroups.length > 0) {
+    for (const group of guardrailGroups) {
       blocks.push({
         kind: 'rules',
         labelKey: `${LABEL}.aiGuardrails`,
         label: group.label,
-        items: items.map(entry => ({ text: entry })),
+        items: group.lines.map(entry => ({ text: entry })),
       })
     }
   }
   else {
-    const items = sentenceEntries(guardrails)
+    const items = sentenceEntries(viewOf(values, 'n.guardrails'))
     if (items.length > 0) {
       blocks.push({ kind: 'rules', labelKey: `${LABEL}.aiGuardrails`, items: items.map(entry => ({ text: entry })) })
     }
   }
 
-  const prompts = viewOf(values, 'n.prompts')
-  if (prompts?.kind === 'blocks') {
-    for (const template of prompts.blocks) {
-      if (template.body.trim().length === 0) continue
-      blocks.push({ kind: 'prompt', labelKey: `${LABEL}.aiPrompt`, title: template.label, text: template.body })
+  const templates = parseBrandPromptTemplates(textOf(values, 'n.prompts') ?? '')
+  if (templates.length > 0) {
+    for (const template of templates) {
+      blocks.push({ kind: 'prompt', labelKey: `${LABEL}.aiPrompt`, title: template.title, text: template.body })
     }
   }
   else {

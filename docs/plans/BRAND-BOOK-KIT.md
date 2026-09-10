@@ -1,9 +1,10 @@
 # Brand Book & Kit (Produkt 03) — Strategie
 
-Status: **Phase 5 — K0–K4 GEBAUT und auf main (dae02441, 2026-09-09;
-Stand je Paket mit Gelernt in §2.18). K5–K8 folgen je in einer EIGENEN
+Status: **Phase 5 — K0–K5 GEBAUT (K0–K4 auf main dae02441, K5 2026-09-09;
+Stand je Paket mit Gelernt in §2.18). K6–K8 folgen je in einer EIGENEN
 Session (WORKFLOW „Sitzungsführung je Phase"); offene Gates: Davids Blick
-auf `brand.md` (K3) und die Leseansicht (K4).** Prototyp freigegeben
+auf `brand.md` (K3), die Leseansicht (K4) und das Inhalts-Gate Otto/Nika
+(K5, Liste liegt vor).** Prototyp freigegeben
 2026-09-09 („Prototyp freigegeben, K0 starten"), Pakete nach §2.18
 VERBINDLICH.
 Vorgeschichte: Strategie geschrieben 2026-09-08, freigegeben 2026-09-09
@@ -852,6 +853,47 @@ Trennung, die `mark.brief` und `type.rules` im Preset schon leben; nur der RAHME
 reist als Schlüssel. (3) Ein Snapshot weiss nichts über die heutige
 Freischaltung: `derivationUnlocked` ist deshalb DREIWERTIG (`true`/`false`/fehlt),
 sonst stünden im Handbuch einer fremden Marke drei Kapitel Werbung.
+
+**Stand K5 (GEBAUT 2026-09-09; Davids Inhalts-Gate offen):** die drei
+Werkstatt-Kapitel laufen. Kataloge als Chips/Karten (`m.types` Mehrfachwahl,
+`n.scope`/`n.review` mit geschlossenem Vertrag in `brandChoiceOptions.ts`,
+`p.facts` Opt-in über die Einträge von `a.facts`, Default keiner; `p.contact`
+mit Vorlage-Karten Konto-Inhaber/Erstgespräch, gespeichert wird der bestätigte
+TEXT, Telefon nie). Otto (`m.patterns`) und Nika (`n.guardrails`) gehen über
+den bestehenden Wizard-Weg (`generate.post.ts`: Bereitschafts-Gate 409
+`not_ready`, Slot-Eimer, Dev-Stub, ZDR in `streamAdvisorTurn`) — Registrierung
+in `server/plugins/otto-nomenclature.ts`/`nika-aiguide.ts`, pure Prompt-
+Zusätze `ottoPrompt.ts`/`nikaPrompt.ts`, Zod-Formverträge in
+`schemas/brandKitSlots.ts`, Invarianten als `verify` (Typ ohne Muster,
+doppeltes Muster, fremder Typ, Tabu-Wort im Ton ⇒ ruhige RÜCKFRAGE statt
+stillem Entwurf). `m.rules` pur vorbefüllt, `n.prompts` pur (System-Prompt =
+`renderBrandContextSystemPrompt`, Kurzform aus dem K3-Renderer, keine zweite
+Fassung der Sätze), `p.summary` pur; die puren Quellen liefert EINE Besitzer-
+Route `GET …/kit/workshop` (`private, no-store`, Datentür von K1: fremd 404,
+ohne Freischaltung 403). Schreiber UND K4-Leser gehen durch dieselben Helfer
+in `shared/brandKitSlots.ts`; die Muster-Tabelle im Book trägt jetzt eine
+vierte Spalte „Herkunft". Beweis: 3117 Tests (+51), Lint, Typecheck 0,
+`check:i18n-keys`, `check:bilanz`, `check:manifests`. NICHT bewiesen:
+Otto/Nika gegen ein echtes Modell, die drei neuen Zusagen 31–33 in
+`verify-brand-sessions.mjs` (geschrieben, nie gefahren — braucht Davids Ja zu
+einem Lauf gegen Prod mit Aufräumen), Klick-Beweis in der Werkstatt.
+**Gelernt:** (1) die Werkstatt hat kein Mehrfach-Chips-Instrument (`BwChips`
+gehört der Abnahme-Fläche, das Bühnen-Modul fällt sonst auf ein Textfeld) —
+`m.types` und `p.facts` brauchten eigene Panels. (2) Die Registry-
+Bereitschaftsregel sperrt erst, wenn ALLE Quellen leer sind; bei sechs
+Quellen kommt so immer ein bezahlter Lauf zustande — Schicht 3 braucht die
+STRUKTUR-Quelle als eigenen Bedarf (`name_types`, `tone_words`), mit
+`coveredSteps`-Klammer, sonst sperrt die Werkstatt clientseitig immer.
+(3) `sessionInstruction` wirft für eine Session ohne `rules` — K0 hatte für
+die zwei Generator-Sessions Ziele und Leitern, aber keine Verarbeitungs-
+regeln; die stehen jetzt drin und sind Teil des Inhalts-Gates. (4)
+`brandChoiceContract` hält genau EINE Id — ein `list`-Slot wie `m.types`
+passt nicht hinein, Mehrfachwahl braucht ihre eigene Klemmung. (5) Statische
+Route schlägt Parameter-Route (`kit/workshop` neben `kit/[file]`) — im Repo
+an sieben Stellen im Betrieb belegt (`check/ranking` neben `check/[id]`),
+kein Messlauf nötig. Offen: der Live-Persona-Audit (Kailua + zwei
+Testmarken) aus der Beweis-Spalte ist NICHT Teil von K5 geworden — er gehört
+zu K8 (Audit + Live), wenn die Lieferseite steht.
 
 ### 2.19 Offene Entscheidungen für die Freigabe
 

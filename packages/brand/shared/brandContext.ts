@@ -203,6 +203,9 @@ export const BRAND_CONTEXT_COLUMNS: Readonly<Record<string, { de: string, en: st
   nameType: { de: 'Typ', en: 'Type' },
   pattern: { de: 'Muster', en: 'Pattern' },
   example: { de: 'Beispiel', en: 'Example' },
+  // K5: die HERKUNFT eines Musters bekommt eine eigene Spalte — Beispiel
+  // und Begründung in einer Zelle kann man weder überfliegen noch trennen.
+  source: { de: 'Herkunft', en: 'Source' },
   usage: { de: 'Verwendung', en: 'Use' },
   minSize: { de: 'Mindestgröße', en: 'Minimum size' },
   role: { de: 'Rolle', en: 'Role' },
@@ -550,6 +553,68 @@ export function renderBrandContextMarkdown(
 
   return `${lines.join('\n').trimEnd()}\n`
 }
+
+/**
+ * DIE KURZFORM VON `brand.md` — der System-Prompt der Vorlagen-Session
+ * (`n.prompts`, Konzept §2.3, Paket K5).
+ *
+ * ── SIE IST EINE AUSWAHL, KEINE ZWEITE FASSUNG ───────────────────────────
+ * Die Session-Qualität sagt es wörtlich: „The system prompt is the short form
+ * of brand.md, in the same words." Deshalb baut diese Funktion NICHTS neu —
+ * sie geht durch DIESELBEN Kapitel-Renderer (`chapterMarkdown`) und nimmt
+ * weniger davon. Eine eigene Formulierung wäre die zweite Fassung derselben
+ * Sätze, und die eine, die jemand später anfasst, ist garantiert nicht die,
+ * die der Kunde kopiert hat.
+ *
+ * ── VIER KAPITEL, UND WARUM GERADE DIESE ─────────────────────────────────
+ * Ein System-Prompt beantwortet einem Modell vier Fragen, bevor es schreibt:
+ * WER ist die Marke (`kontext`), WOZU gibt es sie (`purpose`), WIE klingt sie
+ * (`stimme`) und WAS darf sie nicht (`ki-texte`). Werte, Botschaften,
+ * Nomenklatur und das Visuelle stehen in `brand.md` und im Handbuch — hier
+ * wären sie Ballast in einem Text, den jemand in ein Chat-Fenster klebt.
+ *
+ * ── OHNE ÜBERSCHRIFTEN UND OHNE LEERZEILEN ───────────────────────────────
+ * Der Wert von `n.prompts` ist ein `structured`-Block, und eine LEERZEILE
+ * darin wäre im Speicher ein Blockwechsel (s. `formatBrandPromptTemplates`).
+ * Die Kurzform ist deshalb eine Folge von Zeilen, keine Datei mit Abschnitten.
+ */
+export function renderBrandContextSystemPrompt(
+  view: BrandFoundationView,
+  input: BrandContextInput,
+): string {
+  const { locale } = input
+  const title = oneLine(input.title)
+  const lines: string[] = []
+
+  lines.push(text(
+    locale,
+    `Du schreibst als ${title || 'diese Marke'}. Halte dich an das, was hier steht.`,
+    `You write as ${title || 'this brand'}. Stay within what is written here.`,
+  ))
+
+  for (const id of SYSTEM_PROMPT_CHAPTERS) {
+    for (const line of chapterMarkdown(chapterOf(view, id), locale)) {
+      const clean = line.trim()
+      if (clean.length > 0) lines.push(clean)
+    }
+  }
+
+  lines.push(text(
+    locale,
+    'Erfinde nichts, was hier nicht steht — keine Zahlen, keine Herkünfte, keine Preise.',
+    'Invent nothing that is not written here — no numbers, no origins, no prices.',
+  ))
+
+  return lines.join('\n')
+}
+
+/** Die vier Kapitel der Kurzform — gepflegt, nicht gerechnet (s. o.). */
+const SYSTEM_PROMPT_CHAPTERS: readonly BrandFoundationChapterId[] = [
+  'kontext',
+  'purpose',
+  'stimme',
+  'ki-texte',
+]
 
 // ── `brand.json` ───────────────────────────────────────────────────────────
 

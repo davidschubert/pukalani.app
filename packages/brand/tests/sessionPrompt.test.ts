@@ -191,7 +191,7 @@ describe('Der Bauer selbst', () => {
     // Paket 2 die Inhalte nie in den Prompt gebracht hätte.
     const drafting = BRAND_SLOTS.filter(session =>
       session.generator !== 'none' && session.processing.rules.length > 0)
-    expect(drafting).toHaveLength(21)
+    expect(drafting).toHaveLength(23)
     for (const session of drafting) {
       const text = sessionInstructionForSlot(session.id, optionsFor(session.id, 'new', false))
       expect(text, session.id).toContain('Marks of a good value:')

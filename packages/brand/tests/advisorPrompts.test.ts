@@ -436,7 +436,8 @@ describe('Die Formalien sind für alle Berater dieselben', () => {
   it('SOLO WIRKT IN JEDEM BAUSTEIN — und nur dort, wo der Wert einen Sprecher hat', () => {
     const drafting = BRAND_SLOTS.filter(session =>
       session.generator !== 'none' && session.processing.rules.length > 0)
-    expect(drafting).toHaveLength(21)
+    // 21 bis K4; seit K5 zusätzlich `m.patterns` (Otto) und `n.guardrails` (Nika).
+    expect(drafting).toHaveLength(23)
 
     const withSpeaker: string[] = []
     for (const session of drafting) {

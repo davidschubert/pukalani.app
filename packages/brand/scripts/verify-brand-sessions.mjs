@@ -80,6 +80,30 @@
  *     Fläche (200 — er ist erklärbar), und dieselbe Regel gilt für das
  *     Dokument (Paket 8).
  *
+ * Seit Brand Book & Kit K5 (§2.2–§2.4) kommen die drei WERKSTATT-KAPITEL der
+ * dritten Schicht dazu. Sie stehen als DREI Zusagen und nicht als eine, weil
+ * sie drei verschiedene Dinge belegen — eine Auskunft, eine Sperre und eine
+ * Reise-Regel:
+ *
+ * 31. DIE WERKSTATT-QUELLEN: `GET …/kit/workshop` liefert dem Besitzer die
+ *     vier puren Quellen (Kontakt-Vorlagen, `a.facts`-Einträge, drei
+ *     Prompt-Vorlagen, Pressekit-Vorschau) mit `private, no-store`. Die
+ *     Vorlage „Konto-Inhaber" ist immer dabei und trägt NIE eine
+ *     Telefonnummer. Fremdes Konto ⇒ 404 (Datentür), ohne Freischaltung ⇒ 403
+ *     `derivation_locked` — beide mit GEGENPROBE am freigeschalteten
+ *     Eigentümer.
+ * 32. DIE REISE-REGEL DER FAKTEN (§2.12 Nr. 2): `a.facts` steht ROH in KEINER
+ *     Kit-Datei — weder in `brand.md` noch in `brand.json`. Nur die in
+ *     `p.facts` gewählten Einträge reisen. Mit GEGENPROBE: der gewählte
+ *     Eintrag steht wirklich drin, sonst wäre der Beweis auch ohne `p.facts`
+ *     grün.
+ * 33. WER ENTWIRFT UND WER NICHT: `POST …/aiguide/generate` auf `n.scope`
+ *     antwortet 400 `slot_not_generated` (eine Katalog-Wahl hat keinen
+ *     Entwurf), `m.patterns` OHNE `m.types` antwortet 409 `not_ready` — und
+ *     mit gewählten Typen läuft derselbe Aufruf durch. Otto und Nika hängen
+ *     dabei am gewöhnlichen Slot-Eimer; ein eigener Eimer entsteht nicht
+ *     (§2.11).
+ *
  * Seit Brand Design D2b (§2.2 Schritt 3) kommen die Zusagen der LESUNG dazu:
  *
  * 23. DER LAUF: `POST …/inspiration/read` liest alle Vorbilder, schreibt je
@@ -4029,6 +4053,134 @@ try {
     'die Schranke ist nicht zurückgekommen')
   await setStepState(profileId, 'imagery', 'done')
 
+  // ── 31.–33. Die drei Werkstatt-Kapitel von Book & Kit (K5) ──────────────
+  /*
+   * SIE LAUFEN GANZ AM ENDE, weil sie den fertigen Zustand brauchen: die
+   * Foundation steht, das Preset steht, und die Freischaltung der ABLEITUNG
+   * (K1) ist die einzige Tatsache, die dieser Abschnitt selbst herstellt.
+   *
+   * ER SCHREIBT DIE SLOTS OHNE ROUTE (`setSlots`) — dieselbe Entscheidung wie
+   * in jedem Abschnitt davor: geprüft wird die AUSKUNFT über die Werte, nicht
+   * der Weg, auf dem sie entstanden sind (der hat seinen eigenen Beweis).
+   */
+  const factSecret = `GEHEIM-UMSATZ-${stamp}`
+  const factPublic = 'Gegründet 2026 in Kailua auf Oʻahu.'
+
+  await setSlots(profileId, 'nomenclature', {
+    'm.types': { confirmed: '- product\n- place' },
+    'm.patterns': {
+      confirmed: '## product\nOrt + Erntemonat — kein Fantasiename · Kona Februar 2026 · '
+        + 'aus dem Architektur-Modell\n\n## place\nDachmarke + Stadtteil, nie eine Nummer · '
+        + 'Kailua Coffee Co. Kaimukī · aus dem Wert Nähe',
+    },
+    'm.rules': { confirmed: '- Die Dachmarke steht vorn.' },
+  })
+  await setSlots(profileId, 'aiguide', {
+    'n.scope': { confirmed: 'drafts' },
+    'n.review': { confirmed: 'every' },
+    'n.guardrails': {
+      confirmed: '## Ton-Parameter\nruhig — kurze Hauptsätze\n\n## Tabus\nPremium\n\n'
+        + '## Markenzeichen-Schreibweisen\nKailua Coffee Co. — mit Punkt\n\n'
+        + '## No-go-Themen\nGesundheitsversprechen',
+    },
+  })
+  await setSlots(profileId, 'presskit', {
+    'p.facts': { confirmed: `- ${factPublic}` },
+  })
+  /*
+   * `a.facts` GEHÖRT IN DEN KONTEXT — die Zeile darf die bestehenden Werte des
+   * Kapitels nicht verlieren, sonst prüfen die Abschnitte davor rückwirkend
+   * etwas anderes. Gelesen, ergänzt, zurückgeschrieben.
+   */
+  const contextRow = await tablesDB.getRow({
+    databaseId, tableId: 'brand_steps', rowId: `${profileId}_context`,
+  })
+  const contextSlots = JSON.parse(contextRow.slots || '{}')
+  contextSlots['a.facts'] = { confirmed: `- ${factSecret}` }
+  await setSlots(profileId, 'context', contextSlots)
+
+  // ── 31. Die Werkstatt-Quellen ──────────────────────────────────────────
+  /*
+   * ZUERST DIE SPERRE, DANN DIE AUSKUNFT: ohne Freischaltung antwortet die
+   * Route 403 mit `derivation_locked` (nicht 404 — der Sperrsatz braucht den
+   * Code, K1). Sie ist der Zustand JEDER Marke vor dem Kauf, und ein Beweis,
+   * der nur den offenen Fall kennt, sagt über sie nichts.
+   */
+  const lockedWorkshop = await call(`${base}/kit/workshop`, { cookie: account.cookie })
+  check('ohne Freischaltung ⇒ 403 `derivation_locked` (K1)',
+    lockedWorkshop.status === 403 && lockedWorkshop.json?.reason === 'derivation_locked',
+    `${lockedWorkshop.status} ${JSON.stringify(lockedWorkshop.json)}`)
+
+  await tablesDB.updateRow({
+    databaseId,
+    tableId: 'brand_profiles',
+    rowId: profileId,
+    data: { derivationUnlockedAt: new Date().toISOString(), derivationUnlockedVia: 'operator' },
+  })
+
+  const workshop = await call(`${base}/kit/workshop`, { cookie: account.cookie })
+  check('die Werkstatt-Quellen kommen beim Besitzer an — vier Teile, `private, no-store`',
+    workshop.status === 200
+    && String(workshop.headers['cache-control'] || '').includes('no-store')
+    && Array.isArray(workshop.json?.prompts)
+    && Array.isArray(workshop.json?.facts)
+    && Array.isArray(workshop.json?.contactTemplates)
+    && typeof workshop.json?.summary === 'string',
+    `${workshop.status} · ${workshop.headers['cache-control']}`)
+
+  check('… drei Prompt-Vorlagen, PUR gerechnet (§2.11: null KI-Aufrufe)',
+    (workshop.json?.prompts ?? []).map(entry => entry.id).join(',') === 'system,social,email',
+    JSON.stringify((workshop.json?.prompts ?? []).map(entry => entry.id)))
+
+  check('… die Fakten-Liste trägt den internen Eintrag — hier und NUR hier',
+    (workshop.json?.facts ?? []).includes(factSecret),
+    JSON.stringify(workshop.json?.facts))
+
+  check('… die Vorlage „Konto-Inhaber" ist dabei und trägt KEINE Telefonnummer',
+    (workshop.json?.contactTemplates ?? []).some(entry => entry.id === 'account')
+    && !(workshop.json?.contactTemplates ?? []).some(entry => 'phone' in entry),
+    JSON.stringify(workshop.json?.contactTemplates))
+
+  const foreignAccount = await makeAccount('kit-foreign')
+  const foreignWorkshop = await call(`${base}/kit/workshop`, { cookie: foreignAccount.cookie })
+  check('GEGENPROBE: ein fremdes Konto bekommt 404, nicht 403 (Datentür)',
+    foreignWorkshop.status === 404,
+    `${foreignWorkshop.status} ${JSON.stringify(foreignWorkshop.json)}`)
+
+  // ── 32. Die Reise-Regel der Fakten (§2.12 Nr. 2) ───────────────────────
+  const brandMd = await call(`${base}/kit/brand.md`, { cookie: account.cookie })
+  const brandJson = await call(`${base}/kit/brand.json`, { cookie: account.cookie })
+  check('`a.facts` steht ROH in KEINER Kit-Datei',
+    brandMd.status === 200 && brandJson.status === 200
+    && !brandMd.text.includes(factSecret) && !brandJson.text.includes(factSecret),
+    `md: ${brandMd.text.includes(factSecret)} · json: ${brandJson.text.includes(factSecret)}`)
+  check('GEGENPROBE: der in `p.facts` freigegebene Eintrag reist sehr wohl',
+    brandMd.text.includes(factPublic) || brandJson.text.includes(factPublic),
+    'ohne diese Zeile wäre der Beweis auch ohne `p.facts` grün')
+
+  // ── 33. Wer entwirft und wer nicht ─────────────────────────────────────
+  const scopeRun = await call(`${base}/steps/aiguide/generate`, {
+    method: 'POST', cookie: account.cookie, body: { slotId: 'n.scope' },
+  })
+  check('eine Katalog-Wahl hat keinen Entwurf ⇒ 400 `slot_not_generated`',
+    scopeRun.status === 400 && scopeRun.json?.reason === 'slot_not_generated',
+    `${scopeRun.status} ${JSON.stringify(scopeRun.json)}`)
+
+  await setSlots(profileId, 'nomenclature', { 'm.types': { confirmed: '' } })
+  const patternsCold = await call(`${base}/steps/nomenclature/generate`, {
+    method: 'POST', cookie: account.cookie, body: { slotId: 'm.patterns' },
+  })
+  check('`m.patterns` ohne gewählte Typen ⇒ 409 `not_ready`',
+    patternsCold.status === 409 && patternsCold.json?.reason === 'not_ready',
+    `${patternsCold.status} ${JSON.stringify(patternsCold.json)}`)
+
+  await setSlots(profileId, 'nomenclature', { 'm.types': { confirmed: '- product' } })
+  const patternsWarm = await call(`${base}/steps/nomenclature/generate`, {
+    method: 'POST', cookie: account.cookie, body: { slotId: 'm.patterns' },
+  })
+  check('GEGENPROBE: mit gewählten Typen läuft derselbe Aufruf durch (kein 409)',
+    patternsWarm.status !== 409,
+    `${patternsWarm.status} ${JSON.stringify(patternsWarm.json)}`)
 
 }
 catch (error) {
