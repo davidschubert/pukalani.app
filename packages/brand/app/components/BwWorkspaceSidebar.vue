@@ -267,6 +267,20 @@ function selectSession(step: BwRailStep, session: BwRailSession): void {
   emit('selectSession', { stepId: step.id, sessionId: session.id })
 }
 
+/**
+ * DIE ID DER BEGRÜNDUNGS-ZEILE (Befund M) — sie verbindet Knopf und Satz für
+ * `aria-describedby`.
+ *
+ * `useId()` je Leiste, damit zwei gleichzeitig gerenderte Leisten (Spalte +
+ * Overlay unter 768 px) keine doppelte Id ins Dokument legen; Slot-Ids tragen
+ * Punkte, die in einer HTML-Id erlaubt sind und hier nie in einen
+ * CSS-Selektor wandern.
+ */
+const noteScope = useId()
+function sessionNoteId(session: BwRailSession): string {
+  return `bw-note-${noteScope}-${session.id}`
+}
+
 function selectStep(layer: BwRailLayer, step: BwRailStep): void {
   if (stepDisabled(layer, step)) return
   // Ein Punkt mit eigenem Ziel (Ergebnis-Ansicht) führt DORTHIN — `select`
@@ -433,6 +447,7 @@ function selectStep(layer: BwRailLayer, step: BwRailStep): void {
                       :disabled="session.disabled"
                       :title="session.title || undefined"
                       :aria-current="session.state === 'active' ? 'true' : undefined"
+                      :aria-describedby="session.note ? sessionNoteId(session) : undefined"
                       @click="selectSession(step, session)"
                     >
                       <UIcon :name="sessionGlyph(session).name" class="size-3.5 flex-none" :style="sessionGlyph(session).style" />
@@ -452,6 +467,16 @@ function selectStep(layer: BwRailLayer, step: BwRailStep): void {
                         style="color: var(--bw-muted)"
                       >{{ session.effort }}</span>
                     </button>
+                    <!-- DER GRUND EINER SPERRE, SICHTBAR (Befund M): kein
+                         Hover-`title`, sondern eine Zeile darunter — und über
+                         `aria-describedby` am Knopf, damit sie auch vorgelesen
+                         wird. -->
+                    <p
+                      v-if="session.note"
+                      :id="sessionNoteId(session)"
+                      class="bw-label px-2.5 pb-1 pl-7 leading-snug"
+                      style="color: var(--bw-muted)"
+                    >{{ session.note }}</p>
                   </li>
                 </ul>
               </li>

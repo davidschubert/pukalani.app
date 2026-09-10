@@ -407,6 +407,7 @@
       "acceptancePending": "Frei, sobald alle Felder dieses Kapitels bestätigt sind.",
       "derivedGroup": "Daraus abgeleitet",
       "chapterCount": "{confirmed} von {total} bestätigt",
+      "chapterCountOptional": "{confirmed} von {total} bestätigt + {optional} optional",
       "chapterCountStale": "{confirmed} von {total} bestätigt · {stale} neu besprechen",
       "chapterEffort": "{count} Sessions, ~{minutes} Min",
       "document": "Euer Branding",
@@ -886,9 +887,9 @@
       },
       "advisorInfo": {
         "open": "Über {name}",
-        "desc": "Führt euch durch den ganzen Wizard — von Kontext bis Name. Er stellt kleine, konkrete Fragen, sagt ehrlich, was fehlt, und hält den roten Faden. Im Rücken liest sein Team mit:",
+        "desc": "Führt dich durch den ganzen Wizard — von Kontext bis Name. Er stellt kleine, konkrete Fragen, sagt ehrlich, was fehlt, und hält den roten Faden. Im Rücken liest sein Team mit:",
         "asksTitle": "Typische Frage",
-        "asks": "„Warum habt ihr angefangen — was war der Auslöser?“",
+        "asks": "„Warum hast du angefangen — was war der Auslöser?“",
         "personal": "Markenberater und Markenstratege — jede Empfehlung mit Begründung, jede Entscheidung festgehalten."
       },
       "sidebar": {
@@ -902,7 +903,7 @@
       "whyRecommended": "Warum empfiehlt George {label}?",
       "sendOwnAnswer": "Eigene Antwort senden",
       "editSlot": "{label} bearbeiten",
-      "ourBranding": "Euer Branding",
+      "ourBranding": "Dein Branding",
       "likeBrands": "wie {brands}",
       "mode": {
         "conversation": "Gespräch",
@@ -934,17 +935,18 @@
       "george": {
         "subtitle": "Dein Markenberater",
         "placeholder": "Antwort schreiben — oder {voice} etwas fragen",
+      "addToPlaceholder": "Ergänzung zu „{field}“ schreiben",
         "nothingOpen": "In diesem Kapitel ist nichts mehr offen — bestätige es, wenn es passt.",
         "questionsDone": "Meine Fragen sind durch — die offenen Felder unten formen wir jetzt hier im Gespräch.",
-        "nextDraft": "Fangen wir mit „{field}“ an: Klick auf „{voice}, entwirf das“, dann lege ich dir eine erste Fassung aus euren bisherigen Antworten vor — oder erzähl mir hier, was dir dazu durch den Kopf geht.",
+        "nextDraft": "Fangen wir mit „{field}“ an: Klick auf „{voice}, entwirf das“, dann lege ich dir eine erste Fassung aus deinen bisherigen Antworten vor — oder erzähl mir hier, was dir dazu durch den Kopf geht.",
         "nextConfirm": "Nächster Schritt: Sieh dir „{field}“ an und bestätige es — oder klick auf „Korrigieren“, wenn es noch nicht passt.",
         "send": "Senden"
       },
       "stage": {
-        "title": "Euer Brand-Dokument",
-        "empty": "Hier steht noch nichts — es füllt sich, während ihr antwortet.",
+        "title": "Dein Brand-Dokument",
+        "empty": "Hier steht noch nichts — es füllt sich, während du antwortest.",
         "pending": "Noch offen — kommt im Gespräch.",
-        "draftAnswer": "Was soll {voice} für „{field}“ wissen? Schreibt es hier hinein — daraus entsteht der Entwurf.",
+        "draftAnswer": "Was soll {voice} für „{field}“ wissen? Schreib es hier hinein — daraus entsteht der Entwurf.",
         "pairsPlaceholder": "Der Archetypen-Vergleich ist ein eigenes Instrument und kommt mit einer späteren Phase.",
         "notEditable": "Das leitet George ab — hier tippt niemand."
       },
@@ -964,7 +966,7 @@
       "missingRequired": "Einige Pflicht-Entscheidungen sind noch offen — bestätige sie und versuch es erneut.",
       "draftBadge": "Entwurf von {voice}",
       "site": {
-        "label": "Eure Website",
+        "label": "Deine Website",
         "never": "Noch nicht gelesen.",
         "read": "Gelesen am {date}.",
         "stale": "In der Startkarte steht inzwischen eine andere Adresse — lies sie neu, damit George den richtigen Text hat.",
@@ -973,13 +975,13 @@
         "consent": "Ich darf diese Website analysieren lassen. George ruft die öffentliche Seite einmal ab, behält nur den Text und nichts sonst.",
         "confirm": "Ja, lesen",
         "cancel": "Doch nicht",
-        "running": "Ich lese gerade eure Website …",
+        "running": "Ich lese gerade deine Website …",
         "done": "Gelesen — {chars} Zeichen übernommen. George nutzt sie beim nächsten Entwurf.",
         "error": {
           "noUrl": "In der Startkarte steht keine Adresse. Trag eine ein, dann lese ich sie.",
           "blocked": "Diese Adresse darf ich nicht abrufen. Bitte nenn eine öffentliche http- oder https-Adresse.",
           "notHtml": "Dahinter liegt keine Webseite, die ich lesen kann — vielleicht eine Datei oder ein Bild.",
-          "tooLarge": "Die Seite ist zu groß zum Lesen. Nimm eine einzelne Unterseite, etwa eure Startseite.",
+          "tooLarge": "Die Seite ist zu groß zum Lesen. Nimm eine einzelne Unterseite, etwa deine Startseite.",
           "unreachable": "Ich komme gerade nicht an die Seite. Versuch es später noch einmal.",
           "dailyLimit": "Für heute habe ich genug Websites gelesen. Morgen wieder.",
           "failed": "Das hat gerade nicht geklappt. Versuch es gleich nochmal."
@@ -991,7 +993,7 @@
         "stop": "Stopp",
         "hintPlaceholder": "Hinweis — z. B. wärmer, kürzer, weniger Fachsprache",
         "hintLabel": "Hinweis für {voice}",
-        "answerPlaceholder": "Stichworte, Sätze — alles, was ihr dazu wisst",
+        "answerPlaceholder": "Stichworte, Sätze — alles, was du dazu weißt",
         "answerLabel": "Antwort für {voice}",
         "aiDisabled": "{voice} entwirft gerade nicht. Du kannst alles ganz normal weiterschreiben.",
         "noGenerator": "Für dieses Feld gibt es noch keinen Entwurf von {voice}. Schreib es selbst — es wird gespeichert.",
@@ -1007,7 +1009,7 @@
         "dismiss": "Verstanden",
         "notReady": "Dafür ist noch zu wenig da — oben steht, was fehlt.",
         "slotConfirmed": "Das hast du schon bestätigt. Wenn du es ändern willst, klick auf Korrigieren.",
-        "readingLimit": "Für heute sind die Lese-Läufe aufgebraucht. Morgen geht es weiter — eure Vorbilder und die bisherige Lesung bleiben stehen.",
+        "readingLimit": "Für heute sind die Lese-Läufe aufgebraucht. Morgen geht es weiter — deine Vorbilder und die bisherige Lesung bleiben stehen.",
         "draftsLimit": "Heute keine Entwürfe mehr — morgen wieder drei Läufe."
       },
       "versions": {
@@ -1025,11 +1027,11 @@
       "ready": {
         "needs": "{advisor} braucht dafür erst: {needs}",
         "need": {
-          "startcardAbout": "was ihr macht (aus dem Startbogen)",
-          "startcardAudience": "für wen ihr da seid (aus dem Startbogen)",
-          "startcardIndustry": "eure Branche (aus dem Startbogen)",
-          "competitorNames": "Namen von Wettbewerbern — lest eure Website ein oder tragt sie selbst ein",
-          "sourceTexts": "vorhandene Texte — lest dafür eure Website ein",
+          "startcardAbout": "was du machst (aus dem Startbogen)",
+          "startcardAudience": "für wen du da bist (aus dem Startbogen)",
+          "startcardIndustry": "deine Branche (aus dem Startbogen)",
+          "competitorNames": "Namen von Wettbewerbern — lies deine Website ein oder trag sie selbst ein",
+          "sourceTexts": "vorhandene Texte — lies dafür deine Website ein",
           "sourceSlots": "mindestens eine der Antworten, auf denen dieses Feld aufbaut"
         }
       },
@@ -1037,11 +1039,11 @@
       "chapterReady": "Alle Felder dieses Kapitels sind bestätigt — weiter zur Finalen Abnahme.",
       "designLocked": {
         "title": "Brand Design ist noch nicht freigeschaltet",
-        "description": "Diese Schicht schaltet das Studio nach dem Erstgespräch für eure Marke frei. Eure Brand Foundation bleibt unverändert offen."
+        "description": "Diese Schicht schaltet das Studio nach dem Erstgespräch für deine Marke frei. Deine Brand Foundation bleibt unverändert offen."
       },
       "derivationLocked": {
         "title": "Book & Kit ist Teil der Ableitung",
-        "description": "Diese Schicht schaltet das Studio nach dem Erstgespräch für eure Marke frei — zusammen mit dem Marktvergleich. Eure Brand Foundation bleibt unverändert offen."
+        "description": "Diese Schicht schaltet das Studio nach dem Erstgespräch für deine Marke frei — zusammen mit dem Marktvergleich. Deine Brand Foundation bleibt unverändert offen."
       }
     },
     "brands": {
@@ -1108,11 +1110,20 @@
         "team": "Zwei oder mehr"
       },
       "startCard": {
-        "website": "Eure Website (optional) — ich lese sie, damit du dich nicht wiederholen musst.",
-        "industry": "In welcher Branche seid ihr unterwegs?",
-        "about": "Was macht ihr — in 2–3 Sätzen, wie du es einem Freund erzählen würdest?",
-        "audience": "Für wen ist es gedacht?"
+        "website": "Deine Website (optional) — ich lese sie, damit du dich nicht wiederholen musst.",
+        "industry": "In welcher Branche bist du unterwegs?",
+        "about": "Was machst du — in 2–3 Sätzen, wie du es einem Freund erzählen würdest?",
+        "audience": "Für wen ist es gedacht?",
+        "short": {
+          "industry": "Branche",
+          "about": "Angebot",
+          "audience": "Zielgruppe",
+          "websiteUrl": "Website"
+        }
       },
+      "requiredHint": "Mit * markierte Felder brauche ich.",
+      "requiredField": "Pflichtfeld",
+      "missing": "Noch offen: {fields}",
       "submit": "Los geht's — George übernimmt",
       "failed": "Das Branding konnte nicht angelegt werden.",
       "preparing": "Einen Moment — das Formular wird bereit gemacht."

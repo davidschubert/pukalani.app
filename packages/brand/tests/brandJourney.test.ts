@@ -1409,11 +1409,44 @@ describe('resolveNextStop — der Wegweiser am Kapitelende', () => {
     expect(resolveNextStop('context', slots)).toEqual({ stepKey: 'context', acceptance: true })
   })
 
+  /**
+   * EIN UNBESTÄTIGTER WERT IST OFFEN, NICHT ERLEDIGT (Testlauf-Befund E,
+   * 2026-09-09).
+   *
+   * Der Wegweiser rechnete über `slotIsFilled` — Entwurf ODER Bestätigung.
+   * Nach dem Abschluss von Kundenstimmen hiess der Knopf deshalb „Weiter zu
+   * Größtes Hindernis", obwohl Kritik & Beschwerden und Das Eine in der Leiste
+   * offen standen: sie trugen einen Wert und galten als abgehakt.
+   */
+  it('überspringt eine Session mit WERT nicht, solange sie unbestätigt ist (Befund E)', () => {
+    const slots = {
+      'a.origin': { hasValue: true, confirmed: true },
+      'a.customerPraise': { hasValue: true, confirmed: true },
+      // Wert da, Bestätigung fehlt — GENAU der Fall aus dem Live-Test.
+      'a.complaints': { hasValue: true },
+    }
+    expect(resolveNextStop('context', slots))
+      .toEqual({ stepKey: 'context', sessionKey: 'a.complaints' })
+  })
+
+  it('überspringt Bestätigtes und Vertagtes', () => {
+    const slots = {
+      'a.origin': { hasValue: true, confirmed: true },
+      'a.customerPraise': { hasValue: false, deferred: true },
+    }
+    expect(resolveNextStop('context', slots))
+      .toEqual({ stepKey: 'context', sessionKey: 'a.complaints' })
+  })
+
   it('GEGENPROBE: keine offene FRAGE, aber ein unbestätigter Entwurf ⇒ null', () => {
     const required = confirmableRequiredSlotsForStep('context')
-    const slots = Object.fromEntries(required.map((slot, index) => [
+    // Jede FRAGE bestätigt, ein ABGELEITETES Pflicht-Feld nur mit Entwurf: es
+    // ist kein Ziel für „weiter" (George stellt es nie), aber das Kapitel ist
+    // auch nicht fertig — der Mensch bleibt, wo er ist.
+    const derived = required.find(slot => slot.type !== 'question' && slot.type !== 'choice')!
+    const slots = Object.fromEntries(required.map(slot => [
       slot.id,
-      index === 0 ? { hasValue: true } : { hasValue: true, confirmed: true },
+      slot.id === derived.id ? { hasValue: true } : { hasValue: true, confirmed: true },
     ]))
     expect(resolveNextStop('context', slots)).toBeNull()
   })

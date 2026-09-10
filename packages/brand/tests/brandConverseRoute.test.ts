@@ -830,10 +830,16 @@ describe('Die Session eines Zuges', () => {
 
   it('GEGENPROBE: fehlt ein bestätigter Pflicht-Wert, bleibt `next` null', async () => {
     // Keine offene FRAGE mehr, aber ein Bühnen-Entwurf ist unbestätigt — dann
-    // ist weder eine Session dran noch die Abnahme reif.
+    // ist weder eine Session dran noch die Abnahme reif. Seit Befund E muss der
+    // unbestätigte Wert eine ABLEITUNG sein: eine unbestätigte FRAGE wäre der
+    // nächste Halt und kein „bleib stehen".
     const required = confirmableRequiredSlotsForStep('context')
+    const derived = required.find(slot => slot.type !== 'question' && slot.type !== 'choice')!
     stepRow.slots = JSON.stringify(Object.fromEntries(
-      required.map((slot, index) => [slot.id, index === 0 ? { latestDraft: 'Entwurf' } : { confirmed: 'steht' }]),
+      required.map(slot => [
+        slot.id,
+        slot.id === derived.id ? { latestDraft: 'Entwurf' } : { confirmed: 'steht' },
+      ]),
     ))
     body = { text: 'Und was heißt eigentlich Positionierung?' }
     const { event, chunks } = fakeEvent()
@@ -1255,6 +1261,71 @@ describe('Bestätigung und Nachfrage wissen voneinander', () => {
     const completed = readBack(chunks).at(-1) as { confirm?: boolean }
     expect(completed.confirm).toBeUndefined()
     expect(String(messageRows.find(row => row.role === 'george')!.body)).toBe('Erzähl mir mehr.')
+  })
+
+  /**
+   * DAS ANGEBOT ENTSCHEIDET DIE ROUTE (Testlauf-Befund C, 2026-09-09).
+   *
+   * Bei Kundenstimmen und Größtes Hindernis kamen die zwei Knöpfe NIE: George
+   * bohrte nach und vergass den Marker. Der Mensch hatte damit keinen Weg,
+   * seine Antwort für gut zu erklären. Jetzt reist das Angebot mit, sobald die
+   * Session einen Wert trägt und unbestätigt ist — der Marker ist nur noch
+   * Stil.
+   */
+  it('OHNE MARKER kommt das Angebot trotzdem (C)', async () => {
+    stepRow.slots = JSON.stringify({ 'a.customerPraise': { latestDraft: 'Sie loben die Röstung.' } })
+    stepRows = [stepRow, stepRowFor('pvm')]
+    body = { text: 'Sie loben die Röstung.', sessionKey: 'a.customerPraise' }
+    // George bohrt nach — und schreibt keinen einzigen Marker.
+    modelText = 'Was genau loben sie an der Röstung?'
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    expect(readBack(chunks).at(-1)).toMatchObject({ type: 'generation.completed', confirm: true })
+    const georgeRow = messageRows.find(row => row.role === 'george')
+    expect(JSON.parse(String(georgeRow!.parts))).toMatchObject({ confirm: true })
+  })
+
+  /**
+   * KEIN ZWEITES PAAR KNÖPFE (Testlauf-Befund D): schreibt das Modell die
+   * Beschriftungen als `OPTION:`-Zeilen nach, wären es Chips — und ein Chip
+   * ist eine ANTWORT, sein Klick schreibt seinen Text ins Feld.
+   */
+  it('OPTION-Zeilen mit der Bedeutung der Knöpfe fallen weg (D)', async () => {
+    stepRow.slots = JSON.stringify({ 'a.customerPraise': { latestDraft: 'Sie loben die Röstung.' } })
+    stepRows = [stepRow, stepRowFor('pvm')]
+    body = { text: 'Sie loben die Röstung.', sessionKey: 'a.customerPraise', uiLocale: 'de' }
+    modelText = [
+      'Das trägt für mich schon.',
+      'OPTION: Passt so, bestätigen',
+      'OPTION: Ich ergänze noch etwas',
+    ].join('\n')
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    const completed = readBack(chunks).at(-1) as { confirm?: boolean, options?: string[] }
+    expect(completed.confirm).toBe(true)
+    expect(completed.options).toBeUndefined()
+    // Und auch der VERLAUF trägt sie nicht — ein Reload holte sie sonst zurück.
+    const georgeRow = messageRows.find(row => row.role === 'george')
+    expect(JSON.parse(String(georgeRow!.parts)).options).toBeUndefined()
+  })
+
+  it('… echte Antwort-Möglichkeiten bleiben daneben stehen', async () => {
+    stepRow.slots = JSON.stringify({ 'a.customerPraise': { latestDraft: 'Sie loben die Röstung.' } })
+    stepRows = [stepRow, stepRowFor('pvm')]
+    body = { text: 'Sie loben die Röstung.', sessionKey: 'a.customerPraise', uiLocale: 'de' }
+    modelText = [
+      'Was wiegt schwerer?',
+      'OPTION: Die Röstung',
+      'OPTION: Der Service',
+      'OPTION: Passt so, bestätigen',
+    ].join('\n')
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    const completed = readBack(chunks).at(-1) as { options?: string[] }
+    expect(completed.options).toEqual(['Die Röstung', 'Der Service'])
   })
 })
 

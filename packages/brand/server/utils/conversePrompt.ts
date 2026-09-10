@@ -178,7 +178,7 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
  * heisst er „Frida, entwirf das", und ein fest verdrahteter George-Satz wäre
  * dort schlicht falsch.
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-14'
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-15'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis
@@ -551,6 +551,12 @@ function addressLines(options: BrandConverseInstructionOptions): string[] {
       'THE PERSON YOU ARE TALKING TO BUILDS THIS BRAND ALONE. Address ONE person, in the singular, '
       + 'throughout — in German "du/dich/dein", never "ihr/euch/euer", never "your team", never "you all". '
       + 'Speak about the brand as theirs alone; do not invent co-founders, colleagues or a team.',
+      // converse-15 (Testlauf-Befund K, 2026-09-09): der ABSCHLUSSZUG sagte
+      // „was sie über euch sagen" — die Regel galt, aber sie stand weit weg
+      // von der Abschluss-Aufgabe, und im Nebensatz über DRITTE rutschte das
+      // Plural-Pronomen zurück. Sie gilt für jeden Satz jedes Zuges.
+      'THIS HOLDS FOR EVERY SENTENCE OF EVERY TURN, the closing summary included, and also inside '
+      + 'clauses about OTHER people — in German it is "was sie über dich sagen", never "über euch".',
     ]
   }
   if (options.team === 'team') {
@@ -620,6 +626,19 @@ export function brandConverseInstruction(options: BrandConverseInstructionOption
     // hat er keinen Teil, der in der Inhaltssprache stünde.
     'Everything in this turn is chat and follows the CHAT language of rule 9 — all of it, without '
     + 'exception.',
+    // converse-15 (Testlauf-Befund N, 2026-09-09): im Live-Lauf standen „die
+    // dich gedacht hat", „eine Satz" und „vollauslausten" in Georges Zügen —
+    // ein Berater, der die Sprache seines Gegenübers nicht beherrscht, ist in
+    // genau diesem Produkt nicht glaubwürdig. Die Zeile verlangt nichts
+    // Zusätzliches, sie verlangt Korrektheit.
+    'WRITE CORRECT, NATURAL PROSE in that language — correct grammar, correct inflection, correct '
+    + 'agreement, no invented or garbled words, no half-finished sentences. Read your turn back before '
+    + 'you end it; a broken sentence costs more trust here than a plain one.',
+    // converse-15 (Befund N, zweite Hälfte): George nannte eine SESSION
+    // „das nächste Kapitel". Ein Kapitel hat bis zu zwölf Sessions — wer sie
+    // verwechselt, verspricht einen Fortschritt, den es nicht gibt.
+    'NEVER call a single session a chapter (German "Kapitel"): a chapter holds many of them. Speak '
+    + 'about what is next by NAME, or simply as the next step.',
     // converse-13: die Anrede folgt der Team-Weiche (s. `addressLines`).
     ...addressLines(options),
     // Die Werkstatt-Mechanik ist unsere Sache, nicht die des Gesprächs.
@@ -742,6 +761,13 @@ function replyTaskLines(options: BrandConverseInstructionOptions): string[] {
  * „Ist eine Antwort George zu dünn, fragt er nach und bietet ZWEI Knöpfe" —
  * wer weiterschreiben will, schreibt weiter; wer findet, dass es reicht,
  * entscheidet das selbst. Die Nachfrage ist ein Angebot, kein Tor.
+ *
+ * ── SEIT converse-15 IST DER MARKER STIL, NICHT WAHRHEIT (Befund C) ──────
+ * Die Route liefert das Angebot, sobald die Session einen Wert trägt und
+ * unbestätigt ist — ob das Modell `CONFIRM:` geschrieben hat, ändert daran
+ * nichts (s. `confirmOffered` in `converse.post.ts`). Diese Zeilen bleiben
+ * trotzdem: sie sorgen für den halben Satz, in dem George SAGT, wo er steht.
+ * Zwei Knöpfe ohne dieses Wort wären ein Bedienelement ohne Anlass.
  */
 function confirmLines(options: BrandConverseInstructionOptions): string[] {
   if (options.closing || options.opening || !options.offerConfirm) return []
@@ -757,6 +783,12 @@ function confirmLines(options: BrandConverseInstructionOptions): string[] {
     'NEVER ask them to type a confirmation, never say that you are confirming, locking in, finalising or '
     + 'accepting anything, and never write the button labels into your text: typed words confirm nothing, '
     + 'only the button does.',
+    // converse-15 (Testlauf-Befund D): das Modell schrieb die Beschriftungen
+    // als `OPTION:`-Zeilen nach — daneben stand dann ein zweites Knopfpaar,
+    // dessen Klick als ANTWORT ins Feld liefe. Die Route wirft solche Optionen
+    // weg (`dropControlOptions`); hier steht, dass es sie nicht geben soll.
+    'NEVER turn this choice into OPTION lines: the two buttons exist already. OPTION lines are only ever '
+    + 'for answers to a question about the brand.',
   ]
 }
 

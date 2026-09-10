@@ -236,6 +236,48 @@ export function parseGeorgeConfirm(raw: string): GeorgeTurnConfirm {
 }
 
 /**
+ * KEIN ZWEITES PAAR KNÖPFE FÜR DIESELBE ENTSCHEIDUNG (Testlauf-Befund D,
+ * 2026-09-09).
+ *
+ * ── DER BEFUND ────────────────────────────────────────────────────────────
+ * Der Auftrag NENNT dem Modell die Beschriftung des Bestätigen-Knopfes („The
+ * button reads …", `conversePrompt.ts`) — und ein hilfsbereites Modell schreibt
+ * sie als `OPTION:`-Zeilen mit. Aus einem Bedienelement wurden dann zwei: ein
+ * echter Bestätigen-Knopf und daneben ein Options-Chip mit demselben Text. Der
+ * Chip ist aber eine ANTWORT: sein Klick läuft durch `answerFromGeorge`, und
+ * „Ich ergänze noch etwas" landete im Live-Test wortwörtlich als Feldwert, mit
+ * einem Gesprächszug darauf. Genau das erklärt Befund D („ergänzt nicht").
+ *
+ * ── DIE REGEL ─────────────────────────────────────────────────────────────
+ * Wo das Angebot als BEDIENELEMENT steht, wird eine Option mit derselben
+ * Bedeutung nicht gerendert. Verglichen werden die Beschriftungen, die die
+ * Bühne selbst rendert (aus dem Locale-Katalog, s. `brandConfirmButtonLabel` /
+ * `brandKeepWritingButtonLabel`) — grosszügig normalisiert, weil ein Modell
+ * gern die Satzzeichen ändert, aber ohne Bedeutungs-Raten: eine Option, die
+ * etwas ANDERES sagt, bleibt eine Antwort und keine Bestätigung.
+ *
+ * `labels` reist als Argument herein und wird nicht hier nachgeschlagen: die
+ * Sprache der Oberfläche kennt nur der Aufrufer, und eine pure Regel soll ohne
+ * Locale-Katalog prüfbar sein.
+ */
+function optionKey(label: string): string {
+  return label
+    .toLowerCase()
+    .replace(/[\p{P}\p{S}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+export function dropControlOptions(
+  options: readonly string[],
+  labels: readonly string[],
+): string[] {
+  const blocked = new Set(labels.map(optionKey).filter(key => key.length > 0))
+  if (blocked.size === 0) return [...options]
+  return options.filter(option => !blocked.has(optionKey(option)))
+}
+
+/**
  * Bis wohin ist das Putzen STABIL? Alles bis zum letzten Zeilenumbruch immer;
  * die angebrochene letzte Zeile nur dann, wenn sie kein Marker mehr werden kann.
  *

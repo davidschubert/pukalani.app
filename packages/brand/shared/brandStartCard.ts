@@ -89,16 +89,62 @@ export function emptyBrandNewDraft(contentLocale: string): BrandNewDraft {
 }
 
 /**
+ * DIE INHALTSSPRACHE FOLGT DER OBERFLÄCHE (Testlauf-Befund I, 2026-09-09).
+ *
+ * Die Vorgabe war der ERSTE Eintrag aus `pukalani.brand.contentLocales` — auf
+ * einer deutschen Oberfläche stand im Modal deshalb `en`. Wer es überliest,
+ * legt seine Marke in der falschen Sprache an, und die Inhaltssprache ist beim
+ * Anlegen FIXIERT (Plan §6): ein PATCH holt sie nicht zurück.
+ *
+ * Die Sprache der SEITE ist der beste Hinweis, den es zu diesem Zeitpunkt gibt
+ * — aber nur, wenn sie überhaupt angeboten wird. Sonst bleibt der erste
+ * Eintrag; eine Vorgabe, die die Route mit 400 abweist, wäre schlimmer als
+ * eine, die man ändern muss.
+ */
+export function brandInitialContentLocale(
+  uiLocale: string,
+  contentLocales: readonly string[],
+): string {
+  const locales = contentLocales.filter(code => code.trim().length > 0)
+  if (locales.includes(uiLocale)) return uiLocale
+  return locales[0] ?? 'en'
+}
+
+/** Die Pflichtfelder der Startkarte, in der Reihenfolge der Content-Spec §2.1. */
+export const BRAND_NEW_REQUIRED_FIELDS = ['industry', 'about', 'audience'] as const
+export type BrandNewRequiredField = (typeof BRAND_NEW_REQUIRED_FIELDS)[number]
+
+/** Was der Anlage noch fehlt — `websiteUrl` nur, wenn sie dasteht und keine ist. */
+export type BrandNewDraftGap = BrandNewRequiredField | 'websiteUrl'
+
+/**
+ * WAS DEM ENTWURF NOCH FEHLT (Testlauf-Befund J, 2026-09-09).
+ *
+ * Der Knopf „Los geht's" war `disabled`, und nichts sagte warum: die drei
+ * Pflichtfelder trugen kein Zeichen, und ein abgeschalteter Knopf ohne Grund
+ * ist eine Sackgasse mit Achselzucken. Die Liste steht deshalb HIER, in
+ * Feld-Reihenfolge — die Oberfläche macht daraus die Zeile „Noch offen: …"
+ * (Namen und Satzbau gehören dem Katalog, nicht dieser Rechnung).
+ *
+ * Die Adresse ist bewusst der letzte Eintrag und nur dann einer, wenn sie
+ * ausgefüllt UND keine Adresse ist: leer ist sie gültig (§2.1).
+ */
+export function brandNewDraftMissing(draft: BrandNewDraft): BrandNewDraftGap[] {
+  const gaps: BrandNewDraftGap[] = BRAND_NEW_REQUIRED_FIELDS
+    .filter(field => draft[field].trim().length === 0)
+  if (!isBrandWebsiteUrl(draft.websiteUrl.trim())) gaps.push('websiteUrl')
+  return gaps
+}
+
+/**
  * Drei Pflichtfelder, eine freiwillige Adresse — und die Adresse muss, WENN sie
  * dasteht, eine sein. Dieselbe Rechnung wie im Anlage-Schema: der Knopf soll
  * nicht freigegeben aussehen, um dann mit „konnte nicht angelegt werden" zu
- * antworten.
+ * antworten. Seit Befund J ist sie die Kehrseite von `brandNewDraftMissing` —
+ * zwei Listen desselben Zustands liefen beim nächsten neuen Feld auseinander.
  */
 export function brandNewDraftComplete(draft: BrandNewDraft): boolean {
-  return draft.industry.trim().length > 0
-    && draft.about.trim().length > 0
-    && draft.audience.trim().length > 0
-    && isBrandWebsiteUrl(draft.websiteUrl.trim())
+  return brandNewDraftMissing(draft).length === 0
 }
 
 /**

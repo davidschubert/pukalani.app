@@ -66,6 +66,17 @@ export interface BwRailSession {
   /** Erklärt die Sperre beim Überfahren (`title`), z. B. „kommt als Nächstes". */
   title?: string
   /**
+   * DER GRUND, SICHTBAR (Testlauf-Befund M, 2026-09-09) — eine kleine Zeile
+   * UNTER dem Eintrag statt eines Hover-`title`.
+   *
+   * Ein Tooltip erreicht weder Touch noch Tastatur, und die Finale Abnahme ist
+   * der eine Eintrag, der lange gesperrt dasteht: „Frei, sobald alle Felder
+   * dieses Kapitels bestätigt sind" ist die halbe Anleitung. Die Sidebar hängt
+   * die Zeile zusätzlich per `aria-describedby` an den Knopf, damit ein
+   * Screenreader sie mit der Sperre zusammen vorliest.
+   */
+  note?: string
+  /**
    * An dieser Session hängt ein OFFENER Befund (§8, Paket 5) — ein
    * bernsteinfarbenes Merkzeichen HINTER der Beschriftung.
    *

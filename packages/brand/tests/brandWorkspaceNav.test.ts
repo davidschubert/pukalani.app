@@ -10,12 +10,14 @@ import {
   dismissReasonValid,
   isAcceptanceView,
   needsOpeningTurn,
+  openingAdvanceAllowed,
   resolveAcceptanceStage,
   resolveActiveSession,
   resolveContinueTarget,
   restartWordMatches,
 } from '../shared/brandWorkspaceNav'
-import { BRAND_SLOTS, slotsForStep } from '../shared/slotRegistry'
+import { BRAND_SLOTS, slotIsConfirmable, slotsForStep } from '../shared/slotRegistry'
+import { brandStepCompletion } from '../shared/brandJourney'
 
 /**
  * DIE VIER RECHNUNGEN DER SESSION-NAVIGATION (BW2 Paket 3c-i).
@@ -135,6 +137,18 @@ describe('resolveActiveSession', () => {
   })
 })
 
+/**
+ * EINE ZÄHLWEISE, ÜBERALL DIESELBE (Testlauf-Befund L, 2026-09-09): der Nenner
+ * sind die bestätigbaren PFLICHT-Sessions — genau der von `brandStepCompletion`,
+ * den Notizblock und Finale Abnahme schon benutzen. Vorher zählte die Leiste
+ * ALLE Sessions mit und sagte „0 von 9 bestätigt", während der Notizblock
+ * daneben „0/8 + 1 optional" zeigte.
+ */
+const CONTEXT_REQUIRED = CONTEXT_SESSIONS.filter(
+  session => session.required && slotIsConfirmable(session),
+).length
+const CONTEXT_OPTIONAL = CONTEXT_SESSIONS.filter(session => !session.required).length
+
 describe('countChapterSessions', () => {
   it('zählt bestätigt und veraltet GETRENNT', () => {
     const counts = countChapterSessions('context', map({
@@ -144,14 +158,32 @@ describe('countChapterSessions', () => {
     }))
     expect(counts.confirmed).toBe(1)
     expect(counts.stale).toBe(1)
-    expect(counts.total).toBe(CONTEXT_SESSIONS.length)
+    expect(counts.total).toBe(CONTEXT_REQUIRED)
+  })
+
+  it('zählt PFLICHT-Sessions, optionale getrennt daneben (Befund L)', () => {
+    const counts = countChapterSessions('context', {})
+    expect(counts.total).toBe(CONTEXT_REQUIRED)
+    expect(counts.optional).toBe(CONTEXT_OPTIONAL)
+    expect(counts.total + counts.optional).toBeLessThanOrEqual(CONTEXT_SESSIONS.length)
+    // Und der Nenner ist derselbe wie der der Finalen Abnahme.
+    expect(counts.total).toBe(brandStepCompletion('context', {}).total)
+  })
+
+  it('eine BESTÄTIGTE optionale Session bewegt den Bruch nicht', () => {
+    const optional = CONTEXT_SESSIONS.find(session => !session.required)
+    // Ohne optionale Session im Kapitel gibt es nichts zu beweisen.
+    if (!optional) return
+    const counts = countChapterSessions('context', map({ [optional.id]: { state: 'done' } }))
+    expect(counts.confirmed).toBe(0)
+    expect(counts.total).toBe(CONTEXT_REQUIRED)
   })
 
   it('zählt eine fehlende Session als offen, nie als fertig', () => {
     const counts = countChapterSessions('context', {})
     expect(counts.confirmed).toBe(0)
     expect(counts.stale).toBe(0)
-    expect(counts.total).toBe(CONTEXT_SESSIONS.length)
+    expect(counts.total).toBe(CONTEXT_REQUIRED)
   })
 
   it('zählt vertagte Sessions eigens', () => {
@@ -319,6 +351,29 @@ describe('needsOpeningTurn', () => {
     expect(needsOpeningTurn({
       sessionKey: '', opened: new Set(), hasAdvisorTurn: false, streaming: false,
     })).toBe(false)
+  })
+})
+
+/**
+ * DER SPRUNG NACH DEM ERÖFFNUNGSZUG (Testlauf-Befund B, 2026-09-09).
+ *
+ * Er lief für JEDE Session: ein Klick auf „Das Eine" eröffnete dort und landete
+ * eine Sekunde später auf „Größtes Hindernis" — zwei KI-Züge je Klick, und der
+ * gewählte Eintrag war weg. Erlaubt ist er nur noch da, wofür er gedacht war:
+ * die BEILÄUFIG betretene Entwurfs-Session am Kapitel-Anfang.
+ */
+describe('openingAdvanceAllowed', () => {
+  it('eine ENTWURFS-Session, die niemand angeklickt hat, springt weiter', () => {
+    expect(openingAdvanceAllowed({ askable: false, requested: false })).toBe(true)
+  })
+
+  it('eine FRAGE-Session bleibt stehen — sie ist selbst das Ziel', () => {
+    expect(openingAdvanceAllowed({ askable: true, requested: false })).toBe(false)
+  })
+
+  it('ein ANGEKLICKTER Eintrag springt nie weg (Befund B)', () => {
+    expect(openingAdvanceAllowed({ askable: false, requested: true })).toBe(false)
+    expect(openingAdvanceAllowed({ askable: true, requested: true })).toBe(false)
   })
 })
 

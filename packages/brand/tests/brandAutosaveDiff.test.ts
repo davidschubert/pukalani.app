@@ -3,6 +3,7 @@ import {
   type BrandSyncState,
   brandAutosaveAllowed,
   brandConflictNeedsDecision,
+  brandEditReleasesConfirm,
   brandSlotDisplayValue,
   brandSlotIsConfirmed,
   diffBrandSlots,
@@ -49,6 +50,50 @@ describe('brandSlotDisplayValue', () => {
     expect(brandSlotIsConfirmed(view({ confirmed: 'ja' }))).toBe(true)
     expect(brandSlotIsConfirmed(view({ latestDraft: 'ja' }))).toBe(false)
     expect(brandSlotIsConfirmed(undefined)).toBe(false)
+  })
+})
+
+/**
+ * ÖFFNEN IST NOCH KEINE KORREKTUR (Testlauf-Befund F, 2026-09-09).
+ *
+ * „Korrigieren" hob die Bestätigung schon beim ÖFFNEN des Editors auf: wer
+ * hineinsah und „Korrigieren beenden" drückte, stand vor 3 von 10 statt 4 von
+ * 10. Aufgehoben wird jetzt von der EINGABE — und zwar an genau derselben
+ * Schwelle, an der `diffBrandSlots` einen Wert verschickt.
+ */
+describe('brandEditReleasesConfirm', () => {
+  const confirmed = view({ firstDraft: 'steht', latestDraft: 'steht', confirmed: 'steht' })
+
+  it('derselbe Text nimmt nichts (F)', () => {
+    expect(brandEditReleasesConfirm(confirmed, 'steht')).toBe(false)
+  })
+
+  it('ein anderer Text hebt die Bestätigung auf', () => {
+    expect(brandEditReleasesConfirm(confirmed, 'steht anders')).toBe(true)
+    expect(brandEditReleasesConfirm(confirmed, '')).toBe(true)
+  })
+
+  it('auch ein Leerzeichen zählt — sonst gäbe es eine Eingabe ohne offene Tür', () => {
+    expect(brandEditReleasesConfirm(confirmed, 'steht ')).toBe(true)
+  })
+
+  it('an einem OFFENEN Slot gibt es nichts aufzuheben', () => {
+    expect(brandEditReleasesConfirm(view({ latestDraft: 'entwurf' }), 'anders')).toBe(false)
+    expect(brandEditReleasesConfirm(undefined, 'anders')).toBe(false)
+  })
+
+  /**
+   * DIE SCHWELLE IST DIESELBE WIE IM DIFF — und das ist die eigentliche
+   * Zusage: die Route weist eine Wert-Änderung an einem bestätigten Slot mit
+   * 409 `slot_confirmed` ab, wenn nicht DERSELBE Patch die Bestätigung aufhebt.
+   */
+  it('deckt sich mit `diffBrandSlots`: jeder gesendete Wert öffnet die Tür', () => {
+    const server = { 'a.origin': confirmed }
+    for (const value of ['steht', 'steht ', 'anders', '']) {
+      const patch = diffBrandSlots(server, { 'a.origin': { value } })['a.origin']
+      const sendsValue = patch?.value !== undefined
+      expect(sendsValue).toBe(brandEditReleasesConfirm(confirmed, value))
+    }
   })
 })
 

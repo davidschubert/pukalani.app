@@ -75,12 +75,14 @@ import { georgeSystemPrompt } from '../../../../../../utils/georgePrompt'
 import {
   brandConfirmButtonLabel,
   brandDraftButtonLabel,
+  brandKeepWritingButtonLabel,
   brandSessionPartLabel,
   brandSessionPartQuestion,
   brandSlotPromptLabel,
   labelSlotDependencies,
 } from '../../../../../../utils/brandSlotPromptLabels'
 import {
+  dropControlOptions,
   parseGeorgeConfirm,
   parseGeorgeOptions,
   stripGeorgeTurnMarkers,
@@ -976,14 +978,40 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
     if (!message) return fail('empty_result')
 
     /**
-     * EIN ANGEBOT, DAS NICHT GILT, WIRD NICHT WEITERGEREICHT (converse-14).
+     * DAS ANGEBOT ENTSCHEIDET DER SERVER, NICHT DAS MODELL (Testlauf-Befund C,
+     * 2026-09-09 — schärft converse-14).
      *
-     * Das Modell setzt den Marker auf Zuruf; ob hier überhaupt etwas zu
-     * bestätigen ist, weiss nur der Server (`offerConfirm`). Ohne dieses UND
-     * stünde nach einem übereifrigen `CONFIRM:` ein Knopf unter dem Zug, dessen
-     * Klick in `slot_empty` oder in ein bereits bestätigtes Feld liefe.
+     * Bis hierher galt `offered.confirm && offerConfirm`: der Marker war
+     * Bedingung, `offerConfirm` nur das Veto. Im Live-Test kamen die zwei
+     * Knöpfe deshalb beim Gründungsimpuls sofort — und bei Kundenstimmen und
+     * Größtes Hindernis NIE, weil George dort nachbohrte und den Marker
+     * vergass. Der Mensch hatte damit keinen Weg, eine Antwort für gut zu
+     * erklären, ausser über die Karte rechts.
+     *
+     * Die Wahrheit ist jetzt die ROUTE: hat die aktive Session einen Wert und
+     * ist sie unbestätigt (`offerConfirm`, aus den Slot-Fakten), reist das
+     * Angebot IMMER mit. Der Auftrag behält seine `CONFIRM:`-Zeile als STIL —
+     * George soll in einem Nebensatz sagen, wo er steht —, aber ein
+     * vergessener Marker kostet kein Bedienelement mehr. Ein übereifriger
+     * ebenso wenig: ohne `offerConfirm` gibt es kein Angebot, und der Marker
+     * fällt trotzdem aus dem sichtbaren Text.
      */
-    const confirmOffered = offered.confirm && offerConfirm
+    const confirmOffered = offerConfirm
+
+    /**
+     * UND ZWAR ALS EINZIGES PAAR KNÖPFE (Testlauf-Befund D): eine
+     * `OPTION:`-Zeile mit der Bedeutung „passt so" / „ich ergänze noch etwas"
+     * wäre daneben ein zweiter Knopf für dieselbe Entscheidung — nur einer, der
+     * seinen Text als ANTWORT in das Feld schreibt. Die Regel steht pur nebenan
+     * (`dropControlOptions`), die Beschriftungen kommen aus demselben
+     * Locale-Eintrag, den die Bühne rendert.
+     */
+    const options = confirmOffered
+      ? dropControlOptions(spoken.options, [
+          brandConfirmButtonLabel(uiLocale),
+          brandKeepWritingButtonLabel(uiLocale),
+        ])
+      : spoken.options
 
     let messageId: string
     try {
@@ -1008,7 +1036,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
             // hat, ohne ihn am Wortlaut erraten zu müssen.
             kind: body.closing ? 'closing' : 'reply',
             ...(body.slotId ? { slotId: body.slotId } : {}),
-            ...(spoken.options.length ? { options: spoken.options } : {}),
+            ...(options.length ? { options } : {}),
             // ADDITIV wie `options`: ein nachgeladener Verlauf zeigt die zwei
             // Knöpfe wieder, statt sie beim Reload zu verlieren.
             ...(confirmOffered ? { confirm: true } : {}),
@@ -1098,7 +1126,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
       outcome: 'question',
       // NUR wenn es welche gibt: ein leeres Array wäre für den Leser dasselbe
       // wie „keine", kostete aber einen Sonderfall im Rückwärts-Vertrag.
-      ...(spoken.options.length ? { options: spoken.options } : {}),
+      ...(options.length ? { options } : {}),
       // Dasselbe für das Bestätigungs-Angebot (converse-14).
       ...(confirmOffered ? { confirm: true } : {}),
       next: nextSession,

@@ -407,6 +407,7 @@
       "acceptancePending": "Opens once every field in this chapter is confirmed.",
       "derivedGroup": "Derived from the conversation",
       "chapterCount": "{confirmed} of {total} confirmed",
+      "chapterCountOptional": "{confirmed} of {total} confirmed + {optional} optional",
       "chapterCountStale": "{confirmed} of {total} confirmed · {stale} to revisit",
       "chapterEffort": "{count} sessions, ~{minutes} min",
       "document": "Your branding",
@@ -934,6 +935,7 @@
       "george": {
         "subtitle": "Your brand advisor",
         "placeholder": "Write your answer — or ask a question",
+      "addToPlaceholder": "Add to “{field}”",
         "nothingOpen": "Nothing open in this chapter — confirm it when it fits.",
         "questionsDone": "My questions are done — we'll shape the remaining fields right here in the conversation.",
         "nextDraft": "Let’s start with “{field}”: click “{voice}, draft this” and I’ll lay out a first version from what you’ve told me so far — or just tell me here what’s on your mind about it.",
@@ -1111,8 +1113,17 @@
         "website": "Your website (optional) — I'll read it so you don't have to repeat yourself.",
         "industry": "What industry are you in?",
         "about": "What do you do — in 2–3 sentences, like you'd tell a friend?",
-        "audience": "Who is it for?"
+        "audience": "Who is it for?",
+        "short": {
+          "industry": "Industry",
+          "about": "What you do",
+          "audience": "Audience",
+          "websiteUrl": "Website"
+        }
       },
+      "requiredHint": "I need the fields marked *.",
+      "requiredField": "required",
+      "missing": "Still open: {fields}",
       "submit": "Let's go — George takes over",
       "failed": "The branding could not be created.",
       "preparing": "One moment — the form is getting ready."

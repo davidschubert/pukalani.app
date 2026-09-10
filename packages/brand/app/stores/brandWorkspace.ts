@@ -20,6 +20,7 @@ import {
   type BrandSyncState,
   brandAutosaveAllowed,
   brandConflictNeedsDecision,
+  brandEditReleasesConfirm,
   brandSlotDisplayValue,
   brandSlotIsConfirmed,
   diffBrandSlots,
@@ -416,8 +417,27 @@ const setup = () => {
 
   // ── Schreiben (lokal) ───────────────────────────────────────────────────
 
+  /**
+   * DIE KORREKTUR HEBT DIE BESTÄTIGUNG AUF — ABER ERST DIE ÄNDERUNG
+   * (Testlauf-Befund F, 2026-09-09).
+   *
+   * Bis hierher nahm „Korrigieren" die Bestätigung schon beim ÖFFNEN des
+   * Editors; ein Blick ins Feld kostete den Haken. Jetzt hängt sie am TEXT: die
+   * pure Regel (`brandEditReleasesConfirm`) sagt, ob dieser Wert ein anderer
+   * ist, und nur dann reist `confirmed: false` mit — im SELBEN Patch wie der
+   * Wert, denn die Route lässt eine Wert-Änderung an einem bestätigten Slot nur
+   * durch diese eine Tür.
+   *
+   * Und die Kehrseite: wer zurücktippt, bis wieder der bestätigte Wortlaut
+   * dasteht, bekommt seinen Haken zurück — die lokale Absicht wird GELÖSCHT,
+   * nicht auf `true` gesetzt. Ein `confirmed: true` wäre hier eine neue
+   * Bestätigung für einen Slot, der schon eine hat.
+   */
   function setSlotValue(slotId: string, value: string): void {
-    localEdits.value = { ...localEdits.value, [slotId]: { ...localEdits.value[slotId], value } }
+    const edit: BrandLocalSlotEdit = { ...localEdits.value[slotId], value }
+    if (brandEditReleasesConfirm(serverSlots.value[slotId], value)) edit.confirmed = false
+    else if (edit.confirmed === false) delete edit.confirmed
+    localEdits.value = { ...localEdits.value, [slotId]: edit }
     // Wer tippt, ist der Urheber — die Entwurfs-Markierung fällt (s. `georgeDrafts`).
     clearGeorgeDraft(slotId)
   }

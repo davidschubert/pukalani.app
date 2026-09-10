@@ -109,6 +109,19 @@ export function brandConfirmButtonLabel(uiLocale: string): string {
   return lookup(ROOTS[uiLocale] ?? ROOTS.en, 'brand.workspace.confirmChoice.confirm') ?? ''
 }
 
+/**
+ * DER NAME DES ZWEITEN KNOPFES — „Ich ergänze noch etwas" (Testlauf-Befund D).
+ *
+ * Er steht NICHT im Auftrag (das Modell soll keine Knopf-Texte schreiben),
+ * sondern im FILTER: eine `OPTION:`-Zeile mit dieser Beschriftung wäre ein
+ * zweiter Knopf für dieselbe Entscheidung, und ihr Klick liefe als Antwort in
+ * das Feld (s. `dropControlOptions`). Dieselbe Quelle wie der erste Knopf, aus
+ * derselben Begründung: die Bühne rendert genau diesen Eintrag.
+ */
+export function brandKeepWritingButtonLabel(uiLocale: string): string {
+  return lookup(ROOTS[uiLocale] ?? ROOTS.en, 'brand.workspace.confirmChoice.more') ?? ''
+}
+
 /** Dieselbe Beschriftung für eine ganze Dependency-Liste (Prompt-Aufbau). */
 export function labelSlotDependencies<T extends { slotId: string }>(
   dependencies: readonly T[],

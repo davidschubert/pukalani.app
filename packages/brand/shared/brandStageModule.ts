@@ -72,23 +72,31 @@ export interface BrandStageClaim {
 /**
  * ── DIE VIER ZEILEN, UND WARUM JEDE SO HERUM STEHT ────────────────────────
  *
- * 1. EINE KATALOG-FRAGE MIT WERT GIBT DIE BÜHNE FREI. Sie ist beantwortet;
- *    danach ist die nächste offene Frage des Kapitels die ehrlichere Auskunft
- *    als eine Frage, die schon eine Antwort hat. (Unverändert das Verhalten
- *    von BW2 3c-i.)
- * 2. WER NICHTS BESTÄTIGEN KANN, BEANSPRUCHT NICHTS. `d.pairs` hat weder Feld
+ * 1. EINE UNBEANTWORTETE KATALOG-FRAGE ZEIGT IHR EIGENES MODUL. Frage ⇒
+ *    Antwort-Modul, Auswahl ⇒ Options-Modul — beide zu GENAU diesem Feld.
+ * 2. EINE BEANTWORTETE, ABER UNBESTÄTIGTE KATALOG-FRAGE BEHÄLT DIE BÜHNE
+ *    (Testlauf-Befunde A/G, 2026-09-09). Bis zum Session-Abschluss gab sie sie
+ *    FREI, sobald ein Wert dastand — und weil der Auto-Sprung nach der Antwort
+ *    entfallen ist (Davids Entscheidung 2026-09-09), fiel die Bühne danach auf
+ *    die nächste offene Frage des KAPITELS zurück. Die Folge im Live-Test: in
+ *    der Session „Kundenstimmen" stand das Eingabe-Modul von „Zahlen & Fakten",
+ *    und die nächste getippte Antwort landete in „Kritik & Beschwerden". Eine
+ *    beantwortete Session ist nicht fertig, sie ist unbestätigt — und genau
+ *    dafür ist die Bestätigungs-Karte da.
+ * 3. WER NICHTS BESTÄTIGEN KANN, BEANSPRUCHT NICHTS. `d.pairs` hat weder Feld
  *    noch Zustimmung — eine Karte mit „Übernehmen" wäre dort ein Knopf ohne
  *    Wirkung (Audit A4). Ebenso ein bereits bestätigtes Feld: dort ist
  *    „Korrigieren" die einzige Tür, und die hängt an der Karte, nicht an der
  *    Bühne.
- * 3. MIT WERT: das bisherige Verhalten (`activeAwaitsConfirm`) — Entwurfs-
- *    Modul, wo entworfen werden darf, sonst die reine Bestätigungs-Karte.
- * 4. LEER UND ENTWERFBAR: das NEUE (Weg B). Die Session hat einen Knopf, der
- *    sie füllen kann, also zeigt die Bühne ihn — mit Georges Frage zu diesem
- *    Feld und einem Eingabefeld, dessen Text als HINWEIS in den Entwurf geht.
- *    Der Deckel dagegen ist bewusst `generatable` und NICHT `canGenerate`:
- *    fehlt Material, gehört genau dieser Satz auf die Bühne
- *    (`showReadinessNote`) und nicht die Frage eines fremden Feldes.
+ * 4. ENTWURFS-SESSION MIT WERT: das bisherige Verhalten
+ *    (`activeAwaitsConfirm`) — Entwurfs-Modul, wo entworfen werden darf, sonst
+ *    die reine Bestätigungs-Karte.
+ * 5. ENTWURFS-SESSION, LEER UND ENTWERFBAR: das NEUE aus Weg B. Die Session
+ *    hat einen Knopf, der sie füllen kann, also zeigt die Bühne ihn — mit
+ *    Georges Frage zu diesem Feld und einem Eingabefeld, dessen Text als
+ *    HINWEIS in den Entwurf geht. Der Deckel dagegen ist bewusst `generatable`
+ *    und NICHT `canGenerate`: fehlt Material, gehört genau dieser Satz auf die
+ *    Bühne (`showReadinessNote`) und nicht die Frage eines fremden Feldes.
  *
  * LEER UND NICHT ENTWERFBAR gibt die Bühne frei: die deterministisch
  * gerechneten Felder der Design-Kapitel (`h.ramp`, `i.scale`, `j.examples` …)
@@ -99,13 +107,68 @@ export function brandStageClaim(active: BrandStageActiveSession | null): BrandSt
   if (!active) return null
 
   if (active.type === 'question' || active.type === 'choice') {
-    if (active.hasValue) return null
-    return { module: active.type === 'choice' ? 'options' : 'answer', slotId: active.id }
+    if (!active.hasValue) {
+      return { module: active.type === 'choice' ? 'options' : 'answer', slotId: active.id }
+    }
+    // Beantwortet: erst die Bestätigung gibt die Bühne frei (s. Zeile 2/3).
+    if (active.confirmed || !active.confirmable) return null
+    return { module: 'confirm', slotId: active.id }
   }
 
   if (!active.confirmable || active.confirmed) return null
   if (active.hasValue) return { module: active.canGenerate ? 'draft' : 'confirm', slotId: active.id }
   return active.generatable ? { module: 'draft', slotId: active.id } : null
+}
+
+/**
+ * WOHIN GEHÖRT EINE GETIPPTE ANTWORT — UND ERSETZT SIE ODER ERGÄNZT SIE?
+ * (Testlauf-Befunde A und D, 2026-09-09.)
+ *
+ * ── DER BEFUND, IN EINEM ABSATZ ───────────────────────────────────────────
+ * Die Bühne rechnete das Ziel einer getippten Antwort aus `nextSlot` — der
+ * NÄCHSTEN offenen Katalog-Frage des Kapitels. Solange nach jeder Antwort
+ * automatisch weitergesprungen wurde, waren „aktive Session" und „nächste
+ * Frage" dasselbe. Seit der Sprung entfallen ist (Davids Entscheidung
+ * 2026-09-09), laufen beide auseinander: in der Session `a.customerPraise`
+ * landete die getippte Nachricht wortwörtlich in `a.complaints`, die nächste in
+ * `a.oneThing` — drei Felder, die niemand beantwortet hat.
+ *
+ * ── DIE REGEL ─────────────────────────────────────────────────────────────
+ * Eine getippte Antwort gehört IMMER der AKTIVEN Session, nie der nächsten
+ * Frage. Sie schreibt aber nur dort, wo es etwas zu beantworten gibt: eine
+ * Katalog-Frage (`question`/`choice`), die noch nicht bestätigt ist. Alles
+ * andere — eine Ableitung, eine bestätigte Session, gar keine Session — macht
+ * aus dem Text einen reinen Gesprächszug ohne Feld.
+ *
+ * ── UND SIE ÜBERSCHREIBT NICHTS, WAS SCHON DASTEHT (Befund D) ────────────
+ * „Ich ergänze noch etwas" heisst ERGÄNZEN. Ein zweiter Satz zu derselben
+ * Frage ist kein Ersatz für den ersten: würde er ihn überschreiben, verlöre
+ * genau der Knopf seine Bedeutung, der ihn eingeladen hat. Steht also schon
+ * eine Antwort, wird ANGEHÄNGT; ist das Feld leer, wird gesetzt. Wer seine
+ * Antwort wirklich ersetzen will, geht über „Korrigieren" — die eine Tür, die
+ * dafür da ist.
+ *
+ * ── EINE BEANTWORTETE AUSWAHL NIMMT NICHTS ENTGEGEN ──────────────────────
+ * Ihr Wert ist eine stabile Id aus einem geschlossenen Vertrag
+ * (`brandChoiceOptions`), kein Text: angehängte Prosa machte daraus einen
+ * Wert, den weder das Dokument noch der Generator lesen kann. Solange sie
+ * OFFEN ist, gehört ihr die eigene Formulierung sehr wohl — sonst hätte das
+ * Options-Modul kein Ziel.
+ */
+export type BrandAnswerMode = 'set' | 'append'
+
+export interface BrandAnswerTarget {
+  slotId: string
+  mode: BrandAnswerMode
+}
+
+export function brandAnswerTarget(active: BrandStageActiveSession | null): BrandAnswerTarget | null {
+  if (!active) return null
+  if (active.type !== 'question' && active.type !== 'choice') return null
+  if (active.confirmed) return null
+  if (!active.hasValue) return { slotId: active.id, mode: 'set' }
+  if (active.type === 'choice') return null
+  return { slotId: active.id, mode: 'append' }
 }
 
 /**

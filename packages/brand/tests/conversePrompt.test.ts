@@ -164,8 +164,22 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     // Entwurfs-Knopf und die eigene Frage einer Entwurfs-Session
     // (Kailua-Befunde 5 und 7); converse-13 die Anrede aus der Team-Weiche;
     // converse-14 der Session-Abschluss (Zustand im Auftrag, `CONFIRM:`,
-    // Abschlusszug, Spiegel im Eröffnungszug).
-    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-14')
+    // Abschlusszug, Spiegel im Eröffnungszug); converse-15 die Sprach-Zeile
+    // und das Sessions-sind-keine-Kapitel-Verbot (Testlauf-Befund N), die
+    // Anrede auch im Nebensatz über Dritte (Befund K) und das Verbot, die
+    // Bestätigung als OPTION-Zeilen zu schreiben (Befund D).
+    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-15')
+  })
+
+  /**
+   * BEFUND N (2026-09-09): im Live-Lauf standen „die dich gedacht hat", „eine
+   * Satz" und „vollauslausten" in Georges Zügen — und eine SESSION hiess bei
+   * ihm „das nächste Kapitel".
+   */
+  it('verlangt korrekte Sprache und verbietet „Kapitel" für eine Session (N)', () => {
+    const instruction = brandConverseInstruction(BOTH)
+    expect(instruction).toContain('WRITE CORRECT, NATURAL PROSE')
+    expect(instruction).toContain('NEVER call a single session a chapter')
   })
 
   it('würdigt Substanz — aber verbietet das Lob ohne Deckung', () => {

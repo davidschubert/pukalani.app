@@ -1164,6 +1164,41 @@ export type BrandNextSessionRef =
   | { stepKey: BrandStepKey, sessionKey: string }
   | { stepKey: BrandStepKey, acceptance: true }
 
+/**
+ * DIE NÄCHSTE UNBESTÄTIGTE SESSION — der Wegweiser zählt anders als die Frage
+ * (Testlauf-Befund E, 2026-09-09).
+ *
+ * ── DER BEFUND ────────────────────────────────────────────────────────────
+ * `resolveNextSession` überspringt jede Session, in der schon ein WERT steht
+ * (`slotIsFilled` — Entwurf ODER Bestätigung). Für „was frage ich als
+ * Nächstes?" ist das richtig: eine Frage mit Antwort stellt man nicht noch
+ * einmal. Für „wohin geht es weiter?" ist es falsch. Im Live-Test hiess der
+ * Knopf nach dem Abschluss von Kundenstimmen „Weiter zu Größtes Hindernis",
+ * während Kritik & Beschwerden und Das Eine in der Leiste offen standen — sie
+ * trugen einen (irrtümlich hineingeschriebenen) Wert und galten damit als
+ * erledigt. Ein unbestätigter Wert ist OFFEN, nicht fertig; erledigt ist erst,
+ * was bestätigt ist.
+ *
+ * ── WAS ÜBERSPRUNGEN WIRD ─────────────────────────────────────────────────
+ * Bestätigt (die Arbeit ist getan), vertagt („darauf komme ich zurück" — der
+ * Auto-Weiter überspringt sie einmal, §3a) und unerreichbar (eine Session,
+ * deren Quellen noch nicht stehen, wäre ein Gespräch ohne Grundlage). Die
+ * Menge bleibt die der FRAGBAREN Arbeitsformen: Ableitungen entwirft George
+ * von sich aus, sie sind kein Ziel für „weiter".
+ */
+export function resolveNextOpenSession(
+  stepKey: BrandStepKey,
+  slotStates: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
+): string | null {
+  return slotsForStep(stepKey).find(session =>
+    session.required
+    && ASKABLE_KINDS.includes(session.kind)
+    && !slotStates[session.id]?.confirmed
+    && !slotStates[session.id]?.deferred
+    && session.inputs.slots.every(inputId => inputSatisfied(inputId, slotStates)),
+  )?.id ?? null
+}
+
 export function resolveNextStop(
   stepKey: BrandStepKey,
   slotStates: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
@@ -1171,8 +1206,8 @@ export function resolveNextStop(
 ): BrandNextSessionRef | null {
   const queued = nextStaleSession(stepKey, sessionStates)
   if (queued) return { stepKey, sessionKey: queued }
-  const upcoming = resolveNextSession(stepKey, slotStates)
-  if (upcoming) return { stepKey, sessionKey: upcoming.slotId }
+  const upcoming = resolveNextOpenSession(stepKey, slotStates)
+  if (upcoming) return { stepKey, sessionKey: upcoming }
   return brandStepCompletion(stepKey, slotStates).slotsReady ? { stepKey, acceptance: true } : null
 }
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   GEORGE_TURN_MARKERS,
   createGeorgeTurnScrubber,
+  dropControlOptions,
   parseGeorgeConfirm,
   parseGeorgeOptions,
   parseGeorgeTurn,
@@ -364,5 +365,45 @@ describe('createGeorgeTurnScrubber', () => {
       expect(shown).not.toContain('Handwerker')
     }
     expect(shown.trim()).toBe('Was passt besser?')
+  })
+})
+
+/**
+ * KEIN ZWEITES PAAR KNÖPFE FÜR DIESELBE ENTSCHEIDUNG (Testlauf-Befund D,
+ * 2026-09-09).
+ *
+ * Der Auftrag nennt dem Modell die Beschriftung des Bestätigen-Knopfes — und
+ * das Modell schrieb sie als `OPTION:`-Zeilen mit. Der Chip ist aber eine
+ * ANTWORT: sein Klick schreibt seinen Text in das Feld. Im Live-Test landete
+ * so „Ich ergänze noch etwas" als Wert in einer Session.
+ */
+describe('dropControlOptions', () => {
+  const LABELS = ['Passt so, bestätigen', 'Ich ergänze noch etwas']
+
+  it('wirft eine Option weg, die den Bestätigen-Knopf nachbaut (D)', () => {
+    expect(dropControlOptions(['Passt so, bestätigen', 'Der Handwerker'], LABELS))
+      .toEqual(['Der Handwerker'])
+  })
+
+  it('… und den zweiten Knopf ebenso', () => {
+    expect(dropControlOptions(['Ich ergänze noch etwas', 'Der Gastgeber'], LABELS))
+      .toEqual(['Der Gastgeber'])
+  })
+
+  it('grosszügig bei Satzzeichen und Grossschreibung, streng beim Wortlaut', () => {
+    expect(dropControlOptions(['passt so — bestätigen!', 'Der Handwerker'], LABELS))
+      .toEqual(['Der Handwerker'])
+    // Eine Option, die etwas ANDERES sagt, bleibt eine Antwort.
+    expect(dropControlOptions(['Passt so wie es ist', 'Der Handwerker'], LABELS))
+      .toEqual(['Passt so wie es ist', 'Der Handwerker'])
+  })
+
+  it('ohne Beschriftungen ändert sie nichts (fehlender Locale-Eintrag)', () => {
+    expect(dropControlOptions(['Passt so, bestätigen'], ['', '  '])).toEqual(['Passt so, bestätigen'])
+    expect(dropControlOptions(['Passt so, bestätigen'], [])).toEqual(['Passt so, bestätigen'])
+  })
+
+  it('lässt die Liste sonst unangetastet — Reihenfolge inklusive', () => {
+    expect(dropControlOptions(['A', 'B', 'C'], LABELS)).toEqual(['A', 'B', 'C'])
   })
 })

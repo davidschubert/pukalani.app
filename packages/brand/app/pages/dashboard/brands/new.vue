@@ -2,8 +2,10 @@
 import type { BrandPathKind } from '../../../../shared/slotRegistry'
 import {
   type BrandNewDraft,
+  brandInitialContentLocale,
   brandNewDraftBody,
   brandNewDraftComplete,
+  brandNewDraftMissing,
   emptyBrandNewDraft,
 } from '../../../../shared/brandStartCard'
 import { firstOpenBrandStep } from '../../../../shared/brandJourney'
@@ -33,7 +35,7 @@ import type { BrandProfileDetailResponse } from '../../../../shared/types/brand'
  * KUNDEN-Fläche und tragen die Wizard-Nav des default-Layouts — das
  * dashboard-Layout gehört seit der admin-Montage der Betreiber-Shell. */
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const appConfig = useAppConfig() as { pukalani?: { brand?: { contentLocales?: string[] } } }
 
@@ -54,9 +56,22 @@ const contentLocales = computed(() => appConfig.pukalani?.brand?.contentLocales 
  */
 const route = useRoute()
 const pathKind = ref<BrandPathKind>(route.query.path === 'relaunch' ? 'relaunch' : 'new')
-const draft = ref<BrandNewDraft>(emptyBrandNewDraft(contentLocales.value[0] ?? 'en'))
+// Die Vorgabe folgt der OBERFLÄCHE (Testlauf-Befund I, 2026-09-09) — dieselbe
+// pure Regel wie im Modal; die Inhaltssprache ist beim Anlegen fixiert.
+const draft = ref<BrandNewDraft>(
+  emptyBrandNewDraft(brandInitialContentLocale(locale.value, contentLocales.value)),
+)
 
 const startCardComplete = computed(() => brandNewDraftComplete(draft.value))
+/** Was noch fehlt — als Satz unter dem abgeschalteten Knopf (Befund J). */
+const missingLine = computed(() => {
+  const missing = brandNewDraftMissing(draft.value)
+  return missing.length
+    ? t('brand.new.missing', {
+        fields: missing.map(field => t(`brand.new.startCard.short.${field}`)).join(', '),
+      })
+    : ''
+})
 
 const submitting = ref(false)
 const failed = ref(false)
@@ -152,5 +167,7 @@ useBrandTitle(() => t('brand.new.title'))
         size="lg" class="rounded-full" @click="submit"
       />
     </div>
+    <!-- BEFUND J: der abgeschaltete Knopf sagt, was ihm fehlt. -->
+    <p v-if="hydrated && missingLine" class="bw-label mt-2 text-right" style="color: var(--bw-muted)">{{ missingLine }}</p>
   </div>
 </template>

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   type BrandStageActiveSession,
+  brandAnswerTarget,
   brandStageAwaitsDraftAnswer,
   brandStageClaim,
 } from '../shared/brandStageModule'
@@ -103,13 +104,72 @@ describe('Gegenprobe: die Katalog-Sessions verhalten sich unverändert', () => {
   })
 
   /**
-   * BEANTWORTET HEISST: DIE BÜHNE GEHT WEITER. Das ist die Regel von BW2 3c-i
-   * und der Grund, warum eine beantwortete Frage nicht stehen bleibt — sonst
-   * käme man nach der eigenen Antwort nie zur nächsten.
+   * BEANTWORTET IST NICHT FERTIG (Testlauf-Befund A/G, 2026-09-09).
+   *
+   * Bis zum Session-Abschluss gab eine beantwortete Frage die Bühne FREI — das
+   * war richtig, solange nach jeder Antwort automatisch weitergesprungen wurde.
+   * Ohne den Sprung fiel die Bühne damit auf die nächste offene Frage des
+   * KAPITELS zurück: fremdes Modul, fremdes Zielfeld. Jetzt behält die Session
+   * ihre Bühne und zeigt, was jetzt dran ist — die Bestätigung.
    */
-  it('eine beantwortete Frage gibt die Bühne wieder frei', () => {
-    expect(brandStageClaim(session({ id: 'a.origin', type: 'question', hasValue: true }))).toBeNull()
-    expect(brandStageClaim(session({ id: 'a.facts', type: 'choice', hasValue: true }))).toBeNull()
+  it('eine beantwortete, unbestätigte Frage behält ihre Bühne (Bestätigung)', () => {
+    expect(brandStageClaim(session({ id: 'a.origin', type: 'question', hasValue: true })))
+      .toEqual({ module: 'confirm', slotId: 'a.origin' })
+    expect(brandStageClaim(session({ id: 'a.facts', type: 'choice', hasValue: true })))
+      .toEqual({ module: 'confirm', slotId: 'a.facts' })
+  })
+
+  it('erst die BESTÄTIGUNG gibt die Bühne frei', () => {
+    expect(brandStageClaim(session({
+      id: 'a.origin', type: 'question', hasValue: true, confirmed: true,
+    }))).toBeNull()
+  })
+
+  /**
+   * Eine Frage ohne Zustimmung (`slotIsConfirmable === false`) hätte auf der
+   * Bestätigungs-Karte einen Knopf ohne Wirkung — sie gibt frei wie bisher.
+   */
+  it('ohne Zustimmung beansprucht auch eine beantwortete Frage nichts', () => {
+    expect(brandStageClaim(session({
+      id: 'a.origin', type: 'question', hasValue: true, confirmable: false,
+    }))).toBeNull()
+  })
+})
+
+describe('brandAnswerTarget — wohin gehört eine getippte Antwort', () => {
+  it('immer die AKTIVE Session, auch wenn dort schon etwas steht (Befund A)', () => {
+    expect(brandAnswerTarget(session({ id: 'a.customerPraise', type: 'question' })))
+      .toEqual({ slotId: 'a.customerPraise', mode: 'set' })
+    expect(brandAnswerTarget(session({ id: 'a.customerPraise', type: 'question', hasValue: true })))
+      .toEqual({ slotId: 'a.customerPraise', mode: 'append' })
+  })
+
+  it('eine OFFENE Auswahl nimmt die eigene Formulierung entgegen', () => {
+    expect(brandAnswerTarget(session({ id: 'a.facts', type: 'choice' })))
+      .toEqual({ slotId: 'a.facts', mode: 'set' })
+  })
+
+  /**
+   * Ihr Wert ist eine stabile Id aus einem geschlossenen Vertrag —
+   * angehängte Prosa machte daraus einen Wert, den niemand mehr auflöst.
+   */
+  it('eine BEANTWORTETE Auswahl nimmt nichts mehr entgegen', () => {
+    expect(brandAnswerTarget(session({ id: 'a.facts', type: 'choice', hasValue: true }))).toBeNull()
+  })
+
+  it('eine BESTÄTIGTE Session nimmt nichts mehr entgegen', () => {
+    expect(brandAnswerTarget(session({
+      id: 'a.customerPraise', type: 'question', hasValue: true, confirmed: true,
+    }))).toBeNull()
+  })
+
+  it('eine ABLEITUNG ist kein Ziel — dort ist der Text ein Gesprächszug', () => {
+    expect(brandAnswerTarget(session({ id: 'a.pitch', type: 'derivation' }))).toBeNull()
+    expect(brandAnswerTarget(session({ id: 'b.mission', type: 'stage-edit' }))).toBeNull()
+  })
+
+  it('ohne Session gibt es kein Ziel', () => {
+    expect(brandAnswerTarget(null)).toBeNull()
   })
 })
 

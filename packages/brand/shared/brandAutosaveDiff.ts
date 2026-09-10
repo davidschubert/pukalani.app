@@ -63,6 +63,33 @@ export function brandSlotIsConfirmed(view: BrandSlotView | undefined): boolean {
 }
 
 /**
+ * NIMMT DIESE EINGABE DIE BESTÄTIGUNG? (Testlauf-Befund F, 2026-09-09.)
+ *
+ * ── DER BEFUND ────────────────────────────────────────────────────────────
+ * „Korrigieren" hob die Bestätigung SOFORT auf — beim ÖFFNEN des Editors, per
+ * PATCH. Wer danach „Korrigieren beenden" drückte, ohne ein Zeichen zu ändern,
+ * stand vor 3 von 10 statt 4 von 10, einer unbestätigten Karte und einer
+ * Restzeit von „~2 Min", die es vorher nicht gab. Ein Blick in ein Feld ist
+ * keine Änderung.
+ *
+ * ── DIE REGEL, UND WARUM SIE GENAU SO GESCHNITTEN IST ────────────────────
+ * Aufgehoben wird, sobald der Text ein ANDERER ist — nicht früher. Verglichen
+ * wird gegen `brandSlotDisplayValue` und NICHT gegen `confirmed`, und das ist
+ * kein Detail: `diffBrandSlots` schickt einen `value` genau dann, wenn er von
+ * der Anzeige-Fassung abweicht, und die Route weist eine WERT-Änderung an einem
+ * bestätigten Slot mit 409 `slot_confirmed` ab, wenn nicht DERSELBE Patch die
+ * Bestätigung aufhebt. Beide Rechnungen müssen deshalb dieselbe Schwelle haben
+ * — auch bei einem Leerzeichen: sonst gibt es eine Eingabe, die gesendet wird,
+ * ohne die Tür zu öffnen.
+ */
+export function brandEditReleasesConfirm(
+  view: BrandSlotView | undefined,
+  value: string,
+): boolean {
+  return brandSlotIsConfirmed(view) && value !== brandSlotDisplayValue(view)
+}
+
+/**
  * DIE GEÄNDERTEN SLOTS — Server-Fassung gegen lokale Eingabe.
  *
  * Ein Slot fällt raus, wenn die lokale Eingabe dem Server entspricht; ein

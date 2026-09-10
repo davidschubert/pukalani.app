@@ -8,7 +8,7 @@ import {
   type BrandFindingKind,
   type BrandFindingStatus,
 } from './brandFindings'
-import { type BrandStepKey, slotById, slotsForStep } from './slotRegistry'
+import { type BrandStepKey, slotById, slotIsConfirmable, slotsForStep } from './slotRegistry'
 
 /**
  * DIE RECHNUNGEN DER SESSION-NAVIGATION (BW2 Paket 3c-i/3c-ii,
@@ -149,12 +149,17 @@ export function resolveActiveSession(input: BrandActiveSessionInput): string | n
 export interface BrandChapterSessionCounts {
   /** Bestätigt UND aktuell (`done`) — die Zahl vor dem „von". */
   confirmed: number
-  /** Alle Sessions des Kapitels; die „Finale Abnahme" zählt NICHT mit (§11). */
+  /**
+   * Die PFLICHT-Sessions, die ein Mensch bestätigen kann; die „Finale Abnahme"
+   * zählt NICHT mit (§11), optionale ebenfalls nicht (s. `optional`).
+   */
   total: number
   /** Bestätigt, aber die Quellen haben sich bewegt — „neu besprechen". */
   stale: number
   /** Auf später vertagt — eigenes Merkzeichen, kein eigener Zähler-Teil. */
   deferred: number
+  /** Die optionalen Sessions des Kapitels — als Anhängsel „+ N optional". */
+  optional: number
 }
 
 /**
@@ -165,10 +170,22 @@ export interface BrandChapterSessionCounts {
  * veralteten mit in die 7, verschwände genau die Arbeit aus der Zeile, auf die
  * sie hinweisen soll.
  *
- * Gezählt werden ALLE Sessions des Kapitels, nicht nur die Pflicht-Sessions:
- * die Zeile beantwortet „wie viel ist hier noch zu tun", und ein optionales
- * Feld, das jemand ausgefüllt hat, ist getane Arbeit. Fehlt eine Session in
- * der Karte (frisch geladenes Kapitel), zählt sie als offen — nie als fertig.
+ * ── EINE ZÄHLWEISE, ÜBERALL DIESELBE (Testlauf-Befund L, 2026-09-09) ──────
+ * Gezählt werden die PFLICHT-Sessions, die ein Mensch bestätigen kann — genau
+ * der Nenner von `brandStepCompletion`, den der Notizblock und die Finale
+ * Abnahme schon benutzen. Vorher zählte diese Zeile ALLE Sessions inklusive
+ * der optionalen: die Leiste sagte „0 von 9 bestätigt", der Notizblock
+ * daneben „0/8 + 1 optional" — zwei Zahlen über dasselbe Kapitel. Optionale
+ * stehen deshalb als eigenes Anhängsel (`optional`) und nie im Nenner; sie
+ * sind Angebot, keine Pflicht, und ein Nenner, der sie mitzählt, ist für
+ * jemanden, der sie nicht will, nie erreichbar.
+ *
+ * `stale` und `deferred` zählen bewusst über ALLE Sessions: sie sind
+ * Merkzeichen („2 neu besprechen"), keine Teile des Bruchs — und eine
+ * optionale Session, die veraltet ist, ist trotzdem Arbeit.
+ *
+ * Fehlt eine Session in der Karte (frisch geladenes Kapitel), zählt sie als
+ * offen — nie als fertig.
  */
 export function countChapterSessions(
   stepKey: BrandStepKey,
@@ -176,15 +193,21 @@ export function countChapterSessions(
 ): BrandChapterSessionCounts {
   const order = slotsForStep(stepKey)
   let confirmed = 0
+  let total = 0
   let stale = 0
   let deferred = 0
+  let optional = 0
   for (const session of order) {
     const state = sessions[session.id]
-    if (state?.state === 'done') confirmed += 1
-    else if (state?.state === 'stale') stale += 1
+    if (!session.required) optional += 1
+    else if (slotIsConfirmable(session)) {
+      total += 1
+      if (state?.state === 'done') confirmed += 1
+    }
+    if (state?.state === 'stale') stale += 1
     if (state?.deferred) deferred += 1
   }
-  return { confirmed, total: order.length, stale, deferred }
+  return { confirmed, total, stale, deferred, optional }
 }
 
 /**
@@ -387,6 +410,43 @@ export function needsOpeningTurn(input: BrandOpeningInput): boolean {
   if (!input.sessionKey || input.streaming) return false
   if (input.opened.has(input.sessionKey)) return false
   return !input.hasAdvisorTurn
+}
+
+export interface BrandOpeningAdvanceInput {
+  /** Stellt die eröffnete Session selbst eine Katalog-Frage (`ask`/`collect`/`choose`)? */
+  askable: boolean
+  /** Steht sie als `?s=` in der Adresse — hat der Mensch sie also selbst gewählt? */
+  requested: boolean
+}
+
+/**
+ * DARF DER ERÖFFNUNGSZUG WEITERSPRINGEN? (Testlauf-Befund B, 2026-09-09.)
+ *
+ * ── DER BEFUND ────────────────────────────────────────────────────────────
+ * Nach dem Eröffnungszug lief `autoAdvance` für JEDE Session. Ein Klick auf
+ * „Das Eine" in der Leiste eröffnete dort ein Gespräch — und sprang sofort
+ * weiter zu „Größtes Hindernis"; der Klick auf „Elevator-Pitch" landete auf
+ * „Zahlen & Fakten". Zwei KI-Züge je Klick, und der Eintrag, den der Mensch
+ * gewählt hatte, war nach einem Wimpernschlag wieder weg.
+ *
+ * ── DIE ZWEI BEDINGUNGEN ──────────────────────────────────────────────────
+ * 1. NUR EINE ENTWURFS-SESSION SPRINGT. Das ist der ganze Zweck der Ausnahme
+ *    (Davids Entscheidung (8) vom 2026-09-08): die vier Ableitungen stehen
+ *    vorn in der Registry, George stellt sie nie als Frage, und „Georges
+ *    Interview läuft zuerst durch die echten Fragen". Eine FRAGE-Session
+ *    dagegen ist selbst das Ziel — von ihr weiterzuspringen hiesse, die eben
+ *    gestellte Frage zu überspringen.
+ * 2. EIN ANGEKLICKTER EINTRAG SPRINGT NIE. Steht die Session in der Adresse,
+ *    hat ein Mensch sie gewählt (Klick, Link, Zurück-Taste). Der Sprung gilt
+ *    dem BEILÄUFIGEN Einstieg — dem ersten Betreten eines Kapitels, wo die
+ *    Rangfolge die Session bestimmt hat und nicht der Mensch.
+ *
+ * Er hängt ausserdem am Eröffnungszug selbst und damit an `needsOpeningTurn`:
+ * eine Session mit eigenen Zügen bekommt gar keinen — und springt deshalb
+ * auch nicht.
+ */
+export function openingAdvanceAllowed(input: BrandOpeningAdvanceInput): boolean {
+  return !input.askable && !input.requested
 }
 
 // ── 6 · Die Befund-Chips (BW2 Paket 5, §8) ────────────────────────────────

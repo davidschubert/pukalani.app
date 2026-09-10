@@ -27,7 +27,9 @@
  *  „Deutsch"/„English" und George. */
 import {
   type BrandNewDraft,
+  brandInitialContentLocale,
   brandNewDraftComplete,
+  brandNewDraftMissing,
   emptyBrandNewDraft,
 } from '../../shared/brandStartCard'
 
@@ -68,7 +70,7 @@ const props = withDefaults(defineProps<{
   contentLocales: () => ['de', 'en'],
 })
 defineEmits<{ submit: [payload: BwNewBrandSubmit] }>()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const open = defineModel<boolean>('open', { default: false })
 const kind = ref<'new' | 'rebrand' | null>(null)
 const title = ref('')
@@ -88,15 +90,28 @@ const lang = ref<'de' | 'en'>('de')
  * abgenommenen Klickdummys, und der Knopf bleibt ein Link.
  */
 const locales = computed(() => (props.contentLocales?.length ? props.contentLocales : ['de', 'en']))
-const draft = ref<BrandNewDraft>(emptyBrandNewDraft(locales.value[0] ?? 'de'))
+/**
+ * DIE VORGABE DER INHALTSSPRACHE FOLGT DER OBERFLÄCHE (Testlauf-Befund I,
+ * 2026-09-09) — die Regel steht pur nebenan (`brandInitialContentLocale`).
+ * Auf `/de` stand hier `en`, und die Inhaltssprache ist beim Anlegen fixiert.
+ */
+const initialLocale = computed(() => brandInitialContentLocale(locale.value, locales.value))
+const draft = ref<BrandNewDraft>(emptyBrandNewDraft(initialLocale.value))
 const ready = computed(() => brandNewDraftComplete(draft.value))
+/** Was noch fehlt — als Satz unter dem abgeschalteten Knopf (Befund J). */
+const missing = computed(() => brandNewDraftMissing(draft.value))
+const missingLine = computed(() => (missing.value.length
+  ? t('brand.new.missing', {
+      fields: missing.value.map(field => t(`brand.new.startCard.short.${field}`)).join(', '),
+    })
+  : ''))
 
 /* Jedes Öffnen beginnt beim ersten Schritt. */
 watch(open, (o) => {
   if (o) {
     kind.value = null
     title.value = ''
-    draft.value = emptyBrandNewDraft(locales.value[0] ?? 'de')
+    draft.value = emptyBrandNewDraft(initialLocale.value)
   }
 })
 /* Die Weichen-Ids des Dummys heißen 'new' | 'rebrand', die Schlüssel des
@@ -186,6 +201,10 @@ const langs = [
                 :path-kind="kind === 'new' ? 'new' : 'relaunch'"
                 :content-locales="locales"
               />
+              <!-- BEFUND J (2026-09-09): der Knopf war `disabled` und nichts
+                   sagte warum. Der Satz steht UNTER dem Knopf, nennt die
+                   offenen Felder beim Namen und verschwindet, sobald sie
+                   dastehen — kein roter Fehler, nur die fehlende Auskunft. -->
               <div class="mt-7 flex items-center justify-end gap-3">
                 <p v-if="failed" class="mr-auto text-sm" style="color: var(--bw-stale)">{{ t('brand.new.failed') }}</p>
                 <UButton
@@ -194,6 +213,7 @@ const langs = [
                   @click="$emit('submit', { kind, title: draft.title, lang, draft })"
                 />
               </div>
+              <p v-if="missingLine" class="bw-label mt-2 text-right" style="color: var(--bw-muted)">{{ missingLine }}</p>
             </template>
           </div>
         </Transition>

@@ -152,8 +152,14 @@ const listId = `bw-industry-${useId()}`
     </div>
 
     <!-- Startkarte (Content-Spec §2.1) — vier Felder in der Reihenfolge der
-         Spez: URL (optional), Branche, „was ihr macht", „für wen". -->
-    <p class="bw-label mt-8" style="color: var(--bw-muted)">{{ t('brand.new.startCard.website') }}</p>
+         Spez: URL (optional), Branche, „was ihr macht", „für wen".
+         PFLICHT WIRD ANGESCHRIEBEN (Testlauf-Befund J, 2026-09-09): drei der
+         vier sind Pflicht, und bis heute stand das nirgends — der Knopf blieb
+         still abgeschaltet. Der Stern ist für das Auge (`aria-hidden`), das
+         Wort daneben für den Screenreader; die Zeile unter dem Knopf nennt
+         beim Namen, was noch fehlt (`brandNewDraftMissing`). -->
+    <p class="bw-label mt-8" style="color: var(--bw-muted)">{{ t('brand.new.requiredHint') }}</p>
+    <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.new.startCard.website') }}</p>
     <UInput
       :model-value="draft.websiteUrl" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-full px-4' }"
       :disabled="disabled" type="url" inputmode="url" :maxlength="BRAND_WEBSITE_URL_MAX"
@@ -161,7 +167,10 @@ const listId = `bw-industry-${useId()}`
       @update:model-value="value => set('websiteUrl', String(value))"
     />
 
-    <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.new.startCard.industry') }}</p>
+    <p class="bw-label mt-6" style="color: var(--bw-muted)">
+      {{ t('brand.new.startCard.industry') }} <span aria-hidden="true">*</span>
+      <span class="sr-only">{{ t('brand.new.requiredField') }}</span>
+    </p>
     <UInput
       :model-value="draft.industry" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-full px-4' }"
       :disabled="disabled" :list="listId" :maxlength="BRAND_INDUSTRY_MAX"
@@ -174,7 +183,10 @@ const listId = `bw-industry-${useId()}`
       <option v-for="suggestion in industrySuggestions" :key="suggestion" :value="suggestion" />
     </datalist>
 
-    <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.new.startCard.about') }}</p>
+    <p class="bw-label mt-6" style="color: var(--bw-muted)">
+      {{ t('brand.new.startCard.about') }} <span aria-hidden="true">*</span>
+      <span class="sr-only">{{ t('brand.new.requiredField') }}</span>
+    </p>
     <UTextarea
       :model-value="draft.about" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-2xl px-4 py-3' }"
       :disabled="disabled" :rows="3" :maxlength="BRAND_ABOUT_MAX"
@@ -182,7 +194,10 @@ const listId = `bw-industry-${useId()}`
       @update:model-value="value => set('about', String(value))"
     />
 
-    <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.new.startCard.audience') }}</p>
+    <p class="bw-label mt-6" style="color: var(--bw-muted)">
+      {{ t('brand.new.startCard.audience') }} <span aria-hidden="true">*</span>
+      <span class="sr-only">{{ t('brand.new.requiredField') }}</span>
+    </p>
     <UTextarea
       :model-value="draft.audience" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-2xl px-4 py-3' }"
       :disabled="disabled" :rows="2" :maxlength="BRAND_AUDIENCE_MAX"

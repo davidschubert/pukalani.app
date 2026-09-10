@@ -17,10 +17,11 @@ import {
   decideAutoAdvance,
   isAcceptanceView,
   needsOpeningTurn,
+  openingAdvanceAllowed,
   resolveActiveSession,
   resolveContinueTarget,
 } from '../../../../shared/brandWorkspaceNav'
-import { brandDerivedDividerSlot } from '../../../../shared/brandSessionGroups'
+import { brandDerivedDividerSlot, brandSessionIsAskable } from '../../../../shared/brandSessionGroups'
 import { affectsView, brandAnswerWritesSlot } from '../../../../shared/brandSessions'
 import {
   BRAND_STEP_KEYS,
@@ -38,7 +39,6 @@ import {
   slotById,
   slotIsConfirmable,
   slotsForStep,
-  stepProgress,
 } from '../../../../shared/slotRegistry'
 import {
   brandSlotDisplayValue,
@@ -84,8 +84,10 @@ import {
   brandSlotControls,
 } from '../../../../shared/brandSlotControls'
 import {
+  type BrandStageActiveSession,
   type BrandStageClaim,
   type BrandStageModule,
+  brandAnswerTarget,
   brandStageAwaitsDraftAnswer,
   brandStageClaim,
 } from '../../../../shared/brandStageModule'
@@ -559,6 +561,26 @@ function readinessOf(slot: BrandSlot): BrandSlotReadiness {
 const closingFrom = ref('')
 const closingNext = ref<BrandNextSessionRef | null>(null)
 
+/**
+ * WELCHE Karte gerade im Feld-Modus steht — höchstens EINE, in der Bühne wie
+ * im Log. „Korrigieren" ist ein Umschalter, kein Dauerzustand: eine Spalte
+ * voller offener Textfelder wäre wieder das Formular, das dieser Umbau ersetzt.
+ *
+ * ── SIE IST SEIT BEFUND F AUCH DIE KORREKTUR-ABSICHT ─────────────────────
+ * Ein bestätigter Slot ist zu (`brandSlotControls`: `editable: false`). Damit
+ * „Korrigieren" überhaupt ein Feld öffnen kann, ohne die Bestätigung schon zu
+ * NEHMEN, zählt diese eine Zeile als „hier wird gerade korrigiert" — Karte und
+ * Bühne rechnen ihre Bedienelemente dann wie bei einem offenen Feld. Gesendet
+ * wird deswegen nichts; das tut erst die erste echte Eingabe (`setSlotValue`
+ * im Store). „Korrigieren beenden" setzt sie zurück, und der Haken steht wieder.
+ *
+ * SIE STEHT HIER OBEN, weil `activeStageFacts` sie liest und `turns` über
+ * `stageClaim` schon beim ANLEGEN ausgewertet wird (s. der TDZ-Hinweis an
+ * `completion`). Weiter unten deklariert wäre das exakt der Prod-500 vom
+ * 2026-09-03.
+ */
+const editingSlotId = ref<string | null>(null)
+
 watch(activeSessionKey, () => { closingFrom.value = ''; closingNext.value = null })
 
 /**
@@ -581,20 +603,40 @@ const closedSession = computed(() =>
  * `showGenerate` aus `brandSlotControls` (generierbar UND bereit) — dieselbe
  * Rechnung wie auf der Karte, damit Modul und Knopf nie auseinanderlaufen.
  */
-const stageClaim = computed<BrandStageClaim | null>(() => {
+const activeStageFacts = computed<BrandStageActiveSession | null>(() => {
   const active = activeSlot.value
   if (!active) return null
   const generatable = active.generator !== 'none'
-  return brandStageClaim({
+  return {
     id: active.id,
     type: active.type,
     confirmable: slotIsConfirmable(active),
     generatable,
     canGenerate: generatable && readinessOf(active).ready,
     hasValue: store.slotValue(active.id).length > 0,
-    confirmed: store.slotConfirmed(active.id),
-  })
+    // WÄHREND DER KORREKTUR ZÄHLT DAS FELD ALS OFFEN (Befund F, s.
+    // `editingSlotId`): sonst zeigte die Bühne beim Klick auf „Korrigieren"
+    // weiter die Karte eines fremden Feldes, und der Editor ginge nur im Log auf.
+    confirmed: store.slotConfirmed(active.id) && editingSlotId.value !== active.id,
+  }
 })
+
+const stageClaim = computed<BrandStageClaim | null>(() => brandStageClaim(activeStageFacts.value))
+
+/**
+ * WOHIN GEHÖRT EINE GETIPPTE ANTWORT (Testlauf-Befund A) — die Regel steht pur
+ * nebenan (`brandAnswerTarget`), hier steht nur, welcher Slot dazu gehört.
+ *
+ * Sie ersetzt an JEDEM Sende-Pfad das frühere `nextSlot`: die aktive Session
+ * und „die nächste offene Frage des Kapitels" waren dasselbe, solange nach
+ * jeder Antwort automatisch gesprungen wurde — seit Davids Entscheidung
+ * 2026-09-09 sind sie es nicht mehr, und der Unterschied schrieb drei fremde
+ * Felder voll.
+ */
+const answerTarget = computed(() => brandAnswerTarget(activeStageFacts.value))
+
+const answerSlot = computed<BrandSlot | null>(() =>
+  (answerTarget.value ? activeSlot.value : null))
 
 /**
  * MUSS VOR `turns` DEKLARIERT SEIN (Prod-500 am 2026-09-03): `turns` liest
@@ -851,11 +893,31 @@ const promptBox = ref<HTMLElement | null>(null)
  * Antwort-TEXT in den Slot — genau der Schaden, den `readsLikeQuestion` an
  * anderer Stelle abfängt). Der Knopf tut das Kleinstmögliche: er räumt die Wahl
  * weg und setzt den Cursor dorthin, wo weitergeschrieben wird.
+ *
+ * ── UND SAGT, WOZU (Testlauf-Befund D, 2026-09-09) ───────────────────────
+ * Im Live-Test war nach dem Klick nichts anders: dasselbe Feld, derselbe
+ * Platzhalter, kein Hinweis, dass der nächste Satz an DIESES Feld geht. Jetzt
+ * nennt der Platzhalter das Feld („Ergänzung zu Kundenstimmen"), und die
+ * Ergänzung landet in derselben Session (`answerSlot`, Befund A). Der Merker
+ * fällt mit dem Absenden und beim Session-Wechsel — ein Platzhalter, der über
+ * ein fremdes Feld weiterredet, wäre die nächste Verwechslung.
  */
+const keepWritingFor = ref('')
+
 function keepWriting(turnId: string): void {
   confirmDismissed.value = turnId
+  keepWritingFor.value = activeSessionKey.value
   promptBox.value?.querySelector('textarea')?.focus()
 }
+
+const promptPlaceholder = computed<string>(() => {
+  const slot = keepWritingFor.value === activeSessionKey.value && answerSlot.value
+    ? answerSlot.value
+    : null
+  return slot
+    ? t('brand.workspace.george.addToPlaceholder', { field: slotLabel(slot) })
+    : t('brand.workspace.george.placeholder', { voice: voice.value.name })
+})
 
 /**
  * Der Klick auf einen Chip geht denselben Weg wie eine getippte Antwort —
@@ -918,7 +980,9 @@ function readsLikeQuestion(text: string): boolean {
 }
 
 async function answerFromGeorge(text: string): Promise<void> {
-  const slot = readsLikeQuestion(text) ? null : nextSlot.value
+  // DIE AKTIVE SESSION, NIE DIE NÄCHSTE FRAGE (Testlauf-Befund A) — s.
+  // `answerSlot`/`brandAnswerTarget`. `null` heisst: ein Gesprächszug ohne Feld.
+  const slot = readsLikeQuestion(text) ? null : answerSlot.value
   const question = slot ? t(questionKeyFor(slot, pathKind.value, teamKind.value)) : ''
   /**
    * DER SAMMEL-WERT GEHÖRT DEM SERVER (Kailua-Befund 4) — die Regel steht pur
@@ -927,7 +991,19 @@ async function answerFromGeorge(text: string): Promise<void> {
    */
   const writesSlot = brandAnswerWritesSlot(slot)
 
-  if (slot && writesSlot) store.setSlotValue(slot.id, text)
+  /**
+   * ERGÄNZEN STATT ÜBERSCHREIBEN, wo schon eine Antwort steht (Befund D) —
+   * die Regel steht pur nebenan (`brandAnswerTarget`, `mode`). Der zweite Satz
+   * zu derselben Frage ist eine Ergänzung; würde er den ersten ersetzen,
+   * verlöre der Knopf „Ich ergänze noch etwas" seine Bedeutung.
+   */
+  function nextSlotValue(slotId: string): string {
+    if (answerTarget.value?.mode !== 'append') return text
+    const before = store.slotValue(slotId).trim()
+    return before ? `${before}\n\n${text}` : text
+  }
+
+  if (slot && writesSlot) store.setSlotValue(slot.id, nextSlotValue(slot.id))
   /**
    * DIE EIGENE BLASE ZEIGT DIE LESEFASSUNG, DER SLOT BEHÄLT DIE ID (D8).
    *
@@ -1011,6 +1087,8 @@ async function submitPrompt(): Promise<void> {
   if (!said || !promptEnabled.value || conversation.pending.value) return
   promptDraft.value = ''
   exampleOpen.value = false
+  // Die Ergänzung ist geschrieben — der Platzhalter fällt zurück (Befund D).
+  keepWritingFor.value = ''
   await answerFromGeorge(said)
 }
 
@@ -1067,6 +1145,19 @@ async function ensureOpeningTurn(sessionKey: string): Promise<void> {
   }
   openedSessions.value.add(sessionKey)
   await conversation.converse({ opening: true, sessionKey })
+  /**
+   * WEITER NUR VON EINER ENTWURFS-SESSION, DIE NIEMAND ANGEKLICKT HAT
+   * (Testlauf-Befund B, 2026-09-09) — die Regel steht pur nebenan
+   * (`openingAdvanceAllowed`), hier stehen die zwei Tatsachen.
+   *
+   * Vorher lief der Sprung nach JEDEM Eröffnungszug: ein Klick auf „Das Eine"
+   * eröffnete dort und landete auf „Größtes Hindernis", zwei KI-Züge je Klick.
+   */
+  const opened = slots.value.find(slot => slot.id === sessionKey) ?? slotById(sessionKey)
+  if (!openingAdvanceAllowed({
+    askable: opened ? brandSessionIsAskable(opened) : true,
+    requested: sessionQuery.value === sessionKey,
+  })) return
   await autoAdvance(sessionKey, conversation.nextStop.value)
 }
 
@@ -1302,13 +1393,6 @@ watch(() => conversation.sessionFailure.value, (failure) => {
 
 // ── Slot-Zustände: eine Rechnung, zwei Leser (Bühne + Log) ────────────────
 
-/**
- * WELCHE Karte gerade im Feld-Modus steht — höchstens EINE, in der Bühne wie
- * im Log. „Korrigieren" ist ein Umschalter, kein Dauerzustand: eine Spalte
- * voller offener Textfelder wäre wieder das Formular, das dieser Umbau ersetzt.
- */
-const editingSlotId = ref<string | null>(null)
-
 function onInput(slotId: string, value: string): void {
   store.setSlotValue(slotId, value)
   autosave.schedule()
@@ -1458,12 +1542,27 @@ const {
  *
  * SEIT PAKET 6 steht der Impact-Hinweis davor (§9) — und der angenommene Hash
  * reist mit dem PATCH, sonst weist die Route ihn ab.
+ *
+ * ── ÖFFNEN IST NOCH KEINE KORREKTUR (Testlauf-Befund F, 2026-09-09) ──────
+ * Hier stand `setSlotConfirmed(slotId, false)` samt `flush()`: der Klick auf
+ * „Korrigieren" hob die Bestätigung auf, bevor irgendetwas geändert war. Wer
+ * hineinsah und „Korrigieren beenden" drückte, verlor sie — Zähler 4/10 → 3/10
+ * für einen Blick. Jetzt öffnet dieser Aufruf nur den Editor; AUFGEHOBEN wird
+ * die Bestätigung von der Eingabe selbst (`setSlotValue` im Store), und zwar im
+ * selben Patch wie der neue Text.
+ *
+ * Der Ack wird trotzdem JETZT geholt und gemerkt: der Mensch hat die Hülle
+ * gerade gesehen, und die Zustimmung gilt ihr. Bewegt sie sich, bis er wirklich
+ * tippt, antwortet die Route `impact_unacknowledged` — und der Layer kommt mit
+ * `brand.impact.changed` zurück (s. `store.correctionRejected`).
+ *
+ * `flush()` bleibt: hängt aus einem früheren Anlauf noch eine Änderung, geht sie
+ * jetzt mit dem frischen Ack hinaus; ohne Änderung ist es ein No-op (§3e).
  */
 async function reviseSlot(slotId: string): Promise<void> {
   if (!await requestImpactConsent(slotId)) return
   const ack = impactAckOf(slotId)
   if (ack) store.setImpactAck(ack)
-  store.setSlotConfirmed(slotId, false)
   editingSlotId.value = slotId
   await autosave.flush()
 }
@@ -1637,6 +1736,8 @@ watch([routeStepKey, activeSessionKey], () => {
   promptDraft.value = ''
   exampleOpen.value = false
   editingSlotId.value = null
+  // Auch die Einladung „ergänze noch etwas" gehörte GENAU dieser Session.
+  keepWritingFor.value = ''
   // Ein weggeklickter Veraltet-Hinweis gehörte zu GENAU dieser Session.
   staleHidden.value = false
 })
@@ -1674,7 +1775,10 @@ interface BrandSlotCard {
 const slotCards = computed<BrandSlotCard[]>(() => slots.value.map((slot) => {
   const readiness = readinessOf(slot)
   const controls = brandSlotControls({
-    confirmed: store.slotConfirmed(slot.id),
+    // s. `editingSlotId` (Befund F): eine Karte in Korrektur verhält sich wie
+    // ein offenes Feld — Editor, „Übernehmen", „Korrigieren beenden". Gesendet
+    // wird deswegen nichts; die Bestätigung nimmt erst die Eingabe.
+    confirmed: store.slotConfirmed(slot.id) && editingSlotId.value !== slot.id,
     hasValue: store.slotValue(slot.id).length > 0,
     isGeorgeDraft: store.slotIsGeorgeDraft(slot.id),
     hasEditor: slot.editor !== 'none',
@@ -1743,7 +1847,9 @@ const generationNotice = computed<string | null>(() => {
  */
 const pendingCard = computed<BrandSlotCard | null>(() => {
   const active = activeSlot.value
-  if (active && slotIsConfirmable(active) && !store.slotConfirmed(active.id)) {
+  // „In Korrektur" zählt als offen (Befund F) — dieselbe Rechnung wie in
+  // `activeStageFacts`, damit Modul und Karte dasselbe Feld meinen.
+  if (active && slotIsConfirmable(active) && !activeStageFacts.value?.confirmed) {
     return cardFor(active.id)
   }
   const first = completion.value?.missingRequired[0]
@@ -2461,6 +2567,16 @@ function railSessions(entry: BrandJourneyStep): BwRailSession[] {
    * damit die Leiste sie nie mit einer Slot-Id verwechselt; in die ADRESSE
    * geht `?s=acceptance` (s. `selectSession`).
    */
+  /**
+   * DER GRUND STEHT SICHTBAR DARUNTER (Testlauf-Befund M, 2026-09-09).
+   *
+   * Er stand als `title` im Markup — ein Hover-Tooltip, den auf einem
+   * Touchgerät niemand sieht und den eine Tastatur nie erreicht. Der Eintrag
+   * ist der letzte jedes Kapitels und der einzige dauerhaft gesperrte; ein
+   * abgeschalteter Knopf ohne sichtbare Begründung ist genau die Sackgasse, die
+   * Befund J am Anlage-Modal gefunden hat. `note` rendert die Leiste als kleine
+   * Zeile und hängt sie per `aria-describedby` an den Knopf.
+   */
   const ready = completion.value?.slotsReady === true
   const done = entry.state === 'done'
   list.push({
@@ -2470,7 +2586,7 @@ function railSessions(entry: BrandJourneyStep): BwRailSession[] {
     kind: 'acceptance',
     disabled: !ready && !done,
     highlight: ready && !acceptanceView.value && !done,
-    ...(ready || done ? {} : { title: t('brand.nav.acceptancePending') }),
+    ...(ready || done ? {} : { note: t('brand.nav.acceptancePending') }),
   })
   return list
 }
@@ -2510,21 +2626,44 @@ function railFindingSuffix(stepKey: BrandStepKey): string {
   return findings > 0 ? ` · ${t('brand.finding.openCount', { count: findings }, findings)}` : ''
 }
 
+/**
+ * DIE ZÄHL-ZEILE EINES KAPITELS — bestätigte PFLICHT-Sessions, optionale
+ * getrennt (Testlauf-Befund L, 2026-09-09).
+ *
+ * Vorher stand hier der Nenner „alle Sessions" (`slotsForStep(...).length`) und
+ * im Notizblock daneben der Nenner „bestätigbare Pflicht-Sessions": „Werte 0
+ * von 9 bestätigt" gegen „0/8 + 1 optional". Beide Zeilen lesen jetzt dieselbe
+ * Rechnung (`countChapterSessions` bzw. `brandStepCompletion`) und hängen die
+ * optionalen als Anhängsel an — mit demselben Wortlaut wie der Notizblock.
+ */
 function railCounter(entry: BrandJourneyStep, current: boolean): string {
   const suffix = railFindingSuffix(entry.stepKey)
+  const optional = slotsForStep(entry.stepKey).filter(slot => !slot.required).length
   if (current) {
     const counts = countChapterSessions(entry.stepKey, navSessions.value)
     // Als LITERAL und nicht als Objekt weitergereicht: `t()` verlangt einen
     // Index-Signatur-Typ, ein Interface hat keine.
-    const values = { confirmed: counts.confirmed, total: counts.total, stale: counts.stale }
-    return (counts.stale > 0
-      ? t('brand.nav.chapterCountStale', values)
-      : t('brand.nav.chapterCount', values)) + suffix
+    const values = {
+      confirmed: counts.confirmed,
+      total: counts.total,
+      stale: counts.stale,
+      optional: counts.optional,
+    }
+    if (counts.stale > 0) return t('brand.nav.chapterCountStale', values) + suffix
+    return t(
+      counts.optional > 0 ? 'brand.nav.chapterCountOptional' : 'brand.nav.chapterCount',
+      values,
+    ) + suffix
   }
-  return t('brand.nav.chapterCount', {
+  const values = {
     confirmed: entry.progress.requiredTotal - entry.missingRequired.length,
-    total: slotsForStep(entry.stepKey).length,
-  }) + suffix
+    total: entry.progress.requiredTotal,
+    optional,
+  }
+  return t(
+    optional > 0 ? 'brand.nav.chapterCountOptional' : 'brand.nav.chapterCount',
+    values,
+  ) + suffix
 }
 
 /**
@@ -3250,26 +3389,55 @@ const sidebarBrands = computed<BwSidebarBrand[]>(() => store.profiles.map(profil
 
 /**
  * DER GESAMT-FORTSCHRITT unten rechts. Er zählt über ALLE Bausteine auf dem
- * Weg; für den OFFENEN nimmt er den LIVE-Stand (`stepProgress` aus denselben
- * Slot-Tatsachen wie die Bühne), für die anderen den der Journey. Der
- * Server-Cache `profile.progressPct` bewegt sich erst beim Speichern — hier
- * soll sich der Balken beim Tippen bewegen.
+ * Weg; für den OFFENEN nimmt er den LIVE-Stand (aus denselben Slot-Tatsachen
+ * wie die Bühne), für die anderen den der Journey. Der Server-Cache
+ * `profile.progressPct` bewegt sich erst beim Speichern — hier soll sich der
+ * Balken mit der Arbeit bewegen.
+ *
+ * ── EINE ZÄHLWEISE: BESTÄTIGTE PFLICHTFELDER (Testlauf-Befund L) ─────────
+ * Bis hierher zählte der Fuss BEFÜLLTE Felder (`stepProgress` — Entwurf ODER
+ * Bestätigung), Leiste und Notizblock daneben BESTÄTIGTE. Im Live-Test stand
+ * unten „10 % · 6/59" über einem Notizblock mit „3/10 bestätigt": drei Zahlen
+ * über denselben Stand, von denen zwei etwas anderes meinten. Gezählt wird
+ * jetzt überall dasselbe — bestätigte Pflichtfelder, optionale getrennt
+ * daneben (`optional`, s. `brand.workspace.log.confirmedOfOptional`).
  */
 const overallProgress = computed(() => {
   let total = 0
-  let filled = 0
+  let confirmed = 0
+  let optional = 0
   for (const entry of store.railSteps) {
+    optional += slotsForStep(entry.stepKey).filter(slot => !slot.required).length
     if (entry.stepKey === stepKey.value) {
-      const live = stepProgress(entry.stepKey, slotFacts.value)
-      total += live.requiredTotal
-      filled += live.requiredFilled
+      const live = brandStepCompletion(entry.stepKey, serverSlotFacts.value)
+      total += live.total
+      confirmed += live.confirmed
       continue
     }
     total += entry.progress.requiredTotal
-    filled += entry.progress.requiredFilled
+    // `missingRequired` ist genau die Gegenmenge (bestätigbare Pflicht-Slots
+    // ohne Bestätigung) — dieselbe Rechnung wie `brandStepCompletion`.
+    confirmed += entry.progress.requiredTotal - entry.missingRequired.length
   }
-  return { total, filled, pct: total === 0 ? 100 : Math.round((filled / total) * 100) }
+  return {
+    total,
+    confirmed,
+    optional,
+    pct: total === 0 ? 100 : Math.round((confirmed / total) * 100),
+  }
 })
+
+/** „6/59 bestätigt" — und, wo es welche gibt, „+ 12 optional" (Befund L). */
+const overallProgressCount = computed(() => t(
+  overallProgress.value.optional > 0
+    ? 'brand.workspace.log.confirmedOfOptional'
+    : 'brand.workspace.log.confirmedOf',
+  {
+    confirmed: overallProgress.value.confirmed,
+    total: overallProgress.value.total,
+    optional: overallProgress.value.optional,
+  },
+))
 
 /** Grobe Restzeit — dieselbe Zahl wie auf der Übersicht (Interaktionsbilanz). */
 const TOTAL_MINUTES = 45
@@ -4249,7 +4417,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
       <div ref="promptBox" class="w-full">
         <UChatPrompt
           v-if="!acceptanceView"
-          v-model="promptDraft" :placeholder="t('brand.workspace.george.placeholder', { voice: voice.name })"
+          v-model="promptDraft" :placeholder="promptPlaceholder"
           :disabled="!promptEnabled" :autofocus="false" class="w-full"
           :ui="{ root: 'has-[textarea:focus-visible]:outline-none has-[textarea:focus-visible]:ring-default' }"
           @submit="submitPrompt" @keydown.tab="promptTab"
@@ -4444,7 +4612,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           <BwRailFooter
             :progress-pct="overallProgress.pct"
             :progress-title="t('brand.workspace.log.overall')"
-            :progress-count="`${overallProgress.filled}/${overallProgress.total}`"
+            :progress-count="overallProgressCount"
             :progress-time="remainingTime"
           />
         </div>
