@@ -11301,3 +11301,57 @@ lohnte der Blick, denn ein zu enges Muster hätte den Kanal STILL aus der Liste 
 (`readInsightsRadarConfig` verwirft ohne Meldung). Vor dem Push gegen die echte Regel geprüft.
 (4) Der Werkzeug-Klick auf „Jetzt laufen lassen" hat diesmal gegriffen (zweimal zuvor verpuffte
 er) — der Beweis blieb trotzdem die Antwort der Route, nicht der Klick.
+
+## BW1 Solo-Inhaltsrunde — die Wizard-Oberfläche spricht anredefrei (2026-09-09)
+
+**Ausgangslage:** Die Katalog-FRAGEN tragen die Solo-Weiche seit `1ba268db`.
+Alles daneben sprach weiter „ihr/euch": eine Einzelperson las im selben Kapitel
+erst eine du-Frage und darunter „Tragt eure Farbe ein". Die Notiz in OPEN-ITEMS
+sprach von 254 Texten.
+
+**Inventur (Explore-Agent):** **407** Stellen, nicht 254 — die alte Zahl traf
+genau `packages/brand/i18n/locales/de.json` (255) und übersah die 85
+Marketing-Schlüssel in `apps/branding/i18n/` sowie 67 deutsche Strings im CODE
+(Auswahl-Fragen, Berater-Stimmen, die komplett hartcodierte `team.vue`).
+Nebenbefund, der Arbeit sparte: die Server-Prompts waren **schon erledigt**
+(`conversePrompt.ts` hat seit converse-13 `addressLines`, `georgePrompt.ts`
+`brandTeamVoiceLines`) — offen war dort genau eine Beispielzeile.
+
+**Davids Zuschnitt** (drei strukturierte Fragen, alle Empfehlungen angenommen,
+daher kein DECISION-LOG-Eintrag): (1) **nur Wizard** — Marketing bleibt „ihr"
+nach der Copy-Regel vom 2026-09-04, und technisch könnte es die Weiche gar nicht
+tragen: sie liest `profile.team`, das es auf öffentlichen Seiten nicht gibt;
+(2) **neutral wo möglich**, Weiche nur wo wirklich jemand angesprochen wird;
+(3) **Wizard-Code mitnehmen**.
+
+**Gebaut** (`9cab0bc8`):
+- **162 Texte anredefrei** — stepInfo, Hilfe-Blöcke, Design- und Kit-Kapitel, „Meine Brands", Dokument, Vorbilder. „warum es euch gibt" ⇒ „warum es diese Marke gibt".
+- **Die 20 Brand-Check-Kriterien ebenfalls neutral**, obwohl sie auch auf der ÖFFENTLICHEN Ergebnisseite stehen: derselbe Text an zwei Orten kann nicht zwei Anreden haben, und anredefrei ist in beiden richtig. Bewusster Nebeneffekt auf einer Marketing-Seite.
+- **11 Weichen-Paare** für Georges Kapitel-Einstiege und die Phasen-Intros der Berater, neue pure Regel `shared/brandTeamText.ts` (`teamTextKeyFor`) + Composable. Die Weiche ist je Schlüssel OPTIONAL: kein Paar ⇒ Basis-Schlüssel.
+- **Im Code:** 15 `deSolo` an den Auswahl-Verträgen, 4 Solo-Satzanfänge der Berater, die Rückfragen von Nika und Otto, acht Vokabular-Stellen neutral.
+- **`team` reist bis in die Prompts** (Generator + converse-Route setzen es, `advisorOpenersFor` und `brandChoiceFallbackQuestion` lesen es).
+- **Wächter** `tests/brandTeamText.test.ts`: kein Wizard-Text spricht Plural · jede Weiche trägt beide Fassungen in beiden Sprachen · keine Solo-Fassung sagt „ihr".
+
+**Beweise:** Gegenproben rot (eingebauter „ihr"-Text · halbe Weiche), Resolver
+gegen den echten Katalog zeigt du/ihr getrennt und den Rückfall bei Texten ohne
+Weiche, Dev-Server rendert ohne Konsolenfehler. Gates: -r lint, -r typecheck,
+-r test (3187 in brand nach dem Rebase auf BK1), check:i18n-keys,
+check:manifests, check:single-copy, check:bilanz. Nach der Runde stehen in
+`de.json` noch 90 Plural-Texte — alle in Marketing und Admin, also gewollt.
+**Offen: Davids Klick** durch ein Solo-Branding in der Werkstatt; lokal ging der
+Beweis nur bis vor den Login (kein Gast-Zugang, Zugangsdaten gibt der Agent nicht ein).
+
+**Gelernt:** Die Annahme „Englisch braucht die Weiche nicht, weil `you` beides
+ist" war fachlich richtig und strukturell falsch — `i18nCatalog.test.ts` verlangt
+für beide Sprachen denselben Schlüsselvorrat, und der Test hat es sofort gefangen.
+Die englischen Kinder tragen jetzt zweimal denselben Satz; das ist kein Versehen,
+sondern steht so im Kopf von `brandTeamText.ts`. **Zweite Lehre:** ein Wächter,
+der eine Anrede prüft, muss die dritte Person Singular ausnehmen — „die Produkte
+heissen nach ihr" und „danach steht hier ihr Score" sind kein „ihr" an den Leser.
+**Dritte:** typografische Ellipsen aus einem Kommentar können ein
+Zero-Width-Space mitbringen (`no-irregular-whitespace`); Typecheck und Tests
+sehen das nicht, nur Lint. **Vierte (Umgebung):** ein frischer Worktree startet
+`apps/branding` nicht — `@shikijs/engine-oniguruma` liegt im pnpm-Store, ist aber
+nicht auflösbar, und Nitro antwortet auf JEDER Seite 500. Ein Symlink in
+`node_modules` plus Neustart des Dev-Servers heilt es; das Repo bleibt unberührt.
+
