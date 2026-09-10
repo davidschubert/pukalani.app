@@ -1038,7 +1038,8 @@
       "confirmedSlot": "Bestätigt",
       "confirmedBadge": "Bestätigt",
       "reviseSlot": "Korrigieren",
-      "reviseDone": "Korrigieren beenden",
+      "reviseApply": "Übernehmen",
+      "reviseDiscard": "Verwerfen",
       "answerSlot": "Beantworten",
       "draftSlot": "Entwerfen",
       "confirmChoice": {
@@ -1097,6 +1098,7 @@
       "decisions": "Entscheidungen",
       "recommended": "Empfehlung",
       "ownAnswerPlaceholder": "Oder etwas ganz Eigenes …",
+      "ownAnswerPlaceholderPlain": "Deine Antwort …",
       "whyRecommended": "Warum empfiehlt George {label}?",
       "sendOwnAnswer": "Eigene Antwort senden",
       "editSlot": "{label} bearbeiten",
@@ -1309,10 +1311,22 @@
         "team": "Zwei oder mehr"
       },
       "startCard": {
-        "website": "Deine Website (optional) — ich lese sie, damit du dich nicht wiederholen musst.",
-        "industry": "In welcher Branche bist du unterwegs?",
-        "about": "Was machst du — in 2–3 Sätzen, wie du es einem Freund erzählen würdest?",
-        "audience": "Für wen ist es gedacht?",
+        "website": {
+          "solo": "Deine Website (optional) — ich lese sie, damit du dich nicht wiederholen musst.",
+          "team": "Eure Website (optional) — ich lese sie, damit ihr euch nicht wiederholen müsst."
+        },
+        "industry": {
+          "solo": "In welcher Branche bist du unterwegs?",
+          "team": "In welcher Branche seid ihr unterwegs?"
+        },
+        "about": {
+          "solo": "Was machst du — in 2–3 Sätzen, wie du es einem Freund erzählen würdest?",
+          "team": "Was macht ihr — in 2–3 Sätzen, wie ihr es einem Freund erzählen würdet?"
+        },
+        "audience": {
+          "solo": "Für wen ist es gedacht?",
+          "team": "Für wen ist es gedacht?"
+        },
         "short": {
           "industry": "Branche",
           "about": "Angebot",
@@ -2363,7 +2377,7 @@
         "copied": "Kopiert",
         "copyToast": "Der Link ist in der Zwischenablage.",
         "copyFailed": "Der Link ließ sich nicht kopieren. Markiert ihn und kopiert ihn von Hand.",
-        "onceHint": "Der Link wird nur jetzt angezeigt. Verliert ihr ihn, erzeugt ihr einen neuen.",
+        "onceHint": "Der Link wird nur jetzt angezeigt. Geht er verloren, lässt sich ein neuer erzeugen.",
         "replacesHint": "Ein neuer Link ersetzt den alten — der alte antwortet danach nicht mehr.",
         "createdToast": "Der Lese-Link steht.",
         "revokedToast": "Der Lese-Link ist widerrufen.",
@@ -2381,7 +2395,7 @@
       "contentLocale": "Inhaltssprache {locale}",
       "standProgress": "Kapitel",
       "loadFailed": "Die Brand Foundation konnte nicht geladen werden.",
-      "empty": "Hier steht noch nichts. Sobald ihr die ersten Felder bestätigt habt, füllt sich dieses Handbuch.",
+      "empty": "Hier steht noch nichts. Sobald die ersten Felder bestätigt sind, füllt sich dieses Handbuch.",
       "showToc": "Inhalt einblenden",
       "hideToc": "Inhalt ausblenden",
       "chapterNumber": "Kapitel {num}",
@@ -2415,7 +2429,7 @@
       },
       "note": {
         "visuell": "Gehört zum Fundament dazu, entsteht aber erst im Brand Design — hergeleitet aus dem, was oben steht.",
-        "ki-texte": "Ein fester Rahmen, gefüllt aus euren Werten — keine eigene Erfindung, so aktuell wie die Kapitel darüber.",
+        "ki-texte": "Ein fester Rahmen, gefüllt aus den Werten dieser Marke — keine eigene Erfindung, so aktuell wie die Kapitel darüber.",
         "visuellDone": "Im Brand Design entschieden — Farbwelt, Schriftpaar, Zeichen, Bildsprache und Bewegung, hergeleitet aus dem, was oben steht.",
         "nomenklatur": "Wie neue Produkte, Orte und Formate heißen — hergeleitet aus Markenarchitektur, Werten und Ton.",
         "zeichen-anwendung": "Das Regelwerk zum Zeichen — dieselbe Setzung wie im Kapitel „Visuelle Identität\", eine Zoomstufe näher.",
@@ -2449,7 +2463,7 @@
           "title": "Motion",
           "text": "Tempo und Ruhe der Bewegung — hergeleitet aus den Ton-Wörtern."
         },
-        "offer": "Brand Design entsteht mit eurem Markenberater im Studio-Angebot — wir besprechen es im Erstgespräch.",
+        "offer": "Brand Design entsteht gemeinsam mit dem Markenberater im Studio-Angebot — wir besprechen es im Erstgespräch.",
         "ctaDesign": "Brand Design starten",
         "unlocked": "Brand Design ist für diese Marke freigeschaltet.",
         "unlockedOn": "Freigeschaltet vom Studio am {date}."
@@ -2561,7 +2575,7 @@
         "chosen": "Gewählte Richtung",
         "choose": "Richtung wählen",
         "change": "Richtung ändern",
-        "lockedHint": "Die Richtung wählt ihr im Ergebnis-Kapitel — es öffnet sich, sobald die Kapitel davor stehen.",
+        "lockedHint": "Die Richtung wird im Ergebnis-Kapitel gewählt — es öffnet sich, sobald die Kapitel davor stehen.",
         "fontsLabel": "Schriftpaar",
         "colors": "Farbwelt",
         "previewLine": "So liest sich eine Seite in dieser Welt.",
@@ -2572,9 +2586,9 @@
           "light": "Helle Flächen"
         },
         "reason": {
-          "both": "Passt zu eurem Haupt- und eurem Neben-Archetyp.",
-          "primary": "Passt zu eurem Haupt-Archetyp.",
-          "secondary": "Passt zu eurem Neben-Archetyp.",
+          "both": "Passt zum Haupt- und zum Neben-Archetyp.",
+          "primary": "Passt zum Haupt-Archetyp.",
+          "secondary": "Passt zum Neben-Archetyp.",
           "fallback": "Eine dritte Möglichkeit zum Vergleich."
         },
         "warmEditorial": {
@@ -2630,13 +2644,13 @@
         "correctHint": "Dieses Board entscheidet nichts. Korrigiert wird in den Kapiteln — rechts der Weg dorthin.",
         "eyebrow": "Ergebnis-Board",
         "headline": "Visuelle Identität auf einer Fläche",
-        "lead": "Farbwelt, Schriftpaar, Zeichen, Bild-Prinzipien und Bewegung. Dasselbe Board steht als Kopf von Kapitel 10 in eurer Brand Foundation.",
+        "lead": "Farbwelt, Schriftpaar, Zeichen, Bild-Prinzipien und Bewegung. Dasselbe Board steht als Kopf von Kapitel 10 in dieser Brand Foundation.",
         "print": "Drucken / PDF",
         "inDocument": "Im Dokument lesen",
         "correctTitle": "Korrigieren",
         "correctLead": "Jede Fläche des Boards gehört zu einem Kapitel. Wer etwas ändern will, geht dorthin — das Board zieht nach.",
         "privateTitle": "Was hier nicht steht",
-        "privateLead": "Eure Vorbilder und die behaltenen KI-Entwürfe. Beides ist privat und reist weder ins Board noch in den geteilten Link.",
+        "privateLead": "Die hinterlegten Vorbilder und die behaltenen KI-Entwürfe. Beides ist privat und reist weder ins Board noch in den geteilten Link.",
         "lockedTitle": "Noch nicht fertig",
         "lockedLead": "Das Board entsteht, sobald alle sechs Kapitel von Brand Design abgenommen sind.",
         "lockedProgress": "{done} von {total} Kapiteln",
@@ -2652,7 +2666,7 @@
         "copy": "Kopieren",
         "copied": "Kopiert",
         "contactPublic": "Diese Angabe reist mit dem Pressekit und dem geteilten Link.",
-        "promptHint": "Ohne KI gerechnet — aus euren Werten, Ton-Wörtern und den Leitplanken darüber.",
+        "promptHint": "Ohne KI gerechnet — aus den Werten, Ton-Wörtern und den Leitplanken darüber.",
         "markClearspace": {
           "title": "Schutzraum und Mindestgrößen",
           "text": "Wie viel Luft das Zeichen braucht und ab welcher Größe es nicht mehr gesetzt wird."

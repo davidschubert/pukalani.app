@@ -172,6 +172,95 @@ export function brandAnswerTarget(active: BrandStageActiveSession | null): Brand
 }
 
 /**
+ * STEHT DIE STATISCHE KATALOG-FRAGE UNTER DEM GESPRÄCH? (Dritter Testlauf,
+ * Befund 2, 2026-09-10.)
+ *
+ * ── DER BEFUND, IN EINEM ABSATZ ───────────────────────────────────────────
+ * Die Bühne hängt unter die Züge des Beraters die Katalog-Frage des Feldes,
+ * sofern der Server nicht gemeldet hat, dass DIESER Zug sie gestellt hat
+ * (`coveredSlotId` aus dem Abschluss-Frame). Diese Auskunft gibt es aber nur
+ * für den EINEN Zug, der gerade gelaufen ist — und sie ist bewusst leer,
+ * solange die Session unbestätigt bleibt (`staysOnSession` in
+ * `converse.post.ts` setzt `askedSlotId` dann auf `''`). Folge im Live-Lauf:
+ * unter JEDER Teilantwort der Sammel-Session stand zusätzlich die statische
+ * Klammer-Frage („Ein paar schnelle Zahlen: Wie groß ist das Team, wie lange
+ * machst du das schon, welche Märkte?") — sie fragte auch das noch einmal, was
+ * eine Zeile darüber schon beantwortet war. Nach einem RELOAD dasselbe in jeder
+ * Frage-Session: der Verlauf trägt Georges Frage, `coveredSlotId` ist beim
+ * Laden `null`, und die Katalog-Frage stand ein zweites Mal darunter.
+ *
+ * ── DIE REGEL ─────────────────────────────────────────────────────────────
+ * Die statische Zeile ist ein ERSATZ für einen Zug, den es nicht gibt — nie
+ * eine Ergänzung zu einem, den es gibt. Sie steht deshalb nur da, solange im
+ * Verlauf DIESER Session noch kein Zug des Beraters steht, der dieses Feld
+ * fragt. In der SAMMEL-Session steht sie nie: dort fragt George die TEILfrage,
+ * und die Klammer-Frage daneben ist immer die falsche Auskunft.
+ *
+ * `ownSession` ist die dritte Tatsache und keine Formalität: fällt die Bühne
+ * auf „die nächste offene Frage des KAPITELS" zurück (die aktive Session ist
+ * bestätigt oder erhebt keinen Anspruch), dann handeln Georges Züge von einem
+ * ANDEREN Feld — seine Anwesenheit sagt über diese Frage nichts.
+ */
+export interface BrandStaticQuestionFacts {
+  /** Die Session, in der gesprochen wird, sammelt ihre Teile nacheinander. */
+  collecting: boolean
+  /** Fragt die statische Zeile das Feld der AKTIVEN Session? */
+  ownSession: boolean
+  /** Steht im Verlauf dieser Session schon ein Zug des Beraters? */
+  advisorSpoke: boolean
+}
+
+export function brandStaticQuestionVisible(facts: BrandStaticQuestionFacts): boolean {
+  if (facts.collecting) return false
+  return !(facts.ownSession && facts.advisorSpoke)
+}
+
+/**
+ * DIE ÜBERSCHRIFT UND DER PLATZHALTER DER ANTWORT-KARTE (Dritter Testlauf,
+ * Befund 9, 2026-09-10).
+ *
+ * ── ZWEI KLEINE UNWAHRHEITEN AUF EINER KARTE ─────────────────────────────
+ *  1. Im Eingabefeld stand „Oder etwas ganz Eigenes …" — ohne die Auswahl, auf
+ *     die sich das „Oder" bezieht. Für eine Session mit geschlossenem Vertrag
+ *     (Richtungen, Moodboards, Chip-Karten) ist der Satz richtig; steht das
+ *     Feld ALLEIN da, verweist er auf etwas, das es nicht gibt.
+ *  2. Die Karte trug den Namen der SESSION („Zahlen & Fakten"), während George
+ *     daneben den einzelnen Teil fragte („Seit wann gibt es dich?"). Solange
+ *     eine Sammel-Session läuft, gehört die laufende TEILfrage in die
+ *     Überschrift — sonst beschriftet die Karte eine andere Frage als die, die
+ *     gerade beantwortet wird.
+ *
+ * PUR und mit SCHLÜSSELN statt Sätzen: dieselbe Trennung wie in
+ * `brandFoundation.ts` — die Regel gehört dem Layer, der Text dem Katalog.
+ * `partKey` ist `''`, wo keine Sammel-Session läuft; dann bleibt es beim
+ * Feld-Etikett, das die Aufrufstelle ohnehin schon kennt.
+ */
+export interface BrandStageAnswerCardFacts {
+  /** Rendert die Karte gerade Auswahl-Karten (Richtungen, Boards, Chips)? */
+  hasOptions: boolean
+  /** Der i18n-Schlüssel der laufenden TEILfrage — `''`, wo keine läuft. */
+  partKey: string
+}
+
+export interface BrandStageAnswerCard {
+  /** Überschrift: die Teilfrage, solange eine läuft — sonst `''` (Feld-Etikett). */
+  titleKey: string
+  placeholderKey: string
+}
+
+export const BRAND_OWN_ANSWER_PLACEHOLDER_KEY = 'brand.workspace.ownAnswerPlaceholder'
+export const BRAND_OWN_ANSWER_PLAIN_PLACEHOLDER_KEY = 'brand.workspace.ownAnswerPlaceholderPlain'
+
+export function brandStageAnswerCard(facts: BrandStageAnswerCardFacts): BrandStageAnswerCard {
+  return {
+    titleKey: facts.partKey,
+    placeholderKey: facts.hasOptions
+      ? BRAND_OWN_ANSWER_PLACEHOLDER_KEY
+      : BRAND_OWN_ANSWER_PLAIN_PLACEHOLDER_KEY,
+  }
+}
+
+/**
  * ZEIGT DIE BÜHNE GERADE DAS ANTWORT-MODUL EINER ENTWURFS-SESSION? — der eine
  * Zustand, in dem der getippte Text NICHT in den Chat geht, sondern als
  * Hinweis in `generateSlot()`.

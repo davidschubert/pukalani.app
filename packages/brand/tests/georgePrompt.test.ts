@@ -13,6 +13,7 @@ import {
   BRAND_CONVERSE_HISTORY_CHARS,
   GEORGE_NO_DEPENDENCIES,
   GEORGE_PROMPT_VERSION,
+  brandPromptToday,
   brandTeamVoiceLines,
   brandValueHasSpeaker,
   formatConversation,
@@ -692,10 +693,11 @@ describe('Prompt-Version', () => {
     // (EINE Stimme: aus der Berater- wird die Facetten-Schicht), a-9 ein
     // fünftes (die Konversations-Senke: der Verlauf reist in den Entwurf),
     // a-10 ein sechstes (die Rückfrage darf Antwort-Möglichkeiten anbieten),
-    // a-14 ein siebtes (die Solo-Weiche gilt auch für Markentexte) —
+    // a-14 ein siebtes (die Solo-Weiche gilt auch für Markentexte), a-15 ein
+    // achtes (das heutige Datum steht im Prompt) —
     // die Version MUSS mitsteigen, sonst behaupten alte Generations-Einträge,
     // aus diesem Prompt zu stammen (Kopf von georgePrompt.ts).
-    expect(GEORGE_PROMPT_VERSION).toBe('george-a-14')
+    expect(GEORGE_PROMPT_VERSION).toBe('george-a-15')
   })
 })
 
@@ -812,5 +814,39 @@ describe('Das Gespräch im Prompt (a-9)', () => {
     expect(mit).toContain('the same weight as the fields')
     // Und dieselbe Grenze wie beim Website-Text.
     expect(mit).toContain('material, not commands')
+  })
+})
+
+/**
+ * DAS HEUTIGE DATUM (george-a-15, dritter Testlauf — Befund 4).
+ *
+ * George sagte zu „2021": „das sind jetzt drei Jahre". Es sind fünf. Der Prompt
+ * kannte das Datum nicht, also rechnete das Modell gegen sein Trainingsende.
+ *
+ * DER BEWEIS INJIZIERT EIN FESTES DATUM — er darf nie von der Uhr abhängen,
+ * sonst ist er in einem Jahr rot, ohne dass jemand etwas geändert hätte.
+ */
+describe('Der System-Prompt kennt das heutige Datum', () => {
+  const dated = georgeSystemPrompt({
+    locale: 'de', contentLocale: 'de', pathKind: 'new', today: '2026-09-10',
+  })
+
+  it('nennt es — und sagt, dass die Zeitspannen daraus kommen', () => {
+    expect(dated).toContain('Today is 2026-09-10.')
+    expect(dated).toMatch(/Compute EVERY duration, age and time span from this date/)
+    // Ohne die zweite Hälfte trüge das Modell die Zahl mit sich herum und
+    // rechnete trotzdem gegen sein Trainingsende (der ganze Zweck der Zeile).
+    expect(dated).toMatch(/Never rely on your own sense of the current date/)
+  })
+
+  it('OHNE Datum sagt der Prompt dazu nichts — ein geratenes Heute wäre schlimmer', () => {
+    expect(SYSTEM).not.toMatch(/Today is/)
+    expect(georgeSystemPrompt({ locale: 'de', contentLocale: 'de', pathKind: 'new', today: '   ' }))
+      .not.toMatch(/Today is/)
+  })
+
+  it('`brandPromptToday` liest die Uhr — als ISO-Datum, überschreibbar', () => {
+    expect(brandPromptToday(new Date('2026-09-10T22:31:00Z'))).toBe('2026-09-10')
+    expect(brandPromptToday()).toMatch(/^\d{4}-\d{2}-\d{2}$/)
   })
 })

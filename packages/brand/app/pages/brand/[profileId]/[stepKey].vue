@@ -23,7 +23,7 @@ import {
   resolveContinueTarget,
 } from '../../../../shared/brandWorkspaceNav'
 import { brandDerivedDividerSlot, brandSessionIsAskable } from '../../../../shared/brandSessionGroups'
-import { affectsView, brandAnswerWritesSlot } from '../../../../shared/brandSessions'
+import { affectsView, brandAnswerWritesSlot, nextCollectPart } from '../../../../shared/brandSessions'
 import {
   BRAND_STEP_KEYS,
   type BrandInvariant,
@@ -35,6 +35,7 @@ import {
   exampleKeyFor,
   isBrandDesignStep,
   isBrandKitStep,
+  partKeyFor,
   partLabelKeyFor,
   questionKeyFor,
   slotById,
@@ -43,6 +44,7 @@ import {
   slotsForStep,
 } from '../../../../shared/slotRegistry'
 import {
+  brandDiscardEdit,
   brandSlotDisplayValue,
   brandSlotIsConfirmed,
 } from '../../../../shared/brandAutosaveDiff'
@@ -90,8 +92,10 @@ import {
   type BrandStageClaim,
   type BrandStageModule,
   brandAnswerTarget,
+  brandStageAnswerCard,
   brandStageAwaitsDraftAnswer,
   brandStageClaim,
+  brandStaticQuestionVisible,
 } from '../../../../shared/brandStageModule'
 import type {
   BrandFindingDecisionResponse,
@@ -592,6 +596,22 @@ const closingNext = ref<BrandNextSessionRef | null>(null)
  */
 const editingSlotId = ref<string | null>(null)
 
+/**
+ * DER STAND BEIM ÖFFNEN DES EDITORS (Befund 3, 2026-09-10) — die Fassung, auf
+ * die „Verwerfen" zurückstellt.
+ *
+ * ── WARUM ER HIER GEMERKT WIRD UND NICHT AUS DEM SERVER GELESEN ──────────
+ * Weil der Server ihn beim Klick auf „Verwerfen" längst nicht mehr hat: der
+ * Autosave schreibt jede Eingabe weg, spätestens beim `blur` auf dem Weg zum
+ * Knopf. Wer ihn dort erst holte, stellte auf den GEÄNDERTEN Text zurück —
+ * also auf nichts.
+ *
+ * Text UND Bestätigung, weil beide fallen: die erste Eingabe nimmt die
+ * Bestätigung mit (`brandEditReleasesConfirm`), und ein Verwerfen, das nur den
+ * Text zurückholt, liesse ein bestätigtes Feld unbestätigt zurück.
+ */
+const editBaseline = ref<{ slotId: string, value: string, confirmed: boolean } | null>(null)
+
 watch(activeSessionKey, () => { closingFrom.value = ''; closingNext.value = null })
 
 /**
@@ -815,6 +835,17 @@ const turns = computed<StageTurn[]>(() => {
     help,
   }
 
+  /**
+   * DIE STATISCHE ZEILE IST EIN ERSATZ, KEINE ERGÄNZUNG (Befund 2, 2026-09-10)
+   * — die Regel steht pur nebenan (`brandStaticQuestionVisible`) samt
+   * Begründung; hier werden nur die drei Tatsachen zusammengetragen.
+   */
+  const showQuestion = brandStaticQuestionVisible({
+    collecting: activeSlot.value?.kind === 'collect',
+    ownSession: nextSlot.value.id === activeSessionKey.value,
+    advisorSpoke: spoken.some(turn => turn.role === 'george'),
+  })
+
   if (conversation.coveredSlotId.value === nextSlot.value.id) {
     const last = spoken.at(-1)
     // NUR EINEN GEORGE-ZUG ERSETZEN (Audit-Befund A5). `coveredSlotId` sagt,
@@ -828,7 +859,26 @@ const turns = computed<StageTurn[]>(() => {
     return last?.role === 'george' ? [...spoken.slice(0, -1), { ...last, help }] : [...spoken, question]
   }
 
-  return [...spoken, question]
+  return showQuestion ? [...spoken, question] : spoken
+})
+
+/**
+ * WELCHER TEIL DER SAMMEL-SESSION GERADE DRAN IST — als i18n-Schlüssel seiner
+ * Frage (Befund 9, 2026-09-10).
+ *
+ * Gerechnet aus dem SERVER-Stand (`sessions[…].collected`) mit derselben puren
+ * Regel, die auch die Route benutzt (`nextCollectPart`). Eine eigene Zählung im
+ * Browser wäre eine zweite Wahrheit darüber, welche Frage gerade offen ist —
+ * und die beiden liefen beim ersten abgerissenen Zug auseinander.
+ *
+ * `''` heisst „keine Sammel-Session, oder alle Teile beantwortet". Dann bleibt
+ * es beim Feld-Etikett, so wie vor dieser Runde.
+ */
+const collectPartKey = computed<string>(() => {
+  const slot = activeSlot.value
+  if (!slot || slot.kind !== 'collect') return ''
+  const part = nextCollectPart(slot, store.sessions[slot.id]?.collected ?? {})
+  return part ? partKeyFor(slot, part, teamKind.value) : ''
 })
 
 /* Runde 55 (David) für die BÜHNE: der Verlauf ankert unten und wächst nach
@@ -1471,6 +1521,7 @@ async function closeSession(slotId: string): Promise<BrandNextSessionRef | null>
  */
 async function confirmSlot(slotId: string): Promise<void> {
   editingSlotId.value = null
+  editBaseline.value = null
   // ZUERST FESTHALTEN, WO WIR STEHEN (s. `pinSession`): die Bestätigung nimmt
   // der Session ihren Zustand `open`, und ohne `?s=` würde die Rechnung danach
   // lautlos die nächste nennen.
@@ -1578,7 +1629,58 @@ async function reviseSlot(slotId: string): Promise<void> {
   if (!await requestImpactConsent(slotId)) return
   const ack = impactAckOf(slotId)
   if (ack) store.setImpactAck(ack)
+  openEditor(slotId)
+  await autosave.flush()
+}
+
+/**
+ * DER EDITOR GEHT AUF — und merkt sich, worauf „Verwerfen" zurückstellt
+ * (Befund 3, 2026-09-10). Er SCHREIBT nichts: „Öffnen ist noch keine
+ * Korrektur" (Befund F) bleibt unverändert gültig.
+ *
+ * Ein zweites Öffnen desselben Feldes erneuert die Grundfassung NICHT — sonst
+ * wäre der Bezugspunkt nach jedem Zwischenklick ein anderer, und „Verwerfen"
+ * hiesse „verwirf ab hier".
+ */
+function openEditor(slotId: string): void {
+  if (editBaseline.value?.slotId !== slotId) {
+    editBaseline.value = {
+      slotId,
+      value: store.slotValue(slotId),
+      confirmed: store.slotConfirmed(slotId),
+    }
+  }
   editingSlotId.value = slotId
+}
+
+/** „Übernehmen" — das bisherige Verhalten: der Autosave hat es längst gespeichert. */
+function applyEdit(): void {
+  editingSlotId.value = null
+  editBaseline.value = null
+}
+
+/**
+ * „VERWERFEN" — zurück auf die Fassung von vor dem Öffnen (Befund 3).
+ *
+ * Die Rechnung steht pur nebenan (`brandDiscardEdit`); hier wird sie
+ * ausgeführt. `changed: false` heisst: nichts schreiben, nichts senden — wer
+ * nur hineingesehen hat, löst keine Speicherrunde aus. Sonst gehen Text und
+ * Bestätigung in EINEM Patch hinaus, wie die Route es verlangt.
+ */
+async function discardEdit(slotId: string): Promise<void> {
+  const baseline = editBaseline.value
+  editingSlotId.value = null
+  editBaseline.value = null
+  if (!baseline || baseline.slotId !== slotId) return
+
+  const restore = brandDiscardEdit(baseline, {
+    value: store.slotValue(slotId),
+    confirmed: store.slotConfirmed(slotId),
+  })
+  if (!restore.changed) return
+
+  store.setSlotValue(slotId, restore.value)
+  if (restore.confirmed) store.setSlotConfirmed(slotId, true)
   await autosave.flush()
 }
 
@@ -3127,6 +3229,19 @@ const boardChoices = computed<BwBoardChoice[]>(() => {
 })
 
 /**
+ * ÜBERSCHRIFT UND PLATZHALTER DER ANTWORT-KARTE (Befund 9, 2026-09-10) — die
+ * Regel steht pur nebenan (`brandStageAnswerCard`), hier stehen nur die zwei
+ * Tatsachen: rendert die Karte gerade eine Auswahl, und läuft eine
+ * Sammel-Session.
+ */
+const answerCard = computed(() => brandStageAnswerCard({
+  hasOptions: choiceCards.value.length > 0
+    || directionChoices.value.length > 0
+    || boardChoices.value.length > 0,
+  partKey: collectPartKey.value,
+}))
+
+/**
  * ZWEI ABGELEITETE FELDER, DIE SICH SELBST FÜLLEN (H5: „jede Session muss als
  * BESTÄTIGUNG durchlaufbar sein").
  *
@@ -4119,7 +4234,13 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                    ist die Kernentscheidung, nicht eine Frage unter vielen. -->
               <div v-else-if="stageModule === 'options'" class="mt-3 rounded-2xl p-4" style="background: var(--bw-surface-hi)">
                 <div class="rounded-xl px-4 py-3" style="background: var(--bw-paper)">
-                  <span class="block text-sm font-medium">{{ nextSlot ? slotLabel(nextSlot) : '' }}</span>
+                  <!-- BEFUND 9 (2026-09-10): solange die Sammel-Session läuft,
+                       trägt die Karte die aktuelle TEILfrage — vorher stand
+                       dort der Name der Session („Zahlen & Fakten"), während
+                       George daneben nach einem einzelnen Teil fragte. -->
+                  <span class="block text-sm font-medium">
+                    {{ answerCard.titleKey ? t(answerCard.titleKey) : (nextSlot ? slotLabel(nextSlot) : '') }}
+                  </span>
                   <!-- GESCHLOSSENE MENGE ⇒ KARTEN (P4): der Klick übermittelt
                        die stabile Id, „Übermitteln" entfällt — eine Karte IST
                        die Entscheidung. Offene Auswahl (Positionierungs-
@@ -4164,7 +4285,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                   <UInput
                     v-else
                     v-model="ownChoice" size="sm" class="mt-2 w-full"
-                    :placeholder="t('brand.workspace.ownAnswerPlaceholder')"
+                    :placeholder="t(answerCard.placeholderKey)"
                     :aria-label="t('brand.workspace.sendOwnAnswer')"
                     @keydown.enter="submitChoice"
                   />
@@ -4198,13 +4319,21 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     @blur="autosave.flush()"
                   />
                   <p
-                    v-else-if="store.slotValue(pendingCard.slot.id)"
-                    class="mt-3" :class="renderedAbove(pendingCard.slot.id) ? 'bw-pending' : 'bw-doc-text whitespace-pre-wrap'"
+                    v-else-if="store.slotValue(pendingCard.slot.id) && renderedAbove(pendingCard.slot.id)"
+                    class="bw-pending mt-3"
                   >
-                    {{ renderedAbove(pendingCard.slot.id)
-                      ? t('brand.dna.card.above')
-                      : slotDisplayValue(pendingCard.slot.id, store.slotValue(pendingCard.slot.id)) }}
+                    {{ t('brand.dna.card.above') }}
                   </p>
+                  <!-- BEFUND 1 (2026-09-10): ein `structured`-Wert stand hier
+                       wörtlich in seiner Speicherform („## Team / Nur ich").
+                       Die Form gehört EINER Komponente (s. `BwSlotValue`),
+                       Einzelfelder bleiben unverändert freier Text. -->
+                  <BwSlotValue
+                    v-else-if="store.slotValue(pendingCard.slot.id)"
+                    class="mt-3"
+                    :slot-id="pendingCard.slot.id"
+                    :value="slotDisplayValue(pendingCard.slot.id, store.slotValue(pendingCard.slot.id))"
+                  />
                   <!-- DAS ANTWORT-MODUL EINER ENTWURFS-SESSION (Kailua-Befund
                        5, Weg B): „Noch offen — kommt im Gespräch" zeigte auf
                        ein Gespräch, in dem nichts entstand — für diese Felder
@@ -4303,12 +4432,28 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                       :label="t('brand.workspace.versions.open')"
                       @click="openVersions(pendingCard.slot)"
                     />
+                    <!-- ZWEI AUSGÄNGE STATT EINEM (Befund 3, 2026-09-10):
+                         „Korrigieren beenden" SPEICHERTE — es gab keinen Weg
+                         zurück. Jetzt entscheidet der Mensch, ob seine
+                         Änderung gilt. -->
+                    <template v-if="pendingCard.controls.editable && editingSlotId === pendingCard.slot.id">
+                      <UButton
+                        size="sm" color="neutral" variant="ghost" class="ml-auto rounded-full"
+                        icon="i-ph-check" :label="t('brand.workspace.reviseApply')"
+                        @click="applyEdit()"
+                      />
+                      <UButton
+                        size="sm" color="neutral" variant="ghost" class="rounded-full"
+                        icon="i-ph-arrow-counter-clockwise" :label="t('brand.workspace.reviseDiscard')"
+                        @click="discardEdit(pendingCard.slot.id)"
+                      />
+                    </template>
                     <UButton
-                      v-if="pendingCard.controls.editable"
+                      v-else-if="pendingCard.controls.editable"
                       size="sm" color="neutral" variant="ghost" class="ml-auto rounded-full"
                       icon="i-ph-pencil-simple"
-                      :label="editingSlotId === pendingCard.slot.id ? t('brand.workspace.reviseDone') : t('brand.workspace.reviseSlot')"
-                      @click="editingSlotId = editingSlotId === pendingCard.slot.id ? null : pendingCard.slot.id"
+                      :label="t('brand.workspace.reviseSlot')"
+                      @click="openEditor(pendingCard.slot.id)"
                     />
                     <button
                       v-if="pendingCard.controls.showConfirm"
@@ -4359,13 +4504,17 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     @blur="autosave.flush()"
                   />
                   <p
-                    v-else-if="store.slotValue(pendingCard.slot.id)"
-                    class="mt-2" :class="renderedAbove(pendingCard.slot.id) ? 'bw-pending' : 'bw-doc-text whitespace-pre-wrap'"
+                    v-else-if="store.slotValue(pendingCard.slot.id) && renderedAbove(pendingCard.slot.id)"
+                    class="bw-pending mt-2"
                   >
-                    {{ renderedAbove(pendingCard.slot.id)
-                      ? t('brand.dna.card.above')
-                      : slotDisplayValue(pendingCard.slot.id, store.slotValue(pendingCard.slot.id)) }}
+                    {{ t('brand.dna.card.above') }}
                   </p>
+                  <BwSlotValue
+                    v-else-if="store.slotValue(pendingCard.slot.id)"
+                    class="mt-2"
+                    :slot-id="pendingCard.slot.id"
+                    :value="slotDisplayValue(pendingCard.slot.id, store.slotValue(pendingCard.slot.id))"
+                  />
                   <p v-else class="bw-pending mt-2">{{ t('brand.workspace.stage.pending') }}</p>
                 </div>
                 <!-- Befund 9, zweite Stelle: dieselbe Auskunft an derselben
@@ -4376,13 +4525,24 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                 </p>
                 <p class="mb-2 font-medium">{{ t('brand.workspace.confirmQuestion') }}</p>
                 <div class="flex flex-wrap items-center justify-end gap-2">
+                  <!-- Dieselben zwei Ausgänge wie im Entwurfs-Modul (Befund 3). -->
+                  <template v-if="pendingCard.controls.editable && editingSlotId === pendingCard.slot.id">
+                    <button type="button" class="bw-confirm bw-confirm--ghost" @click="applyEdit()">
+                      <UIcon name="i-ph-check" class="size-4" />
+                      {{ t('brand.workspace.reviseApply') }}
+                    </button>
+                    <button type="button" class="bw-confirm bw-confirm--ghost" @click="discardEdit(pendingCard.slot.id)">
+                      <UIcon name="i-ph-arrow-counter-clockwise" class="size-4" />
+                      {{ t('brand.workspace.reviseDiscard') }}
+                    </button>
+                  </template>
                   <button
-                    v-if="pendingCard.controls.editable"
+                    v-else-if="pendingCard.controls.editable"
                     type="button" class="bw-confirm bw-confirm--ghost"
-                    @click="editingSlotId = editingSlotId === pendingCard.slot.id ? null : pendingCard.slot.id"
+                    @click="openEditor(pendingCard.slot.id)"
                   >
                     <UIcon name="i-ph-pencil-simple" class="size-4" />
-                    {{ editingSlotId === pendingCard.slot.id ? t('brand.workspace.reviseDone') : t('brand.workspace.reviseSlot') }}
+                    {{ t('brand.workspace.reviseSlot') }}
                   </button>
                   <button
                     v-if="pendingCard.controls.showConfirm"
@@ -4652,7 +4812,9 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                   @update:model-value="value => onInput(card.id, String(value))"
                   @blur="autosave.flush()"
                 />
-                <p v-else-if="card.value" class="bw-doc-text mt-1.5 whitespace-pre-wrap" style="font-size: 0.875rem; line-height: 1.5">{{ card.display }}</p>
+                <!-- BEFUND 1 (2026-09-10): auch der Notizblock zeigte die
+                     Speicherform eines strukturierten Wertes. -->
+                <BwSlotValue v-else-if="card.value" class="mt-1.5" size="sm" :slot-id="card.id" :value="card.display" />
                 <p v-else class="bw-pending mt-1.5">{{ card.placeholder }}</p>
 
                 <!-- DIE BEFUNDE AN DIESEM FELD (§8) — kompakt: Icon und ein
@@ -4718,12 +4880,25 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                       :label="card.action === 'answer' ? t('brand.workspace.answerSlot') : t('brand.workspace.draftSlot')"
                       @click="goToSession(card.id)"
                     />
+                    <!-- Dieselben zwei Ausgänge wie auf der Bühne (Befund 3). -->
+                    <template v-else-if="card.controls.editable && editingSlotId === card.id">
+                      <UButton
+                        size="xs" color="neutral" variant="ghost" class="rounded-full"
+                        icon="i-ph-check" :label="t('brand.workspace.reviseApply')"
+                        @click="applyEdit()"
+                      />
+                      <UButton
+                        size="xs" color="neutral" variant="ghost" class="rounded-full"
+                        icon="i-ph-arrow-counter-clockwise" :label="t('brand.workspace.reviseDiscard')"
+                        @click="discardEdit(card.id)"
+                      />
+                    </template>
                     <UButton
                       v-else-if="card.controls.editable"
                       size="xs" color="neutral" variant="ghost" class="rounded-full"
                       icon="i-ph-pencil-simple"
-                      :label="editingSlotId === card.id ? t('brand.workspace.reviseDone') : t('brand.workspace.reviseSlot')"
-                      @click="editingSlotId = editingSlotId === card.id ? null : card.id"
+                      :label="t('brand.workspace.reviseSlot')"
+                      @click="openEditor(card.id)"
                     />
                     <button
                       type="button" class="bw-confirm bw-confirm--open bw-confirm--xs"

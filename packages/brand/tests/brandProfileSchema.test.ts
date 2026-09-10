@@ -7,8 +7,10 @@ import {
   BRAND_ABOUT_MAX,
   BRAND_AUDIENCE_MAX,
   BRAND_INDUSTRY_MAX,
+  BRAND_NEW_DETAILS_FIELDS,
   BRAND_WEBSITE_URL_MAX,
   brandInitialContentLocale,
+  brandNewDetailsCopy,
   brandNewDraftBody,
   brandNewDraftComplete,
   brandNewDraftMissing,
@@ -263,5 +265,35 @@ describe('Der Anlage-Entwurf (Startkarte)', () => {
     const parsed = createBrandProfileCreateSchema(LOCALES).safeParse(brandNewDraftBody('new', draft))
     expect(parsed.success).toBe(true)
     expect(parsed.success && parsed.data.title).toBe('Morgenlicht Studio')
+  })
+})
+
+/**
+ * DIE ANLAGE FOLGT DER WEICHE W3 (Dritter Testlauf, Befund 5, 2026-09-10).
+ *
+ * Die Weiche steht IM SELBEN Formular; die vier Fragen darunter blieben nach
+ * dem Umschalten auf „Zwei oder mehr" im Singular stehen.
+ */
+describe('brandNewDetailsCopy', () => {
+  it('gibt je Feld einen eigenen Schlüssel — solo und team verschieden', () => {
+    const solo = brandNewDetailsCopy('solo')
+    const team = brandNewDetailsCopy('team')
+    for (const field of BRAND_NEW_DETAILS_FIELDS) {
+      expect(solo[field]).toBe(`brand.new.startCard.${field}.solo`)
+      expect(team[field]).toBe(`brand.new.startCard.${field}.team`)
+      expect(solo[field]).not.toBe(team[field])
+    }
+  })
+
+  it('deckt genau die vier Felder der Startkarte ab', () => {
+    expect([...BRAND_NEW_DETAILS_FIELDS]).toEqual(['website', 'industry', 'about', 'audience'])
+    expect(Object.keys(brandNewDetailsCopy('solo')).sort())
+      .toEqual([...BRAND_NEW_DETAILS_FIELDS].sort())
+  })
+
+  it('der BASIS-Schlüssel wird nicht mehr geliefert — er stünde sonst roh im Formular', () => {
+    for (const key of Object.values(brandNewDetailsCopy('solo'))) {
+      expect(key.endsWith('.solo')).toBe(true)
+    }
   })
 })

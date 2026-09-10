@@ -6,6 +6,11 @@ import { BRAND_DIRECTIONS, BRAND_DIRECTIONS_VERSION } from '../shared/brandDirec
 import { type BrandFoundationInput, buildBrandFoundation } from '../shared/brandFoundation'
 import { formatBrandSlotList, formatBrandSlotStructured } from '../shared/brandSlotFormat'
 import {
+  BRAND_OWN_ANSWER_PLACEHOLDER_KEY,
+  BRAND_OWN_ANSWER_PLAIN_PLACEHOLDER_KEY,
+} from '../shared/brandStageModule'
+import { BRAND_NEW_DETAILS_FIELDS, brandNewDetailsCopy } from '../shared/brandStartCard'
+import {
   BRAND_SLOTS,
   type BrandSlot,
   exampleKeyFor,
@@ -361,6 +366,66 @@ describe('brand i18n-Katalog', () => {
       'brand.workspace.versions.close',
     ]
     expect(generation.filter(key => missingIn(key).length)).toEqual([])
+  })
+
+  /**
+   * DIE ZWEI AUSGÄNGE DES EDITORS (Dritter Testlauf, Befund 3) und der zweite
+   * Platzhalter der Antwort-Karte (Befund 9). Beide hängen an keiner Registry:
+   * fiele einer weg, stünde sein Schlüssel wörtlich auf einem Knopf.
+   */
+  it('trägt die zwei Ausgänge der Korrektur und beide Antwort-Platzhalter', () => {
+    const keys = [
+      'brand.workspace.reviseSlot',
+      'brand.workspace.reviseApply',
+      'brand.workspace.reviseDiscard',
+      BRAND_OWN_ANSWER_PLACEHOLDER_KEY,
+      BRAND_OWN_ANSWER_PLAIN_PLACEHOLDER_KEY,
+    ]
+    expect(keys.filter(key => missingIn(key).length)).toEqual([])
+    // „Korrigieren beenden" ist ERSETZT und darf nicht liegen bleiben — ein
+    // Schlüssel ohne Leser ist die nächste Copy-Runde, die ins Leere pflegt.
+    expect(missingIn('brand.workspace.reviseDone').length).toBe(LOCALES.length)
+  })
+
+  /**
+   * DIE STARTKARTE DER ANLAGE FOLGT DER WEICHE W3 (Befund 5) — dieselbe
+   * Doppel-Zusage wie bei den Fragen: beide Fassungen da, der Basis-Schlüssel
+   * weg (ein JSON-Katalog kann unter EINEM Schlüssel nicht gleichzeitig Text
+   * und Kind-Objekt halten).
+   */
+  it('führt beide Fassungen der Anlage-Startkarte — in de UND en', () => {
+    const gaps: string[] = []
+    for (const team of ['solo', 'team'] as const) {
+      for (const key of Object.values(brandNewDetailsCopy(team))) {
+        if (missingIn(key).length) gaps.push(`${key} fehlt`)
+      }
+    }
+    for (const field of BRAND_NEW_DETAILS_FIELDS) {
+      const base = `brand.new.startCard.${field}`
+      if (!missingIn(base).length) gaps.push(`${base}: Basis-Schlüssel steht noch da`)
+    }
+    expect(gaps).toEqual([])
+  })
+
+  /**
+   * DIE LESEANSICHT REDET NICHT IM PLURAL (Dritter Testlauf, Befund 6).
+   *
+   * „Brand Design entsteht mit eurem Markenberater …" und „Die Richtung wählt
+   * ihr im Ergebnis-Kapitel …" standen bei einer Solo-Marke im Handbuch — und
+   * dieselben Sätze rendert die öffentliche Discover-Anatomie, die die Weiche
+   * gar nicht kennt. Die Auflösung ist deshalb NEUTRAL statt zweifassig: ein
+   * Text ohne Anrede ist auf beiden Seiten der Weiche und ohne sie richtig.
+   */
+  it('hält die Texte der Leseansicht frei von der Mehrzahl-Anrede', () => {
+    const plural = /(^|[^a-zäöüß])(ihr|euch|euer|eure|eurem|euren|eures|eurer)([^a-zäöüß]|$)/i
+    const offenders: string[] = []
+    for (const [key, text] of deTexts) {
+      if (!key.startsWith('brand.foundation.')) continue
+      if (plural.test(text)) offenders.push(`${key}: ${text}`)
+    }
+    expect(offenders).toEqual([])
+    // GEGENPROBE: der Ausdruck greift überhaupt.
+    expect(plural.test('Die Richtung wählt ihr im Ergebnis-Kapitel.')).toBe(true)
   })
 
   it('GEGENPROBE: ein erfundener Slot fällt durch', () => {

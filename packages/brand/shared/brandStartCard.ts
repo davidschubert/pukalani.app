@@ -110,6 +110,46 @@ export function brandInitialContentLocale(
   return locales[0] ?? 'en'
 }
 
+/**
+ * DIE ANREDE DER ANLAGE FOLGT DER WEICHE W3 (Dritter Testlauf, Befund 5,
+ * 2026-09-10).
+ *
+ * ── DER BEFUND ────────────────────────────────────────────────────────────
+ * Die Weiche „Wer steckt dahinter?" steht IM SELBEN Formular, direkt über der
+ * Startkarte — und die vier Fragen darunter blieben nach dem Umschalten auf
+ * „Zwei oder mehr" wörtlich im Singular stehen („Deine Website … damit du dich
+ * nicht wiederholen musst", „In welcher Branche bist du unterwegs?"). Der
+ * erste Satz, den ein Team im Produkt liest, redete es mit „du" an — und
+ * genau das war die Entscheidung, die zwei Klicks vorher gefallen war.
+ *
+ * ── EINE REGEL, ZWEI OBERFLÄCHEN ─────────────────────────────────────────
+ * Modal (`/dashboard/brands`) und Seite (`/dashboard/brands/new`) rendern
+ * DASSELBE Formular (`BwNewBrandDetails`), also gibt es die Regel genau einmal
+ * — und weil sie pur ist, prüft ein Test sie ohne Formular. Sie liefert
+ * SCHLÜSSEL, keine Sätze: die Texte gehören dem Katalog (dieselbe Trennung wie
+ * bei `questionKeyFor`).
+ *
+ * DIE WEICHE SELBST BLEIBT DRAUSSEN: „Wer steckt dahinter?", „Nur ich" und
+ * „Zwei oder mehr" beschreiben die Wahl und dürfen sich mit ihr nicht ändern —
+ * eine Frage, die ihre eigene Antwort spiegelt, liest sich wie ein Fehler.
+ */
+export type BrandNewDetailsField = 'website' | 'industry' | 'about' | 'audience'
+
+export type BrandNewDetailsCopy = Readonly<Record<BrandNewDetailsField, string>>
+
+export const BRAND_NEW_DETAILS_FIELDS: readonly BrandNewDetailsField[]
+  = ['website', 'industry', 'about', 'audience']
+
+export function brandNewDetailsCopy(team: BrandNewDraft['team']): BrandNewDetailsCopy {
+  const variant = team === 'team' ? 'team' : 'solo'
+  return {
+    website: `brand.new.startCard.website.${variant}`,
+    industry: `brand.new.startCard.industry.${variant}`,
+    about: `brand.new.startCard.about.${variant}`,
+    audience: `brand.new.startCard.audience.${variant}`,
+  }
+}
+
 /** Die Pflichtfelder der Startkarte, in der Reihenfolge der Content-Spec §2.1. */
 export const BRAND_NEW_REQUIRED_FIELDS = ['industry', 'about', 'audience'] as const
 export type BrandNewRequiredField = (typeof BRAND_NEW_REQUIRED_FIELDS)[number]

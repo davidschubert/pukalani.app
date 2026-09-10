@@ -7,6 +7,7 @@ import {
   BRAND_INDUSTRY_MAX,
   BRAND_WEBSITE_URL_MAX,
   type BrandNewDraft,
+  brandNewDetailsCopy,
 } from '../../shared/brandStartCard'
 
 /**
@@ -73,6 +74,17 @@ const showNamingOpt = computed(() => draft.value.relaunchScope === 'recut')
  * bindet das zweite Feld an die Vorschläge des ersten.
  */
 const listId = `bw-industry-${useId()}`
+
+/**
+ * DIE STARTKARTE FOLGT DER WEICHE W3 (Testlauf-Befund 5, 2026-09-10) — die
+ * Regel steht pur nebenan (`brandNewDetailsCopy`) samt Begründung.
+ *
+ * REAKTIV, weil die Weiche im SELBEN Formular steht: wer auf „Zwei oder mehr"
+ * umschaltet, sieht die Anrede sofort wechseln. Vorher blieb darunter „In
+ * welcher Branche bist du unterwegs?" stehen — der erste Satz, den ein Team im
+ * Produkt liest, widersprach der Entscheidung zwei Klicks davor.
+ */
+const copy = computed(() => brandNewDetailsCopy(draft.value.team))
 </script>
 
 <template>
@@ -159,7 +171,7 @@ const listId = `bw-industry-${useId()}`
          Wort daneben für den Screenreader; die Zeile unter dem Knopf nennt
          beim Namen, was noch fehlt (`brandNewDraftMissing`). -->
     <p class="bw-label mt-8" style="color: var(--bw-muted)">{{ t('brand.new.requiredHint') }}</p>
-    <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.new.startCard.website') }}</p>
+    <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t(copy.website) }}</p>
     <UInput
       :model-value="draft.websiteUrl" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-full px-4' }"
       :disabled="disabled" type="url" inputmode="url" :maxlength="BRAND_WEBSITE_URL_MAX"
@@ -168,7 +180,7 @@ const listId = `bw-industry-${useId()}`
     />
 
     <p class="bw-label mt-6" style="color: var(--bw-muted)">
-      {{ t('brand.new.startCard.industry') }} <span aria-hidden="true">*</span>
+      {{ t(copy.industry) }} <span aria-hidden="true">*</span>
       <span class="sr-only">{{ t('brand.new.requiredField') }}</span>
     </p>
     <UInput
@@ -184,7 +196,7 @@ const listId = `bw-industry-${useId()}`
     </datalist>
 
     <p class="bw-label mt-6" style="color: var(--bw-muted)">
-      {{ t('brand.new.startCard.about') }} <span aria-hidden="true">*</span>
+      {{ t(copy.about) }} <span aria-hidden="true">*</span>
       <span class="sr-only">{{ t('brand.new.requiredField') }}</span>
     </p>
     <UTextarea
@@ -195,7 +207,7 @@ const listId = `bw-industry-${useId()}`
     />
 
     <p class="bw-label mt-6" style="color: var(--bw-muted)">
-      {{ t('brand.new.startCard.audience') }} <span aria-hidden="true">*</span>
+      {{ t(copy.audience) }} <span aria-hidden="true">*</span>
       <span class="sr-only">{{ t('brand.new.requiredField') }}</span>
     </p>
     <UTextarea

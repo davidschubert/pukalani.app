@@ -1038,7 +1038,8 @@
       "confirmedSlot": "Confirmed",
       "confirmedBadge": "Confirmed",
       "reviseSlot": "Revise",
-      "reviseDone": "Done revising",
+      "reviseApply": "Keep changes",
+      "reviseDiscard": "Discard",
       "answerSlot": "Answer",
       "draftSlot": "Draft it",
       "confirmChoice": {
@@ -1097,6 +1098,7 @@
       "decisions": "Decisions",
       "recommended": "Recommended",
       "ownAnswerPlaceholder": "Or something entirely your own …",
+      "ownAnswerPlaceholderPlain": "Your answer …",
       "whyRecommended": "Why does George recommend {label}?",
       "sendOwnAnswer": "Send your own answer",
       "editSlot": "Edit {label}",
@@ -1309,10 +1311,22 @@
         "team": "Two or more"
       },
       "startCard": {
-        "website": "Your website (optional) — I'll read it so you don't have to repeat yourself.",
-        "industry": "What industry are you in?",
-        "about": "What do you do — in 2–3 sentences, like you'd tell a friend?",
-        "audience": "Who is it for?",
+        "website": {
+          "solo": "Your website (optional) — I'll read it so you don't have to repeat yourself.",
+          "team": "Your website (optional) — I'll read it so you don't have to repeat yourselves."
+        },
+        "industry": {
+          "solo": "What industry are you in?",
+          "team": "What industry are you in?"
+        },
+        "about": {
+          "solo": "What do you do — in 2–3 sentences, like you'd tell a friend?",
+          "team": "What do you do — in 2–3 sentences, like you'd tell a friend?"
+        },
+        "audience": {
+          "solo": "Who is it for?",
+          "team": "Who is it for?"
+        },
         "short": {
           "industry": "Industry",
           "about": "What you do",
@@ -2449,7 +2463,7 @@
           "title": "Motion",
           "text": "Pace and calm of movement — derived from your tone words."
         },
-        "offer": "Brand Design happens with your brand adviser as part of the studio offering — we talk it through in the first call.",
+        "offer": "Brand Design happens together with the brand adviser as part of the studio offering — we talk it through in the first call.",
         "ctaDesign": "Start Brand Design",
         "unlocked": "Brand Design is unlocked for this brand.",
         "unlockedOn": "Unlocked by the studio on {date}."
@@ -2561,7 +2575,7 @@
         "chosen": "Chosen direction",
         "choose": "Choose a direction",
         "change": "Change direction",
-        "lockedHint": "You choose the direction in the result chapter — it opens once the chapters before it are settled.",
+        "lockedHint": "The direction is chosen in the result chapter — it opens once the chapters before it are settled.",
         "fontsLabel": "Type pairing",
         "colors": "Colour world",
         "previewLine": "This is how a page reads in this world.",

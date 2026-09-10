@@ -71,7 +71,7 @@ import {
   brandConversePrompt,
   countSessionProbes,
 } from '../../../../../../utils/conversePrompt'
-import { georgeSystemPrompt } from '../../../../../../utils/georgePrompt'
+import { brandPromptToday, georgeSystemPrompt } from '../../../../../../utils/georgePrompt'
 import {
   brandConfirmButtonLabel,
   brandDraftButtonLabel,
@@ -764,6 +764,9 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
       contentLocale: profile.contentLocale,
       pathKind: profileFacts(profile, betaAccount).pathKind,
       technique,
+      // george-a-15 (Befund 4): „seit 2021" wurde im Gespräch zu „drei Jahre".
+      // Das Datum liest der SERVER, nicht der Prompt-Bauer.
+      today: brandPromptToday(),
     })
 
     /**

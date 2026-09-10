@@ -172,8 +172,10 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     // bestätigte WERT im Abschlusszug samt Knopf-Verbot (Befund 1), das Ziel
     // als NAME statt als zitierte Frage (Befund 3) und `stayField` — ein
     // Antwort-Zug einer unbestätigten Session stellt keine fremde Frage
-    // (Befund 2).
-    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-16')
+    // (Befund 2); converse-17 der Pflicht-Halbsatz über den KERN des
+    // bestätigten Wertes (Befund 7) und das Verbot, im Abschluss auf den
+    // Weiter-Knopf zu zeigen (Befund 8).
+    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-17')
   })
 
   /**
@@ -1162,5 +1164,63 @@ describe('Die beantworteten Fragen des Kapitels (converse-12)', () => {
     const instruction = brandConverseInstruction(BOTH)
     expect(instruction).toContain('questions already answered in this chapter')
     expect(instruction).toContain('which you cannot see in the history above')
+  })
+})
+
+/**
+ * DER DRITTE LIVE-TESTLAUF (2026-09-10) — zwei Befunde am Abschlusszug.
+ *
+ * Beide waren im Zug LESBAR und in keinem Test sichtbar: ein Abschluss, der
+ * eine erarbeitete Ableitung mit „Das sitzt." abtut, und ein Abschluss, der in
+ * jedem Fall auf den Knopf unter sich zeigt.
+ */
+describe('converse-17: der Abschluss würdigt den Kern (Befund 7)', () => {
+  const CLOSING_17 = {
+    ...BOTH,
+    draftButton: 'George, entwirf das',
+    closing: {
+      goal: 'Der Purpose steht in einem Satz.',
+      value: 'Wir wollen, dass jeder Handgriff im Laden erklärbar bleibt.',
+      nextLabel: 'Kritik & Beschwerden',
+      acceptance: false,
+      skipped: [],
+    },
+  }
+
+  it('verlangt den Halbsatz über den KERN — und verbietet die Leerformel', () => {
+    const instruction = brandConverseInstruction(CLOSING_17)
+    expect(instruction).toMatch(/BEGIN BY NAMING THE CORE OF WHAT THEY JUST SETTLED/)
+    expect(instruction).toMatch(/This clause is REQUIRED/)
+    // Der Live-Satz, wörtlich als verbotenes Muster im Auftrag.
+    expect(instruction).toContain('Das sitzt.')
+    // „nicht zitieren" bleibt daneben stehen — würdigen ist nicht nachsprechen.
+    expect(instruction).toMatch(/Do not quote it/)
+  })
+
+  it('der Wert reist weiter mit — ohne ihn gäbe es keinen Kern zu nennen', () => {
+    expect(brandConverseInstruction(CLOSING_17))
+      .toContain('Wir wollen, dass jeder Handgriff im Laden erklärbar bleibt.')
+  })
+
+  /**
+   * BEFUND 8: „Du findest den Button unten." / „Der Button unten bringt dich
+   * dorthin." stand in JEDEM Abschluss — converse-14 hatte es ausdrücklich
+   * erlaubt. Die Gegenprobe hängt am WORT: es fällt aus dem Abschluss-Auftrag
+   * und bleibt im Entwurfs-Hinweis von converse-11.
+   */
+  it('erwähnt den Weiter-Knopf mit keinem Wort mehr (Befund 8)', () => {
+    const instruction = brandConverseInstruction(CLOSING_17)
+    expect(instruction).not.toMatch(/button/i)
+    expect(instruction).toMatch(/NEVER POINT AT THE INTERFACE/)
+    // Der alte Erlaubnis-Satz ist weg.
+    expect(instruction).not.toMatch(/you may say that it is there/)
+    // Was bleibt: WOHIN es geht.
+    expect(instruction).toMatch(/WHERE IT GOES ON/)
+  })
+
+  it('GEGENPROBE: der Entwurfs-Hinweis eines gewöhnlichen Zuges nennt ihn weiter', () => {
+    const reply = brandConverseInstruction({ ...BOTH, draftButton: 'George, entwirf das' })
+    expect(reply).toMatch(/button/i)
+    expect(reply).toContain('George, entwirf das')
   })
 })

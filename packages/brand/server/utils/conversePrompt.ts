@@ -203,7 +203,28 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
  *     Abschlusszug. Die Route gibt für einen solchen Zug auch keine fremde
  *     `nextQuestion` mehr mit — Auftrag und Eingaben sagen dasselbe.
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-16'
+/**
+ * `converse-17` (2026-09-10, dritter Live-Testlauf — Befunde 7 und 8). ZWEI
+ * Änderungen, beide am ABSCHLUSSZUG:
+ *
+ *  1. ER WÜRDIGT DEN KERN, STATT IHN ZU ÜBERGEHEN (Befund 7). Der Auftrag
+ *     hatte den bestätigten Wert seit converse-16 (`closing.value`), verlangte
+ *     aber nur, ihn NICHT zu wiederholen — und ein Modell, dem man sagt „nicht
+ *     nachsprechen", sagt am sichersten gar nichts dazu. Live stand nach einer
+ *     mühsam erarbeiteten Ableitung „Das sitzt. Jetzt geht es darum …": eine
+ *     Floskel über einem Satz, an dem jemand zehn Minuten gearbeitet hat. Neu
+ *     ist der Halbsatz PFLICHT — er greift den KERN in eigenen Worten auf, und
+ *     „nicht zitieren" bleibt daneben stehen.
+ *  2. ER ERWÄHNT DEN KNOPF NICHT MEHR (Befund 8). „Du findest den Button
+ *     unten." / „Der Button unten bringt dich dorthin." stand in JEDEM
+ *     Abschluss — converse-14 hatte es ausdrücklich erlaubt („you may say that
+ *     it is there"). Es ist die Mechanik der Werkstatt, und die ist unsere
+ *     Sache: die Bühne zeigt den Knopf, George sagt nur, wohin es weitergeht.
+ *     Die Regel gilt ENG — im Entwurfs-Hinweis eines gewöhnlichen Zuges
+ *     (converse-11, `decisionLines`) bleibt der Knopf-Name stehen: dort ist er
+ *     der einzige Weg, aus einer Entscheidung Text zu machen.
+ */
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-17'
 
 /**
  * WIE VIEL VOM BESTÄTIGTEN WERT DER ABSCHLUSSZUG SIEHT (converse-16).
@@ -913,8 +934,21 @@ function closingTaskLines(closing: BrandConverseClosingOptions): string[] {
     '',
     'How to work:',
     `What this session was for: ${closing.goal}`,
-    'Say in ONE clause what now stands, in their own words. No praise, no summary of the whole chapter, '
-    + 'and never repeat the confirmed value back in full — they just read it.',
+    /**
+     * DER HALBSATZ IST PFLICHT (converse-17, Testlauf-Befund 7).
+     *
+     * Bis hierher stand hier nur „sag in EINEM Halbsatz, was jetzt steht" neben
+     * „wiederhole den Wert nicht" — und die zweite Hälfte gewann: der Abschluss
+     * einer erarbeiteten Ableitung lautete „Das sitzt. Jetzt geht es darum …",
+     * eine Floskel ohne einen einzigen Gedanken aus dem Ergebnis. Jetzt sagt
+     * der Auftrag, WAS in den Halbsatz gehört (der Kern, in eigenen Worten) und
+     * was nicht (Zitat, Zusammenfassung, Lob).
+     */
+    'BEGIN BY NAMING THE CORE OF WHAT THEY JUST SETTLED — one clause, in YOUR OWN words, that shows you '
+    + 'have read it: the one idea their answer turns on. This clause is REQUIRED; an empty opener like '
+    + '"That works." or "Das sitzt." is not an option, because it would fit any answer to any question. '
+    + 'Do not quote it, do not repeat it in full, do not summarise the whole chapter, and do not praise '
+    + 'it — they just read it themselves.',
     /**
      * DER ZUSTAND DES FELDES, UND ZWAR VOR JEDER ANDEREN REGEL (converse-16,
      * Testlauf-Befund 1).
@@ -930,10 +964,9 @@ function closingTaskLines(closing: BrandConverseClosingOptions): string[] {
         + `${clamp(closing.value, BRAND_CLOSING_VALUE_CHARS)}`
       : 'THE FIELD IS WRITTEN AND CONFIRMED — it stands next to this conversation. Honour that it stands; '
         + 'never speak of it as something still to be made.',
-    'NEVER offer to draft, write, generate or produce this value, never name a draft button, and never '
-    + 'say anything of the form "when you let me draft it, it will appear": the work is done and the text '
-    + 'is on their screen. A turn that puts a finished field back into the future takes the result away '
-    + 'from them.',
+    'NEVER offer to draft, write, generate or produce this value, and never say anything of the form '
+    + '"when you let me draft it, it will appear": the work is done and the text is on their screen. A '
+    + 'turn that puts a finished field back into the future takes the result away from them.',
   ]
 
   if (closing.skipped.length) {
@@ -956,9 +989,27 @@ function closingTaskLines(closing: BrandConverseClosingOptions): string[] {
         + 'sentence what it is about, in your own words. This target is given to you — never pick a '
         + 'different one, never offer a choice of where to go, and never claim something is next that is '
         + 'not named here.',
-    'ASK NOTHING in this turn: no question, no follow-up, no invitation to write. A button underneath your '
-    + 'turn takes them onwards — you may say that it is there, in half a clause, but you never claim to '
-    + 'have moved them yourself.',
+    'ASK NOTHING in this turn: no question, no follow-up, no invitation to write.',
+    /**
+     * KEIN VERWEIS AUF DAS BEDIENELEMENT (converse-17, Testlauf-Befund 8).
+     *
+     * converse-14 erlaubte den halben Satz („you may say that it is there"), und
+     * das Modell nahm ihn in JEDEM Abschluss: „Du findest den Button unten.",
+     * „Der Button unten bringt dich dorthin." Ein Berater, der auf die
+     * Bedienung seiner eigenen Oberfläche zeigt, redet über die Software statt
+     * über die Marke — und die Bühne zeigt den Knopf ohnehin, gross und direkt
+     * unter dem Zug. Die allgemeine Regel „nie über die Mechanik reden" stand
+     * schon im Auftrag; sie hatte hier nur eine Ausnahme, und die fällt.
+     *
+     * DIE ZEILE NENNT DAS WORT SELBST NICHT — auch nicht im Verbot. Ein Prompt,
+     * der „sag nicht Knopf" sagt, legt das Wort ins Fenster; und der Beweis zu
+     * diesem Befund ist eine Gegenprobe über genau dieses Wort (es fällt aus
+     * dem Abschluss-Auftrag und bleibt im Entwurfs-Hinweis von converse-11).
+     */
+    'NEVER POINT AT THE INTERFACE: do not describe anything on their screen, do not tell them where to '
+    + 'click, press or look, and do not name any control. Whatever takes them onwards is right in front '
+    + 'of them. Say WHERE it goes on, never HOW to get there — and never claim to have moved them '
+    + 'yourself.',
   )
   return lines
 }

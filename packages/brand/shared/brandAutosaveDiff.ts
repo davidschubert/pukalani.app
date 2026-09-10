@@ -90,6 +90,52 @@ export function brandEditReleasesConfirm(
 }
 
 /**
+ * WAS „VERWERFEN" WIEDERHERSTELLT (Dritter Testlauf, Befund 3, 2026-09-10).
+ *
+ * ── DER BEFUND ────────────────────────────────────────────────────────────
+ * Der Editor hatte genau EINEN Ausgang: „Korrigieren beenden". Der SPEICHERT —
+ * jede Eingabe ist über den Autosave längst hinaus, spätestens beim `blur` auf
+ * dem Weg zum Knopf. Wer ein bestätigtes Feld aufmachte, zwei Wörter probierte
+ * und es sich anders überlegte, hatte keinen Weg zurück: der neue Text stand,
+ * und die Bestätigung war mit ihm gefallen. Jetzt stehen zwei Knöpfe da —
+ * „Übernehmen" (das bisherige Verhalten) und „Verwerfen".
+ *
+ * ── DIE REGEL IST EIN VERGLEICH, KEIN UNDO-STAPEL ────────────────────────
+ * Verworfen wird gegen die Fassung, die beim ÖFFNEN des Editors galt: Text und
+ * Bestätigung. Ein Verlauf einzelner Tastendrücke wäre eine zweite Wahrheit
+ * neben dem Autosave — und der hat die Zwischenstände längst weggeschrieben.
+ *
+ * `changed: false` heisst „es gibt nichts zu tun": kein Schreibvorgang, kein
+ * PATCH. Wer nur hineingesehen hat, löst mit dem Verwerfen also KEINE Runde
+ * aus — dieselbe Zusage wie bei `brandEditReleasesConfirm` eine Ebene höher.
+ *
+ * DIE BESTÄTIGUNG KOMMT MIT ZURÜCK, und zwar in demselben Patch wie der Text:
+ * `diffBrandSlots` schickt `value` und `confirmed` gemeinsam, und die Route
+ * verlangt genau das (eine Wert-Änderung an einem bestätigten Slot ohne
+ * begleitendes `confirmed` ist ein 409 `slot_confirmed`).
+ */
+export interface BrandEditSnapshot {
+  value: string
+  confirmed: boolean
+}
+
+export interface BrandEditRestore extends BrandEditSnapshot {
+  /** Ist überhaupt etwas zu tun? `false` ⇒ kein Schreibvorgang, kein Request. */
+  changed: boolean
+}
+
+export function brandDiscardEdit(
+  baseline: BrandEditSnapshot,
+  current: BrandEditSnapshot,
+): BrandEditRestore {
+  return {
+    value: baseline.value,
+    confirmed: baseline.confirmed,
+    changed: baseline.value !== current.value || baseline.confirmed !== current.confirmed,
+  }
+}
+
+/**
  * DIE GEÄNDERTEN SLOTS — Server-Fassung gegen lokale Eingabe.
  *
  * Ein Slot fällt raus, wenn die lokale Eingabe dem Server entspricht; ein

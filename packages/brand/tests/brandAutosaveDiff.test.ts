@@ -3,6 +3,7 @@ import {
   type BrandSyncState,
   brandAutosaveAllowed,
   brandConflictNeedsDecision,
+  brandDiscardEdit,
   brandEditReleasesConfirm,
   brandSlotDisplayValue,
   brandSlotIsConfirmed,
@@ -279,5 +280,52 @@ describe('brandConflictNeedsDecision', () => {
       { 'a.origin': view({ latestDraft: 'x' }) },
       {},
     )).toBe(false)
+  })
+})
+
+/**
+ * „VERWERFEN" (Dritter Testlauf, Befund 3, 2026-09-10).
+ *
+ * Der Editor hatte nur einen Ausgang, und der SPEICHERTE. Die Rechnung hier
+ * beantwortet zwei Fragen: worauf wird zurückgestellt, und ist überhaupt etwas
+ * zu tun.
+ */
+describe('brandDiscardEdit', () => {
+  const baseline = { value: 'steht', confirmed: true }
+
+  it('stellt Text UND Bestätigung auf die Fassung von vor dem Öffnen zurück', () => {
+    // Die erste Eingabe hat die Bestätigung mitgenommen
+    // (`brandEditReleasesConfirm`) — beides muss zurück.
+    expect(brandDiscardEdit(baseline, { value: 'steht anders', confirmed: false }))
+      .toEqual({ value: 'steht', confirmed: true, changed: true })
+  })
+
+  it('tut NICHTS, wenn nur hineingesehen wurde — kein Request', () => {
+    expect(brandDiscardEdit(baseline, { value: 'steht', confirmed: true }).changed).toBe(false)
+  })
+
+  it('sieht auch eine Bestätigung, die ohne Textänderung gefallen ist', () => {
+    expect(brandDiscardEdit(baseline, { value: 'steht', confirmed: false }))
+      .toEqual({ value: 'steht', confirmed: true, changed: true })
+  })
+
+  it('an einem OFFENEN Feld bleibt es offen — es wird nichts erfunden', () => {
+    expect(brandDiscardEdit({ value: 'entwurf', confirmed: false }, { value: 'anders', confirmed: false }))
+      .toEqual({ value: 'entwurf', confirmed: false, changed: true })
+  })
+
+  /**
+   * DIE ZUSAGE AM ANDEREN ENDE: was das Verwerfen schreibt, ist genau der
+   * Patch, den die Route für eine Rücknahme braucht — Wert UND Bestätigung in
+   * EINEM Rumpf (sonst 409 `slot_confirmed`).
+   */
+  it('ergibt zusammen mit `diffBrandSlots` EINEN vollständigen Patch', () => {
+    // Der Server trägt inzwischen den geänderten, unbestätigten Text.
+    const server = { 'a.origin': view({ firstDraft: 'steht', latestDraft: 'steht anders' }) }
+    const restore = brandDiscardEdit(baseline, { value: 'steht anders', confirmed: false })
+    const patch = diffBrandSlots(server, {
+      'a.origin': { value: restore.value, confirmed: restore.confirmed },
+    })['a.origin']
+    expect(patch).toEqual({ value: 'steht', confirmed: true })
   })
 })

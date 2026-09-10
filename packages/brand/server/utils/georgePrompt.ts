@@ -55,6 +55,28 @@ import type { BrandSlotDependency } from './brandGenerators'
 /**
  * Fassung der Prompt-Bausteine dieses Bausteins (A · Kontext).
  *
+ * `george-a-15` (2026-09-10, dritter Live-Testlauf — Befund 4): DAS HEUTIGE
+ * DATUM steht im System-Prompt.
+ *
+ * ── DER BEFUND, IN EINEM ABSATZ ───────────────────────────────────────────
+ * Auf die Antwort „2021" auf die Frage nach dem Alter der Marke sagte George
+ * „das sind jetzt drei Jahre". Es sind fünf. Der Prompt kannte das Datum nicht,
+ * also rechnete das Modell gegen sein Trainingsende — und ein Berater, der die
+ * Jahre einer Marke falsch zählt, verliert genau die Glaubwürdigkeit, von der
+ * dieses Produkt lebt. Der Fehler wandert weiter: dieselbe Zahl steht danach in
+ * Pitch, Boilerplate und Pressekit.
+ *
+ * ── WARUM IM SYSTEM-PROMPT UND NICHT IM AUFTRAG ──────────────────────────
+ * Weil BEIDE Enden ihn brauchen — das Gespräch (`converse.post.ts`) und der
+ * Entwurf (`advisorGenerator.ts`) — und beide bauen ihren System-Prompt hier.
+ * Eine zweite Datums-Zeile im Gesprächs- und eine dritte im Entwurfs-Auftrag
+ * wären drei Stellen für eine Tatsache, die sich täglich ändert.
+ *
+ * Das Datum REIST HEREIN und wird nicht hier gelesen: `new Date()` in einer
+ * puren Prompt-Funktion machte jeden Test von der Uhr abhängig (und einen davon
+ * ein Jahr später rot). Fehlt es, sagt der Prompt zum Datum nichts — das ist
+ * der Stand von a-14 und nicht ein geratenes Heute.
+ *
  * `george-a-14` (2026-09-09, Davids Entscheidung nach dem Elevator-Pitch):
  * die Team-Weiche W3 gilt jetzt auch für MARKENTEXTE, nicht mehr nur für die
  * Anrede im Gespräch (`converse-13`) und die Beschriftungen der Felder. Der
@@ -162,7 +184,7 @@ import type { BrandSlotDependency } from './brandGenerators'
  *   · B8/B9 — Kontext-Sensibilität (kein Vertriebston für einen Verein) und
  *     eine Sorgfaltszeile gegen holprige Sprache.
  */
-export const GEORGE_PROMPT_VERSION = 'george-a-14'
+export const GEORGE_PROMPT_VERSION = 'george-a-15'
 
 /** Default der Persona (Content-Spec §1.1, Gate ② abgesegnet). */
 export const GEORGE_PERSONA_DEFAULT = 'George'
@@ -191,6 +213,46 @@ export interface GeorgeSystemPromptOptions {
   technique?: BrandAdvisor
   persona?: string
   vendor?: string
+  /**
+   * HEUTE, als ISO-Datum (`YYYY-MM-DD`) — der Server liest die Uhr, nicht diese
+   * Funktion (Begründung an `george-a-15` oben).
+   *
+   * Leer oder fehlend heisst: der Prompt sagt zum Datum nichts. Ein geratenes
+   * Heute wäre schlimmer als keines — es sähe aus wie eine Tatsache.
+   */
+  today?: string
+}
+
+/**
+ * DIE DATUMS-ZEILE (george-a-15) — sie sagt das Datum UND was damit zu tun ist.
+ *
+ * „Today is 2026-09-10" allein reicht nicht: das Modell trägt die Zahl dann mit
+ * sich herum und rechnet trotzdem gegen sein Trainingsende, weil niemand gesagt
+ * hat, dass die Zeitspannen daraus kommen. Der zweite Halbsatz ist der ganze
+ * Zweck der Zeile.
+ */
+/**
+ * HEUTE, wie es in den Prompt geht — die EINE Stelle, die dafür die Uhr liest
+ * (george-a-15).
+ *
+ * UTC und `YYYY-MM-DD`: eine Zeitzone brächte an einer Jahreszahl nichts ein
+ * und wäre eine zweite Frage („welche?"), die niemand beantworten kann — der
+ * Server steht anderswo als der Mensch. `now` ist überschreibbar, damit ein
+ * Beweis ein festes Datum vorlegen kann statt gegen die Uhr zu prüfen.
+ */
+export function brandPromptToday(now: Date = new Date()): string {
+  return now.toISOString().slice(0, 10)
+}
+
+function todayLines(today: string | undefined): string[] {
+  const iso = (today ?? '').trim()
+  if (!iso) return []
+  return [
+    `Today is ${iso}. Compute EVERY duration, age and time span from this date — how long the brand `
+    + 'has existed, how long ago something happened, which year is "this year". Never rely on your own '
+    + 'sense of the current date, and never state a number of years you have not counted from it.',
+    '',
+  ]
 }
 
 /**
@@ -321,6 +383,9 @@ export function georgeSystemPrompt(options: GeorgeSystemPromptOptions): string {
     '',
     `Path: ${path}`,
     '',
+    // george-a-15: das Datum steht NEBEN dem Pfad und nicht in den Regeln —
+    // es ist eine Tatsache über die Welt, keine Verhaltensregel.
+    ...todayLines(options.today),
     // BEWUSST DIE LETZTE ZEILE (a-8, Verlaufs-Audit 2026-09-03): in einem
     // deutschen Branding standen englische George-Züge („I need one concrete
     // thing …") — Regel 9 steht weit oben und verlor bei langem englischen

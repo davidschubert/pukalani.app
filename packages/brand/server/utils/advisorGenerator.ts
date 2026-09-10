@@ -13,7 +13,12 @@ import type {
   BrandSlotDependency,
   BrandSlotGenerator,
 } from './brandGenerators'
-import { type BrandSlotInstructionOptions, formatGeorgeInputs, georgeSystemPrompt } from './georgePrompt'
+import {
+  type BrandSlotInstructionOptions,
+  brandPromptToday,
+  formatGeorgeInputs,
+  georgeSystemPrompt,
+} from './georgePrompt'
 import { createGeorgeTurnScrubber, parseGeorgeTurn } from './georgeTurn'
 import { BRAND_PROVIDER_ROUTING } from './brandProviderRouting'
 
@@ -315,6 +320,9 @@ export function createAdvisorSlotGenerator(options: AdvisorSlotGeneratorOptions)
       // Debatte — das ist seit dem 2026-09-02 immer George.
       technique: techniqueForStep(context.stepKey),
       persona: personaName(),
+      // george-a-15 (Befund 4): ohne das Datum rechnet das Modell Zeitspannen
+      // gegen sein Trainingsende — „seit 2021" wurde zu „drei Jahre".
+      today: brandPromptToday(),
     })
 
     // DIE MARKER GEHEN NICHT IN DIE SPRECHBLASE (george-a-4): der Mensch sieht

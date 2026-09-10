@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import {
+  BRAND_OWN_ANSWER_PLACEHOLDER_KEY,
+  BRAND_OWN_ANSWER_PLAIN_PLACEHOLDER_KEY,
   type BrandStageActiveSession,
   brandAnswerTarget,
+  brandStageAnswerCard,
   brandStageAwaitsDraftAnswer,
   brandStageClaim,
+  brandStaticQuestionVisible,
 } from '../shared/brandStageModule'
-import { slotById, slotIsConfirmable, slotsForStep } from '../shared/slotRegistry'
+import { partKeyFor, slotById, slotIsConfirmable, slotsForStep } from '../shared/slotRegistry'
 
 /**
  * WELCHES MODUL ZEIGT DIE BÜHNE FÜR DIE AKTIVE SESSION? (Kailua-Befund 5,
@@ -225,5 +229,76 @@ describe('Die Registry stützt den Befund', () => {
         confirmed: false,
       })).toEqual({ module: 'draft', slotId: slot.id })
     }
+  })
+})
+
+/**
+ * BEFUND 2 DES DRITTEN TESTLAUFS (2026-09-10): unter jeder Teilantwort der
+ * Sammel-Session stand ZUSÄTZLICH die statische Katalog-Frage — und nach einem
+ * Reload dasselbe in jeder Frage-Session.
+ */
+describe('Die statische Katalog-Frage ist ein Ersatz, keine Ergänzung', () => {
+  it('steht da, solange in dieser Session noch kein Berater-Zug steht', () => {
+    expect(brandStaticQuestionVisible({
+      collecting: false,
+      ownSession: true,
+      advisorSpoke: false,
+    })).toBe(true)
+  })
+
+  it('fällt weg, sobald George in DIESER Session gesprochen hat (Reload-Fall)', () => {
+    expect(brandStaticQuestionVisible({
+      collecting: false,
+      ownSession: true,
+      advisorSpoke: true,
+    })).toBe(false)
+  })
+
+  it('fällt in der SAMMEL-Session immer weg — dort fragt George den Teil', () => {
+    for (const advisorSpoke of [false, true]) {
+      expect(brandStaticQuestionVisible({ collecting: true, ownSession: true, advisorSpoke }))
+        .toBe(false)
+      // Auch als Rückfall auf „die nächste offene Frage des Kapitels": neben
+      // einer Teilfrage gehört keine zweite Frage.
+      expect(brandStaticQuestionVisible({ collecting: true, ownSession: false, advisorSpoke }))
+        .toBe(false)
+    }
+  })
+
+  it('GEGENPROBE: ein fremdes Feld bleibt sichtbar, auch wenn George gesprochen hat', () => {
+    // Die Bühne fällt auf „die nächste offene Frage des KAPITELS" zurück (die
+    // aktive Session ist bestätigt). Georges Züge handeln dann von einem
+    // ANDEREN Feld und sagen über diese Frage nichts.
+    expect(brandStaticQuestionVisible({
+      collecting: false,
+      ownSession: false,
+      advisorSpoke: true,
+    })).toBe(true)
+  })
+})
+
+/**
+ * BEFUND 9 DES DRITTEN TESTLAUFS (2026-09-10): „Oder etwas ganz Eigenes …"
+ * ohne die Auswahl, auf die sich das „Oder" bezieht — und der Sessionname als
+ * Überschrift, während George den einzelnen Teil fragte.
+ */
+describe('Die Antwort-Karte beschriftet, was gerade gefragt wird', () => {
+  it('nennt „Oder …" nur, wo es auch Karten gibt', () => {
+    expect(brandStageAnswerCard({ hasOptions: true, partKey: '' }).placeholderKey)
+      .toBe(BRAND_OWN_ANSWER_PLACEHOLDER_KEY)
+    expect(brandStageAnswerCard({ hasOptions: false, partKey: '' }).placeholderKey)
+      .toBe(BRAND_OWN_ANSWER_PLAIN_PLACEHOLDER_KEY)
+    expect(BRAND_OWN_ANSWER_PLACEHOLDER_KEY).not.toBe(BRAND_OWN_ANSWER_PLAIN_PLACEHOLDER_KEY)
+  })
+
+  it('trägt die laufende TEILfrage als Überschrift, solange eine läuft', () => {
+    const facts = slotById('a.facts')!
+    const key = partKeyFor(facts, facts.parts[1]!, 'solo')
+    expect(key).toBe('brand.part.a.facts.age.solo')
+    expect(brandStageAnswerCard({ hasOptions: false, partKey: key }).titleKey).toBe(key)
+  })
+
+  it('und ein leerer Teil-Schlüssel heisst „nimm das Feld-Etikett"', () => {
+    expect(brandStageAnswerCard({ hasOptions: true, partKey: '' }).titleKey).toBe('')
   })
 })
