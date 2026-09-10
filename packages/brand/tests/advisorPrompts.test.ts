@@ -6,6 +6,7 @@ import {
   type BrandSlotInstructionOptions,
   GEORGE_PRIMARY_SOURCE_ANSWERS,
   GEORGE_PRIMARY_SOURCE_START_CARD,
+  brandValueHasSpeaker,
 } from '../server/utils/georgePrompt'
 import { sessionInstructionForSlot } from '../server/utils/sessionPrompt'
 import { MILO_CANDIDATE_RANGE } from '../server/utils/miloPrompt'
@@ -49,6 +50,9 @@ function optionsFor(slotId: string, overrides: Partial<BrandSlotInstructionOptio
     kind: overrides.kind ?? slot.schema.kind,
     hasSiteAnalysis: overrides.hasSiteAnalysis ?? false,
     hasConversation: overrides.hasConversation ?? false,
+    // Die Weiche W3 (a-14) reist nur mit, wenn der Aufrufer sie nennt — ohne
+    // sie sagt der Auftrag zur Person das, was er vor a-14 sagte.
+    ...(overrides.team ? { team: overrides.team } : {}),
   }
 }
 
@@ -415,5 +419,43 @@ describe('Die Formalien sind für alle Berater dieselben', () => {
       ],
     }))
     expect(instruction).toContain('Your inputs are the fields: a.pitch, b.conviction.')
+  })
+
+  /**
+   * DIE SOLO-WEICHE GILT ÜBERALL (a-14) — sie steht im FUNDAMENT und nicht in
+   * einer der vier Berater-Dateien.
+   *
+   * Das ist derselbe Grund wie bei jeder anderen Sicherung hier: eine Regel je
+   * Baustein wären vier Stellen, an denen sie fehlen kann — und ein Purpose in
+   * der Wir-Form fällt niemandem auf, der gerade auf den Pitch schaut.
+   *
+   * Die Prüfung läuft über ALLE Sessions mit Entwurfs-Auftrag und vergleicht
+   * gegen die FORM des Werts. So kann weder eine neue Session die Regel
+   * verlieren noch eine „ohne Person"-Session sie fälschlich bekommen.
+   */
+  it('SOLO WIRKT IN JEDEM BAUSTEIN — und nur dort, wo der Wert einen Sprecher hat', () => {
+    const drafting = BRAND_SLOTS.filter(session =>
+      session.generator !== 'none' && session.processing.rules.length > 0)
+    expect(drafting).toHaveLength(21)
+
+    const withSpeaker: string[] = []
+    for (const session of drafting) {
+      const solo = sessionInstructionForSlot(session.id, optionsFor(session.id, { team: 'solo' }))
+      const team = sessionInstructionForSlot(session.id, optionsFor(session.id, { team: 'team' }))
+      const expected = brandValueHasSpeaker(session.form.person)
+      expect(solo.includes('THE BRAND IS RUN BY ONE PERSON'), session.id).toBe(expected)
+      expect(team.includes('THE BRAND IS RUN BY SEVERAL PEOPLE'), session.id).toBe(expected)
+      if (expected) withSpeaker.push(session.id)
+    }
+
+    // Ohne diese Zeile wäre der Test grün, sobald die Weiche NIRGENDS mehr
+    // greift — dann stimmte „erwartet: nein" für jede Session.
+    expect(withSpeaker).toEqual([
+      'a.pitch',
+      'b.whyStarted', 'b.purpose', 'b.mission',
+      'b2.rule',
+      'c.definitions',
+      'd.voiceSamples', 'd.vocabulary',
+    ])
   })
 })

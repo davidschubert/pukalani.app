@@ -39,6 +39,12 @@
  * Fassung dieser Aufträge. Steigt, sobald sich eine Aufgabe inhaltlich ändert —
  * oder der System-Prompt, mit dem sie gesendet werden.
  *
+ * `milo-c-5` (2026-09-09, Davids Team-Entscheidung): die Aufgaben sind
+ * unverändert, das FUNDAMENT nicht (`george-a-14`, Solo-Weiche für
+ * Markentexte). `c.definitions` schreibt Werte-Definitionen als VERHALTEN in
+ * der ersten Person — für eine Marke, die eine Person allein führt, heisst das
+ * ab hier „ich" und nicht mehr „wir".
+ *
  * `milo-c-4` (2026-09-04, BW2 Paket 2b — Gegenlese-Runde): neue Beispielwelt
  * (Ernährungscoaching statt Hundeschule), und `c.definitions` trägt eine
  * INVARIANTE — jeder gewählte Wert muss in der Liste vorkommen, geprüft im
@@ -53,7 +59,7 @@
  * `milo-c-2` (2026-09-02): Aufgaben unverändert, System-Prompt auf
  * `george-a-5` · Eine Stimme.
  */
-export const MILO_PROMPT_VERSION = 'milo-c-4'
+export const MILO_PROMPT_VERSION = 'milo-c-5'
 
 /**
  * WIE VIELE WERTE-KANDIDATEN — die Zahl, auf die §6/03 §7 danach auf 3–5

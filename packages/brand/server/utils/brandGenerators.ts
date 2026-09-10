@@ -12,6 +12,7 @@ import { formatBrandSlotList, formatBrandSlotStructured } from '../../shared/bra
 import {
   type BrandSlot,
   type BrandStepKey,
+  type BrandTeamKind,
   dependencyClosure,
 } from '../../shared/slotRegistry'
 import type { BrandStartCard } from '../../shared/types/brand'
@@ -70,6 +71,19 @@ export interface BrandGeneratorContext {
   uiLocale: string
   /** Die Weiche W1, für pfadabhängige Prompts. */
   pathKind: 'new' | 'relaunch'
+  /**
+   * DIE WEICHE W3 (a-14, Davids Entscheidung 2026-09-09) — sie entscheidet, WER
+   * im Markentext spricht: `solo` ⇒ Ich-Form, `team` ⇒ Wir-Form.
+   *
+   * Sie steht NEBEN `pathKind`, weil sie dieselbe Sorte Tatsache ist: eine
+   * Angabe aus dem Profil, die den Auftrag ändert und nicht die Eingaben. Sie
+   * geht deshalb auch NICHT in den `inputHash` — der beschreibt den Stand der
+   * Quell-Slots, genau wie bei Startkarte und Website-Text.
+   *
+   * OPTIONAL, damit ein Aufrufer ohne Profil (Beweise, Werkzeuge) weiterläuft:
+   * ohne sie sagt der Auftrag zur Person das, was er vor a-14 sagte.
+   */
+  team?: BrandTeamKind
   /**
    * DIE STARTKARTE DES PROFILS (Content-Spec §2.1) — die primäre Quelle des
    * Bausteins A, dessen Slots gerade DESHALB keine `dependencies` haben.

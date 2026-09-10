@@ -213,17 +213,21 @@ describe('Der Aufruf an den Transport gilt für JEDEN Berater', () => {
     // Verarbeitungsregeln sind in beiden Runden wörtlich dieselben geblieben —
     // der Prompt ist es nicht, und ein Eintrag aus der Vorfassung entstand
     // nachweislich ohne diese Abschnitte.
+    //
+    // Mit `george-a-14` (2026-09-09) sind sie ein drittes Mal gestiegen: das
+    // FUNDAMENT trägt jetzt die Solo-Weiche für Markentexte. Die Aufträge sind
+    // wörtlich dieselben geblieben, die Aufgabe ist es nicht.
     const veraResult = await vera.veraStrategyGenerator(context('b.purpose', 'pvm') as never)
-    expect(veraResult.promptVersion).toBe('vera-b-4')
+    expect(veraResult.promptVersion).toBe('vera-b-5')
     const miloResult = await milo.miloValuesGenerator(context('c.candidates', 'values') as never)
-    expect(miloResult.promptVersion).toBe('milo-c-4')
+    expect(miloResult.promptVersion).toBe('milo-c-5')
     // Baustein D läuft weiter INTERIM (Gesprächs-Ableitung statt Paarvergleich,
     // Davids Entscheidung 2026-09-04); die Zahl sagt, WELCHE Aufträge einen
     // Eintrag erzeugt haben, nicht welcher Weg zum Wert führte.
     const archetypeResult = await archetype.georgeArchetypeGenerator(
       context('d.hypothesis', 'archetype') as never,
     )
-    expect(archetypeResult.promptVersion).toBe('george-archetype-4')
+    expect(archetypeResult.promptVersion).toBe('george-archetype-5')
   })
 
   it('QUELL-WERTE AUS ANDEREN BAUSTEINEN LANDEN IM PROMPT (P3.1)', async () => {

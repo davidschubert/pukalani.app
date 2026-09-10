@@ -975,6 +975,68 @@ describe('POST …/generate — die Sprache der Seite', () => {
 })
 
 /**
+ * ── DIE TEAM-WEICHE REIST BIS ZUM GENERATOR (a-14, Davids Entscheidung
+ * 2026-09-09) ─────────────────────────────────────────────────────────────
+ * Sie steht am PROFIL (`brand_profiles.team`) und erreichte bis a-14 nur die
+ * Beschriftungen der Felder — der Entwurfs-Auftrag sah sie nie, und der
+ * Elevator-Pitch einer Solo-Marke sprach von „unserer Werkstatt".
+ *
+ * Gemessen wird hier die Naht, die DIESE Route besitzt: was sie aus dem Profil
+ * liest und in den Vertrag legt. Dass daraus eine Regel im Prompt wird, misst
+ * `georgeContextGenerator.test.ts` am gesendeten Auftrag; die Regel selbst
+ * misst `georgePrompt.test.ts`.
+ */
+describe('POST …/generate — die Team-Weiche aus dem Profil', () => {
+  let seen: (string | undefined)[]
+
+  beforeEach(async () => {
+    seen = []
+    const module = await import('../server/utils/brandGenerators')
+    module.registerBrandSlotGenerator('context', (async (context: { team?: string }) => {
+      seen.push(context.team)
+      return {
+        draft: 'Wert.',
+        model: 'test-model',
+        provider: 'test',
+        promptVersion: 'p-1',
+        aborted: false,
+      }
+    }) as never)
+  })
+
+  afterEach(async () => {
+    const module = await import('../server/utils/brandGenerators')
+    module.clearBrandSlotGenerators()
+    module.clearActiveBrandGenerations()
+    profileRow.team = 'solo'
+  })
+
+  it('reicht „solo" durch — der Stand des Fixture-Profils', async () => {
+    expect(profileRow.team).toBe('solo')
+    body = { slotId: 'a.pitch' }
+    await handler(fakeEvent().event)
+    expect(seen[0]).toBe('solo')
+  })
+
+  it('und „team", wenn das Profil es sagt — die Gegenprobe', async () => {
+    profileRow.team = 'team'
+    body = { slotId: 'a.pitch' }
+    await handler(fakeEvent().event)
+    expect(seen[0]).toBe('team')
+  })
+
+  it('EINE ZEILE OHNE ANGABE gilt als „solo" — profileFacts entscheidet, nicht die Route', async () => {
+    // Bestands-Zeilen aus der Zeit vor der Weiche lesen `undefined`; die pure
+    // Rechnung macht daraus den Default. Ohne diese Prüfung käme dort
+    // `undefined` beim Generator an und die Regel fiele still aus.
+    profileRow.team = undefined
+    body = { slotId: 'a.pitch' }
+    await handler(fakeEvent().event)
+    expect(seen[0]).toBe('solo')
+  })
+})
+
+/**
  * ── DIE QUELLEN AUS ANDEREN BAUSTEINEN (P3.1) ─────────────────────────────
  * Die Registry lässt einen Slot ausdrücklich aus einem FREMDEN Baustein
  * schöpfen — `b.purpose` ← `a.pitch`, `c.candidates` ← `a.origin`. Bis P3.1 las

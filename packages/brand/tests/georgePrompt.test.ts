@@ -8,11 +8,13 @@ import {
   formatBrandSlotStructured,
 } from '../shared/brandSlotFormat'
 import { advisorByKey } from '../shared/brandAdvisors'
-import { slotById } from '../shared/slotRegistry'
+import { type BrandTeamKind, slotById } from '../shared/slotRegistry'
 import {
   BRAND_CONVERSE_HISTORY_CHARS,
   GEORGE_NO_DEPENDENCIES,
   GEORGE_PROMPT_VERSION,
+  brandTeamVoiceLines,
+  brandValueHasSpeaker,
   formatConversation,
   formatDependencies,
   formatGeorgeInputs,
@@ -235,6 +237,7 @@ function optionsFor(
     pathKind?: 'new' | 'relaunch'
     hasSiteAnalysis?: boolean
     hasConversation?: boolean
+    team?: BrandTeamKind
   } = {},
 ) {
   const slot = slotById(slotId)!
@@ -246,8 +249,117 @@ function optionsFor(
     kind: slot.schema.kind,
     hasSiteAnalysis: overrides.hasSiteAnalysis ?? false,
     hasConversation: overrides.hasConversation ?? false,
+    ...(overrides.team ? { team: overrides.team } : {}),
   }
 }
+
+/**
+ * DIE SOLO-WEICHE IM MARKENTEXT (a-14, Davids Entscheidung 2026-09-09).
+ *
+ * Der Anlass ist messbar und war live zu lesen: der generierte Elevator-Pitch
+ * schrieb „Wir drehen und brennen Geschirr … in unserer Werkstatt in Leipzig",
+ * obwohl im Start-Modal „Nur ich" gewählt war. Die Weiche erreichte die
+ * Beschriftungen und (seit `converse-13`) die Anrede im Gespräch — den
+ * ENTWURFS-Auftrag nie. Schlimmer noch: `a.pitch` hat die Wert-Form fest auf
+ * `person: 'we'`, der Auftrag VERLANGTE das „wir" also ausdrücklich.
+ *
+ * Geprüft werden deshalb drei Dinge, und das dritte ist das teuerste:
+ *  1. `solo` ⇒ Ich-Regel, `team` ⇒ Wir-Regel, ohne Weiche ⇒ keine von beiden.
+ *  2. Die alte, widersprechende Zeile („Write it in the first person plural")
+ *     ist WEG, sobald die Weiche spricht — zwei Vorgaben zur selben Frage im
+ *     selben Prompt sind schlimmer als eine falsche.
+ *  3. Die Ausnahme hält: `a-13` hat die Wert-Form an zwölf Sessions auf „ohne
+ *     Person" korrigiert. Ein „ich" in `a.category` („Tagescafé mit eigener
+ *     Backstube") machte diese Korrektur still rückgängig.
+ */
+describe('Die Team-Weiche im Feldwert (a-14)', () => {
+  const SOLO_RULE = 'THE BRAND IS RUN BY ONE PERSON'
+  const TEAM_RULE = 'THE BRAND IS RUN BY SEVERAL PEOPLE'
+  const OLD_WE_LINE = 'Write it in the first person plural ("we").'
+
+  it('SOLO ⇒ Ich-Form, ausformuliert in beiden Sprachen', () => {
+    const instruction = sessionInstructionForSlot('a.pitch', optionsFor('a.pitch', { team: 'solo' }))
+    expect(instruction).toContain(SOLO_RULE)
+    expect(instruction).toContain('FIRST PERSON SINGULAR')
+    expect(instruction).toContain('"ich/mein/meine"')
+    expect(instruction).toContain('never invent a team, colleagues or co-founders')
+    expect(instruction).not.toContain(TEAM_RULE)
+  })
+
+  it('TEAM ⇒ Wir-Form', () => {
+    const instruction = sessionInstructionForSlot('a.pitch', optionsFor('a.pitch', { team: 'team' }))
+    expect(instruction).toContain(TEAM_RULE)
+    expect(instruction).toContain('FIRST PERSON PLURAL')
+    expect(instruction).toContain('"wir/unser"')
+    expect(instruction).not.toContain(SOLO_RULE)
+  })
+
+  it('OHNE WEICHE bleibt der Auftrag der von a-13 — kein geratenes „solo"', () => {
+    const instruction = sessionInstructionForSlot('a.pitch', optionsFor('a.pitch'))
+    expect(instruction).not.toContain(SOLO_RULE)
+    expect(instruction).not.toContain(TEAM_RULE)
+    // Die feste Form der Session bleibt dann die einzige Auskunft zur Person.
+    expect(instruction).toContain(OLD_WE_LINE)
+  })
+
+  it('DIE FESTE „wir"-ZEILE WEICHT DER WEICHE — sonst stünden zwei Vorgaben da', () => {
+    // `a.pitch` steht in `sessionContent.ts` fest auf `person: 'we'`. Genau
+    // deshalb ist es das Feld, an dem Davids Befund entstand.
+    expect(slotById('a.pitch')!.form.person).toBe('we')
+    const solo = sessionInstructionForSlot('a.pitch', optionsFor('a.pitch', { team: 'solo' }))
+    expect(solo).not.toContain(OLD_WE_LINE)
+    // Und die Formvorbilder der Session stehen in der Wir-Form — die Regel sagt
+    // ausdrücklich, dass sie die Form zeigen und nicht den Sprecher.
+    expect(solo).toContain('it overrides the person used in the form examples')
+  })
+
+  it('DIE REGEL STEHT NACH DEN BEISPIELEN — sonst gewinnt „Wir sind ein Tagescafé" die Recency', () => {
+    const lines = sessionInstructionForSlot('a.pitch', optionsFor('a.pitch', { team: 'solo' })).split('\n')
+    const examples = lines.findIndex(line => line.startsWith('Examples of the FORM only'))
+    const rule = lines.findIndex(line => line.startsWith(SOLO_RULE))
+    expect(examples).toBeGreaterThanOrEqual(0)
+    expect(rule).toBeGreaterThan(examples)
+  })
+
+  it('„OHNE PERSON" BLEIBT OHNE PERSON — die a-13-Korrektur wird nicht gebrochen', () => {
+    expect(slotById('a.category')!.form.person).toBe('none')
+    for (const team of ['solo', 'team'] as const) {
+      const instruction = sessionInstructionForSlot('a.category', optionsFor('a.category', { team }))
+      expect(instruction, team).not.toContain(SOLO_RULE)
+      expect(instruction, team).not.toContain(TEAM_RULE)
+      expect(instruction, team).toContain('Write it without a grammatical subject for the brand.')
+    }
+  })
+
+  it('erreicht auch die Sessions OHNE feste Person — dort ist die Weiche die einzige Auskunft', () => {
+    // `d.vocabulary` ist die EINZIGE Session mit Entwurfs-Auftrag, die die
+    // Person offen lässt (`fromTeam`, der Default aus `defineSession`) — und
+    // damit die einzige, in der der Auftrag ohne Weiche gar nichts zur Person
+    // sagte.
+    expect(slotById('d.vocabulary')!.form.person).toBe('fromTeam')
+    expect(sessionInstructionForSlot('d.vocabulary', optionsFor('d.vocabulary', { team: 'solo' })))
+      .toContain(SOLO_RULE)
+    expect(sessionInstructionForSlot('d.vocabulary', optionsFor('d.vocabulary')))
+      .not.toContain(SOLO_RULE)
+  })
+
+  /**
+   * DIE GEGENPROBE zur Ausnahme: ohne sie prüfte der Test oben nur, dass eine
+   * Zeichenkette fehlt — und das wäre er auch, wenn die Regel NIE käme.
+   */
+  it('die pure Regel entscheidet an der Form, nicht am Slot', () => {
+    expect(brandTeamVoiceLines('solo', 'we')).toHaveLength(2)
+    expect(brandTeamVoiceLines('solo', 'I')).toHaveLength(2)
+    expect(brandTeamVoiceLines('solo', 'fromTeam')).toHaveLength(2)
+    expect(brandTeamVoiceLines('team', 'we')).toHaveLength(1)
+    expect(brandTeamVoiceLines('solo', 'none')).toEqual([])
+    expect(brandTeamVoiceLines('solo', 'brand')).toEqual([])
+    expect(brandTeamVoiceLines(undefined, 'we')).toEqual([])
+    expect(brandValueHasSpeaker('none')).toBe(false)
+    expect(brandValueHasSpeaker(undefined)).toBe(false)
+    expect(brandValueHasSpeaker('fromTeam')).toBe(true)
+  })
+})
 
 /** Die fünf Slots des Bausteins A, die George überhaupt entwirft (§4). */
 const CONTEXT_SLOTS = ['a.pitch', 'a.category', 'a.competitors', 'a.audienceSketch', 'a.toneAnalysis']
@@ -579,10 +691,11 @@ describe('Prompt-Version', () => {
     // (Berater-Schicht, Rahmung, Rückfrage, B4/B6/B8/B9), a-5 ein viertes
     // (EINE Stimme: aus der Berater- wird die Facetten-Schicht), a-9 ein
     // fünftes (die Konversations-Senke: der Verlauf reist in den Entwurf),
-    // a-10 ein sechstes (die Rückfrage darf Antwort-Möglichkeiten anbieten) —
+    // a-10 ein sechstes (die Rückfrage darf Antwort-Möglichkeiten anbieten),
+    // a-14 ein siebtes (die Solo-Weiche gilt auch für Markentexte) —
     // die Version MUSS mitsteigen, sonst behaupten alte Generations-Einträge,
     // aus diesem Prompt zu stammen (Kopf von georgePrompt.ts).
-    expect(GEORGE_PROMPT_VERSION).toBe('george-a-13')
+    expect(GEORGE_PROMPT_VERSION).toBe('george-a-14')
   })
 })
 

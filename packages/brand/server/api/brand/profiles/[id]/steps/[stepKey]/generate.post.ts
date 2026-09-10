@@ -446,6 +446,11 @@ export default defineEventHandler(async (event) => {
       // Generator ihn je selbst bauen muss.
       uiLocale: resolveBrandUiLocale(body.uiLocale, profile.contentLocale),
       pathKind: profileFacts(profile, betaAccount).pathKind,
+      // DIE WEICHE W3 (george-a-14, Davids Entscheidung 2026-09-09): sie
+      // entscheidet, WER im Markentext spricht. Die Beschriftungen bekamen sie
+      // schon (`labelSlotDependencies`, oben), der Entwurfs-Auftrag nicht —
+      // deshalb sprach der Pitch einer Solo-Marke von „unserer Werkstatt".
+      team: profileFacts(profile, betaAccount).team,
       // Die STARTKARTE aus dem PROFIL (§2.1) — sie geht NICHT in den
       // `inputHash`: der beschreibt den Stand der Quell-SLOTS, und dafür ist
       // `collectSlotDependencies` die einzige Quelle. Eine Änderung an der

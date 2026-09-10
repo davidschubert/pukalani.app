@@ -71,12 +71,18 @@ function context(overrides: {
   siteAnalysis?: string
   uiLocale?: string
   conversation?: { role: 'george' | 'user' | 'system', body: string }[]
+  /** Nur für die Weiche W3 (a-14): sie greift nur, wo der Wert einen Sprecher hat. */
+  slotId?: string
+  team?: 'solo' | 'team'
 } = {}) {
   return {
     event,
     stepKey: 'context' as const,
-    slot,
+    slot: overrides.slotId ? slotById(overrides.slotId)! : slot,
     locale: 'de',
+    // Die Weiche W3 kommt aus dem Profil und reist seit a-14 bis in den
+    // Entwurfs-Auftrag; ohne Angabe bleibt sie leer (Rückwärts-Vertrag).
+    ...(overrides.team ? { team: overrides.team } : {}),
     // Die Route setzt hier IMMER einen Wert (mit Rückfall auf die
     // Inhaltssprache) — der Generator fällt deshalb nie selbst zurück.
     uiLocale: overrides.uiLocale ?? 'de',
@@ -257,6 +263,27 @@ describe('Der Aufruf an den Transport', () => {
     expect(prompt).toContain('no earlier answers were handed to you')
     expect(prompt).not.toContain('[start card')
   })
+
+  /**
+   * DIE WEICHE W3 KOMMT WIRKLICH BIS IN DEN PROMPT (a-14).
+   *
+   * Der Beweis gehört HIERHER und nicht zu den puren Prompt-Tests: dort steht,
+   * dass die Regel gebaut WÜRDE, wenn jemand `team` reicht. Ob der Generator
+   * sie reicht, sieht man nur an dem, was beim Anbieter ankommt — und genau
+   * diese Naht war die Lücke, an der Davids Elevator-Pitch „Wir drehen und
+   * brennen …" entstand.
+   */
+  it('reicht die Solo-Weiche in den Auftrag durch — gemessen am gesendeten Prompt', async () => {
+    await plugin.georgeContextGenerator(context({ slotId: 'a.pitch', team: 'solo' }))
+    expect(lastCall().prompt).toContain('THE BRAND IS RUN BY ONE PERSON')
+    expect(lastCall().prompt).not.toContain('Write it in the first person plural ("we").')
+  })
+
+  it('OHNE Weiche steht die Regel nicht im Prompt — die Gegenprobe', async () => {
+    await plugin.georgeContextGenerator(context({ slotId: 'a.pitch' }))
+    expect(lastCall().prompt).not.toContain('THE BRAND IS RUN BY ONE PERSON')
+    expect(lastCall().prompt).toContain('Write it in the first person plural ("we").')
+  })
 })
 
 describe('Das Ergebnis im Vertrag', () => {
@@ -272,7 +299,7 @@ describe('Das Ergebnis im Vertrag', () => {
     expect(result.draft).toBe('ErstZweit')
     expect(result.model).toBe('m')
     expect(result.provider).toBe('p')
-    expect(result.promptVersion).toBe('george-a-13')
+    expect(result.promptVersion).toBe('george-a-14')
     expect(result.aborted).toBe(false)
   })
 

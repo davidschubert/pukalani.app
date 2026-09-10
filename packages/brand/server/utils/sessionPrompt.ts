@@ -9,6 +9,7 @@ import {
   GEORGE_PRIMARY_SOURCE_ANSWERS,
   GEORGE_PRIMARY_SOURCE_START_CARD,
   brandSlotInstructionTail,
+  brandValueHasSpeaker,
 } from './georgePrompt'
 
 /**
@@ -73,11 +74,24 @@ function section(heading: string, lines: readonly string[]): string[] {
  * `person: 'fromTeam'`, `tense: 'any'`, kein Wortdeckel und keine Verbotsliste
  * sind die mechanischen Vorgaben aus `defineSession`; sie auszuschreiben hiesse,
  * dem Modell „keine Regel" als Regel zu verkaufen.
+ *
+ * ── DIE TEAM-WEICHE SCHLÄGT DIE FESTE PERSON (a-14) ───────────────────────
+ * Sagt die Weiche etwas (`options.team` gesetzt UND die Form sieht überhaupt
+ * einen Sprecher vor), schweigt die Person-Zeile hier: die Regel steht dann
+ * weiter unten im Fundament (`brandTeamVoiceLines`), ausformuliert und mit der
+ * Ausnahme für „ohne Person". Zwei Vorgaben zur selben Frage im selben Prompt
+ * wären ein Widerspruch — und `a.pitch` steht fest auf „wir", also entstünde er
+ * ausgerechnet an dem Feld, das Davids Befund ausgelöst hat.
  */
-function formLines(config: BrandSessionConfig): string[] {
+function formLines(config: BrandSessionConfig, options: BrandSlotInstructionOptions): string[] {
   const lines: string[] = []
-  if (config.form.person === 'we') lines.push('Write it in the first person plural ("we").')
-  if (config.form.person === 'I') lines.push('Write it in the first person singular ("I").')
+  const teamDecides = !!options.team && brandValueHasSpeaker(config.form.person)
+  if (!teamDecides && config.form.person === 'we') {
+    lines.push('Write it in the first person plural ("we").')
+  }
+  if (!teamDecides && config.form.person === 'I') {
+    lines.push('Write it in the first person singular ("I").')
+  }
   if (config.form.person === 'brand') lines.push('Write it about the brand, in the third person.')
   if (config.form.person === 'none') lines.push('Write it without a grammatical subject for the brand.')
   if (config.form.tense === 'present') lines.push('Present tense.')
@@ -132,7 +146,7 @@ export function sessionInstruction(
     `TASK: ${config.goal}`,
     ...config.processing.rules,
     ...config.processing.pathRules[options.pathKind],
-    ...section('The form of the value:', formLines(config)),
+    ...section('The form of the value:', formLines(config, options)),
     ...section('Marks of a good value:', config.quality.map(mark => `- ${mark}`)),
     ...section('Never accept:', config.antiPatterns.map(pattern => `- ${pattern}`)),
     ...section(
@@ -165,6 +179,10 @@ export function sessionInstruction(
     ...lines,
     ...brandSlotInstructionTail(options, {
       primarySource,
+      // a-14: WER im Feld spricht, entscheidet die Team-Weiche — aber nur, wo
+      // die Session einen Sprecher vorsieht. Das Fundament kann das nicht
+      // wissen, der Bauer schon: er hält die Session in der Hand.
+      valuePerson: config.form.person,
       ...(contract ? { valueRules: brandChoicePromptRule(contract) } : {}),
     }),
   ].join('\n')

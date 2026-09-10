@@ -1,4 +1,5 @@
-import type { BrandPathKind, BrandSlotSchemaKind } from '../../shared/slotRegistry'
+import type { BrandPathKind, BrandSlotSchemaKind, BrandTeamKind } from '../../shared/slotRegistry'
+import type { BrandSessionForm } from '../../shared/sessionContent'
 import { BRAND_VOICE, type BrandAdvisor, advisorOpenersFor } from '../../shared/brandAdvisors'
 import { brandSlotFormatExample, brandSlotFormatRule } from '../../shared/brandSlotFormat'
 import { BRAND_SITE_ANALYSIS_PROMPT_MAX } from '../../shared/brandSiteAnalysis'
@@ -53,6 +54,19 @@ import type { BrandSlotDependency } from './brandGenerators'
 
 /**
  * Fassung der Prompt-Bausteine dieses Bausteins (A · Kontext).
+ *
+ * `george-a-14` (2026-09-09, Davids Entscheidung nach dem Elevator-Pitch):
+ * die Team-Weiche W3 gilt jetzt auch für MARKENTEXTE, nicht mehr nur für die
+ * Anrede im Gespräch (`converse-13`) und die Beschriftungen der Felder. Der
+ * generierte Pitch einer Solo-Marke sprach „Wir drehen und brennen Geschirr …
+ * in unserer Werkstatt", obwohl im Start-Modal „Nur ich" stand: `a.pitch` hat
+ * die Wert-Form fest auf `person: 'we'`, und die Weiche erreichte den
+ * Entwurfs-Auftrag nie. Neu trägt jede Instruktion `brandTeamVoiceLines()` —
+ * `solo` ⇒ Ich-Form, `team` ⇒ Wir-Form — und zwar NUR dort, wo die Form des
+ * Werts überhaupt einen Sprecher vorsieht (`brandValueHasSpeaker`): die an
+ * zwölf Sessions von a-13 auf „ohne Person" korrigierte Form bleibt
+ * unangetastet. Ohne Weiche (alter Aufrufer, Fixture-Beweis) sagt der Auftrag
+ * zur Person weiterhin genau das, was er in a-13 sagte.
  *
  * `george-a-13` (2026-09-04, BW2 Paket 2b — Gegenlese-Runde): dieselben
  * Abschnitte, anderer Inhalt. Die Beispiele stehen in einer neuen Welt
@@ -148,7 +162,7 @@ import type { BrandSlotDependency } from './brandGenerators'
  *   · B8/B9 — Kontext-Sensibilität (kein Vertriebston für einen Verein) und
  *     eine Sorgfaltszeile gegen holprige Sprache.
  */
-export const GEORGE_PROMPT_VERSION = 'george-a-13'
+export const GEORGE_PROMPT_VERSION = 'george-a-14'
 
 /** Default der Persona (Content-Spec §1.1, Gate ② abgesegnet). */
 export const GEORGE_PERSONA_DEFAULT = 'George'
@@ -369,6 +383,70 @@ export interface BrandSlotInstructionOptions {
    * `context.locale` durch.
    */
   contentLocale?: string
+  /**
+   * DIE TEAM-WEICHE W3 (a-14, Davids Entscheidung 2026-09-09) — sie gilt jetzt
+   * auch für MARKENTEXTE und nicht mehr nur für Anrede und Beschriftungen.
+   *
+   * `solo` heisst, EIN Mensch führt die Marke: der Feldwert spricht dann in der
+   * Ich-Form. Der Anlass war ein Elevator-Pitch, der „Wir drehen und brennen
+   * Geschirr … in unserer Werkstatt" schrieb, obwohl im Start-Modal „Nur ich"
+   * stand — `a.pitch` hat die Wert-Form fest auf `person: 'we'`, und die Weiche
+   * kam hier nie an.
+   *
+   * FEHLT sie (Fixture-Beweise, Aufrufer ohne Profil), sagt der Auftrag zur
+   * Person genau das, was er in a-13 sagte — das ist der Rückwärts-Vertrag und
+   * kein geratenes „solo".
+   */
+  team?: BrandTeamKind
+}
+
+/**
+ * SIEHT DIE FORM DES WERTS ÜBERHAUPT EINEN SPRECHER VOR? (a-14)
+ *
+ * Die Team-Weiche darf NUR dort greifen, wo im Feld jemand spricht. `none`
+ * („ohne Person") und `brand` (dritte Person) sind genau die Formen, in denen
+ * ein „ich" den Wert kaputt machte — und `none` ist keine Nachlässigkeit,
+ * sondern ein Ergebnis: `george-a-13` hat die Wert-Form an zwölf Sessions
+ * ausdrücklich von „folgt der Weiche Solo/Team" auf „ohne Person" korrigiert.
+ * Diese Korrektur wieder aufzuheben, wäre der teuerste Nebeneffekt, den diese
+ * Regel haben könnte.
+ */
+export function brandValueHasSpeaker(person: BrandSessionForm['person'] | undefined): boolean {
+  return person === 'we' || person === 'I' || person === 'fromTeam'
+}
+
+/**
+ * DIE TEAM-WEICHE ALS REGEL FÜR DEN FELDWERT (a-14).
+ *
+ * Ausformuliert je Fall, aus demselben Grund wie `addressLines` in
+ * `conversePrompt.ts`: „speak as the person really is" lässt im Deutschen genau
+ * die Frage offen, um die es geht (ich/wir). Und mit einem ausdrücklichen Satz
+ * über die BEISPIELE, weil die Formvorbilder einer Session in der Wir-Form
+ * stehen (`a.pitch`: „Wir sind ein Tagescafé …") und im Prompt VOR dieser Regel
+ * stehen: sie hängt deshalb im Fundament, unmittelbar bei der Beschreibung des
+ * Feldwerts, und nicht oben im Abschnitt „The form of the value".
+ *
+ * OHNE Weiche: keine Zeile. Ein geratenes „solo" wäre schlimmer als Schweigen.
+ */
+export function brandTeamVoiceLines(
+  team: BrandTeamKind | undefined,
+  person: BrandSessionForm['person'] | undefined,
+): string[] {
+  if (!team || !brandValueHasSpeaker(person)) return []
+  if (team === 'solo') {
+    return [
+      'THE BRAND IS RUN BY ONE PERSON. Where the value form allows a speaker, this value speaks in the '
+      + 'FIRST PERSON SINGULAR — in German "ich/mein/meine", in English "I/my". Never "wir/unser", never '
+      + '"we/our", and never invent a team, colleagues or co-founders behind this brand.',
+      'This holds for EVERY sentence of the value, and it overrides the person used in the form examples '
+      + 'above: those show the SHAPE of a good value, never who speaks.',
+    ]
+  }
+  return [
+    'THE BRAND IS RUN BY SEVERAL PEOPLE. Where the value form allows a speaker, this value speaks in the '
+    + 'FIRST PERSON PLURAL — in German "wir/unser", in English "we/our" — and speaks about the brand as '
+    + 'theirs together.',
+  ]
 }
 
 /**
@@ -400,6 +478,17 @@ export interface BrandSlotInstructionFrame {
    * nur, wie lang es sein darf.
    */
   valueRules?: readonly string[]
+  /**
+   * DIE FORM DES WERTS, soweit sie die PERSON betrifft (a-14) — aus
+   * `sessionContent.form.person`.
+   *
+   * Sie steht im FRAME und nicht in den Optionen, weil sie eine Eigenschaft der
+   * SESSION ist und nicht des Laufs: der Bauer, der die Aufgabe kennt, kennt
+   * auch ihre Form. Nur mit ihr kann `brandTeamVoiceLines` die Ausnahme halten
+   * (`none`/`brand` bekommen keine Sprecher-Regel). FEHLT sie, gibt es keine
+   * Team-Zeile — Rückwärts-Vertrag wie bei jeder anderen Erweiterung hier.
+   */
+  valuePerson?: BrandSessionForm['person']
 }
 
 /**
@@ -495,6 +584,10 @@ export function brandSlotInstructionTail(
   const formatExample = brandSlotFormatExample(options.kind)
   lines.push('', 'The field value:')
   if (frame.valueRules?.length) lines.push(...frame.valueRules)
+  // a-14: WER im Feld spricht, folgt der Team-Weiche — und zwar hier unten,
+  // hinter den Formvorbildern der Session. Ein „Wir sind ein Tagescafé …" als
+  // Formbeispiel stünde sonst NACH der Regel und gewänne die Recency.
+  lines.push(...brandTeamVoiceLines(options.team, frame.valuePerson))
   if (formatRule && formatExample) {
     lines.push(formatRule, 'Example of the shape:', formatExample)
   }

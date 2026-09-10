@@ -48,6 +48,13 @@
  * Fassung dieser Aufträge. Steigt, sobald sich eine Aufgabe inhaltlich ändert —
  * oder der System-Prompt, mit dem sie gesendet werden.
  *
+ * `vera-b-5` (2026-09-09, Davids Team-Entscheidung): die Aufgaben sind
+ * unverändert, das FUNDAMENT nicht (`george-a-14`, Solo-Weiche für
+ * Markentexte). `b.purpose`, `b.mission` und `b2.rule` schreiben ihre Werte in
+ * der ersten Person — ein Eintrag aus `vera-b-4` entstand nachweislich ohne
+ * die Regel, die dort jetzt „ich" statt „wir" verlangt, wenn eine Person
+ * allein die Marke führt.
+ *
  * `vera-b-4` (2026-09-04, BW2 Paket 2b — Gegenlese-Runde): neue Beispielwelt
  * (Yoga-Studio in B, Software-Haus in B2), `b2.model` schreibt die Form des
  * Werts jetzt ausdrücklich („ohne Person"), und die Namen in den
@@ -66,7 +73,7 @@
  * vergleichbar zu erklären, wäre genau die Sorte stille Unwahrheit, gegen die
  * es diese Zahl gibt.
  */
-export const VERA_PROMPT_VERSION = 'vera-b-4'
+export const VERA_PROMPT_VERSION = 'vera-b-5'
 
 /**
  * VERAS PRÜFSTEIN, wörtlich — der Satz, der jeden PVM-Entwurf tragen muss.

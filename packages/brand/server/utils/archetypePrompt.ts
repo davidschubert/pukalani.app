@@ -65,6 +65,13 @@
  * Fassung dieser Aufträge. Steigt, sobald sich eine Aufgabe inhaltlich ändert —
  * oder der System-Prompt, mit dem sie gesendet werden.
  *
+ * `george-archetype-5` (2026-09-09, Davids Team-Entscheidung): die Aufgaben
+ * sind unverändert, das FUNDAMENT nicht (`george-a-14`, Solo-Weiche für
+ * Markentexte). Betroffen sind die Stimme-Ableitungen dieses Bausteins —
+ * `d.voiceSamples` schreibt drei Sätze IN der Markenstimme —, nicht die beiden
+ * Archetyp-Auswahlen: deren Wert-Form steht seit a-13 auf „ohne Person" und
+ * bleibt davon unberührt.
+ *
  * `george-archetype-4` (2026-09-04, BW2 Paket 2b — Gegenlese-Runde): neue
  * Beispielwelt (Designstudio und Fotostudio statt Schmiede und Reisebüro),
  * Form des Werts an allen vier Ableitungen gesetzt, und `d.secondary` prüft
@@ -87,7 +94,7 @@
  * Aufgabe. Kommt der Paarvergleich, steigt sie auf `-2`, und ein alter Eintrag
  * bleibt lesbar als das, was er war.
  */
-export const ARCHETYPE_PROMPT_VERSION = 'george-archetype-4'
+export const ARCHETYPE_PROMPT_VERSION = 'george-archetype-5'
 
 /**
  * DIE DREI REGELTEXTE DIESES BAUSTEINS — das leere Paarvergleich-Feld, die

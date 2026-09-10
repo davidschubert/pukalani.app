@@ -245,6 +245,10 @@ export function createAdvisorSlotGenerator(options: AdvisorSlotGeneratorOptions)
       // NUR für die Beispiele der Session (BW2 Paket 2): sie liegen je Sprache
       // vor, und ein deutsches Branding bekommt das deutsche Formvorbild.
       contentLocale: context.locale,
+      // DIE WEICHE W3 (a-14): sie entscheidet, WER im Feldwert spricht. Sie
+      // erreichte bis hierher nur Anrede und Beschriftungen — ein Elevator-Pitch
+      // einer Solo-Marke schrieb deshalb „Wir drehen und brennen …".
+      team: context.team,
     })
 
     const prompt = [
