@@ -825,6 +825,30 @@ einen eigenen kurzen Richter-Prompt. Offen für K6: ohne Preset trägt
 `context.stand` kein Datum (Design-Stand), ein Foundation-Stand je Datei
 gehört zur Lieferseite.
 
+**Stand K4 (GEBAUT 2026-09-09):** die fünf Anker haben Blöcke — `nomenklatur`
+(Typen als Chips, Muster je Typ als Tabelle, Regeln), die drei
+Anwendungs-Kapitel aus dem Preset, `pressekit` (Tagline, Boilerplates, NUR
+`p.facts`, Kontakt) und `ki-texte`, das nach Abnahme von `aiguide` „AI-Guidelines"
+heisst (Anker unverändert). Vier neue Block-Arten (`rules` mit optionalem
+Gegenbeispiel, `prompt` mit Kopieren-Knopf, `contact`, `lockedUsage`; `table` gab
+es schon). Die Zahlen sind DIE VON K2 — `brandTokenRoleHex` für die gespiegelten
+Dunkel-Stufen, `BRAND_TOKEN_TYPE_STEPS` für die Größen-Leiter, der neue
+`brandTokenAccentLiftFor` für den gehobenen Dunkelmodus-Akzent samt Beleg (§2.20
+Nr. 7). Server: EINE Lade-Funktion für Book und Kit
+(`server/utils/brandFoundationView.ts`) — der K3-Unterschied „Route überspringt
+Schicht 3, Kit nicht" ist damit weg. Beweis: 2987 Tests (+31), Lint, Typecheck 0,
+`check:i18n-keys`, `check:bilanz`; SSR ohne Login 404 auf `/de/brand/x/foundation`,
+Playground-Dummy weiter 200. **Gelernt:** (1) `formatBrandSlotStructured` zieht
+JEDEN Block auf EINE Zeile — ein `structured`-Wert mit Zeilenumbrüchen kommt vom
+kanonischen Schreiber nie; wer Muster + Beispiel oder eine Prompt-Vorlage
+speichert, braucht einen eigenen Trenner (` · `) oder baut den Wert selbst.
+(2) Der Renderer darf Sätze in der INHALTSSPRACHE der Marke erzeugen (Schutzraum,
+„nie Text auf …") — das ist kein Bruch der Schlüssel-Regel, sondern dieselbe
+Trennung, die `mark.brief` und `type.rules` im Preset schon leben; nur der RAHMEN
+reist als Schlüssel. (3) Ein Snapshot weiss nichts über die heutige
+Freischaltung: `derivationUnlocked` ist deshalb DREIWERTIG (`true`/`false`/fehlt),
+sonst stünden im Handbuch einer fremden Marke drei Kapitel Werbung.
+
 ### 2.19 Offene Entscheidungen für die Freigabe
 
 | # | Frage | Empfehlung |

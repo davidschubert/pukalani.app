@@ -339,6 +339,16 @@ export type BrandContextJsonBlock =
   | { kind: 'dodont', labelKey?: string, pairs: { doText: string, dontText: string }[] }
   | { kind: 'table', labelKey?: string, columnKeys: string[], rows: string[][] }
   | { kind: 'choice', labelKey?: string, slotId: string, optionIds: string[] }
+  /**
+   * SEIT K4 (§2.5): `label` ist eine Überschrift, die die MARKE geschrieben
+   * hat (die Gruppen von `n.guardrails`) — sie steht wörtlich da, während
+   * `labelKey` wie überall der Rahmen ist.
+   */
+  | { kind: 'rules', labelKey?: string, label?: string, items: { text: string, dont?: string }[] }
+  /** Eine kopierbare Vorlage (§2.3 `n.prompts`) — `title` ist Marken-Inhalt. */
+  | { kind: 'prompt', labelKey: string, title: string, text: string }
+  /** Die Ansprechperson des Pressekits (§2.4 `p.contact`). */
+  | { kind: 'contact', name: string, role: string, email: string }
   | { kind: 'aiRules', tone: string[], avoid: string[], stands: string[] }
 
 export interface BrandContextJsonChapter {

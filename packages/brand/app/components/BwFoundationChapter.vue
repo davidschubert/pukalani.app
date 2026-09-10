@@ -108,10 +108,51 @@ const hasDesign = computed(() => props.chapter.blocks.some(block => block.kind =
  * Vergangenheit. Ein zweiter Schlüssel statt einer Verzweigung im Satz — beide
  * Sätze stehen so vollständig im Katalog und sind einzeln übersetzbar.
  */
-const noteKey = computed(() => (hasDesign.value
-  ? 'brand.foundation.note.visuellDone'
-  : `brand.foundation.note.${props.chapter.id}`))
+/**
+ * Dieselbe Weiche für Kapitel 11 (Paket K4, §2.20 Nr. 6): mit den Guidelines
+ * ist der Satz „ein fester Rahmen" eine Auskunft über die Vergangenheit. Die
+ * Frage stellt der BLOCK und nicht der Titel — `prompt` gibt es nur mit
+ * abgenommenem `aiguide`.
+ */
+const hasGuidelines = computed(() => props.chapter.blocks.some(block => block.kind === 'prompt'))
+
+const noteKey = computed(() => {
+  if (hasDesign.value) return 'brand.foundation.note.visuellDone'
+  if (props.chapter.id === 'ki-texte' && hasGuidelines.value) return 'brand.foundation.note.kiTexteGuidelines'
+  return `brand.foundation.note.${props.chapter.id}`
+})
 const note = computed(() => (te(noteKey.value) ? t(noteKey.value) : ''))
+
+/**
+ * WARUM DIESES KAPITEL ZU IST (Paket K4, §2.5) — `null` an Kapitel 10, das
+ * seinen einen Grund seit jeher im Markup trägt (Brand Design).
+ *
+ * Die drei Anwendungs-Kapitel haben ZWEI Gründe („Book & Kit ist Teil der
+ * Ableitung" bzw. „kommt mit Brand Design"), und sie führen zu verschiedenen
+ * Knöpfen. Ein gemeinsamer Satz wäre in der häufigsten Lage — freigeschaltet,
+ * Design fehlt noch — schlicht falsch.
+ */
+const lockReason = computed(() => props.chapter.lockReason ?? null)
+
+/**
+ * KOPIEREN (§2.3 `n.prompts`): eine Vorlage wird übernommen, nicht gelesen —
+ * deshalb ist der Knopf echt. Der Merker hält den Index der zuletzt kopierten
+ * Vorlage, damit bei drei Blöcken nur der geklickte „Kopiert" zeigt.
+ */
+const copiedPrompt = ref<number | null>(null)
+
+async function copyPrompt(index: number, value: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(value)
+  }
+  catch {
+    /* Ohne Erlaubnis (oder ohne sicheren Kontext) gibt es keine Zwischenablage.
+     * Die Rückmeldung steht trotzdem: der Text ist sichtbar und markierbar,
+     * und ein stiller Fehlschlag wäre die unehrlichere der beiden Auskünfte. */
+  }
+  copiedPrompt.value = index
+  window.setTimeout(() => { copiedPrompt.value = null }, 1600)
+}
 
 /**
  * DER WEG ZUM ERSTGESPRÄCH — AUS DER CONFIG, NICHT GETIPPT (BS1 R0).
@@ -150,7 +191,7 @@ const designUnlockedDate = computed(() => {
  * fünf gesperrten Elementen nein. Statt seiner steht ein Satz (s. Markup).
  */
 const renderedBlocks = computed(() => (props.chapter.state === 'locked' && !isPrivate.value
-  ? props.chapter.blocks.filter(block => block.kind !== 'locked')
+  ? props.chapter.blocks.filter(block => block.kind !== 'locked' && block.kind !== 'lockedUsage')
   : props.chapter.blocks))
 </script>
 
@@ -166,7 +207,7 @@ const renderedBlocks = computed(() => (props.chapter.state === 'locked' && !isPr
       >{{ t('brand.foundation.pending') }}</span>
       <span v-else-if="chapter.state === 'locked'" class="bw-state">
         <UIcon name="i-ph-lock-simple" class="size-3.5" />
-        {{ t('brand.foundation.visual.follows') }}
+        {{ t(lockReason ? 'brand.foundation.usage.follows' : 'brand.foundation.visual.follows') }}
       </span>
     </div>
     <h2 class="mt-1 text-[26px] font-extralight leading-tight tracking-tight">{{ t(chapter.titleKey) }}</h2>
@@ -180,7 +221,11 @@ const renderedBlocks = computed(() => (props.chapter.state === 'locked' && !isPr
     <p
       v-if="chapter.state === 'locked' && isPrivate"
       class="mt-4 text-sm leading-relaxed" style="color: var(--bw-ink-soft)"
-    >{{ t('brand.foundation.visual.offer') }}</p>
+    >{{ t(lockReason === 'derivation'
+      ? 'brand.foundation.usage.lockedDerivation'
+      : lockReason === 'design'
+        ? 'brand.foundation.usage.lockedDesign'
+        : 'brand.foundation.visual.offer') }}</p>
 
     <div class="mt-5 flex flex-col gap-7">
       <template v-for="(block, i) in renderedBlocks" :key="`${chapter.id}-${i}`">
@@ -306,6 +351,98 @@ const renderedBlocks = computed(() => (props.chapter.state === 'locked' && !isPr
           </div>
         </div>
 
+        <!-- REGELN (Paket K4, §2.5): nummeriert, weil man sie zitiert — „Regel
+             3" ist im Team eine Adresse. Das Gegenbeispiel steht UNTER der
+             Regel und nicht daneben: es ist ihre Begründung, kein zweiter
+             Wert. Zwei Beschriftungen, zwei Herkünfte (s. Kopf der Block-Art):
+             der Rahmen kommt aus dem Katalog, die Gruppen-Überschrift von der
+             Marke. -->
+        <div v-else-if="block.kind === 'rules'">
+          <p v-if="block.labelKey || block.label" class="bw-label" style="color: var(--bw-muted)">
+            {{ [block.labelKey ? t(block.labelKey) : '', block.label ?? ''].filter(Boolean).join(' · ') }}
+          </p>
+          <ol class="mt-2.5 flex flex-col gap-2.5">
+            <li v-for="(rule, r) in block.items" :key="`rule-${r}`" class="flex items-start gap-3">
+              <span class="bw-label mt-0.5 flex-none tabular-nums" style="color: var(--bw-muted)">
+                {{ String(r + 1).padStart(2, '0') }}
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="block text-sm leading-relaxed">{{ rule.text }}</span>
+                <span
+                  v-if="rule.dont"
+                  class="mt-1 flex items-start gap-2 text-sm leading-relaxed" style="color: var(--bw-muted)"
+                >
+                  <UIcon name="i-ph-x-circle-fill" class="mt-0.5 size-4 flex-none" style="color: var(--bw-stale)" />
+                  <span class="min-w-0">{{ rule.dont }}</span>
+                </span>
+              </span>
+            </li>
+          </ol>
+        </div>
+
+        <!-- VORLAGE ZUM KOPIEREN (§2.3 `n.prompts`): Mono, Zeilenumbrüche
+             erhalten — sie wird nicht gelesen, sie wird übernommen. Der Knopf
+             schreibt echt in die Zwischenablage und verschwindet im Druck. -->
+        <div
+          v-else-if="block.kind === 'prompt'"
+          class="fd-box rounded-2xl px-5 py-4" style="background: var(--bw-surface)"
+        >
+          <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <p class="bw-label" style="color: var(--bw-muted)">{{ t(block.labelKey) }}</p>
+            <UButton
+              class="fd-noprint ms-auto rounded-full"
+              size="xs" color="neutral" variant="outline"
+              :icon="copiedPrompt === i ? 'i-ph-check' : 'i-ph-copy'"
+              :label="t(copiedPrompt === i ? 'brand.foundation.usage.copied' : 'brand.foundation.usage.copy')"
+              style="background: var(--bw-surface-hi)"
+              @click="copyPrompt(i, block.text)"
+            />
+          </div>
+          <p class="mt-1 text-sm font-medium">{{ block.title }}</p>
+          <pre class="fd-prompt mt-3">{{ block.text }}</pre>
+          <p class="bw-pending mt-3">{{ t('brand.foundation.usage.promptHint') }}</p>
+        </div>
+
+        <!-- ANSPRECHPERSON (§2.4 `p.contact`): der Vermerk „reist öffentlich"
+             steht AM Block und nicht im Kleingedruckten — genau das ist die
+             Zusage, die der Mensch vor der Abnahme gesehen hat. -->
+        <div
+          v-else-if="block.kind === 'contact'"
+          class="fd-box rounded-2xl px-5 py-4" style="background: var(--bw-surface)"
+        >
+          <p class="bw-label" style="color: var(--bw-muted)">{{ t('brand.foundation.label.pressContact') }}</p>
+          <p v-if="block.name" class="mt-2 text-sm font-medium">{{ block.name }}</p>
+          <p v-if="block.role" class="text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ block.role }}</p>
+          <!-- KEIN `mailto:` — die Seite wird auch geteilt und gedruckt, und
+               eine Adresse zum Abschreiben ist in beiden Fällen das, was
+               gebraucht wird. -->
+          <p v-if="block.email" class="mt-1 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
+            {{ block.email }}
+          </p>
+          <p class="bw-pending mt-3">{{ t('brand.foundation.usage.contactPublic') }}</p>
+        </div>
+
+        <!-- DIE SCHRANKE DER ANWENDUNGS-KAPITEL (Paket K4, §2.5) — dieselbe
+             Fläche wie an Kapitel 10, andere Liste und anderes Produkt. -->
+        <div
+          v-else-if="block.kind === 'lockedUsage'"
+          class="fd-box flex items-start gap-3 rounded-2xl px-5 py-4"
+          style="background: var(--bw-surface)"
+        >
+          <UIcon name="i-ph-lock-simple" class="mt-0.5 size-4 flex-none" style="color: var(--bw-muted)" />
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium" style="color: var(--bw-ink-soft)">
+              {{ t(`brand.foundation.usage.${block.topic}.title`) }}
+            </p>
+            <p class="mt-1 text-sm leading-relaxed" style="color: var(--bw-muted)">
+              {{ t(`brand.foundation.usage.${block.topic}.text`) }}
+            </p>
+          </div>
+          <p class="bw-label flex-none max-sm:hidden" style="color: var(--bw-muted)">
+            {{ t('brand.foundation.usage.product') }}
+          </p>
+        </div>
+
         <!-- DIE SICHTBARE SCHRANKE (§2.5): was dort entsteht, woraus — und
              welches Produkt es liefert. Ehrlich beschriftet statt weggelassen. -->
         <div
@@ -393,7 +530,7 @@ const renderedBlocks = computed(() => (props.chapter.state === 'locked' && !isPr
     <p
       v-if="chapter.state === 'locked' && !isPrivate"
       class="mt-5 text-sm leading-relaxed" style="color: var(--bw-ink-soft)"
-    >{{ t('brand.foundation.visual.shareLine') }}</p>
+    >{{ t(lockReason ? 'brand.foundation.usage.shareLine' : 'brand.foundation.visual.shareLine') }}</p>
 
     <!-- Der Vermerk am offenen Kapitel — NUR privat, und der EINZIGE Knopf im
          Text: korrigiert und abgenommen wird in der Werkstatt, nie hier (§2.6). -->
@@ -408,7 +545,29 @@ const renderedBlocks = computed(() => (props.chapter.state === 'locked' && !isPr
     <!-- EIN CTA-PAAR je Schranken-Kapitel, nicht je Abschnitt — und nur privat.
          OHNE PREISANKER: der Schranken-Text mit Preis ist Davids Gate (Paket
          G4), und ein erfundener Preis wäre teurer als eine fehlende Zahl. -->
-    <div v-if="chapter.state === 'locked' && isPrivate" class="fd-noprint mt-5 flex flex-wrap items-center gap-2">
+    <!-- DIE ANWENDUNGS-KAPITEL (Paket K4, §2.5): EIN Knopf, kein Preis. Bei
+         `derivation` ist das Erstgespräch der einzige Weg (die Ableitung wird
+         freigeschaltet, nicht gekauft); bei `design` führt derselbe Knopf
+         weiter, den Kapitel 10 anbietet — dorthin, wo die Farbwelt entsteht. -->
+    <div v-if="chapter.state === 'locked' && isPrivate && lockReason" class="fd-noprint mt-5 flex flex-wrap items-center gap-2">
+      <UButton
+        v-if="lockReason === 'design' && designTo"
+        :to="designTo"
+        class="rounded-full" trailing-icon="i-ph-arrow-right"
+        :label="t('brand.foundation.visual.ctaDesign')"
+      />
+      <UButton
+        v-else
+        :to="callCta.to" :target="callCta.target" :rel="callCta.rel" :external="callCta.external"
+        class="rounded-full" trailing-icon="i-ph-arrow-right"
+        :label="t('brand.foundation.visual.ctaCall')"
+      />
+      <p class="bw-label basis-full" style="color: var(--bw-muted)">
+        {{ t('brand.foundation.usage.product') }}
+      </p>
+    </div>
+
+    <div v-else-if="chapter.state === 'locked' && isPrivate" class="fd-noprint mt-5 flex flex-wrap items-center gap-2">
       <UButton
         v-if="directionTo"
         :to="directionTo"
@@ -452,10 +611,25 @@ const renderedBlocks = computed(() => (props.chapter.state === 'locked' && !isPr
 /* DRUCK (§2.6): Seitenumbruch je Kapitel, keine Knöpfe, keine Karten-Flächen
  * — Papier braucht Linien, keine Tiefe. Die Kopfzeile mit Marke und Stand
  * setzt die SEITE, nicht das Kapitel. */
+/* Die Vorlage steht in Mono mit erhaltenen Umbrüchen und bricht lange Zeilen
+ * um — ein Prompt-Block, der quer scrollt, lässt den Seitenkörper mitscrollen. */
+.fd-prompt {
+  font-family: var(--bw-font-mono);
+  font-size: 12px;
+  line-height: 20px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--bw-ink-soft);
+  margin: 0;
+}
+
 @media print {
   .fd-chapter { break-before: page; break-inside: auto; }
   .fd-chapter:first-child { break-before: auto; }
   .fd-noprint { display: none !important; }
   .fd-box { background: transparent !important; border: 1px solid #ddd; border-radius: 8px; }
+  /* Tabellen der Anwendungs-Kapitel nicht über den Seitenrand reißen (§2.5):
+   * eine Rollen-Tabelle, die auf zwei Seiten zerfällt, verliert ihren Kopf. */
+  .fd-chapter table { break-inside: avoid; }
 }
 </style>

@@ -90,16 +90,19 @@ describe('buildBrandFoundation — was reist und was nicht', () => {
     // absichtlich noch nicht gibt; die Zeile darunter hält fest, dass ihre
     // Werte solange auch NICHT still irgendwo auftauchen.
     //
-    // DASSELBE GILT SEIT K0 FÜR SCHICHT 3: die fünf neuen Kapitel-Anker (§2.5)
-    // stehen in `BRAND_FOUNDATION_CHAPTER_IDS`, ihre Block-Bauer kommen erst
-    // mit **K4**. Bis dahin darf kein Wert von dort still auftauchen.
+    // SCHICHT 3 STEHT SEIT K4 DA (§2.5) — bis auf EINEN Wert: `p.summary` ist
+    // die pure VORSCHAU des Pressekits („Boilerplates, Tagline, Fakten,
+    // Kontakt — nur lesen", §2.4). Das Kapitel `pressekit` ist genau diese
+    // Vorschau, nur aus den QUELLEN gerechnet statt aus dem gespeicherten
+    // Abzug (§2.5: „gefüllt aus `p.summary`-Quellen"). Beides zu zeigen wäre
+    // derselbe Inhalt zweimal, einmal von damals und einmal von jetzt.
     const travelling = BRAND_SLOTS.filter(slot => sessionTravels(slot))
-    const spaeter = (stepId: string) => isBrandDesignStep(stepId) || isBrandKitStep(stepId)
-    for (const slot of travelling.filter(slot => !spaeter(slot.stepId))) {
+    const spaeter = (slot: BrandSlot) => isBrandDesignStep(slot.stepId) || slot.id === 'p.summary'
+    for (const slot of travelling.filter(slot => !spaeter(slot))) {
       expect(rendered, `${slot.id} fehlt in der Leseansicht`).toContain(`wert-${slot.id}`)
     }
-    for (const slot of travelling.filter(slot => spaeter(slot.stepId))) {
-      expect(rendered, `${slot.id} steht schon in der Leseansicht — D8/K4 bauen das`)
+    for (const slot of travelling.filter(slot => spaeter(slot))) {
+      expect(rendered, `${slot.id} steht schon in der Leseansicht — D8 baut das`)
         .not.toContain(`wert-${slot.id}`)
     }
     // Und es gibt sie wirklich, sonst prüfte die zweite Schleife nichts.
@@ -143,37 +146,40 @@ describe('buildBrandFoundation — was reist und was nicht', () => {
 })
 
 /**
- * DIE FÜNF KAPITEL-ANKER AUS K0, die heute noch keine Blöcke haben (§2.5) —
- * Nomenklatur, die drei Anwendungs-Kapitel und das Pressekit. K4 füllt sie.
+ * DIE DREI ANWENDUNGS-KAPITEL (§2.5) — sie hängen NICHT an Werten, sondern am
+ * PRESET und an der Freischaltung. `ALL` kennt beides nicht, also stehen sie
+ * dort nicht (s. `BrandFoundationInput.derivationUnlocked`).
  */
-const K0_OHNE_BLOECKE: readonly BrandFoundationChapterId[] = [
-  'nomenklatur', 'zeichen-anwendung', 'farbe-anwendung', 'typografie-anwendung', 'pressekit',
+const NUR_MIT_PRESET: readonly BrandFoundationChapterId[] = [
+  'zeichen-anwendung', 'farbe-anwendung', 'typografie-anwendung',
 ]
 
 describe('buildBrandFoundation — die Kapitel', () => {
   it('hält die Reihenfolge aus §2.2 ein', () => {
-    // DIE FÜNF ANKER VON K0 SIND NOCH LEER (Konzept BRAND-BOOK-KIT.md §2.5):
-    // sie stehen in `BRAND_FOUNDATION_CHAPTER_IDS` als Vertrag, ihre Blöcke
-    // baut **K4**. Ein Kapitel ohne Blöcke wird gefiltert — geprüft wird
-    // deshalb, dass die gerenderten Kapitel eine TEILMENGE der Ordnung sind und
-    // ihre Reihenfolge einhalten (dasselbe Muster wie im Kailua-Beweis).
+    // Ein Kapitel ohne Blöcke wird gefiltert — geprüft wird deshalb, dass die
+    // gerenderten Kapitel eine TEILMENGE der Ordnung sind und ihre Reihenfolge
+    // einhalten (dasselbe Muster wie im Kailua-Beweis).
     const gerendert = buildBrandFoundation(ALL).chapters.map(chapter => chapter.id)
-    expect(gerendert).toEqual(BRAND_FOUNDATION_CHAPTER_IDS.filter(id => !K0_OHNE_BLOECKE.includes(id)))
-    expect(gerendert).toHaveLength(12)
+    expect(gerendert).toEqual(BRAND_FOUNDATION_CHAPTER_IDS.filter(id => !NUR_MIT_PRESET.includes(id)))
+    expect(gerendert).toHaveLength(14)
   })
 
-  it('lässt die fünf K0-Anker leer, bis K4 ihre Blöcke baut', () => {
+  it('lässt die drei Anwendungs-Kapitel weg, solange der Aufrufer nichts über die Ableitung sagt', () => {
     // Ohne diese Zeile wäre der Test darüber auch grün, wenn jemand die Anker
     // wieder aus der Liste nähme — die Ids sind aber ein Vertrag (§2.17).
-    for (const id of K0_OHNE_BLOECKE) expect(BRAND_FOUNDATION_CHAPTER_IDS).toContain(id)
+    for (const id of NUR_MIT_PRESET) expect(BRAND_FOUNDATION_CHAPTER_IDS).toContain(id)
     expect(buildBrandFoundation(ALL).chapters.map(chapter => chapter.id))
-      .not.toEqual(expect.arrayContaining([...K0_OHNE_BLOECKE]))
+      .not.toEqual(expect.arrayContaining([...NUR_MIT_PRESET]))
   })
 
   it('gibt jedem Kapitel Sprungmarke, Titel-Schlüssel und Zustand', () => {
     for (const chapter of buildBrandFoundation(ALL).chapters) {
       expect(chapter.anchor, chapter.id).toBe(chapter.id)
-      expect(chapter.titleKey, chapter.id).toBe(`brand.foundation.chapter.${chapter.id}`)
+      // Kapitel 11 heisst nach Abnahme von `aiguide` „AI-Guidelines" — die Id
+      // und damit die SPRUNGMARKE bleibt `ki-texte` (§2.20 Nr. 6).
+      expect(chapter.titleKey, chapter.id).toBe(chapter.id === 'ki-texte'
+        ? 'brand.foundation.chapter.aiGuidelines'
+        : `brand.foundation.chapter.${chapter.id}`)
       expect(chapter.state, chapter.id).toBe(chapter.id === 'visuell' ? 'locked' : 'done')
     }
   })

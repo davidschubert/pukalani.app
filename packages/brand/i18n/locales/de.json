@@ -2206,7 +2206,13 @@
       "note": {
         "visuell": "Gehört zum Fundament dazu, entsteht aber erst im Brand Design — hergeleitet aus dem, was oben steht.",
         "ki-texte": "Ein fester Rahmen, gefüllt aus euren Werten — keine eigene Erfindung, so aktuell wie die Kapitel darüber.",
-        "visuellDone": "Im Brand Design entschieden — Farbwelt, Schriftpaar, Zeichen, Bildsprache und Bewegung, hergeleitet aus dem, was oben steht."
+        "visuellDone": "Im Brand Design entschieden — Farbwelt, Schriftpaar, Zeichen, Bildsprache und Bewegung, hergeleitet aus dem, was oben steht.",
+        "nomenklatur": "Wie neue Produkte, Orte und Formate heißen — hergeleitet aus Markenarchitektur, Werten und Ton.",
+        "zeichen-anwendung": "Das Regelwerk zum Zeichen — dieselbe Setzung wie im Kapitel „Visuelle Identität\", eine Zoomstufe näher.",
+        "farbe-anwendung": "Rollen, Kontraste und Regeln — dieselben Zahlen, die auch in tokens.json stehen.",
+        "typografie-anwendung": "Paar, Größen-Leiter und Lizenz — gerechnet aus der gewählten Hierarchie, nicht getippt.",
+        "pressekit": "Nichts Neues — zusammengestellt aus Botschaften, freigegebenen Fakten und Kontakt.",
+        "kiTexteGuidelines": "Der feste Rahmen bleibt — darunter stehen Umfang, Freigabe, Leitplanken und die Vorlagen."
       },
       "visual": {
         "follows": "folgt in Brand Design",
@@ -2255,7 +2261,8 @@
         "farbe-anwendung": "Farb-Anwendung",
         "typografie-anwendung": "Typografie-Anwendung",
         "pressekit": "Pressekit",
-        "ki-texte": "Regeln für KI-Texte"
+        "ki-texte": "Regeln für KI-Texte",
+        "aiGuidelines": "AI-Guidelines"
       },
       "label": {
         "pitch": "In einem Satz",
@@ -2287,14 +2294,57 @@
         "distinctiveAsset": "Verbales Erkennungszeichen",
         "nameDecision": "Top drei",
         "nameChecks": "Verfügbarkeits-Check",
-        "nameCriteria": "Acht Kriterien"
+        "nameCriteria": "Acht Kriterien",
+        "nameTypes": "Produkttypen",
+        "namePatterns": "Muster je Produkttyp",
+        "nameRules": "Namens-Regeln",
+        "markKind": "Zeichenart",
+        "markBrief": "Briefing",
+        "markClearSpace": "Schutzraum",
+        "markMinSizes": "Mindestgrößen",
+        "markVariants": "Varianten",
+        "markDonts": "Don'ts",
+        "colorRolesLight": "Rollen im hellen Modus",
+        "colorRolesDark": "Rollen im dunklen Modus",
+        "accentLift": "Akzent im dunklen Modus",
+        "contrastPairs": "Kontrast-Paare mit Urteil",
+        "colorRules": "Farb-Regeln",
+        "typePair": "Schriftpaar",
+        "typeScale": "Größen-Skala",
+        "typeRules": "Schrift-Regeln",
+        "typeLicense": "Lizenz",
+        "pressFacts": "Freigegebene Fakten",
+        "pressContact": "Presse-Kontakt",
+        "pressMark": "Zeichen",
+        "aiScope": "Was KI erzeugen darf",
+        "aiReview": "Freigabe-Regel",
+        "aiGuardrails": "Leitplanken",
+        "aiPrompt": "Vorlage"
       },
       "column": {
         "name": "Name",
         "note": "Notiz",
         "rank": "Rang",
         "check": "Prüfung",
-        "criteria": "Kriterium"
+        "criteria": "Kriterium",
+        "nameType": "Typ",
+        "pattern": "Muster",
+        "example": "Beispiel",
+        "usage": "Verwendung",
+        "minSize": "Mindestgröße",
+        "role": "Rolle",
+        "hex": "Hex",
+        "contrast": "Kontrast",
+        "accent": "Akzent",
+        "ground": "Grund",
+        "pair": "Paar",
+        "ratio": "Verhältnis",
+        "verdict": "Urteil",
+        "step": "Stufe",
+        "size": "Größe",
+        "lineHeight": "Zeilenhöhe",
+        "weight": "Gewicht",
+        "font": "Schrift"
       },
       "direction": {
         "chosen": "Gewählte Richtung",
@@ -2381,6 +2431,45 @@
         "lockedProgress": "{done} von {total} Kapiteln",
         "toChapter": "Weiter im Brand Design",
         "progressTitle": "Brand Design"
+      },
+      "usage": {
+        "follows": "folgt in Brand Book & Kit",
+        "product": "Brand Book & Kit",
+        "lockedDerivation": "Book & Kit ist Teil der Ableitung — wir schalten sie im Erstgespräch frei.",
+        "lockedDesign": "Kommt mit Brand Design: ohne Farbwelt, Schriftpaar und Zeichen gibt es hier keine Regel, die stimmt.",
+        "shareLine": "Dieses Kapitel folgt in Brand Book & Kit.",
+        "copy": "Kopieren",
+        "copied": "Kopiert",
+        "contactPublic": "Diese Angabe reist mit dem Pressekit und dem geteilten Link.",
+        "promptHint": "Ohne KI gerechnet — aus euren Werten, Ton-Wörtern und den Leitplanken darüber.",
+        "markClearspace": {
+          "title": "Schutzraum und Mindestgrößen",
+          "text": "Wie viel Luft das Zeichen braucht und ab welcher Größe es nicht mehr gesetzt wird."
+        },
+        "markVariants": {
+          "title": "Varianten",
+          "text": "Hell, dunkel, einfarbig — und wann welche gilt."
+        },
+        "markDonts": {
+          "title": "Don'ts",
+          "text": "Was mit dem Zeichen nie passiert, mit Gegenbeispiel daneben."
+        },
+        "colorRoles": {
+          "title": "Rollen-Tabelle",
+          "text": "Jede Rolle mit Hex, hell und dunkel — dieselben Namen in beiden Modi."
+        },
+        "colorContrast": {
+          "title": "Kontrast-Paare",
+          "text": "Geprüfte Paare mit Urteil, und die Regel „nie Text auf …\" aus den Durchfallern."
+        },
+        "typeScale": {
+          "title": "Größen-Tabelle",
+          "text": "h1 bis small mit Größe, Zeilenhöhe und Gewicht."
+        },
+        "typeLicense": {
+          "title": "Regeln und Lizenz",
+          "text": "Was welche Schrift trägt — und woher die Dateien kommen."
+        }
       }
     },
     "session": {

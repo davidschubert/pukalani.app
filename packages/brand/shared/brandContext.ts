@@ -163,6 +163,33 @@ export const BRAND_CONTEXT_LABELS: Readonly<Record<string, { de: string, en: str
   nameDecision: { de: 'Top drei', en: 'Top three' },
   nameChecks: { de: 'Verfügbarkeits-Check', en: 'Availability check' },
   nameCriteria: { de: 'Acht Kriterien', en: 'Eight criteria' },
+
+  // ── Schicht 3 (Paket K4, §2.5) ───────────────────────────────────────────
+  nameTypes: { de: 'Produkttypen', en: 'Product types' },
+  namePatterns: { de: 'Muster je Produkttyp', en: 'Pattern per product type' },
+  nameRules: { de: 'Namens-Regeln', en: 'Naming rules' },
+  markKind: { de: 'Zeichenart', en: 'Kind of mark' },
+  markBrief: { de: 'Briefing', en: 'Brief' },
+  markClearSpace: { de: 'Schutzraum', en: 'Clear space' },
+  markMinSizes: { de: 'Mindestgrößen', en: 'Minimum sizes' },
+  markVariants: { de: 'Varianten', en: 'Variants' },
+  markDonts: { de: 'Don\'ts', en: 'Don\'ts' },
+  colorRolesLight: { de: 'Rollen im hellen Modus', en: 'Roles in light mode' },
+  colorRolesDark: { de: 'Rollen im dunklen Modus', en: 'Roles in dark mode' },
+  accentLift: { de: 'Akzent im dunklen Modus', en: 'Accent in dark mode' },
+  contrastPairs: { de: 'Kontrast-Paare mit Urteil', en: 'Contrast pairs with verdict' },
+  colorRules: { de: 'Farb-Regeln', en: 'Colour rules' },
+  typePair: { de: 'Schriftpaar', en: 'Font pair' },
+  typeScale: { de: 'Größen-Skala', en: 'Size scale' },
+  typeRules: { de: 'Schrift-Regeln', en: 'Type rules' },
+  typeLicense: { de: 'Lizenz', en: 'Licence' },
+  pressFacts: { de: 'Freigegebene Fakten', en: 'Released facts' },
+  pressContact: { de: 'Presse-Kontakt', en: 'Press contact' },
+  pressMark: { de: 'Zeichen', en: 'Mark' },
+  aiScope: { de: 'Was KI erzeugen darf', en: 'What AI may produce' },
+  aiReview: { de: 'Freigabe-Regel', en: 'Review rule' },
+  aiGuardrails: { de: 'Leitplanken', en: 'Guardrails' },
+  aiPrompt: { de: 'Vorlage', en: 'Template' },
 }
 
 export const BRAND_CONTEXT_COLUMNS: Readonly<Record<string, { de: string, en: string }>> = {
@@ -171,6 +198,26 @@ export const BRAND_CONTEXT_COLUMNS: Readonly<Record<string, { de: string, en: st
   rank: { de: 'Rang', en: 'Rank' },
   check: { de: 'Prüfung', en: 'Check' },
   criteria: { de: 'Kriterium', en: 'Criterion' },
+
+  // ── Schicht 3 (Paket K4, §2.5) ───────────────────────────────────────────
+  nameType: { de: 'Typ', en: 'Type' },
+  pattern: { de: 'Muster', en: 'Pattern' },
+  example: { de: 'Beispiel', en: 'Example' },
+  usage: { de: 'Verwendung', en: 'Use' },
+  minSize: { de: 'Mindestgröße', en: 'Minimum size' },
+  role: { de: 'Rolle', en: 'Role' },
+  hex: { de: 'Hex', en: 'Hex' },
+  contrast: { de: 'Kontrast', en: 'Contrast' },
+  accent: { de: 'Akzent', en: 'Accent' },
+  ground: { de: 'Grund', en: 'Ground' },
+  pair: { de: 'Paar', en: 'Pair' },
+  ratio: { de: 'Verhältnis', en: 'Ratio' },
+  verdict: { de: 'Urteil', en: 'Verdict' },
+  step: { de: 'Stufe', en: 'Step' },
+  size: { de: 'Größe', en: 'Size' },
+  lineHeight: { de: 'Zeilenhöhe', en: 'Line height' },
+  weight: { de: 'Gewicht', en: 'Weight' },
+  font: { de: 'Schrift', en: 'Font' },
 }
 
 /** Der Name hinter dem letzten Punkt — `brand.foundation.label.pitch` ⇒ `pitch`. */
@@ -263,6 +310,37 @@ function blockMarkdown(block: BrandFoundationBlock, locale: string): string[] {
       const names = block.optionIds.map(id => brandChoiceDisplayLabel(block.slotId, id, locale))
       return [labelled(label, escapeBrandContextMarkdown(names.join(' · ')))]
     }
+    case 'rules': {
+      /* Der Rahmen und die Überschrift der MARKE stehen hintereinander
+       * („Leitplanken · Ton") — dieselbe Form wie im Klickdummy. */
+      const head = [label, block.label].filter(Boolean).join(' · ')
+      return [
+        ...(head ? [`**${head}:**`] : []),
+        ...block.items.flatMap((item, index) => [
+          `${index + 1}. ${escapeBrandContextMarkdown(oneLine(item.text))}`,
+          ...(item.dont
+            ? [`   ${text(locale, 'Nicht', 'Not')}: ${escapeBrandContextMarkdown(oneLine(item.dont))}`]
+            : []),
+        ]),
+      ]
+    }
+    case 'prompt':
+      /* Die Vorlage steht als CODE-BLOCK: sie wird kopiert, nicht gelesen —
+       * und ihre Zeilenumbrüche sind Teil des Prompts. Ein escapetes Zitat
+       * hätte hier den umgekehrten Effekt: der Empfänger übernähme die
+       * Rückstriche in sein KI-Werkzeug. */
+      return [
+        `**${[label, oneLine(block.title)].filter(Boolean).join(' · ')}:**`,
+        '',
+        '```text',
+        block.text.replace(/\r\n/g, '\n').replace(/```/g, "'''").trimEnd(),
+        '```',
+      ]
+    case 'contact':
+      return [labelled(
+        text(locale, 'Presse-Kontakt', 'Press contact'),
+        escapeBrandContextMarkdown([block.name, block.role, block.email].filter(Boolean).join(' · ')),
+      )]
     case 'aiRules':
       return aiRulesMarkdown(block, locale)
     default:
@@ -483,10 +561,22 @@ export function renderBrandContextMarkdown(
  * die Wahrheit, seine Blöcke wären ein zweites Abbild davon), und die drei
  * Schicht-3-Kapitel haben ihre eigenen Schlüssel, weil ein Leser sie einzeln
  * sucht (`nomenclature`, `aiGuidelines`, `presskit`).
+ *
+ * SEIT K4 STEHEN DIE DREI ANWENDUNGS-KAPITEL AUCH HIER — und zwar OHNE eigenen
+ * Schlüssel, sie fallen also ganz heraus. Derselbe Grund wie bei `visuell`:
+ * Rollen-Tabellen, Kontrast-Urteile und die Größen-Leiter sind GERECHNET aus
+ * dem Preset, das in dieser Datei schon vollständig steht (`design`). Ein
+ * zweites Abbild daneben wären dieselben Hex-Werte ein zweites Mal — und die
+ * eine Fassung, die jemand später anfasst, ist garantiert nicht die, die ein
+ * Skript liest. Wer die Regeln als TEXT will, liest das Book (§2.5) oder
+ * `tokens.json`.
  */
 const JSON_OWN_KEYS: readonly BrandFoundationChapterId[] = [
   'story',
   'visuell',
+  'zeichen-anwendung',
+  'farbe-anwendung',
+  'typografie-anwendung',
   'nomenklatur',
   'ki-texte',
   'pressekit',
@@ -540,6 +630,17 @@ function jsonBlock(block: BrandFoundationBlock): BrandContextJsonBlock | null {
         slotId: block.slotId,
         optionIds: [...block.optionIds],
       }
+    case 'rules':
+      return {
+        kind: 'rules',
+        ...(block.labelKey ? { labelKey: block.labelKey } : {}),
+        ...(block.label ? { label: block.label } : {}),
+        items: block.items.map(item => ({ text: item.text, ...(item.dont ? { dont: item.dont } : {}) })),
+      }
+    case 'prompt':
+      return { kind: 'prompt', labelKey: block.labelKey, title: block.title, text: block.text }
+    case 'contact':
+      return { kind: 'contact', name: block.name, role: block.role, email: block.email }
     case 'aiRules':
       return {
         kind: 'aiRules',

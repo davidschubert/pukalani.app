@@ -1,9 +1,43 @@
+import { brandRampDark } from './brandDesign'
+import {
+  brandColorRoleLabel,
+  brandColorRoleNote,
+  brandContrastLevelLabel,
+  brandContrastPairLabel,
+  brandRatioText,
+} from './brandDesignColor'
+import {
+  BRAND_MARK_BRIEF_FIELDS,
+  BRAND_MARK_MIN_WIDTH_MM,
+  BRAND_MARK_MIN_WIDTH_PX,
+  BRAND_MARK_MONOGRAM_MIN_PX,
+  brandMarkClearSpaceText,
+  brandMarkInitial,
+  brandMarkVariantsText,
+} from './brandDesignMark'
+import {
+  BRAND_TYPE_BODY_REM,
+  BRAND_TYPE_DEFAULT_RULES,
+  brandTypeRulesFromLines,
+  brandTypeScaleRatio,
+} from './brandDesignType'
+import { BRAND_MARK_KINDS, brandTermById, brandTermLabel } from './brandDesignVocab'
 import { type BrandDirection, brandDirectionById, BRAND_DIRECTIONS_VERSION } from './brandDirections'
+import { brandFontPair } from './brandFontPairs'
+import { brandLicenseNote, brandLicenseRows } from './brandKitLicenses'
+import { BRAND_AI_REVIEWS, BRAND_AI_SCOPES, BRAND_NAME_TYPES, type BrandKitTerm } from './brandKitVocab'
 import { brandListEntries } from './brandSessions'
 import { isBrandSlotShareable } from './brandSharing'
 import { type BrandSlotValueView, brandSlotValueView } from './brandSlotFormat'
+import {
+  BRAND_TOKEN_BODY_WEIGHT,
+  BRAND_TOKEN_TYPE_STEPS,
+  brandTokenAccentLiftFor,
+  brandTokenContrastFor,
+  brandTokenRoleHex,
+} from './brandTokens'
 import { type BrandPathKind, type BrandStepKey, type BrandTeamKind, slotById } from './slotRegistry'
-import type { BrandDesignPreset, BrandDesignSnapshotPreset } from './types/brand'
+import type { BrandDesignPreset, BrandDesignSnapshotPreset, BrandRampShade } from './types/brand'
 
 /**
  * DER RENDERER DER BRAND FOUNDATION (Konzept
@@ -60,6 +94,21 @@ import type { BrandDesignPreset, BrandDesignSnapshotPreset } from './types/brand
  * `brandSlotFormat.ts`). Dann steht er als `text`-Block da. Ein Handbuch, das
  * eine bestätigte Festlegung verschweigt, weil ihr ein Bindestrich fehlt,
  * wäre schlimmer als eines mit einer ungeordneten Zeile.
+ *
+ * ── DIE EINE STELLE, AN DER HIER SÄTZE STEHEN (Paket K4, BK1 §2.5) ────────
+ * Die drei ANWENDUNGS-Kapitel (`zeichen-`, `farbe-`, `typografie-anwendung`)
+ * rechnen Regeln AUS DEM PRESET: den Schutzraum-Satz, die Varianten-Zeile, die
+ * Regel „nie Text auf …". Diese Sätze stehen in der INHALTSSPRACHE DER MARKE
+ * (`input.contentLocale`) und nicht in der des Lesers — genau wie
+ * `mark.brief`, `type.rules` und `imagery.dodont`, die schon im Preset so
+ * liegen und hier nur zitiert werden. Die Regel des Kopfes bleibt also
+ * wörtlich gültig: was den RAHMEN beschreibt (Kapitelname, Beschriftung,
+ * Spaltenkopf), reist als Schlüssel; was die MARKE sagt, steht in ihrer
+ * Sprache da. Die zwei Sprachen stehen dafür im Code (`text(locale, de, en)`,
+ * dieselbe Auflösung wie in `brandKitLicenses.ts` und `brandContext.ts`) —
+ * ein i18n-Modul wäre hier sogar falsch: es antwortete in der Sprache des
+ * Browsers, und eine deutsche Marke bekäme im englischen Browser eine
+ * englische Farbregel zwischen ihren deutschen Sätzen.
  */
 
 // ── Die Blöcke ──────────────────────────────────────────────────────────────
@@ -67,6 +116,41 @@ import type { BrandDesignPreset, BrandDesignSnapshotPreset } from './types/brand
 /** Die fünf Elemente der visuellen Schranke (§2.5) — Ids, keine Texte. */
 export const BRAND_FOUNDATION_VISUAL_ELEMENTS = ['logo', 'color', 'typography', 'imagery', 'motion'] as const
 export type BrandFoundationVisualElement = (typeof BRAND_FOUNDATION_VISUAL_ELEMENTS)[number]
+
+/**
+ * DIE THEMEN HINTER DER SCHRANKE DER ANWENDUNGS-KAPITEL (Paket K4, §2.5) —
+ * Ids, keine Texte, wie bei den fünf Elementen darüber.
+ *
+ * Eine EIGENE Liste und keine Erweiterung von
+ * `BRAND_FOUNDATION_VISUAL_ELEMENTS`: die fünf Elemente sind die Abschnitte
+ * von Kapitel 10 (eine Fläche, ein Produkt — Brand Design), diese sieben sind
+ * das, was das Regelwerk verspricht (drei Flächen, ein anderes Produkt — Book
+ * & Kit). Eine gemeinsame Liste hiesse, dass eine Zeile aus dem einen Kapitel
+ * versehentlich im anderen stehen kann.
+ *
+ * Texte im Katalog unter `brand.foundation.usage.<topic>.title` / `.text`.
+ */
+export const BRAND_FOUNDATION_USAGE_TOPICS = [
+  'markClearspace',
+  'markVariants',
+  'markDonts',
+  'colorRoles',
+  'colorContrast',
+  'typeScale',
+  'typeLicense',
+] as const
+export type BrandFoundationUsageTopic = (typeof BRAND_FOUNDATION_USAGE_TOPICS)[number]
+
+/**
+ * WARUM EIN ANWENDUNGS-KAPITEL ZU IST (§2.5, Spalten 4 und 5 der Tabelle).
+ *
+ * `derivation` = die Ableitung ist für diese Marke nicht freigeschaltet („Book
+ * & Kit ist Teil der Ableitung"), `design` = sie IST frei, aber es gibt kein
+ * Preset („kommt mit Brand Design"). Zwei Gründe, zwei Sätze, zwei CTAs — ein
+ * blosses `locked` zwänge die Oberfläche zu raten, und sie riete falsch: die
+ * häufigste Lage ist „freigeschaltet, Design fehlt noch".
+ */
+export type BrandFoundationLockReason = 'derivation' | 'design'
 
 /**
  * DIE FÜNF ABSCHNITTE DES VOLLEN KAPITELS 10 (Brand Design D8, §2.8).
@@ -144,8 +228,45 @@ export type BrandFoundationBlock =
   | { kind: 'table', labelKey?: string, columnKeys: string[], rows: string[][] }
   /** Gespeicherte Auswahl-Ids (Archetyp, Architektur-Modell) — s. Kopf Nr. 3. */
   | { kind: 'choice', labelKey?: string, slotId: string, optionIds: string[] }
+  /**
+   * NUMMERIERTE REGELN mit optionalem Gegenbeispiel (Paket K4, §2.5).
+   *
+   * Nummeriert, weil man sie ZITIERT — „Regel 3" ist im Team eine Adresse
+   * (dieselbe Setzung wie im abgenommenen Klickdummy). Das `dont` steht UNTER
+   * der Regel und nicht daneben: es ist ihre Begründung, kein zweiter Wert.
+   *
+   * ZWEI BESCHRIFTUNGEN, ZWEI HERKÜNFTE: `labelKey` ist der RAHMEN
+   * („Leitplanken") und reist als Schlüssel; `label` ist eine Überschrift, die
+   * die MARKE selbst geschrieben hat (die Gruppen von `n.guardrails`) und
+   * steht deshalb wörtlich da — genau wie `cards[].title`. Stehen beide,
+   * setzt die Oberfläche sie hintereinander.
+   */
+  | { kind: 'rules', labelKey?: string, label?: string, items: { text: string, dont?: string }[] }
+  /**
+   * EINE KOPIERBARE VORLAGE (§2.3 `n.prompts`) — sie wird nicht gelesen,
+   * sondern übernommen.
+   *
+   * `title` ist der Name, den die Marke der Vorlage gegeben hat (Inhalt),
+   * `labelKey` das Rahmenwort darüber (Sprache des Lesers). Der Text behält
+   * seine Zeilenumbrüche; die Oberfläche setzt ihn in Mono und hängt den
+   * Kopieren-Knopf daneben.
+   */
+  | { kind: 'prompt', labelKey: string, title: string, text: string }
+  /**
+   * DIE ANSPRECHPERSON DES PRESSEKITS (§2.4 `p.contact`) — Name, Rolle,
+   * E-Mail. Drei Felder statt eines Textblocks, weil ein Empfänger genau
+   * diese drei sucht und die Oberfläche die Adresse verlinkbar machen können
+   * muss.
+   */
+  | { kind: 'contact', name: string, role: string, email: string }
   /** Die sichtbare Schranke (§2.5) — Texte im Katalog, hier nur die Id. */
   | { kind: 'locked', element: BrandFoundationVisualElement }
+  /**
+   * DIE SCHRANKE DER ANWENDUNGS-KAPITEL (Paket K4, §2.5) — dieselbe Idee wie
+   * `locked`, andere Liste und anderes Produkt (s.
+   * `BRAND_FOUNDATION_USAGE_TOPICS`).
+   */
+  | { kind: 'lockedUsage', topic: BrandFoundationUsageTopic }
   /**
    * DIE GEWÄHLTE RICHTUNG (Paket G4, §2.5) — Kapitel 10, VOR der Schranke.
    *
@@ -267,6 +388,11 @@ export interface BrandFoundationChapter {
    * kennt die Frage nicht.
    */
   readonly state: 'done' | 'pending' | 'locked'
+  /**
+   * NUR an einem `locked`-Kapitel der Schicht 3 (Paket K4) — Kapitel 10 hat
+   * seinen Grund im Block (`locked`) und braucht keinen zweiten.
+   */
+  readonly lockReason?: BrandFoundationLockReason
   readonly blocks: readonly BrandFoundationBlock[]
 }
 
@@ -334,11 +460,17 @@ export const BRAND_FOUNDATION_SOURCE_STEPS: Readonly<
   'farbe-anwendung': ['color'],
   'typografie-anwendung': ['type'],
   pressekit: ['presskit'],
-  // Der KI-Rahmen ist eine Zusammenfassung dreier Kapitel — solange eines
-  // davon offen ist, kann sich sein Inhalt noch ändern. Das Kapitel `aiguide`
-  // kommt hier mit K4 dazu (§2.5): erst dann rendert es die Guidelines statt
-  // des festen Rahmens, und erst dann kann es auf sie warten.
-  'ki-texte': ['values', 'archetype', 'verbal'],
+  /*
+   * Der KI-Rahmen ist eine Zusammenfassung dreier Kapitel — solange eines
+   * davon offen ist, kann sich sein Inhalt noch ändern. SEIT K4 steht
+   * `aiguide` daneben (§2.5): das Kapitel rendert jetzt die Guidelines statt
+   * des festen Rahmens, sobald sie bestätigt sind — also darf es auch auf sie
+   * warten. Es steht ZULETZT, weil `brandFoundationPendingStep` das ERSTE
+   * offene Quell-Kapitel als Sprungziel nimmt: wer den Rahmen noch nicht
+   * stehen hat, soll dorthin und nicht in eine Schicht, die er erst danach
+   * betritt.
+   */
+  'ki-texte': ['values', 'archetype', 'verbal', 'aiguide'],
 }
 
 /**
@@ -418,6 +550,30 @@ export interface BrandFoundationInput {
    * eingefrorene Snapshot (`BrandShareSnapshot.design`).
    */
   readonly design?: BrandFoundationDesignInput
+  /**
+   * IST DIE ABLEITUNG FÜR DIESE MARKE FREIGESCHALTET? (Paket K4, §2.5/§2.8)
+   *
+   * Drei Werte, nicht zwei — und der dritte ist der Punkt:
+   *  · `true`  ⇒ die drei Anwendungs-Kapitel stehen. MIT Preset voll, ohne
+   *              Preset als Schranke mit dem Grund `design`.
+   *  · `false` ⇒ sie stehen als Schranke mit dem Grund `derivation`
+   *              („Book & Kit ist Teil der Ableitung").
+   *  · fehlt   ⇒ SIE STEHEN GAR NICHT — der Aufrufer weiss es nicht.
+   *
+   * Der dritte Fall ist der SNAPSHOT (`/brand/share/:token`): ein
+   * eingefrorenes Abbild trägt keine Aussage über den heutigen Zustand des
+   * Kontos, sondern nur über den damaligen INHALT. Eine Schranke daraus zu
+   * bauen hiesse, in das Handbuch einer fremden Marke drei Kapitel Werbung zu
+   * setzen, deren Aussage der Leser nicht nachprüfen kann. Die Share-Seite
+   * reicht deshalb `true` NUR mit eingefrorenem Preset herein (dann sind die
+   * Kapitel voll und wahr) und sonst gar nichts.
+   *
+   * Gerechnet wird die Freischaltung hier NICHT: `resolveDerivationAccess`
+   * (Beta ODER Feld) ist die eine Regel dafür, und sie braucht Kontowissen,
+   * das ein purer Renderer nicht hat — dieselbe Arbeitsteilung wie bei
+   * `direction` und `design`.
+   */
+  readonly derivationUnlocked?: boolean
 }
 
 // ── Schlüssel-Konventionen ──────────────────────────────────────────────────
@@ -906,6 +1062,548 @@ function visualBlocks(
   ]
 }
 
+// ── Schicht 3: die fünf neuen Kapitel (Paket K4, BK1 §2.5) ──────────────────
+
+/**
+ * DIE ZWEI SPRACHEN IM CODE — für die Sätze, die die MARKE spricht (s. Kopf,
+ * „Die eine Stelle, an der hier Sätze stehen"). Wörtlich dieselbe Auflösung
+ * wie in `brandKitLicenses.ts`, `brandContext.ts` und `brandDesignVocab.ts`.
+ */
+function isDe(locale: string): boolean {
+  return locale.toLowerCase().startsWith('de')
+}
+
+function text(locale: string, de: string, en: string): string {
+  return isDe(locale) ? de : en
+}
+
+/** Eine Zahl in der Sprache der Marke — Komma im Deutschen, wie `brandRatioText`. */
+function num(value: number, locale: string): string {
+  const raw = Number.isInteger(value) ? String(value) : String(value)
+  return isDe(locale) ? raw.replace('.', ',') : raw
+}
+
+/**
+ * EIN KATALOG-WERT ALS LESEFASSUNG — TOLERANT gegen Id UND Label.
+ *
+ * `m.types` speichert Ids (`product`), `m.patterns` bekommt seine Block-
+ * Überschriften aus einem Lauf und kann dort das LABEL tragen („Produkt").
+ * Beides derselbe Typ; wer nur die Id kennte, schriebe in die Tabelle
+ * „Produkt" und in die Chips daneben `product`. Unbekanntes bleibt, wie es
+ * kam — ein Wert, den der Katalog nicht kennt, ist trotzdem eine bestätigte
+ * Festlegung (s. Kopf, „Was nicht parsbar ist, wird nicht verworfen").
+ */
+function kitTermLabel(terms: readonly BrandKitTerm[], value: string, locale: string): string {
+  const needle = value.trim().toLowerCase()
+  const term = terms.find(entry => entry.id.toLowerCase() === needle
+    || entry.de.toLowerCase() === needle
+    || entry.en.toLowerCase() === needle)
+  return term ? text(locale, term.de, term.en) : value.trim()
+}
+
+/** Die Hinweiszeile eines Katalog-Wertes — '' bei unbekanntem Wert. */
+function kitTermNote(terms: readonly BrandKitTerm[], value: string, locale: string): string {
+  const needle = value.trim().toLowerCase()
+  const term = terms.find(entry => entry.id.toLowerCase() === needle
+    || entry.de.toLowerCase() === needle
+    || entry.en.toLowerCase() === needle)
+  return term ? text(locale, term.noteDe, term.noteEn) : ''
+}
+
+/**
+ * EIN ABSATZ ALS REGEL-EINTRÄGE. Zeilen zuerst, dann Mittelpunkte, zuletzt
+ * Sätze — in dieser Reihenfolge, weil jede Stufe gröber ist als die davor:
+ * wer seine No-Gos untereinander geschrieben hat, bekommt genau seine Zeilen;
+ * wer sie in einen Absatz getippt hat, bekommt Sätze statt eines Blocks.
+ */
+function ruleEntries(value: string): string[] {
+  const lines = value.split('\n').map(line => line.trim().replace(LIST_MARKER, '').trim()).filter(Boolean)
+  if (lines.length > 1) return lines
+  const single = lines[0] ?? ''
+  if (single.length === 0) return []
+  const dotted = single.split(' · ').map(part => part.trim()).filter(Boolean)
+  if (dotted.length > 1) return dotted
+  const sentences = single.split(/(?<=[.!?])\s+/u).map(part => part.trim()).filter(Boolean)
+  return sentences.length > 0 ? sentences : [single]
+}
+
+/** Kapitel „Nomenklatur" (§2.5, nach `architektur`) — entfällt ohne Werte. */
+function nomenclatureBlocks(values: Map<string, string>, locale: string): BrandFoundationBlock[] {
+  const blocks: BrandFoundationBlock[] = []
+
+  const types = wordEntries(viewOf(values, 'm.types'), textOf(values, 'm.types'))
+  if (types.length > 0) {
+    // Chips OHNE Stimmprobe: die Hinweiszeile des Katalogs erklärt UNSER
+    // Vokabular („Was ihr herstellt oder verkauft") und nicht diese Marke —
+    // im Handbuch wäre sie Produkt-Text zwischen Marken-Text.
+    blocks.push({
+      kind: 'chips',
+      labelKey: `${LABEL}.nameTypes`,
+      items: types.map(id => ({ word: kitTermLabel(BRAND_NAME_TYPES, id, locale), sample: '' })),
+    })
+  }
+
+  const patterns = viewOf(values, 'm.patterns')
+  if (patterns?.kind === 'blocks') {
+    /*
+     * JE TYP EIN MUSTER MIT BEISPIEL (§2.2) — zwei Schreibweisen, eine
+     * Lesart: der Block trägt Muster und Beispiel entweder auf zwei ZEILEN
+     * oder in einer Zeile durch ` · ` getrennt. Beides gibt es wirklich —
+     * `formatBrandSlotStructured` zieht einen Wert auf EINE Zeile zusammen,
+     * ein Mensch im Bühnen-Editor tippt zwei. Der Mittelpunkt ist dabei die
+     * eindeutigere Marke: die Muster selbst tragen Gedankenstriche („Ort +
+     * Erntemonat — kein Fantasiename"), an denen ein Trenner ohne Not
+     * zerbräche.
+     *
+     * Fehlt das Beispiel, bleibt die Zelle LEER — ein erfundenes wäre ein
+     * Name, den die Marke nie vergeben hat.
+     */
+    const rows = patterns.blocks
+      .map((block) => {
+        const lines = block.body.split('\n').map(line => line.trim()).filter(Boolean)
+        const [pattern = '', ...rest] = lines.length > 1
+          ? lines
+          : (lines[0] ?? '').split(' · ').map(part => part.trim()).filter(Boolean)
+        return [kitTermLabel(BRAND_NAME_TYPES, block.label, locale), pattern, rest.join(' · ')]
+      })
+      .filter(row => (row[1] ?? '').length > 0)
+    if (rows.length > 0) {
+      blocks.push({
+        kind: 'table',
+        labelKey: `${LABEL}.namePatterns`,
+        columnKeys: [`${COLUMN}.nameType`, `${COLUMN}.pattern`, `${COLUMN}.example`],
+        rows,
+      })
+    }
+  }
+  else {
+    blocks.push(...blocksAsCards(patterns, `${LABEL}.namePatterns`))
+  }
+
+  const rules = sentenceEntries(viewOf(values, 'm.rules'))
+  if (rules.length > 0) {
+    blocks.push({ kind: 'rules', labelKey: `${LABEL}.nameRules`, items: rules.map(entry => ({ text: entry })) })
+  }
+  return blocks
+}
+
+/**
+ * EIN FELD DES ZEICHEN-BRIEFINGS aus den Preset-Zeilen — gelesen nach
+ * POSITION, nicht nach Beschriftung (dieselbe Arbeitsteilung wie
+ * `parseBrandMarkBriefSlotValue`: die Überschriften stehen in der
+ * Inhaltssprache der Marke).
+ *
+ * '' sobald die Zeilenzahl nicht stimmt: dann trägt der Aufrufer ALLE Zeilen
+ * als Liste nach, statt an der dritten Position etwas Falsches zu behaupten.
+ */
+function markBriefField(lines: readonly string[], field: string): string {
+  if (lines.length !== BRAND_MARK_BRIEF_FIELDS.length) return ''
+  const index = BRAND_MARK_BRIEF_FIELDS.findIndex(entry => entry.id === field)
+  const line = lines[index]
+  if (line === undefined) return ''
+  const colon = line.indexOf(':')
+  return (colon >= 0 ? line.slice(colon + 1) : line).trim()
+}
+
+/**
+ * Kapitel „Zeichen-Anwendung" (§2.5) — das Regelwerk zum Zeichen, eine
+ * Zoomstufe unter der Vitrine von Kapitel 10.
+ *
+ * Der Schutzraum-Satz kommt aus `brandMarkClearSpaceText` und nicht aus dem
+ * Briefing-Feld, obwohl dort dasselbe steht: das Feld ist ein GESPEICHERTER
+ * Wert von damals, die Funktion ist die Regel von heute (`BRAND_MARK_MIN_*`).
+ * Weichen sie ab, gilt die Regel — und die Tabelle daneben zeigt dieselben
+ * drei Zahlen zum Abschreiben.
+ */
+function markUsageBlocks(
+  design: BrandFoundationDesignInput,
+  title: string,
+  locale: string,
+): BrandFoundationBlock[] {
+  const blocks: BrandFoundationBlock[] = []
+  const kind = brandTermById(BRAND_MARK_KINDS, design.mark.kind)
+  if (kind) blocks.push({ kind: 'text', text: brandTermLabel(kind, locale), labelKey: `${LABEL}.markKind` })
+
+  const lines = design.mark.brief
+  const written = ['character', 'formLanguage', 'places']
+    .map(field => markBriefField(lines, field))
+    .filter(entry => entry.length > 0)
+  const briefItems = written.length > 0 ? written : lines.filter(line => line.trim().length > 0)
+  if (briefItems.length > 0) {
+    blocks.push({ kind: 'list', labelKey: `${LABEL}.markBrief`, items: briefItems })
+  }
+
+  blocks.push({
+    kind: 'text',
+    text: brandMarkClearSpaceText(brandMarkInitial(title), locale),
+    labelKey: `${LABEL}.markClearSpace`,
+  })
+  blocks.push({
+    kind: 'table',
+    labelKey: `${LABEL}.markMinSizes`,
+    columnKeys: [`${COLUMN}.usage`, `${COLUMN}.minSize`],
+    rows: [
+      [text(locale, 'Wortmarke am Bildschirm', 'Wordmark on screen'), `${BRAND_MARK_MIN_WIDTH_PX} px`],
+      [text(locale, 'Wortmarke im Druck', 'Wordmark in print'), `${BRAND_MARK_MIN_WIDTH_MM} mm`],
+      [text(locale, 'Monogramm', 'Monogram'), `${BRAND_MARK_MONOGRAM_MIN_PX} px`],
+    ],
+  })
+  blocks.push({ kind: 'text', text: brandMarkVariantsText(locale), labelKey: `${LABEL}.markVariants` })
+
+  const noGos = ruleEntries(markBriefField(lines, 'noGos'))
+  if (noGos.length > 0) {
+    blocks.push({ kind: 'rules', labelKey: `${LABEL}.markDonts`, items: noGos.map(entry => ({ text: entry })) })
+  }
+  return blocks
+}
+
+/** Die Farben eines Presets in der Form, die `brandTokenRoleHex` erwartet. */
+function presetColors(design: BrandFoundationDesignInput): {
+  rampLight: BrandDesignSnapshotPreset['color']['rampLight']
+  rampDark: BrandDesignSnapshotPreset['color']['rampDark']
+  neutral: BrandDesignSnapshotPreset['color']['neutral']
+  accent: string
+} {
+  return {
+    rampLight: design.color.rampLight,
+    rampDark: design.color.rampDark,
+    neutral: design.color.neutral,
+    accent: design.color.accent,
+  }
+}
+
+/** „4,8:1 · AA" — das Urteil einer Messung in der Sprache der Marke. */
+function verdictText(ratio: number, level: string, locale: string): string {
+  return `${brandRatioText(ratio, locale)} · ${brandContrastLevelLabel(level, locale)}`
+}
+
+/**
+ * Kapitel „Farb-Anwendung" (§2.5) — Rollen je Modus, Kontrast-Paare mit
+ * Urteil, die Regeln aus den Durchfallern und der gehobene Dunkelmodus-Akzent.
+ *
+ * Die dunklen Hex-Werte kommen aus `brandTokenRoleHex` (K2) und werden hier
+ * NICHT nachgerechnet: dieselbe Spiegelung, die `tokens.json` schreibt (§2.20
+ * Nr. 1) — eine zweite Regel hier hiesse, dass Handbuch und Datei
+ * verschiedene Farben nennen können.
+ */
+function colorUsageBlocks(
+  design: BrandFoundationDesignInput,
+  locale: string,
+): BrandFoundationBlock[] {
+  const snapshot = design as BrandDesignSnapshotPreset
+  const colors = presetColors(design)
+  const blocks: BrandFoundationBlock[] = []
+
+  const roleTable = (scheme: 'light' | 'dark'): BrandFoundationBlock | null => {
+    const rows = design.color.roles
+      .map((role) => {
+        const hex = brandTokenRoleHex(role.source, scheme, colors)
+        if (!hex) return null
+        const contrast = brandTokenContrastFor(snapshot, scheme, hex)
+        return [
+          brandColorRoleLabel(role.id, locale),
+          hex,
+          contrast ? verdictText(contrast.ratio, contrast.level, locale) : '—',
+          brandColorRoleNote(role.id, locale),
+        ]
+      })
+      .filter((row): row is string[] => row !== null)
+    if (rows.length === 0) return null
+    return {
+      kind: 'table',
+      labelKey: scheme === 'light' ? `${LABEL}.colorRolesLight` : `${LABEL}.colorRolesDark`,
+      columnKeys: [`${COLUMN}.role`, `${COLUMN}.hex`, `${COLUMN}.contrast`, `${COLUMN}.usage`],
+      rows,
+    }
+  }
+  const light = roleTable('light')
+  if (light) blocks.push(light)
+  const dark = roleTable('dark')
+  if (dark) blocks.push(dark)
+
+  /*
+   * DER GEHOBENE AKZENT (§2.20 Nr. 7) — mit BELEG, nicht als Behauptung.
+   * Zwei Zeilen: was gemessen wurde und worauf der Alias jetzt zeigt. Die
+   * Rechnung ist die des Token-Modells (`brandTokenAccentLiftFor`), damit im
+   * Handbuch dieselbe Stufe steht wie in `tokens.json`.
+   */
+  const lift = brandTokenAccentLiftFor(snapshot)
+  const accentRamp = brandRampDark(design.color.accent)
+  const liftedHex = lift && accentRamp ? accentRamp[lift.lifted.shade as BrandRampShade] : ''
+  if (lift && liftedHex) {
+    blocks.push({
+      kind: 'table',
+      labelKey: `${LABEL}.accentLift`,
+      columnKeys: [`${COLUMN}.accent`, `${COLUMN}.ground`, `${COLUMN}.contrast`],
+      rows: [
+        [design.color.accent, lift.ground, verdictText(lift.measured.ratio, lift.measured.level, locale)],
+        [`${liftedHex} (${lift.lifted.shade})`, lift.ground, verdictText(lift.lifted.ratio, lift.lifted.level, locale)],
+      ],
+    })
+  }
+
+  if (design.color.contrastPairs.length > 0) {
+    blocks.push({
+      kind: 'table',
+      labelKey: `${LABEL}.contrastPairs`,
+      columnKeys: [`${COLUMN}.pair`, `${COLUMN}.ratio`, `${COLUMN}.verdict`],
+      rows: design.color.contrastPairs.map(pair => [
+        brandContrastPairLabel(pair.id, locale),
+        brandRatioText(pair.ratio, locale),
+        brandContrastLevelLabel(pair.level, locale),
+      ]),
+    })
+  }
+
+  /*
+   * DIE REGEL „NIE TEXT AUF …" ENTSTEHT AUS DEN DURCHFALLERN und wird nicht
+   * geschrieben: was hier steht, ist gemessen. Fällt kein Paar durch, steht
+   * hier NICHTS — eine erfundene Verbots-Liste wäre eine Regel ohne Anlass.
+   */
+  const failing = design.color.contrastPairs.filter(pair => pair.level === 'fail' || pair.level === 'AA18')
+  if (failing.length > 0) {
+    blocks.push({
+      kind: 'rules',
+      labelKey: `${LABEL}.colorRules`,
+      items: failing.map((pair) => {
+        const label = brandContrastPairLabel(pair.id, locale)
+        const measured = verdictText(pair.ratio, pair.level, locale)
+        return pair.level === 'fail'
+          ? {
+              text: text(
+                locale,
+                `Nie Text auf ${pair.background} — das Paar „${label}" bleibt unter AA (${measured}).`,
+                `Never set text on ${pair.background} — the pair "${label}" stays below AA (${measured}).`,
+              ),
+              dont: `${pair.foreground} auf ${pair.background}`,
+            }
+          : {
+              text: text(
+                locale,
+                `Auf ${pair.background} nur grosse Schrift — „${label}" reicht nur für Überschriften (${measured}).`,
+                `On ${pair.background} use large type only — "${label}" is enough for headings (${measured}).`,
+              ),
+            }
+      }),
+    })
+  }
+  return blocks
+}
+
+/**
+ * Kapitel „Typografie-Anwendung" (§2.5) — Paar, Grössen-Leiter, Regeln,
+ * Lizenz.
+ *
+ * Die Leiter ist DIE VON K2 (`BRAND_TOKEN_TYPE_STEPS` + `ratio ** rung`) und
+ * wird hier nicht neu erfunden: die Zahlen im Handbuch sind Zeichen für
+ * Zeichen die aus `tokens.json`. Der Prototyp hatte sie von Hand (42/32/24 px)
+ * — richtig für EINE Marke, falsch für jede zweite (K2-„Gelernt").
+ */
+function typeUsageBlocks(
+  design: BrandFoundationDesignInput,
+  locale: string,
+): BrandFoundationBlock[] {
+  const blocks: BrandFoundationBlock[] = []
+  const pair = brandFontPair(design.type.pair)
+  const ratio = brandTypeScaleRatio(design.type.scale)
+  const rules = brandTypeRulesFromLines(design.type.rules) ?? BRAND_TYPE_DEFAULT_RULES
+
+  if (pair) {
+    blocks.push({
+      kind: 'text',
+      labelKey: `${LABEL}.typePair`,
+      text: text(
+        locale,
+        `${pair.headingFamily} für Überschriften, ${pair.bodyFamily} für Fließtext — `
+        + `Größen-Leiter 1 : ${num(Math.round(ratio * 10) / 10, locale)} über ${BRAND_TYPE_BODY_REM} rem Fließtext.`,
+        `${pair.headingFamily} for headings, ${pair.bodyFamily} for body copy — `
+        + `size ladder 1 : ${num(Math.round(ratio * 10) / 10, locale)} over ${BRAND_TYPE_BODY_REM} rem body text.`,
+      ),
+    })
+  }
+
+  blocks.push({
+    kind: 'table',
+    labelKey: `${LABEL}.typeScale`,
+    columnKeys: [
+      `${COLUMN}.step`,
+      `${COLUMN}.size`,
+      `${COLUMN}.lineHeight`,
+      `${COLUMN}.weight`,
+      `${COLUMN}.font`,
+      `${COLUMN}.usage`,
+    ],
+    rows: BRAND_TOKEN_TYPE_STEPS.map((step) => {
+      const rem = Math.round(BRAND_TYPE_BODY_REM * ratio ** step.rung * 1000) / 1000
+      const weight = step.face === 'heading' ? rules.headingWeight : (step.bodyWeight ?? BRAND_TOKEN_BODY_WEIGHT)
+      const family = step.face === 'heading' ? pair?.headingFamily : pair?.bodyFamily
+      return [
+        step.id,
+        `${num(rem, locale)} rem`,
+        num(step.lineHeight, locale),
+        String(weight),
+        family ?? '',
+        text(locale, step.usageDe, step.usageEn),
+      ]
+    }),
+  })
+
+  const ruleLines = design.type.rules.map(line => line.trim()).filter(Boolean)
+  if (ruleLines.length > 0) {
+    blocks.push({ kind: 'rules', labelKey: `${LABEL}.typeRules`, items: ruleLines.map(line => ({ text: line })) })
+  }
+
+  const licenses = brandLicenseRows(design as BrandDesignSnapshotPreset, locale)
+  if (licenses.length > 0) {
+    blocks.push({
+      kind: 'text',
+      labelKey: `${LABEL}.typeLicense`,
+      text: `${licenses.map(row => `${row.family} (${row.spdx}, ${row.source})`).join(' · ')} — ${brandLicenseNote(locale)}`,
+    })
+  }
+  return blocks
+}
+
+/**
+ * DER PRESSE-KONTAKT AUS DEM SLOT-WERT — tolerant gegen beide Formen.
+ *
+ * `p.contact` ist `structured` (drei beschriftete Blöcke), aber der Wert ist
+ * von Hand änderbar, und ein Mensch tippt drei Zeilen. Gelesen wird deshalb,
+ * was dasteht: die E-Mail ist der Eintrag mit dem `@`, der erste Rest ist der
+ * Name, der zweite die Rolle. `null` heisst „daraus wird kein Kontakt" — der
+ * Aufrufer stellt den Wert dann als Text hin, statt ihn zu verlieren.
+ */
+function contactBlock(view: BrandSlotValueView | null): { name: string, role: string, email: string } | null {
+  const entries = view?.kind === 'blocks'
+    ? view.blocks.map(block => block.body.trim()).filter(Boolean)
+    : sentenceEntries(view)
+  if (entries.length === 0) return null
+  const email = entries.find(entry => /\S+@\S+\.\S+/u.test(entry)) ?? ''
+  const rest = entries.filter(entry => entry !== email)
+  const name = rest[0] ?? ''
+  if (!name && !email) return null
+  return { name, role: rest[1] ?? '', email: /\S+@\S+\.\S+/u.exec(email)?.[0] ?? '' }
+}
+
+/**
+ * Kapitel „Pressekit" (§2.5, vor `ki-texte`) — NICHTS Neues, nur
+ * zusammengestellt.
+ *
+ * Es steht erst, wenn ein Mensch etwas dafür gesagt hat (`p.facts` oder
+ * `p.contact`): Tagline und Boilerplates allein wären das Messaging-Kapitel
+ * ein zweites Mal.
+ *
+ * `p.facts` ist die EINE Quelle der Fakten — NIE `a.facts` (§2.4). Das steht
+ * hier als Satz und nicht nur als Weglassung, weil der Renderer `a.facts`
+ * ohnehin nicht sieht (`sensitivity: 'internal'`, das eine Tor) und ein
+ * künftiger Leser sonst glauben könnte, hier fehle etwas.
+ */
+function presskitBlocks(
+  values: Map<string, string>,
+  design: BrandFoundationDesignInput | undefined,
+  locale: string,
+): BrandFoundationBlock[] {
+  if (!values.has('p.facts') && !values.has('p.contact')) return []
+  const blocks: BrandFoundationBlock[] = []
+
+  const taglines = sentenceEntries(viewOf(values, 'ep.taglines'))
+  if (taglines.length > 0) blocks.push({ kind: 'lead', text: taglines[0]!, labelKey: `${LABEL}.tagline` })
+  blocks.push(...blocksAsCards(viewOf(values, 'ep.boilerplates'), `${LABEL}.boilerplates`))
+
+  const facts = sentenceEntries(viewOf(values, 'p.facts'))
+  if (facts.length > 0) blocks.push({ kind: 'list', labelKey: `${LABEL}.pressFacts`, items: facts })
+
+  const contactView = viewOf(values, 'p.contact')
+  const contact = contactBlock(contactView)
+  if (contact) blocks.push({ kind: 'contact', ...contact })
+  else if (contactView) blocks.push(...textBlock(textOf(values, 'p.contact'), `${LABEL}.pressContact`))
+
+  if (design) {
+    const kind = brandTermById(BRAND_MARK_KINDS, design.mark.kind)
+    blocks.push({
+      kind: 'text',
+      labelKey: `${LABEL}.pressMark`,
+      text: `${kind ? `${brandTermLabel(kind, locale)} — ` : ''}${brandMarkVariantsText(locale)}`,
+    })
+  }
+  return blocks
+}
+
+/**
+ * DIE AI-GUIDELINES (§2.3/§2.5) — sie treten NEBEN den festen Drei-Zeilen-
+ * Rahmen, nicht an seine Stelle: der Rahmen ist die kostenlose Fassung und
+ * bleibt wahr, die Guidelines sind die Ausarbeitung darüber.
+ *
+ * Leeres Ergebnis heisst „`aiguide` ist nicht abgenommen" — dann heisst das
+ * Kapitel weiter „Regeln für KI-Texte" (§2.20 Nr. 6).
+ */
+function aiGuidelineBlocks(values: Map<string, string>, locale: string): BrandFoundationBlock[] {
+  const blocks: BrandFoundationBlock[] = []
+
+  const scope = textOf(values, 'n.scope')
+  if (scope) {
+    const note = kitTermNote(BRAND_AI_SCOPES, scope, locale)
+    blocks.push({
+      kind: 'text',
+      labelKey: `${LABEL}.aiScope`,
+      text: `${kitTermLabel(BRAND_AI_SCOPES, scope, locale)}${note ? ` — ${note}` : ''}`,
+    })
+  }
+  const review = textOf(values, 'n.review')
+  if (review) {
+    const note = kitTermNote(BRAND_AI_REVIEWS, review, locale)
+    blocks.push({
+      kind: 'text',
+      labelKey: `${LABEL}.aiReview`,
+      text: `${kitTermLabel(BRAND_AI_REVIEWS, review, locale)}${note ? ` — ${note}` : ''}`,
+    })
+  }
+
+  const guardrails = viewOf(values, 'n.guardrails')
+  if (guardrails?.kind === 'blocks') {
+    for (const group of guardrails.blocks) {
+      const items = ruleEntries(group.body)
+      if (items.length === 0) continue
+      blocks.push({
+        kind: 'rules',
+        labelKey: `${LABEL}.aiGuardrails`,
+        label: group.label,
+        items: items.map(entry => ({ text: entry })),
+      })
+    }
+  }
+  else {
+    const items = sentenceEntries(guardrails)
+    if (items.length > 0) {
+      blocks.push({ kind: 'rules', labelKey: `${LABEL}.aiGuardrails`, items: items.map(entry => ({ text: entry })) })
+    }
+  }
+
+  const prompts = viewOf(values, 'n.prompts')
+  if (prompts?.kind === 'blocks') {
+    for (const template of prompts.blocks) {
+      if (template.body.trim().length === 0) continue
+      blocks.push({ kind: 'prompt', labelKey: `${LABEL}.aiPrompt`, title: template.label, text: template.body })
+    }
+  }
+  else {
+    // Formfremd: die Vorlagen sind trotzdem bestätigte Werte (s. Kopf).
+    blocks.push(...textBlock(textOf(values, 'n.prompts'), `${LABEL}.aiPrompt`))
+  }
+  return blocks
+}
+
+/** Welche Schranken-Themen ein Anwendungs-Kapitel zeigt (§2.5). */
+const USAGE_TOPICS: Readonly<Record<string, readonly BrandFoundationUsageTopic[]>> = {
+  'zeichen-anwendung': ['markClearspace', 'markVariants', 'markDonts'],
+  'farbe-anwendung': ['colorRoles', 'colorContrast'],
+  'typografie-anwendung': ['typeScale', 'typeLicense'],
+}
+
+function lockedUsageBlocks(chapterId: BrandFoundationChapterId): BrandFoundationBlock[] {
+  return (USAGE_TOPICS[chapterId] ?? []).map((topic): BrandFoundationBlock => ({ kind: 'lockedUsage', topic }))
+}
+
 // ── Die Regel ───────────────────────────────────────────────────────────────
 
 /**
@@ -941,7 +1639,38 @@ export function buildBrandFoundation(input: BrandFoundationInput): BrandFoundati
     ? [{ kind: 'aiRules', tone: toneWords, avoid: guide.avoid, stands: brandValues }]
     : []
 
-  const draft: { id: BrandFoundationChapterId, blocks: BrandFoundationBlock[], state?: 'locked' }[] = [
+  /*
+   * DIE GUIDELINES ENTSCHEIDEN ÜBER DEN TITEL VON KAPITEL 11 (§2.20 Nr. 6):
+   * mit ihnen heisst es „AI-Guidelines", ohne sie weiter „Regeln für
+   * KI-Texte". Die Id und damit die SPRUNGMARKE bleibt `ki-texte` — ein
+   * verschickter Tieflink darf nicht ins Leere zeigen (§2.17).
+   */
+  const guidelines = aiGuidelineBlocks(values, input.contentLocale)
+
+  /*
+   * DIE DREI ANWENDUNGS-KAPITEL (§2.5) — drei Zustände, eine Weiche.
+   * `undefined` heisst „der Aufrufer weiss es nicht" und lässt sie ganz weg
+   * (s. `BrandFoundationInput.derivationUnlocked`).
+   */
+  const usageChapter = (
+    id: BrandFoundationChapterId,
+    blocks: () => BrandFoundationBlock[],
+  ): { id: BrandFoundationChapterId, blocks: BrandFoundationBlock[], state?: 'locked', lockReason?: BrandFoundationLockReason } => {
+    if (input.derivationUnlocked === undefined) return { id, blocks: [] }
+    if (!input.derivationUnlocked) {
+      return { id, blocks: lockedUsageBlocks(id), state: 'locked', lockReason: 'derivation' }
+    }
+    if (!input.design) return { id, blocks: lockedUsageBlocks(id), state: 'locked', lockReason: 'design' }
+    return { id, blocks: blocks() }
+  }
+
+  const draft: {
+    id: BrandFoundationChapterId
+    blocks: BrandFoundationBlock[]
+    state?: 'locked'
+    lockReason?: BrandFoundationLockReason
+    titleKey?: string
+  }[] = [
     { id: 'story', blocks: storyBlocks(input.story) },
     {
       id: 'kontext',
@@ -973,6 +1702,10 @@ export function buildBrandFoundation(input: BrandFoundationInput): BrandFoundati
         ...textBlock(textOf(values, 'b2.rule'), `${LABEL}.namingRule`),
       ],
     },
+    // Nur auf dem B2-Weg (§2.20 Nr. 4): ohne Markenarchitektur läuft
+    // `nomenclature` nicht, es gibt keine Werte, und das Kapitel entfällt
+    // OHNE LÜCKE — wie `architektur` selbst.
+    { id: 'nomenklatur', blocks: nomenclatureBlocks(values, input.contentLocale) },
     { id: 'werte', blocks: valueBlocks(values) },
     { id: 'stimme', blocks: voiceBlocks(values) },
     { id: 'manifest', blocks: manifestoBlocks(values) },
@@ -987,7 +1720,15 @@ export function buildBrandFoundation(input: BrandFoundationInput): BrandFoundati
       // sondern die Tatsache dahinter.
       ...(input.design ? {} : { state: 'locked' as const }),
     },
-    { id: 'ki-texte', blocks: aiRules },
+    usageChapter('zeichen-anwendung', () => markUsageBlocks(input.design!, input.title, input.contentLocale)),
+    usageChapter('farbe-anwendung', () => colorUsageBlocks(input.design!, input.contentLocale)),
+    usageChapter('typografie-anwendung', () => typeUsageBlocks(input.design!, input.contentLocale)),
+    { id: 'pressekit', blocks: presskitBlocks(values, input.design, input.contentLocale) },
+    {
+      id: 'ki-texte',
+      blocks: [...aiRules, ...guidelines],
+      ...(guidelines.length > 0 ? { titleKey: 'brand.foundation.chapter.aiGuidelines' } : {}),
+    },
   ]
 
   return {
@@ -996,8 +1737,9 @@ export function buildBrandFoundation(input: BrandFoundationInput): BrandFoundati
       .map(chapter => ({
         id: chapter.id,
         anchor: chapter.id,
-        titleKey: chapterTitleKey(chapter.id),
+        titleKey: chapter.titleKey ?? chapterTitleKey(chapter.id),
         state: chapter.state ?? 'done',
+        ...(chapter.lockReason ? { lockReason: chapter.lockReason } : {}),
         blocks: chapter.blocks,
       })),
   }

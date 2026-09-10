@@ -1,8 +1,7 @@
+import { resolveDerivationAccess } from '../../../../../shared/brandDerivation'
 import { brandStepAcceptance } from '../../../../../shared/brandJourney'
 import { blockingFindingSlots } from '../../../../../shared/brandFindings'
-import { BRAND_DIRECTIONS_VERSION, brandDirectionById } from '../../../../../shared/brandDirections'
-import { buildBrandFoundation } from '../../../../../shared/brandFoundation'
-import { type BrandStepKey, isBrandDesignStep, isBrandKitStep, slotsForStep } from '../../../../../shared/slotRegistry'
+import { isBrandDesignStep, slotsForStep } from '../../../../../shared/slotRegistry'
 import type {
   BrandFoundationResponse,
   BrandFoundationStepState,
@@ -10,7 +9,7 @@ import type {
 import { loadBrandDocumentContext } from '../../../../utils/brandAcceptance'
 import { brandDesignStand, loadBrandDesignPreset } from '../../../../utils/brandDesignPreset'
 import { recordBrandEvent } from '../../../../utils/brandEvents'
-import { confirmedSlotValues, toStoryView } from '../../../../utils/brandStore'
+import { buildBrandFoundationView } from '../../../../utils/brandFoundationView'
 
 /**
  * „BRAND FOUNDATION" — DIE PRIVATE LESEANSICHT (Konzept
@@ -18,12 +17,16 @@ import { confirmedSlotValues, toStoryView } from '../../../../utils/brandStore'
  *
  * ── SIE BAUT EINEN SNAPSHOT, DEN NIEMAND SPEICHERT ───────────────────────
  * `buildBrandFoundation` nimmt wörtlich die Form des `BrandShareSnapshot`
- * (Kopf von `shared/brandFoundation.ts`). Diese Route legt deshalb die LIVE-
- * Werte in genau diese Form — dieselben `confirmedSlotValues` je Kapitel des
- * Weges, dieselbe Story — und reicht sie hinein. Der Unterschied zwischen der
- * privaten und der geteilten Ansicht ist damit ein Testfall und kein Zufall:
- * beide fahren dieselbe Regel, die eine auf dem Jetzt, die andere auf dem
- * eingefrorenen Damals.
+ * (Kopf von `shared/brandFoundation.ts`). Die LIVE-Werte in genau diese Form
+ * zu legen ist seit K4 nicht mehr Sache dieser Route, sondern von
+ * `buildBrandFoundationView` (server/utils) — dieselbe Funktion, die auch das
+ * KIT fährt (`brand.md`, `brand.json`, README). Vorher stand die Rechnung
+ * zweimal da und übersprang die Kapitel der dritten Schicht unterschiedlich;
+ * §2.6 sagt „`brand.md` liest DIESELBE Ansicht wie das Book", und ab hier ist
+ * das derselbe Aufruf. Der Unterschied zwischen der privaten und der
+ * geteilten Ansicht bleibt damit ein Testfall und kein Zufall: beide fahren
+ * dieselbe Regel, die eine auf dem Jetzt, die andere auf dem eingefrorenen
+ * Damals.
  *
  * ── HIER WIRD NICHT VORGEFILTERT (§2.8, das Doppelnetz) ──────────────────
  * Bewusst KEIN `brandShareableSlotValues`: was in ein Handbuch gehört,
@@ -57,24 +60,28 @@ export default defineEventHandler(async (event): Promise<BrandFoundationResponse
 
   const byStepKey = new Map(stepRows.map(row => [row.stepKey, row]))
 
+  /**
+   * DER ZÄHLER UND DIE ABNAHME-ZUSTÄNDE — die eine Sache, die das Kit nicht
+   * braucht und die deshalb hier geblieben ist.
+   *
+   * Übersprungene Kapitel sind nicht das, was diese Marke IST (§2.2), und die
+   * sechs Design-Kapitel zählen als EINES (s. `accepted` unten) — die
+   * Kapitel-LISTE der Leseansicht baut `buildBrandFoundationView`, diese
+   * Schleife baut nur den Fortschritt darüber.
+   */
   const chapters: BrandFoundationStepState[] = []
-  const values: { stepKey: BrandStepKey, slots: { slotId: string, value: string }[] }[] = []
-
   for (const entry of journey) {
-    // Übersprungene Kapitel sind nicht das, was diese Marke IST (§2.2) — sie
-    // fehlen hier wie im Dokument und wie im Snapshot.
     if (entry.state === 'skipped') continue
-    // DIE SECHS DESIGN-KAPITEL SIND EIN KAPITEL (D8, §2.8): sie erscheinen
-    // NICHT als sechs Text-Abschnitte, sondern gebündelt als das volle
-    // Kapitel 10 „Visuelle Identität" — ihre Werte sind Vokabular-Ids, Hex und
-    // gerechnete Tabellen, kein Fliesstext. Gelesen werden sie deshalb unten
-    // als PRESET (`loadBrandDesignPreset`), nicht hier als Wertliste.
+    // DIE SECHS DESIGN-KAPITEL SIND EIN KAPITEL (D8, §2.8) und stehen deshalb
+    // nicht einzeln in dieser Liste — der Zähler unten rechnet sie als +1,
+    // sobald das Preset steht. Die drei Kapitel der SCHICHT 3 stehen seit K4
+    // sehr wohl darin: sie sind je ein eigenes Werkstatt-Kapitel, sie werden
+    // einzeln abgenommen, und ohne sie könnte der Vermerk „noch nicht
+    // abgenommen" an Nomenklatur, Pressekit und den AI-Guidelines nicht
+    // erscheinen (`BRAND_FOUNDATION_SOURCE_STEPS`). Ohne Freischaltung sind
+    // sie `skipped` und fallen schon eine Zeile darüber heraus — der Zähler
+    // einer Marke ohne Ableitung ändert sich also nicht.
     if (isBrandDesignStep(entry.stepKey)) continue
-    // UND SCHICHT 3 GENAUSO WENIG (K0): ohne Freischaltung ist sie `skipped`
-    // und fällt schon oben heraus, danach hätte sie hier bis K4 nichts zu
-    // zeigen — die fünf neuen Kapitel-Anker (§2.5) bekommen ihre Blöcke dort,
-    // nicht hier als Wertliste.
-    if (isBrandKitStep(entry.stepKey)) continue
     const row = byStepKey.get(entry.stepKey)
     const openConflicts = blockingFindingSlots(
       findings,
@@ -88,32 +95,7 @@ export default defineEventHandler(async (event): Promise<BrandFoundationResponse
       storedState: row?.state ?? 'open',
       acceptance: { accepted: acceptance.accepted, total: acceptance.total },
     })
-    values.push({ stepKey: entry.stepKey, slots: row ? confirmedSlotValues(row) : [] })
   }
-
-  /**
-   * DIE GEWÄHLTE RICHTUNG — DIE EINE WAHRHEIT IST DER BESTÄTIGTE SLOT-WERT
-   * (Paket G4, Konzept §11 d).
-   *
-   * `brand_profiles.designPresetId/designPresetVersion` gibt es als Spalten
-   * seit Migration 001, geschrieben hat sie NIE jemand. Sie zu spiegeln hiesse,
-   * zwei Stellen zu haben, die dieselbe Frage beantworten — und die eine, die
-   * jemand später ändert, ist garantiert nicht die, die noch gelesen wird
-   * (dieselbe Regel wie beim Doppelnetz oben: EINE Wahrheit, mehrere Netze,
-   * nie zwei Quellen). Gelesen wird deshalb hier wie beim Veröffentlichen der
-   * bestätigte Wert der Session `result.direction`; die zwei Spalten bleiben
-   * unbeschrieben, bis die Themes-Engine-Presets sie wirklich brauchen.
-   *
-   * NUR EINE BEKANNTE ID REIST WEITER: `result.direction` ist
-   * `audience: 'internal'` und wird vom Renderer gesondert gerendert (s.
-   * `BrandFoundationInput.direction`) — stünde hier ein beliebiger Text, ginge
-   * er als roher Wert durch die Antwort, an genau dem Tor vorbei, das die
-   * Leseansicht ausmacht.
-   */
-  const chosenDirection = values
-    .find(chapter => chapter.stepKey === 'result')?.slots
-    .find(slot => slot.slotId === 'result.direction')?.value ?? ''
-  const direction = brandDirectionById(chosenDirection.trim())
 
   /**
    * DAS ERGEBNIS VON BRAND DESIGN (D8, §2.8) — dieselbe Arbeitsteilung wie bei
@@ -124,6 +106,20 @@ export default defineEventHandler(async (event): Promise<BrandFoundationResponse
    * Schranke mit der gewählten Richtung, unverändert seit G4.
    */
   const design = await loadBrandDesignPreset(event, profile, stepRows)
+
+  /**
+   * DIE SCHRANKE DER SCHICHT 3 (K1, §2.8) — dieselbe Regel, die das Kit
+   * durchsetzt (`resolveDerivationAccess`), hier aber nur als ANZEIGE: die
+   * Leseansicht wirft nichts, sie zeigt drei gesperrte Kapitel mit dem
+   * richtigen Grund (§2.5). Gerechnet wird sie in der Route und nicht im
+   * Renderer, weil sie Kontowissen braucht (Beta ODER Feld) — und ein purer
+   * Renderer hat keines.
+   */
+  const derivation = resolveDerivationAccess({
+    betaAccount,
+    unlockedAt: profile.derivationUnlockedAt,
+    via: profile.derivationUnlockedVia,
+  })
 
   await recordBrandEvent(event, {
     type: 'foundation.viewed',
@@ -140,17 +136,12 @@ export default defineEventHandler(async (event): Promise<BrandFoundationResponse
     profileId: profile.$id,
     title: profile.title ?? '',
     contentLocale: profile.contentLocale,
-    view: buildBrandFoundation({
-      title: profile.title ?? '',
-      contentLocale: profile.contentLocale,
-      story: toStoryView(profile).body,
-      chapters: values,
-      pathKind: profile.pathKind === 'relaunch' ? 'relaunch' : 'new',
-      team: profile.team === 'team' ? 'team' : 'solo',
-      ...(direction
-        ? { direction: { id: direction.id, version: String(BRAND_DIRECTIONS_VERSION) } }
-        : {}),
-      ...(design.preset ? { design: design.preset } : {}),
+    view: buildBrandFoundationView({
+      profile,
+      stepRows,
+      journey,
+      design: design.preset,
+      derivationUnlocked: derivation.unlocked,
     }),
     chapters,
     /**

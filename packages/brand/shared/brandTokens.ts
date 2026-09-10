@@ -307,7 +307,7 @@ export function brandTokenAccentLift(
  * im Dunkeln alles steht. Führt die Marke kein `paper`, gilt Neutral 950
  * direkt; die Rechnung bleibt so für jede Marke dieselbe.
  */
-function darkGroundHex(preset: BrandDesignSnapshotPreset): string {
+export function brandTokenDarkGround(preset: BrandDesignSnapshotPreset): string {
   const paper = preset.color.roles.find(role => role.id === 'paper')
   const colors = {
     rampLight: preset.color.rampLight,
@@ -316,6 +316,26 @@ function darkGroundHex(preset: BrandDesignSnapshotPreset): string {
     accent: preset.color.accent,
   }
   return (paper ? brandTokenRoleHex(paper.source, 'dark', colors) : null) ?? preset.color.neutral[950]
+}
+
+/**
+ * DIE HEBUNG FÜR EIN GANZES PRESET — Rampe, Grund und Urteil in EINEM Aufruf
+ * (Paket K4).
+ *
+ * Sie steht hier und nicht beim Aufrufer, weil das Book seit K4 DENSELBEN
+ * Beleg zeigt, den `tokens.json` als `$extensions` trägt (§2.20 Nr. 7). Zwei
+ * Stellen, die Akzent-Rampe und dunkle Fläche selbst zusammensuchen, wären
+ * zwei Gelegenheiten, eine andere Fläche zu messen als die, gegen die das
+ * Token gehoben wurde — und der Leser sähe im Handbuch ein Verhältnis, das in
+ * der Datei nicht steht.
+ *
+ * `null` heisst: nichts zu heben (der Akzent erreicht AA) oder nichts zu
+ * rechnen (unlesbarer Akzent).
+ */
+export function brandTokenAccentLiftFor(preset: BrandDesignSnapshotPreset): BrandTokenAccentLift | null {
+  const accentRamp = brandRampDark(preset.color.accent)
+  if (!accentRamp) return null
+  return brandTokenAccentLift(preset.color.accent, brandTokenDarkGround(preset), accentRamp)
 }
 
 function rampGroup(ramp: BrandRamp, description: string): BrandRampTokenGroup {
@@ -356,7 +376,7 @@ function roleGroup(
      * Akzent-Rampe — das gemessene Urteil reist als Beleg mit. Der helle
      * Modus und jede andere Rolle bleiben unberührt. */
     const lift = scheme === 'dark' && role.source === 'accent' && accentRamp
-      ? brandTokenAccentLift(preset.color.accent, darkGroundHex(preset), accentRamp)
+      ? brandTokenAccentLiftFor(preset)
       : null
     const token: BrandColorAliasToken = {
       $type: 'color',

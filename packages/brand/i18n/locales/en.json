@@ -2206,7 +2206,13 @@
       "note": {
         "visuell": "Part of the foundation, but it takes shape in Brand Design — derived from everything above.",
         "ki-texte": "A fixed frame filled with your own values — nothing invented, as current as the chapters above.",
-        "visuellDone": "Decided in Brand Design — colour world, type pair, mark, imagery and motion, derived from everything above."
+        "visuellDone": "Decided in Brand Design — colour world, type pair, mark, imagery and motion, derived from everything above.",
+        "nomenklatur": "How new products, places and formats are named — derived from brand architecture, values and tone.",
+        "zeichen-anwendung": "The rulebook for the mark — the same setting as in \"Visual identity\", one zoom level closer.",
+        "farbe-anwendung": "Roles, contrasts and rules — the same figures that stand in tokens.json.",
+        "typografie-anwendung": "Pair, size ladder and licence — computed from the chosen hierarchy, not typed.",
+        "pressekit": "Nothing new — assembled from messaging, released facts and the contact.",
+        "kiTexteGuidelines": "The fixed frame stays — below it: scope, review, guardrails and the templates."
       },
       "visual": {
         "follows": "follows in Brand Design",
@@ -2255,7 +2261,8 @@
         "farbe-anwendung": "Colour usage",
         "typografie-anwendung": "Type usage",
         "pressekit": "Press kit",
-        "ki-texte": "Rules for AI copy"
+        "ki-texte": "Rules for AI copy",
+        "aiGuidelines": "AI guidelines"
       },
       "label": {
         "pitch": "In one sentence",
@@ -2287,14 +2294,57 @@
         "distinctiveAsset": "Verbal signature",
         "nameDecision": "Top three",
         "nameChecks": "Availability check",
-        "nameCriteria": "Eight criteria"
+        "nameCriteria": "Eight criteria",
+        "nameTypes": "Product types",
+        "namePatterns": "Pattern per product type",
+        "nameRules": "Naming rules",
+        "markKind": "Kind of mark",
+        "markBrief": "Brief",
+        "markClearSpace": "Clear space",
+        "markMinSizes": "Minimum sizes",
+        "markVariants": "Variants",
+        "markDonts": "Don'ts",
+        "colorRolesLight": "Roles in light mode",
+        "colorRolesDark": "Roles in dark mode",
+        "accentLift": "Accent in dark mode",
+        "contrastPairs": "Contrast pairs with verdict",
+        "colorRules": "Colour rules",
+        "typePair": "Font pair",
+        "typeScale": "Size scale",
+        "typeRules": "Type rules",
+        "typeLicense": "Licence",
+        "pressFacts": "Released facts",
+        "pressContact": "Press contact",
+        "pressMark": "Mark",
+        "aiScope": "What AI may produce",
+        "aiReview": "Review rule",
+        "aiGuardrails": "Guardrails",
+        "aiPrompt": "Template"
       },
       "column": {
         "name": "Name",
         "note": "Note",
         "rank": "Rank",
         "check": "Check",
-        "criteria": "Criterion"
+        "criteria": "Criterion",
+        "nameType": "Type",
+        "pattern": "Pattern",
+        "example": "Example",
+        "usage": "Use",
+        "minSize": "Minimum size",
+        "role": "Role",
+        "hex": "Hex",
+        "contrast": "Contrast",
+        "accent": "Accent",
+        "ground": "Ground",
+        "pair": "Pair",
+        "ratio": "Ratio",
+        "verdict": "Verdict",
+        "step": "Step",
+        "size": "Size",
+        "lineHeight": "Line height",
+        "weight": "Weight",
+        "font": "Font"
       },
       "direction": {
         "chosen": "Chosen direction",
@@ -2381,6 +2431,45 @@
         "lockedProgress": "{done} of {total} chapters",
         "toChapter": "Continue in Brand Design",
         "progressTitle": "Brand Design"
+      },
+      "usage": {
+        "follows": "follows in Brand Book & Kit",
+        "product": "Brand Book & Kit",
+        "lockedDerivation": "Book & Kit is part of the derivation — we unlock it in the intro call.",
+        "lockedDesign": "Comes with Brand Design: without a colour world, type pair and mark there is no rule here that would hold.",
+        "shareLine": "This chapter follows in Brand Book & Kit.",
+        "copy": "Copy",
+        "copied": "Copied",
+        "contactPublic": "This detail travels with the press kit and the shared link.",
+        "promptHint": "Computed without AI — from your values, tone words and the guardrails above.",
+        "markClearspace": {
+          "title": "Clear space and minimum sizes",
+          "text": "How much air the mark needs and below which size it is no longer set."
+        },
+        "markVariants": {
+          "title": "Variants",
+          "text": "Light, dark, single colour — and when each one applies."
+        },
+        "markDonts": {
+          "title": "Don'ts",
+          "text": "What never happens to the mark, with a counter-example beside it."
+        },
+        "colorRoles": {
+          "title": "Role table",
+          "text": "Every role with its hex, light and dark — the same names in both modes."
+        },
+        "colorContrast": {
+          "title": "Contrast pairs",
+          "text": "Checked pairs with a verdict, and the rule \"never set text on …\" from the failures."
+        },
+        "typeScale": {
+          "title": "Size table",
+          "text": "h1 to small with size, line height and weight."
+        },
+        "typeLicense": {
+          "title": "Rules and licence",
+          "text": "What each typeface carries — and where the files come from."
+        }
       }
     },
     "session": {

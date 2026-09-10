@@ -99,6 +99,20 @@ const chapters = computed(() => {
     // `schemaVersion` — auch eine v2-Marke ohne fertiges Brand Design hat
     // keines, und ein alter Link muss ohne Sonderweg lesbar bleiben.
     ...(source.design ? { design: source.design } : {}),
+    /**
+     * DIE ANWENDUNGS-KAPITEL BEIM FREMDLESER (Paket K4, §2.5): sie stehen
+     * NUR mit eingefrorenem Preset — dann sind sie voll und wahr, denn sie
+     * sind daraus gerechnet.
+     *
+     * Ohne Preset bleibt das Feld WEG, und der Renderer lässt die drei
+     * Kapitel ganz aus (`derivationUnlocked: undefined`). Das ist die
+     * ehrliche Antwort: ein Snapshot weiss nichts über den heutigen
+     * Freischalt-Zustand des Kontos, und drei Schranken in einem fremden
+     * Handbuch wären drei Kapitel Werbung, deren Aussage der Leser nicht
+     * nachprüfen kann. Was er stattdessen sieht, ist unverändert Kapitel 10
+     * — dort steht die Schranke seit G4, in EINEM Satz.
+     */
+    ...(source.design ? { derivationUnlocked: true } : {}),
   }).chapters
 })
 

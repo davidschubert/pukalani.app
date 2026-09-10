@@ -58,6 +58,27 @@ const block = z.discriminatedUnion('kind', [
     slotId: z.string().min(1),
     optionIds: z.array(z.string()),
   }),
+  /* SEIT K4 (§2.5): Regeln, Vorlagen und die Ansprechperson des Pressekits.
+   * `label` und `title` sind MARKEN-Inhalt und deshalb Sätze; jede andere
+   * Beschriftung bleibt ein Schlüssel (s. Kopf Nr. 2). */
+  z.object({
+    kind: z.literal('rules'),
+    ...labelled,
+    label: z.string().min(1).optional(),
+    items: z.array(z.object({ text: z.string(), dont: z.string().optional() })),
+  }),
+  z.object({
+    kind: z.literal('prompt'),
+    labelKey: z.string().min(1),
+    title: z.string(),
+    text: z.string(),
+  }),
+  z.object({
+    kind: z.literal('contact'),
+    name: z.string(),
+    role: z.string(),
+    email: z.string(),
+  }),
   z.object({
     kind: z.literal('aiRules'),
     tone: z.array(z.string()),

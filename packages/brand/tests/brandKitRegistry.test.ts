@@ -319,7 +319,7 @@ describe('K0 — Schicht 3 zählt ohne Freischaltung nirgends mit', () => {
     expect(auf.steps).toEqual(['nomenclature', 'aiguide'])
   })
 
-  it('Leseansicht: die fünf neuen Anker stehen im Vertrag, aber ohne Blöcke (K4)', () => {
+  it('Leseansicht: die fünf neuen Anker stehen im Vertrag (K0) und ihre Quellen (K4)', () => {
     // Die Reihenfolge IST der Vertrag (§2.17: verschickte Tieflinks dürfen
     // nicht ins Leere zeigen) — `ki-texte` bleibt, wo es steht.
     expect([...BRAND_FOUNDATION_CHAPTER_IDS]).toEqual([
@@ -332,9 +332,12 @@ describe('K0 — Schicht 3 zählt ohne Freischaltung nirgends mit', () => {
     expect(BRAND_FOUNDATION_SOURCE_STEPS['zeichen-anwendung']).toEqual(['mark'])
     expect(BRAND_FOUNDATION_SOURCE_STEPS['farbe-anwendung']).toEqual(['color'])
     expect(BRAND_FOUNDATION_SOURCE_STEPS['typografie-anwendung']).toEqual(['type'])
-    // Kapitel 11 heisst erst nach Abnahme von `aiguide` „AI-Guidelines" (K4) —
-    // seine Quellen bleiben in K0 unverändert.
-    expect(BRAND_FOUNDATION_SOURCE_STEPS['ki-texte']).toEqual(['values', 'archetype', 'verbal'])
+    // Kapitel 11 heisst nach Abnahme von `aiguide` „AI-Guidelines" (§2.20
+    // Nr. 6) — seit K4 wartet es deshalb auch auf dieses Kapitel. `aiguide`
+    // steht ZULETZT: `brandFoundationPendingStep` nimmt das ERSTE offene
+    // Quell-Kapitel als Sprungziel, und wer den Rahmen noch nicht hat, soll
+    // dorthin und nicht in eine Schicht, die er erst danach betritt.
+    expect(BRAND_FOUNDATION_SOURCE_STEPS['ki-texte']).toEqual(['values', 'archetype', 'verbal', 'aiguide'])
   })
 
   it('Share: die drei Kapitel reisen wie Foundation-Kapitel (§2.5)', () => {
