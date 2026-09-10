@@ -43,8 +43,30 @@ import {
 const localesDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'i18n', 'locales')
 const LOCALES = ['de', 'en'] as const
 
-interface AdvisorCopy { role?: string, focus?: string, intro?: string }
+interface AdvisorCopy {
+  role?: string
+  focus?: string
+  /**
+   * Seit der Solo-Weiche (BW1-Inhaltsrunde 2026-09-09) darf das Intro ein Paar
+   * `{solo, team}` sein — es ist ein GESPROCHENER Satz und folgt der Anrede der
+   * Marke (`shared/brandTeamText.ts`). Die Wächter unten prüfen deshalb JEDE
+   * Fassung: eine Weiche darf keine Gelegenheit sein, in einem der beiden Zweige
+   * den Namen der Kollegin oder das Übergabe-Verbot zu vergessen.
+   */
+  intro?: string | { solo?: string, team?: string }
+}
 type Catalog = { brand: { advisors?: Record<string, AdvisorCopy> } }
+
+/** Alle Fassungen eines Intros — eine ohne Weiche, zwei mit. */
+function introVariants(entry: AdvisorCopy | undefined): string[] {
+  const intro = entry?.intro
+  if (typeof intro === 'string') return [intro]
+  if (!intro) return []
+  // Ein halbes Paar ist ein Loch und kein Sonderfall: der Rückfall in
+  // `teamTextKeyFor` griffe zwar, aber der Basis-Schlüssel steht dann nicht
+  // mehr da — die Anrede fiele auf den rohen Schlüssel zurück.
+  return typeof intro.solo === 'string' && typeof intro.team === 'string' ? [intro.solo, intro.team] : []
+}
 
 const catalogs = Object.fromEntries(LOCALES.map(locale => [
   locale,
@@ -191,7 +213,8 @@ describe('Berater im i18n-Katalog', () => {
         const entry = catalogs[locale].brand.advisors?.[advisor.key]
         if (!entry?.role?.trim()) gaps.push(`${advisor.key}.role fehlt in ${locale}`)
         if (!entry?.focus?.trim()) gaps.push(`${advisor.key}.focus fehlt in ${locale}`)
-        if (!entry?.intro?.trim()) gaps.push(`${advisor.key}.intro fehlt in ${locale}`)
+        const intros = introVariants(entry)
+        if (!intros.length || intros.some(intro => !intro.trim())) gaps.push(`${advisor.key}.intro fehlt in ${locale}`)
       }
     }
     expect(gaps).toEqual([])
@@ -200,8 +223,9 @@ describe('Berater im i18n-Katalog', () => {
   it('das Phasen-Intro nennt die Kollegin beim Namen', () => {
     for (const advisor of BRAND_ADVISORS) {
       for (const locale of LOCALES) {
-        expect(catalogs[locale].brand.advisors![advisor.key]!.intro, `${advisor.key}/${locale}`)
-          .toContain(advisor.name)
+        for (const intro of introVariants(catalogs[locale].brand.advisors?.[advisor.key])) {
+          expect(intro, `${advisor.key}/${locale}`).toContain(advisor.name)
+        }
       }
     }
   })
@@ -213,8 +237,9 @@ describe('Berater im i18n-Katalog', () => {
     const handoverWording = /übernimmt|takes over|führt ab hier|leads from here/i
     for (const advisor of BRAND_ADVISORS) {
       for (const locale of LOCALES) {
-        expect(catalogs[locale].brand.advisors![advisor.key]!.intro, `${advisor.key}/${locale}`)
-          .not.toMatch(handoverWording)
+        for (const intro of introVariants(catalogs[locale].brand.advisors?.[advisor.key])) {
+          expect(intro, `${advisor.key}/${locale}`).not.toMatch(handoverWording)
+        }
       }
     }
   })

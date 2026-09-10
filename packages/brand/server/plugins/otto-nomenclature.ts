@@ -1,3 +1,4 @@
+import type { BrandTeamKind } from '../../shared/slotRegistry'
 import {
   type AdvisorSlotVerdict,
   type AdvisorSlotVerifyInput,
@@ -72,13 +73,17 @@ export function ottoPatternQuestion(
   violation: string,
   detail: string,
   uiLocale: string,
+  /** Anrede der Marke (BW1-Inhaltsrunde 2026-09-09) — Vorgabe ist die Team-Fassung. */
+  team: BrandTeamKind = 'team',
 ): string {
   const de = isDe(uiLocale)
   const label = typeLabel(detail, uiLocale)
   if (violation === 'pattern_missing') {
     return de
       ? `Für „${label}" habe ich noch kein Muster, das ich verantworten kann. `
-        + 'Nennt mir einen Namen, den ihr in dieser Sorte schon vergeben habt oder vergeben würdet — '
+        + (team === 'solo'
+          ? 'Nenn mir einen Namen, den du in dieser Sorte schon vergeben hast oder vergeben würdest — '
+          : 'Nennt mir einen Namen, den ihr in dieser Sorte schon vergeben habt oder vergeben würdet — ')
         + 'daraus wird die Regel.'
       : `I have no pattern for "${label}" that I would stand behind yet. `
         + 'Give me one name you have already used in that kind — or would use — and the rule follows from it.'
@@ -92,7 +97,7 @@ export function ottoPatternQuestion(
   }
   if (violation === 'pattern_stray_type') {
     return de
-      ? `Ich hatte ein Muster für „${label}" dabei — das steht aber nicht in eurer Auswahl. `
+      ? `Ich hatte ein Muster für „${label}" dabei — das steht aber nicht in der Auswahl. `
         + 'Gehört die Sorte doch dazu, oder lasse ich sie weg?'
       : `I had a pattern for "${label}", but that kind is not in your selection. `
         + 'Does it belong after all, or shall I leave it out?'
@@ -120,7 +125,7 @@ export function verifyOttoDraft(input: AdvisorSlotVerifyInput): AdvisorSlotVerdi
   const check = checkBrandNamePatterns(types, input.draft)
   return check.ok
     ? { draft: input.draft }
-    : { question: ottoPatternQuestion(check.violation, check.detail, input.uiLocale) }
+    : { question: ottoPatternQuestion(check.violation, check.detail, input.uiLocale, input.team) }
 }
 
 /** Ottos Generator für das Kapitel `nomenclature`. */

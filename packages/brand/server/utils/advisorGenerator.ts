@@ -6,7 +6,7 @@ import {
   checkBrandChoiceDraft,
   swapBrandChoiceValueLine,
 } from '../../shared/brandChoiceOptions'
-import type { BrandSlot } from '../../shared/slotRegistry'
+import type { BrandSlot, BrandTeamKind } from '../../shared/slotRegistry'
 import type {
   BrandGeneratorContext,
   BrandGeneratorResult,
@@ -195,6 +195,13 @@ export interface AdvisorSlotVerifyInput {
   /** Sprache der OBERFLÄCHE — eine Rückfrage ist Chat und folgt Regel 9. */
   uiLocale: string
   /**
+   * Die Anrede-Weiche der Marke (BW1-Inhaltsrunde 2026-09-09) — eine
+   * Rückfrage ist Chat, und Chat spricht die Person an: bei „Nur ich" mit
+   * „du", im Team mit „ihr". Fehlt sie, bleibt es bei der Team-Fassung, die
+   * vor dieser Runde die einzige war.
+   */
+  team?: BrandTeamKind
+  /**
    * DIE QUELL-SLOTS DIESES FELDES — dieselben, die auch in den Prompt gingen
    * (K5).
    *
@@ -239,6 +246,8 @@ export function verifyBrandChoiceSlot(input: {
   slot: { id: string }
   draft: string
   uiLocale: string
+  /** Anrede der Marke — s. `AdvisorSlotVerifyInput.team` (BW1-Inhaltsrunde). */
+  team?: BrandTeamKind
 }): AdvisorSlotVerdict {
   const contract = brandChoiceContract(input.slot.id)
   if (!contract) return { draft: input.draft }
@@ -246,7 +255,7 @@ export function verifyBrandChoiceSlot(input: {
   const check = checkBrandChoiceDraft(contract, input.draft)
   return check.ok
     ? { draft: check.value }
-    : { question: brandChoiceFallbackQuestion(contract, input.uiLocale) }
+    : { question: brandChoiceFallbackQuestion(contract, input.uiLocale, input.team) }
 }
 
 export interface AdvisorSlotGeneratorOptions {
@@ -319,6 +328,10 @@ export function createAdvisorSlotGenerator(options: AdvisorSlotGeneratorOptions)
       // dort automatisch dessen Technik. WER spricht, steht gar nicht zur
       // Debatte — das ist seit dem 2026-09-02 immer George.
       technique: techniqueForStep(context.stepKey),
+      // Die Satzanfänge der Technik folgen der Anrede der Marke
+      // (BW1-Inhaltsrunde 2026-09-09) — sonst gibt die Stimmprobe dem Modell
+      // ein „Warum ausgerechnet ihr?" mit, während die Anrede-Regel „du" sagt.
+      team: context.team,
       persona: personaName(),
       // george-a-15 (Befund 4): ohne das Datum rechnet das Modell Zeitspannen
       // gegen sein Trainingsende — „seit 2021" wurde zu „drei Jahre".
@@ -361,6 +374,7 @@ export function createAdvisorSlotGenerator(options: AdvisorSlotGeneratorOptions)
         slot: context.slot,
         draft: turn.draft,
         uiLocale: context.uiLocale,
+        team: context.team,
         dependencies: context.dependencies,
       })
       if ('question' in verdict) {

@@ -163,11 +163,11 @@ export const BRAND_IMAGERY_PRINCIPLES: readonly BrandImageryPrinciple[] = [
       },
       colour: {
         doText: {
-          de: 'Gedämpfte Töne aus eurer Farbwelt, der Akzent sparsam.',
+          de: 'Gedämpfte Töne aus der Farbwelt, der Akzent sparsam.',
           en: 'Muted tones from your colour world, the accent used sparingly.',
         },
         dontText: {
-          de: 'Farbfilter und Sättigungs-Regler, die eure Töne verschieben.',
+          de: 'Farbfilter und Sättigungs-Regler, die die eigenen Töne verschieben.',
           en: 'Colour filters and saturation sliders that shift your tones.',
         },
       },
@@ -269,7 +269,7 @@ export const BRAND_IMAGERY_PRINCIPLES: readonly BrandImageryPrinciple[] = [
       },
       colour: {
         doText: {
-          de: 'Nur Töne aus eurer Farbwelt, keine Fremdfarbe.',
+          de: 'Nur Töne aus der Farbwelt, keine Fremdfarbe.',
           en: 'Only tones from your colour world, no foreign colour.',
         },
         dontText: {
@@ -603,7 +603,7 @@ const ILLUSTRATION_RULES: Readonly<Record<string, BrandImageryAxisRule>> = {
   },
   area: {
     doText: {
-      de: 'Farbflächen ohne Kontur, aus eurer Farbwelt.',
+      de: 'Farbflächen ohne Kontur, aus der Farbwelt.',
       en: 'Colour areas without outlines, from your colour world.',
     },
     dontText: {

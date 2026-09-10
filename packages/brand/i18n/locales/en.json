@@ -1370,7 +1370,10 @@
       "vera": {
         "role": "Strategist",
         "focus": "why questions, positioning",
-        "intro": "I went through your context with Vera — our strategist; she reads this chapter closely. Now I ask the why questions until your positioning holds."
+        "intro": {
+          "solo": "I went through your context with Vera — our strategist; she reads this chapter closely. Now I ask the why questions until your positioning holds.",
+          "team": "I went through your context with Vera — our strategist; she reads this chapter closely. Now I ask the why questions until your positioning holds."
+        }
       },
       "milo": {
         "role": "Values advisor",
@@ -1390,7 +1393,10 @@
       "frida": {
         "role": "Design director",
         "focus": "strategy becomes form",
-        "intro": "From here I work with Frida — our design director. She turns your foundation into form and justifies every decision against it."
+        "intro": {
+          "solo": "From here I work with Frida — our design director. She turns your foundation into form and justifies every decision against it.",
+          "team": "From here I work with Frida — our design director. She turns your foundation into form and justifies every decision against it."
+        }
       }
     },
     "invite": {
@@ -3457,34 +3463,61 @@
       "moves": {
         "nomenclature": {
           "m1": {
-            "text": "Names are cheap until they end up on a sign. Tell me first which kinds of things you give names to at all — then I propose ONE pattern per kind, not an assortment.",
+            "text": {
+              "solo": "Names are cheap until they end up on a sign. Tell me first which kinds of things you give names to at all — then I propose ONE pattern per kind, not an assortment.",
+              "team": "Names are cheap until they end up on a sign. Tell me first which kinds of things you give names to at all — then I propose ONE pattern per kind, not an assortment."
+            },
             "help": "Only on the path with brand architecture — without sub-brands there would be nothing to confirm."
           },
           "m2": {
-            "text": "On names I go by Otto: survive first, please second. The patterns below are derived, not invented — if you do not like one, correct it, but tell me which rule applies instead."
+            "text": {
+              "solo": "On names I go by Otto: survive first, please second. The patterns below are derived, not invented — if you do not like one, correct it, but tell me which rule applies instead.",
+              "team": "On names I go by Otto: survive first, please second. The patterns below are derived, not invented — if you do not like one, correct it, but tell me which rule applies instead."
+            }
           },
           "m3": {
-            "text": "And the test for every future name: can you spell it out over the phone? If not, it costs you a little money every single day."
+            "text": {
+              "solo": "And the test for every future name: can you spell it out over the phone? If not, it costs you a little money every single day.",
+              "team": "And the test for every future name: can you spell it out over the phone? If not, it costs you a little money every single day."
+            }
           }
         },
         "aiguide": {
           "m1": {
-            "text": "Two questions settle this whole chapter: what may a machine write in your name — and who reads it before it goes out. Everything after that is guardrails, not new decisions."
+            "text": {
+              "solo": "Two questions settle this whole chapter: what may a machine write in your name — and who reads it before it goes out. Everything after that is guardrails, not new decisions.",
+              "team": "Two questions settle this whole chapter: what may a machine write in your name — and who reads it before it goes out. Everything after that is guardrails, not new decisions."
+            }
           },
           "m2": {
-            "text": "I read the guardrails back with Nika's ear: your tone words, your banned words, your values, your naming rules. I invented nothing — I sorted. Strike whatever is wrong.",
-            "help": "Tone parameters from your tone words · taboos from your avoid list · spellings from your naming rules."
+            "text": {
+              "solo": "I read the guardrails back with Nika's ear: your tone words, your banned words, your values, your naming rules. I invented nothing — I sorted. Strike whatever is wrong.",
+              "team": "I read the guardrails back with Nika's ear: your tone words, your banned words, your values, your naming rules. I invented nothing — I sorted. Strike whatever is wrong."
+            },
+            "help": {
+              "solo": "Tone parameters from your tone words · taboos from your avoid list · spellings from your naming rules.",
+              "team": "Tone parameters from your tone words · taboos from your avoid list · spellings from your naming rules."
+            }
           },
           "m3": {
-            "text": "The three templates below are computed, not written: no model was involved. Paste them into your AI tool — and when a guardrail changes, they change with it."
+            "text": {
+              "solo": "The three templates below are computed, not written: no model was involved. Paste them into your AI tool — and when a guardrail changes, they change with it.",
+              "team": "The three templates below are computed, not written: no model was involved. Paste them into your AI tool — and when a guardrail changes, they change with it."
+            }
           }
         },
         "presskit": {
           "m1": {
-            "text": "Nothing new happens here — I assemble what you settled long ago. Two things still need a human: which facts may travel, and who the press can talk to."
+            "text": {
+              "solo": "Nothing new happens here — I assemble what you settled long ago. Two things still need a human: which facts may travel, and who the press can talk to.",
+              "team": "Nothing new happens here — I assemble what you settled long ago. Two things still need a human: which facts may travel, and who the press can talk to."
+            }
           },
           "m2": {
-            "text": "Your hard numbers from the context stay internal. Only what you tick here goes into the press kit — the default is none.",
+            "text": {
+              "solo": "Your hard numbers from the context stay internal. Only what you tick here goes into the press kit — the default is none.",
+              "team": "Your hard numbers from the context stay internal. Only what you tick here goes into the press kit — the default is none."
+            },
             "help": "The selection is stored as its own value; the raw list never travels."
           }
         }

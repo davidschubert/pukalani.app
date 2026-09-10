@@ -290,7 +290,7 @@
       "base": {
         "title": "Basisfarbe",
         "tag": "h.base · drei Kandidaten",
-        "intro": "Das ist die einzige Farbe, die ihr wirklich wählt — alles andere rechne ich daraus. Geprüft wird sie als Textfarbe auf dem Papierton, den sie selbst erzeugt.",
+        "intro": "Das ist die einzige Farbe, die wirklich gewählt wird — alles andere rechne ich daraus. Geprüft wird sie als Textfarbe auf dem Papierton, den sie selbst erzeugt.",
         "onPaper": "{ratio} auf Papier · {level}",
         "blocked": "Als Textfarbe nicht wählbar — unter 4,5:1. Als Fläche bleibt sie erlaubt.",
         "pickerLabel": "Basisfarbe im Farb-Picker wählen",
@@ -298,22 +298,22 @@
         "hexHint": "Picker öffnen oder eigenen Hex-Wert eingeben (sechs Zeichen)."
       },
       "candidate": {
-        "direction-deep": "Die Tiefe eurer Richtung",
-        "palette-deep": "Die Tiefe eurer Farbwelt",
-        "direction-mid": "Der Mittelton eurer Richtung",
+        "direction-deep": "Die Tiefe der Richtung",
+        "palette-deep": "Die Tiefe der Farbwelt",
+        "direction-mid": "Der Mittelton der Richtung",
         "signal-deep": "Ein zweiter Farbton als Signal",
         "signal-alt": "Noch ein Signal-Ton"
       },
       "reason": {
         "base": {
-          "directionDeep": "Die tiefste Farbe der Richtung, für die ihr euch entschieden habt — tief genug, um Text zu tragen.",
+          "directionDeep": "Die tiefste Farbe der gewählten Richtung — tief genug, um Text zu tragen.",
           "paletteDeep": "Ein anderer Farbton aus derselben kuratierten Welt: eigenständiger, ohne die Richtung zu verlassen.",
           "directionMid": "Der freundlichste der drei — und meistens der, der als Textfarbe durchfällt."
         },
         "accent": {
-          "directionMid": "Aus eurer eigenen Welt und damit harmonisch — für hellen Knopf-Text ist er meistens zu hell.",
+          "directionMid": "Aus der eigenen Welt und damit harmonisch — für hellen Knopf-Text ist er meistens zu hell.",
           "signalDeep": "Ein anderer Farbton, tief genug für hellen Text: das Signal, das man auch von weitem sieht.",
-          "signalAlt": "Dieselbe Idee in einer zweiten Farbe — falls die erste zu nah an eurem Umfeld liegt."
+          "signalAlt": "Dieselbe Idee in einer zweiten Farbe — falls die erste zu nah am Umfeld der Marke liegt."
         }
       },
       "scheme": {
@@ -332,7 +332,7 @@
         "tag": "h.neutral",
         "intro": "Flächen und Linien tragen einen Hauch Farbe — oder bewusst einen anderen Ton.",
         "note": {
-          "tinted": "Flächen tragen einen Hauch eurer Marke — die Vorgabe.",
+          "tinted": "Flächen tragen einen Hauch der Marke — die Vorgabe.",
           "warm": "Papierfarben mit Gelbstich, wie ungestrichenes Papier.",
           "cool": "Ruhiger, technischer — nimmt der Wärme etwas Süße."
         }
@@ -341,7 +341,7 @@
         "title": "Akzent",
         "tag": "h.accent",
         "intro": "Ein Signal, kein Zweitgrund: ein Pop je Fläche.",
-        "tooClose": "Zu nah an eurer Basisfarbe — als Signal würde ihn niemand lesen."
+        "tooClose": "Zu nah an der Basisfarbe — als Signal würde ihn niemand lesen."
       },
       "roles": {
         "title": "Rollen",
@@ -378,8 +378,8 @@
       "about": "About",
       "team": "Team",
       "product": {
-        "wizard": "Eure Marke entsteht im Gespräch mit eurem Markenberater.",
-        "design": "Drei Moodboards aus eurer Visual DNA.",
+        "wizard": "Die Marke entsteht im Gespräch mit einem persönlichen Markenberater.",
+        "design": "Drei Moodboards aus der Visual DNA.",
         "book": "Book, Tokens, brand.json + Strategy Playbook.",
         "experience": "Assets und Pläne entlang des 90-Tage-Plans.",
         "monitoring": "Wöchentlicher Blick von außen, mit Alerts.",
@@ -792,23 +792,23 @@
       }
     },
     "stepInfo": {
-      "context": "Der Kontext ist der Boden, auf dem alles steht: Wer ihr seid, was ihr anbietet, für wen — und in welchem Markt ihr euch bewegt. Jede spätere Empfehlung von George stützt sich auf diese Fakten; ohne sauberen Kontext wären Werte, Archetyp und Tagline geraten statt hergeleitet.",
-      "pvm": "Der Kompass der Marke: Der Purpose sagt, warum es euch gibt. Die Vision, wohin ihr wollt. Die Mission, wie ihr dorthin kommt. Zusammen sind sie die Messlatte für jede Entscheidung — von der Preisliste bis zum Instagram-Post.",
-      "architecture": "Die Markenarchitektur ordnet eure Markenfamilie: Tritt alles unter einer Marke auf, tragen Produkte eigene Namen — und wer leiht wem Vertrauen? Aus drei Weichen leitet George ein Modell her und macht daraus eine Namensregel, an der sich jedes künftige Angebot messen lässt.",
-      "values": "Werte sind die Verhaltensregeln eurer Marke: Sie sagen, wie ihr entscheidet, wenn es unbequem wird. In der Brand Foundation sind sie das Scharnier zwischen Purpose (warum es euch gibt) und Archetyp & Stimme (wie ihr klingt) — jede spätere Design- und Textentscheidung wird an ihnen gemessen.",
-      "archetype": "Der Archetyp gibt eurer Marke einen wiedererkennbaren Charakter — ein Muster, das Menschen intuitiv verstehen (der Weise, der Entdecker, der Fürsorgliche …). Daraus leitet sich die Stimme ab: wie ihr klingt, worüber ihr sprecht und worüber nie. So schreibt jeder im Team, als schriebe dieselbe Person.",
+      "context": "Der Kontext ist der Boden, auf dem alles steht: wer hinter der Marke steht, was sie anbietet, für wen — und in welchem Markt sie sich bewegt. Jede spätere Empfehlung von George stützt sich auf diese Fakten; ohne sauberen Kontext wären Werte, Archetyp und Tagline geraten statt hergeleitet.",
+      "pvm": "Der Kompass der Marke: Der Purpose sagt, warum es sie gibt. Die Vision, wohin sie will. Die Mission, wie sie dorthin kommt. Zusammen sind sie die Messlatte für jede Entscheidung — von der Preisliste bis zum Instagram-Post.",
+      "architecture": "Die Markenarchitektur ordnet die Markenfamilie: Tritt alles unter einer Marke auf, tragen Produkte eigene Namen — und wer leiht wem Vertrauen? Aus drei Weichen leitet George ein Modell her und macht daraus eine Namensregel, an der sich jedes künftige Angebot messen lässt.",
+      "values": "Werte sind die Verhaltensregeln der Marke: Sie sagen, wie entschieden wird, wenn es unbequem wird. In der Brand Foundation sind sie das Scharnier zwischen Purpose (warum es die Marke gibt) und Archetyp & Stimme (wie sie klingt) — jede spätere Design- und Textentscheidung wird an ihnen gemessen.",
+      "archetype": "Der Archetyp gibt der Marke einen wiedererkennbaren Charakter — ein Muster, das Menschen intuitiv verstehen (der Weise, der Entdecker, der Fürsorgliche …). Daraus leitet sich die Stimme ab: wie die Marke klingt, worüber sie spricht und worüber nie. So liest sich jeder Text, als schriebe dieselbe Person.",
       "manifesto": "Das Manifest verdichtet die ganze Foundation in einen Text mit Haltung — das Stück, das man laut vorlesen kann: auf der Website, im Pitch, beim Onboarding neuer Leute. Es entsteht aus Purpose, Werten und Stimme, nicht umgekehrt.",
-      "verbal": "Die Tagline ist der eine Satz neben eurem Namen; das Messaging sind die Kernbotschaften dahinter — was ihr wem sagt, damit es hängen bleibt. Beides baut auf der Foundation auf: Ohne geklärte Werte klingt jede Tagline beliebig.",
+      "verbal": "Die Tagline ist der eine Satz neben dem Namen; das Messaging sind die Kernbotschaften dahinter — was wem gesagt wird, damit es hängen bleibt. Beides baut auf der Foundation auf: Ohne geklärte Werte klingt jede Tagline beliebig.",
       "naming": "Ob neue Marke oder Prüfstand für den Bestandsnamen: Hier wird der Name an der Foundation gemessen — passt er zu Purpose, Werten und Archetyp? Dazu die nüchterne Prüfung: Ist er frei, ist er aussprechbar, funktioniert er auch auf Englisch?",
-      "result": "Das Ergebnis bündelt alle bestätigten Entscheidungen der Foundation zu eurem Markendokument — mit einer Richtung für alles Weitere. Von hier aus geht es in Design, Texte und den Auftritt; und je ehrlicher die Kapitel davor, desto tragfähiger ist, was hier steht.",
-      "dna": "Vor Farbe und Schrift steht eine Richtung. Frida liest eure Foundation und — wenn ihr welche mitbringt — eure Vorbilder, und macht daraus zehn benannte Eigenschaften eurer Gestalt statt einer Stimmung.",
-      "color": "Eure Farben kommen nicht aus dem Katalog: aus Archetyp und Werten wird eine Basisfarbe hergeleitet und daraus eine geprüfte Hell- und Dunkel-Rampe mit barrierefreien Kontrast-Paaren.",
-      "type": "Schrift ist Stimme in Form. Aus eurer Tonalität folgt ein Paar für Überschrift und Text, dazu Grade, Hierarchie und die Regeln, wo welcher Schnitt gilt.",
-      "mark": "Die Richtung eures Zeichens — Wortmarke, Monogramm oder Bildmarke — mit Briefing und gesetzten Beispielen. Ein Entwurf ist ein Entwurf, kein fertiges, schützbares Logo.",
-      "imagery": "Wie eure Marke aussieht, wenn sie nicht spricht: Fotografie-Stil, Illustration und Icons — mit Do & Don’t zum Fühlen statt einer Liste von Adjektiven.",
-      "motion": "Bewegung mit Charakter: Tempo und Übergänge, ob euer Zeichen sich bewegt — und was passiert, wenn jemand reduzierte Bewegung eingestellt hat.",
-      "nomenclature": "Wenn die Marke wächst, bekommt jedes neue Ding einen Namen — und ohne Muster bekommt es irgendeinen. Otto leitet je Produkttyp ein Namensmuster aus eurer Markenarchitektur her und macht daraus Regeln, an denen sich jeder künftige Name messen lässt.",
-      "aiguide": "KI schreibt längst mit. Hier legt ihr fest, was sie in eurem Namen erzeugen darf, wer freigibt und welche Leitplanken gelten — Ton, Tabu-Wörter, Schreibweisen. Nika leitet alles aus eurer Stimme ab; erfunden wird nichts.",
+      "result": "Das Ergebnis bündelt alle bestätigten Entscheidungen der Foundation zum Markendokument — mit einer Richtung für alles Weitere. Von hier aus geht es in Design, Texte und den Auftritt; und je ehrlicher die Kapitel davor, desto tragfähiger ist, was hier steht.",
+      "dna": "Vor Farbe und Schrift steht eine Richtung. Frida liest die Foundation und — falls welche hinterlegt sind — die Vorbilder, und macht daraus zehn benannte Eigenschaften der Gestalt statt einer Stimmung.",
+      "color": "Die Farben kommen nicht aus dem Katalog: aus Archetyp und Werten wird eine Basisfarbe hergeleitet und daraus eine geprüfte Hell- und Dunkel-Rampe mit barrierefreien Kontrast-Paaren.",
+      "type": "Schrift ist Stimme in Form. Aus der Tonalität folgt ein Paar für Überschrift und Text, dazu Grade, Hierarchie und die Regeln, wo welcher Schnitt gilt.",
+      "mark": "Die Richtung des Zeichens — Wortmarke, Monogramm oder Bildmarke — mit Briefing und gesetzten Beispielen. Ein Entwurf ist ein Entwurf, kein fertiges, schützbares Logo.",
+      "imagery": "Wie die Marke aussieht, wenn sie nicht spricht: Fotografie-Stil, Illustration und Icons — mit Do & Don’t zum Fühlen statt einer Liste von Adjektiven.",
+      "motion": "Bewegung mit Charakter: Tempo und Übergänge, ob das Zeichen sich bewegt — und was passiert, wenn jemand reduzierte Bewegung eingestellt hat.",
+      "nomenclature": "Wenn die Marke wächst, bekommt jedes neue Ding einen Namen — und ohne Muster bekommt es irgendeinen. Otto leitet je Produkttyp ein Namensmuster aus der Markenarchitektur her und macht daraus Regeln, an denen sich jeder künftige Name messen lässt.",
+      "aiguide": "KI schreibt längst mit. Hier wird festgelegt, was sie im Namen der Marke erzeugen darf, wer freigibt und welche Leitplanken gelten — Ton, Tabu-Wörter, Schreibweisen. Nika leitet alles aus der Stimme der Marke ab; erfunden wird nichts.",
       "presskit": "Fast fertig aus dem, was schon steht: Boilerplates, Tagline, Zeichen. Zwei Dinge muss trotzdem ein Mensch sagen — welche Fakten öffentlich reisen dürfen und wer die Ansprechperson ist."
     },
     "part": {
@@ -897,35 +897,35 @@
     },
     "help": {
       "b": {
-        "purpose": "Der Purpose ist das WARUM: der Grund, aus dem es euch gibt — jenseits vom Geldverdienen. Die Vision ist das WOHIN, die Mission das WIE: drei Sätze, drei Aufgaben. Patagonias Purpose verkauft keine Jacken, er will den Planeten retten.",
-        "vision": "Die Vision beschreibt die Welt, wenn ihr Erfolg hattet — ein Bild, keine Zielzahl. Sie darf zehn Jahre entfernt liegen und muss trotzdem heute Richtung geben.",
-        "mission": "Die Mission sagt, was ihr täglich tut, um dorthin zu kommen — konkret genug, dass eine neue Kollegin danach handeln kann. Purpose ist das Warum, Vision das Wohin, Mission das Wie.",
-        "positioningCategory": "Positionierung ist der Platz, den ihr im Kopf besetzt: eine Kategorie — und die Leute, für die ihr darin die erste Wahl seid. Ohne Kategorie vergleicht man euch trotzdem, nur ohne euer Zutun."
+        "purpose": "Der Purpose ist das WARUM: der Grund, aus dem es die Marke gibt — jenseits vom Geldverdienen. Die Vision ist das WOHIN, die Mission das WIE: drei Sätze, drei Aufgaben. Patagonias Purpose verkauft keine Jacken, er will den Planeten retten.",
+        "vision": "Die Vision beschreibt die Welt, wenn die Marke Erfolg hatte — ein Bild, keine Zielzahl. Sie darf zehn Jahre entfernt liegen und muss trotzdem heute Richtung geben.",
+        "mission": "Die Mission sagt, was täglich getan wird, um dorthin zu kommen — konkret genug, dass jemand Neues danach handeln kann. Purpose ist das Warum, Vision das Wohin, Mission das Wie.",
+        "positioningCategory": "Positionierung ist der Platz, den die Marke im Kopf besetzt: eine Kategorie — und die Leute, für die sie darin die erste Wahl ist. Ohne Kategorie wird sie trotzdem verglichen, nur ohne ihr Zutun."
       },
       "b2": {
         "model": "Vier Modelle: Branded House (eine Marke trägt alles), Sub-Brands, Endorsed Brands, House of Brands (Marken ohne sichtbare Mutter). Jedes kauft eine andere Art Vertrauen — und jedes hat seinen Preis."
       },
       "c": {
         "candidates": "Werte sind Verhaltensregeln, die Geld kosten dürfen — keine Poster-Wörter. In Umfrage um Umfrage kennt die Mehrheit der Beschäftigten die Werte der eigenen Firma nicht; genau das passiert, wenn sie nach Klang gewählt wurden.",
-        "final": "Drei bis fünf ist die Arbeitsgröße: Weniger sagt nichts, mehr merkt sich niemand. Nehmt die, die ihr in einer schlechten Woche verteidigen würdet — nicht die, die sich gut lesen."
+        "final": "Drei bis fünf ist die Arbeitsgröße: Weniger sagt nichts, mehr merkt sich niemand. Bleiben sollten die Werte, die sich in einer schlechten Woche verteidigen lassen — nicht die, die sich gut lesen."
       },
       "d": {
-        "pairs": "Der Archetyp ist der Charakter eurer Marke — er steuert Stimme, Bilder und Wirkung. Man wählt ihn nicht aus einer Liste: Er entsteht aus Vergleichen, weil eine Entscheidung zwischen zwei Gefühlen ehrlicher ist als ein Menü mit zwölf Einträgen.",
-        "primary": "Zwölf Archetypen in vier Gruppen; ihr bekommt einen primären und einen sekundären. Der primäre setzt den Ton, der sekundäre bewahrt ihn vor dem Klischee.",
-        "gapReveal": "Hier trifft euer Selbstbild auf das Bild, das euer heutiger Auftritt sendet. Eine Abweichung ist kein Fehler — sie ist das Nützlichste auf dieser Seite, und sie wird benannt statt weggeglättet."
+        "pairs": "Der Archetyp ist der Charakter der Marke — er steuert Stimme, Bilder und Wirkung. Man wählt ihn nicht aus einer Liste: Er entsteht aus Vergleichen, weil eine Entscheidung zwischen zwei Gefühlen ehrlicher ist als ein Menü mit zwölf Einträgen.",
+        "primary": "Zwölf Archetypen in vier Gruppen; heraus kommen ein primärer und ein sekundärer. Der primäre setzt den Ton, der sekundäre bewahrt ihn vor dem Klischee.",
+        "gapReveal": "Hier trifft das Selbstbild auf das Bild, das der heutige Auftritt sendet. Eine Abweichung ist kein Fehler — sie ist das Nützlichste auf dieser Seite, und sie wird benannt statt weggeglättet."
       },
       "e": {
-        "statements": "Ein Manifest bezieht Stellung: Es soll die Richtigen anziehen und die Falschen abschrecken. Die Satzanfänge sind ein Gerüst — streicht, was geliehen klingt, und behaltet, was ihr laut sagen würdet.",
+        "statements": "Ein Manifest bezieht Stellung: Es soll die Richtigen anziehen und die Falschen abschrecken. Die Satzanfänge sind ein Gerüst — weg mit allem, was geliehen klingt; bleiben darf, was sich laut sagen lässt.",
         "manifesto": "Eine Mission erklärt, ein Manifest verpflichtet. Es ist zum Vorlesen geschrieben — kürzer und schärfer gewinnt fast immer."
       },
       "f": {
         "nameType": "Es gibt neun Sorten Namen — beschreibend, erfunden, metaphorisch und so weiter. Erst die Sorte wählen, dann brainstormen: Eine gemischte Liste kippt immer in die sicherste Option.",
-        "taste": "Der Name ist das meistwiederholte Element einer Marke — er muss sprechbar, merkbar und schützbar sein. Was ihr an fremden Namen liebt, sagt mehr über euren Geschmack als jede Adjektivliste.",
+        "taste": "Der Name ist das meistwiederholte Element einer Marke — er muss sprechbar, merkbar und schützbar sein. Was an fremden Namen gefällt, sagt mehr über den eigenen Geschmack als jede Adjektivliste.",
         "checks": "Je erfundener ein Name, desto schützbarer ist er. Was hier steht, sind Indikatoren aus öffentlichen Registern und aus dem DNS — allgemeine Information, keine Rechtsberatung. Sprecht vor der Festlegung mit einer Markenanwältin."
       }
     },
     "rebrand": {
-      "r1": "Was am bestehenden Auftritt MUSS bleiben — woran man euch erkennt, was Stammkunden vermissen würden?",
+      "r1": "Was am bestehenden Auftritt MUSS bleiben — woran man die Marke erkennt, was Stammkunden vermissen würden?",
       "r2": "Was fliegt bewusst raus — und warum gerade das?"
     },
     "choice": {
@@ -994,7 +994,7 @@
       "dnaSource": {
         "inspiration": {
           "label": "Wir haben Vorbilder",
-          "hint": "Screenshots, Pinterest, drei Websites, die euch gefallen. Frida liest sie gegen eure Foundation.",
+          "hint": "Screenshots, Pinterest, drei Websites, die gefallen. Frida liest sie gegen die Foundation.",
           "example": "Die Startseite einer Rösterei, ein Buch-Cover, ein Instagram-Feed."
         },
         "foundation": {
@@ -1232,8 +1232,8 @@
           "competitorNames": "Namen von Wettbewerbern — lies deine Website ein oder trag sie selbst ein",
           "sourceTexts": "vorhandene Texte — lies dafür deine Website ein",
           "sourceSlots": "mindestens eine der Antworten, auf denen dieses Feld aufbaut",
-          "nameTypes": "die Sorten von Dingen, die ihr benennt — die Frage davor in diesem Kapitel",
-          "toneWords": "eure Ton-Wörter aus dem Kapitel Stimme"
+          "nameTypes": "die Sorten von Dingen, die benannt werden — die Frage davor in diesem Kapitel",
+          "toneWords": "die Ton-Wörter aus dem Kapitel Stimme"
         }
       },
       "progressConfirmed": "{confirmed} von {total} bestätigt",
@@ -1370,7 +1370,10 @@
       "vera": {
         "role": "Strategin",
         "focus": "Warum-Fragen, Positionierung",
-        "intro": "Ich habe euren Kontext mit Vera durchgesehen — unserer Strategin; sie liest in diesem Kapitel streng mit. Jetzt stelle ich die Warum-Fragen, bis eure Positionierung trägt."
+        "intro": {
+          "solo": "Ich habe deinen Kontext mit Vera durchgesehen — unserer Strategin; sie liest in diesem Kapitel streng mit. Jetzt stelle ich die Warum-Fragen, bis deine Positionierung trägt.",
+          "team": "Ich habe euren Kontext mit Vera durchgesehen — unserer Strategin; sie liest in diesem Kapitel streng mit. Jetzt stelle ich die Warum-Fragen, bis eure Positionierung trägt."
+        }
       },
       "milo": {
         "role": "Werte-Berater",
@@ -1390,7 +1393,10 @@
       "frida": {
         "role": "Design Directorin",
         "focus": "Strategie wird Gestalt",
-        "intro": "Ab hier arbeite ich mit Frida — unserer Design Directorin. Sie macht aus eurer Foundation eine Gestalt und begründet jede Entscheidung am Fundament."
+        "intro": {
+          "solo": "Ab hier arbeite ich mit Frida — unserer Design Directorin. Sie macht aus deiner Foundation eine Gestalt und begründet jede Entscheidung am Fundament.",
+          "team": "Ab hier arbeite ich mit Frida — unserer Design Directorin. Sie macht aus eurer Foundation eine Gestalt und begründet jede Entscheidung am Fundament."
+        }
       }
     },
     "invite": {
@@ -1525,12 +1531,12 @@
       },
       "criteria": {
         "a1": {
-          "title": "Der erste Satz gehört nur euch",
+          "title": "Der erste Satz gehört nur dieser Marke",
           "next": "Schreibt den ersten Satz so, dass ihn kein Wettbewerber unterschreiben könnte — im Relaunch ist das der erste Baustein."
         },
         "a2": {
           "title": "Name und Claim sind unverwechselbar",
-          "next": "Prüft, ob euer Claim etwas behauptet, statt nur die Kategorie zu nennen — euer Markenberater stellt genau diese Frage zuerst."
+          "next": "Der Claim sollte etwas behaupten, statt nur die Kategorie zu nennen — der Markenberater stellt genau diese Frage zuerst."
         },
         "a3": {
           "title": "Keine Floskeln im Einstieg",
@@ -1538,11 +1544,11 @@
         },
         "a4": {
           "title": "Ein erkennbarer Standpunkt",
-          "next": "Formuliert einen Satz, den ihr auch dann sagt, wenn er nicht allen gefällt — daraus wird eure Haltung."
+          "next": "Einen Satz formulieren, der auch dann fällt, wenn er nicht allen gefällt — daraus wird die Haltung."
         },
         "a5": {
           "title": "Eigene Bildsprache statt Stock-Motive",
-          "next": "Sammelt drei Motive aus eurem echten Alltag; sie tragen mehr als jedes gekaufte Bild."
+          "next": "Drei Motive aus dem echten Alltag sammeln; sie tragen mehr als jedes gekaufte Bild."
         },
         "b1": {
           "title": "Favicon und Vorschaubild vorhanden",
@@ -1554,11 +1560,11 @@
         },
         "b3": {
           "title": "Alt-Texte beschreiben eine Bildwelt",
-          "next": "Beschreibt in den Alt-Texten, was zu sehen ist — nebenbei ordnet ihr damit eure Bildwelt."
+          "next": "In den Alt-Texten beschreiben, was zu sehen ist — nebenbei ordnet das die Bildwelt."
         },
         "b4": {
           "title": "Farb- und Theme-Angaben gesetzt",
-          "next": "Hinterlegt eure Markenfarbe im Seitenkopf, damit Browser und App sie übernehmen."
+          "next": "Die Markenfarbe im Seitenkopf hinterlegen, damit Browser und App sie übernehmen."
         },
         "b5": {
           "title": "Wort- und Bildwelt passen zusammen",
@@ -1566,7 +1572,7 @@
         },
         "c1": {
           "title": "Ein Ton durch die ganze Seite",
-          "next": "Entscheidet euch für eine Anrede und ein Register und zieht sie durch — im Wizard wird daraus eine festgehaltene Regel."
+          "next": "Eine Anrede und ein Register festlegen und durchziehen — im Wizard wird daraus eine festgehaltene Regel."
         },
         "c2": {
           "title": "Titel, Vorschau und Überschrift sagen dasselbe",
@@ -1594,11 +1600,11 @@
         },
         "d3": {
           "title": "Auffindbarkeit: Titel und Beschreibung",
-          "next": "Schreibt Titel und Beschreibung in guter Länge — sie sind euer Auftritt in der Suche."
+          "next": "Titel und Beschreibung in guter Länge schreiben — sie sind der Auftritt in der Suche."
         },
         "d4": {
           "title": "Strukturierte Daten für Suche und KI",
-          "next": "Hinterlegt Organisation und Website als strukturierte Daten, damit Antwortmaschinen euch richtig zitieren."
+          "next": "Organisation und Website als strukturierte Daten hinterlegen, damit Antwortmaschinen die Marke richtig zitieren."
         },
         "d5": {
           "title": "Kontakt und Vertrauen sichtbar",
@@ -1606,23 +1612,23 @@
         },
         "e1": {
           "title": "In zehn Sekunden verständlich",
-          "next": "Sagt im ersten Absatz ohne Anlauf, was ihr anbietet."
+          "next": "Im ersten Absatz ohne Anlauf sagen, was angeboten wird."
         },
         "e2": {
           "title": "Für wen es gemacht ist",
-          "next": "Benennt eure Zielgruppe beim Namen — im Wizard ist das ein eigener Baustein."
+          "next": "Die Zielgruppe beim Namen nennen — im Wizard ist das ein eigener Baustein."
         },
         "e3": {
           "title": "Ein kurzer, aktiver Kernsatz",
-          "next": "Kürzt euren Kernsatz auf höchstens zwanzig Wörter mit einem aktiven Verb."
+          "next": "Den Kernsatz auf höchstens zwanzig Wörter mit einem aktiven Verb kürzen."
         },
         "e4": {
           "title": "Erkennbare Abgrenzung",
-          "next": "Sagt sachlich, was ihr anders macht — ohne den Wettbewerb zu nennen."
+          "next": "Sachlich sagen, was anders gemacht wird — ohne den Wettbewerb zu nennen."
         },
         "e5": {
           "title": "Wenig Fachjargon",
-          "next": "Tauscht lange Fachwörter gegen die Worte eurer Kundschaft."
+          "next": "Lange Fachwörter gegen die Worte der Kundschaft tauschen."
         },
         "f1": {
           "title": "Die Seite spricht ein Gefühl an",
@@ -1630,7 +1636,7 @@
         },
         "f2": {
           "title": "Eine Geschichte oder ein Ursprung",
-          "next": "Schreibt in drei Sätzen auf, warum es euch gibt — das trägt die halbe Marke."
+          "next": "In drei Sätzen aufschreiben, warum es diese Marke gibt — das trägt die halbe Marke."
         },
         "f3": {
           "title": "Menschliche Stimme statt Behördenton",
@@ -1638,19 +1644,19 @@
         },
         "f4": {
           "title": "Ein Moment, den man weitersagt",
-          "next": "Gönnt euch eine eigenwillige Zeile — eine genügt."
+          "next": "Eine eigenwillige Zeile darf sein — eine genügt."
         },
         "f5": {
           "title": "Der Ton passt zur Kategorie",
-          "next": "Prüft, ob euer Ton zu dem passt, was ihr anbietet — und zu denen, die es kaufen."
+          "next": "Prüfen, ob der Ton zu dem passt, was angeboten wird — und zu denen, die es kaufen."
         },
         "g1": {
           "title": "Für mobile Geräte vorbereitet",
-          "next": "Setzt die Viewport-Angabe; ohne sie bricht euer Auftritt auf dem Telefon auseinander."
+          "next": "Die Viewport-Angabe setzen; ohne sie bricht der Auftritt auf dem Telefon auseinander."
         },
         "g2": {
           "title": "Bereit für den Dunkelmodus",
-          "next": "Hinterlegt eine dunkle Fassung eurer Farben — viele Menschen sehen euch nur so."
+          "next": "Eine dunkle Fassung der Farben hinterlegen — viele Menschen sehen die Marke nur so."
         },
         "g3": {
           "title": "Die Botschaft trägt als Einzeiler",
@@ -1662,7 +1668,7 @@
         },
         "g5": {
           "title": "Die Sprache trägt kurz und lang",
-          "next": "Schreibt Beschriftungen und Knöpfe im selben Ton wie eure Absätze."
+          "next": "Beschriftungen und Knöpfe im selben Ton schreiben wie die Absätze."
         },
         "h1": {
           "title": "Rechtschreibung und Zeichensetzung",
@@ -1689,11 +1695,11 @@
         "eyebrow": "Brand-Check · Fundament-Reife",
         "source": "Quelle: Fundament-Dokument von {host}, Stand {date}",
         "sourceUnnamed": "Quelle: Fundament-Dokument, Stand {date}",
-        "hint": "Geprüft wurden eure bestätigten Antworten, nicht eine Website. Die 16 gerechneten Kriterien gibt es an einem Dokument nicht — sie bleiben nicht bewertbar.",
+        "hint": "Geprüft wurden die bestätigten Antworten, nicht eine Website. Die 16 gerechneten Kriterien gibt es an einem Dokument nicht — sie bleiben nicht bewertbar.",
         "errors": {
           "empty": "Bestätigt zuerst Felder im Fundament. Ohne bestätigte Antworten gibt es nichts zu prüfen.",
-          "accountLimit": "Heute sind eure 10 Neu-Ermittlungen aufgebraucht. Morgen geht es weiter.",
-          "notFound": "Diese Brand gibt es für euch nicht.",
+          "accountLimit": "Heute sind die 10 Neu-Ermittlungen aufgebraucht. Morgen geht es weiter.",
+          "notFound": "Diese Brand ist unter diesem Konto nicht verfügbar.",
           "unavailable": "Der Check ist gerade nicht erreichbar. Versucht es in ein paar Minuten noch einmal.",
           "generic": "Das hat gerade nicht geklappt. Versucht es in einem Moment noch einmal."
         }
@@ -1702,39 +1708,39 @@
     "myScores": {
       "title": "Brand-Score",
       "subtitle": "Wo diese Marke heute steht — von außen gemessen und im Fundament geprüft.",
-      "back": "Zu euren Brands",
-      "loading": "Wir holen eure Stände …",
+      "back": "Zurück zu den Brands",
+      "loading": "Die Stände werden geholt …",
       "missingTitle": "Diese Brand gibt es hier nicht.",
-      "missingText": "Der Link zeigt auf eine Brand, die es nicht mehr gibt oder die nicht euch gehört.",
+      "missingText": "Der Link zeigt auf eine Brand, die es nicht mehr gibt oder die zu einem anderen Konto gehört.",
       "sources": {
         "website": "Website",
         "document": "Fundament"
       },
       "website": {
         "title": "Website-Score",
-        "lead": "Der Außen-Check eurer Startseite — dieselben 40 Kriterien wie im öffentlichen Brand-Check.",
+        "lead": "Der Außen-Check der Startseite — dieselben 40 Kriterien wie im öffentlichen Brand-Check.",
         "stand": "Geprüft am {date}",
         "open": "Ergebnis ansehen",
         "recheck": "Brand-Score neu ermitteln",
-        "running": "Wir prüfen eure Website …",
+        "running": "Die Website wird geprüft …",
         "none": "Für diese Brand gibt es noch keinen Website-Check.",
         "start": "Website prüfen",
         "noUrl": "Für diese Brand ist noch keine Website hinterlegt.",
         "addUrl": "Website hinterlegen",
-        "urlLabel": "Eure Website",
-        "urlPlaceholder": "eure-website.de",
+        "urlLabel": "Website der Marke",
+        "urlPlaceholder": "beispiel-marke.de",
         "save": "Speichern",
         "saved": "Website gespeichert"
       },
       "document": {
         "title": "Fundament-Reife",
-        "lead": "Dieselben Kriterien, gestellt an euer Fundament-Dokument statt an eine Seite. Die 16 gerechneten Kriterien bleiben dort nicht bewertbar.",
+        "lead": "Dieselben Kriterien, gestellt an das Fundament-Dokument statt an eine Seite. Die 16 gerechneten Kriterien bleiben dort nicht bewertbar.",
         "stand": "Geprüft am {date}",
         "open": "Ergebnis ansehen",
         "recheck": "Fundament erneut prüfen",
         "start": "Fundament prüfen",
-        "running": "Wir lesen euer Fundament …",
-        "none": "Euer Fundament wurde noch nicht geprüft."
+        "running": "Das Fundament wird gelesen …",
+        "none": "Das Fundament wurde noch nicht geprüft."
       },
       "diff": {
         "title": "Gegenüberstellung",
@@ -1775,7 +1781,7 @@
         "nav": "Brand-Scores",
         "all": "Alle Brand-Scores",
         "title": "Brand-Scores",
-        "subtitle": "Alle eure Brands mit ihren zwei Zahlen — von außen gemessen und im Fundament geprüft.",
+        "subtitle": "Alle Brands mit ihren zwei Zahlen — von außen gemessen und im Fundament geprüft.",
         "summary": "{count} Brands · Ø Website-Score {avg}",
         "summaryEmpty": "{count} Brands · noch kein Website-Score",
         "col": {
@@ -1793,15 +1799,15 @@
         "done": "Der neue Stand ist da.",
         "failed": "Das hat nicht geklappt",
         "emptyTitle": "Noch keine Brand",
-        "empty": "Legt eure erste an — danach steht hier ihr Score.",
+        "empty": "Noch keine Brand angelegt — danach steht hier ihr Score.",
         "emptyCta": "Brand anlegen"
       },
       "errors": {
-        "accountLimit": "Heute sind eure 10 Neu-Ermittlungen aufgebraucht. Morgen geht es weiter.",
+        "accountLimit": "Heute sind die 10 Neu-Ermittlungen aufgebraucht. Morgen geht es weiter.",
         "documentEmpty": "Bestätigt zuerst Felder im Fundament. Ohne bestätigte Antworten gibt es nichts zu prüfen.",
-        "notFound": "Diese Brand gibt es für euch nicht.",
-        "invalidUrl": "Diese Adresse können wir nicht lesen. Schreibt sie bitte so, wie ihr sie im Browser eingebt.",
-        "blockedTarget": "Diese Adresse dürfen wir nicht abrufen. Nennt uns bitte die öffentliche Adresse eurer Website.",
+        "notFound": "Diese Brand ist unter diesem Konto nicht verfügbar.",
+        "invalidUrl": "Diese Adresse können wir nicht lesen. Bitte so schreiben, wie sie im Browser steht.",
+        "blockedTarget": "Diese Adresse dürfen wir nicht abrufen. Bitte die öffentliche Adresse der Website angeben.",
         "fetchFailed": "Die Seite hat nicht geantwortet. Prüft die Adresse und versucht es gleich noch einmal.",
         "siteBlocked": "Diese Website untersagt die automatische Auswertung — wir respektieren das. Deshalb gibt es hier kein Ergebnis.",
         "unavailable": "Der Check ist gerade nicht erreichbar. Versucht es in ein paar Minuten noch einmal.",
@@ -2267,7 +2273,7 @@
       "counter": "{accepted} von {total} abgenommen",
       "area": "Bereich",
       "exampleLabel": "Beispiel — erfunden, fremde Branche",
-      "own": "Eure Eingabe",
+      "own": "Die eigene Eingabe",
       "notes": "Notiz",
       "valueEmpty": "Noch keine Eingabe — optional.",
       "accept": "Abnehmen",
@@ -2320,9 +2326,9 @@
     },
     "document": {
       "title": "Dein Branding",
-      "lead": "Alle bestätigten Entscheidungen eurer Foundation, Kapitel für Kapitel. Hier wird gelesen — abgenommen wird im Kapitel.",
+      "lead": "Alle bestätigten Entscheidungen der Foundation, Kapitel für Kapitel. Hier wird gelesen — abgenommen wird im Kapitel.",
       "loadFailed": "Das Dokument konnte nicht geladen werden.",
-      "empty": "Hier steht noch nichts — sobald ihr ein Kapitel besprochen habt, füllt es sich.",
+      "empty": "Hier steht noch nichts — sobald ein Kapitel besprochen ist, füllt es sich.",
       "toc": "Inhalt",
       "standProgress": "Abgenommen",
       "state": {
@@ -2335,7 +2341,7 @@
         "toAcceptance": "Zur Abnahme"
       },
       "reviewTitle": "Der letzte Blick",
-      "reviewLead": "Das Team liest euer ganzes Dokument einmal am Stück und meldet Widersprüche, Lücken und Stellen, die schärfer gehen.",
+      "reviewLead": "Das Team liest das ganze Dokument einmal am Stück und meldet Widersprüche, Lücken und Stellen, die schärfer gehen.",
       "review": "Dokument prüfen",
       "reviewing": "Wird gelesen …",
       "reviewNeedsChapter": "Sobald ein Kapitel abgenommen ist, lohnt sich der Blick.",
@@ -2343,7 +2349,7 @@
       "reviewResult": "{caughtUp} Sessions nachgeholt, {findings} Befunde.",
       "stillUnreviewed": "{count} Session bleibt noch offen — der nächste Blick holt sie nach. | {count} Sessions bleiben noch offen — der nächste Blick holt sie nach.",
       "noFindings": "Nichts gefunden, was sich reibt.",
-      "reviewFailed": "Der Blick kam gerade nicht zustande. Euer Dokument steht trotzdem — versucht es später noch einmal.",
+      "reviewFailed": "Der Blick kam gerade nicht zustande. Das Dokument steht trotzdem — bitte später noch einmal versuchen.",
       "readFoundation": "Als Foundation lesen"
     },
     "foundation": {
@@ -3089,7 +3095,7 @@
     "designLayer": {
       "label": "Brand Design",
       "lockedNote": "Baut auf der Foundation auf",
-      "info": "Die visuelle Identität eurer Marke — hergeleitet aus Foundation und Brand Language, nicht aus dem Katalog. Farben, Schrift und Zeichen entstehen aus Archetyp, Werten und Stimme; jede Entscheidung trägt ihre Begründung. Freigeschaltet wird Brand Design vom Studio nach dem Erstgespräch.",
+      "info": "Die visuelle Identität der Marke — hergeleitet aus Foundation und Brand Language, nicht aus dem Katalog. Farben, Schrift und Zeichen entstehen aus Archetyp, Werten und Stimme; jede Entscheidung trägt ihre Begründung. Freigeschaltet wird Brand Design vom Studio nach dem Erstgespräch.",
       "progress": "{done} von {total} Kapiteln",
       "result": "Visuelle Identität"
     },
@@ -3101,34 +3107,34 @@
       "result": "Kit"
     },
     "inspiration": {
-      "title": "Eure Vorbilder",
-      "intro": "Screenshots von allem, was euch gefällt — je Bild sagt ihr nur, was daran: Farbwelt, Typografie, Zeichen, Bildsprache oder Komposition. Ein Satz dazu hilft, ist aber nicht Pflicht.",
+      "title": "Vorbilder",
+      "intro": "Screenshots von allem, was gefällt — je Bild nur eine Angabe, was daran: Farbwelt, Typografie, Zeichen, Bildsprache oder Komposition. Ein Satz dazu hilft, ist aber nicht Pflicht.",
       "counter": "{count} von {max}",
-      "loading": "Eure Vorbilder werden geladen …",
+      "loading": "Die Vorbilder werden geladen …",
       "add": "Screenshots hinzufügen",
       "formats": "PNG, JPG, WebP · bis 5 MB je Bild",
       "itemLabel": "Vorbild {number}",
       "areaLabel": "Bereich von Vorbild {number}",
       "noteLabel": "Notiz zu Vorbild {number}",
-      "notePlaceholder": "Was gefällt euch daran? (optional)",
+      "notePlaceholder": "Was gefällt daran? (optional)",
       "remove": "Vorbild {number} entfernen",
       "limits": "Bis {max} Bilder je Marke · höchstens 5 MB je Bild",
-      "privacy": "Eure Vorbilder bleiben privat: sie erscheinen weder im Dokument noch im geteilten Link noch im Beispiel. Sie sind Fremdwerke — wir lesen sie, wir bauen sie nicht nach.",
+      "privacy": "Vorbilder bleiben privat: sie erscheinen weder im Dokument noch im geteilten Link noch im Beispiel. Sie sind Fremdwerke — wir lesen sie, wir bauen sie nicht nach.",
       "error": {
         "tooLarge": "Das Bild ist größer als 5 MB. Ein Screenshot in Bildschirmgröße reicht völlig.",
-        "unsupportedType": "Nur PNG, JPG und WebP. Was ihr geschickt habt, ist keines davon.",
-        "limitReached": "Mehr als {max} Vorbilder nehmen wir nicht — entfernt eines, wenn ihr noch eines braucht.",
+        "unsupportedType": "Nur PNG, JPG und WebP. Diese Datei ist keines davon.",
+        "limitReached": "Mehr als {max} Vorbilder nehmen wir nicht — für ein weiteres muss eines weichen.",
         "areaInvalid": "Diesen Bereich gibt es nicht. Wählt Farbwelt, Typografie, Zeichen, Bildsprache oder Komposition.",
         "noteTooLong": "Die Notiz ist zu lang — ein Satz genügt.",
         "rateLimited": "Das ging zu schnell hintereinander. Wartet eine Minute und versucht es noch einmal.",
         "notFound": "Dieses Vorbild gibt es nicht mehr.",
         "generic": "Das hat nicht geklappt. Versucht es bitte noch einmal."
       },
-      "skipped": "Ihr habt euch für Fridas Vorschlag entschieden — Vorbilder entfallen in diesem Kapitel. Ihr könnt die Weiche oben jederzeit korrigieren."
+      "skipped": "Fridas Vorschlag ist gewählt — Vorbilder entfallen in diesem Kapitel. Die Weiche oben lässt sich jederzeit korrigieren."
     },
     "reading": {
       "title": "Was Frida darin liest",
-      "intro": "Jedes Vorbild wird an eurer Foundation gemessen, nicht umgekehrt: Was trägt schon, weil es zu Archetyp, Werten und Ton passt — und was geht besser? Die Stelle, an der gemessen wurde, steht bei jedem Urteil.",
+      "intro": "Jedes Vorbild wird an der Foundation gemessen, nicht umgekehrt: Was trägt schon, weil es zu Archetyp, Werten und Ton passt — und was geht besser? Die Stelle, an der gemessen wurde, steht bei jedem Urteil.",
       "state": {
         "read": "gelesen",
         "stale": "veraltet"
@@ -3138,8 +3144,8 @@
       "anchor": "gemessen an: {anchor}",
       "unread": "Noch nicht gelesen",
       "unreadHint": "Kommt mit dem nächsten Lauf dazu.",
-      "empty": "Legt zuerst Vorbilder ab — dann liest Frida sie gegen eure Foundation.",
-      "running": "Frida liest eure Vorbilder …",
+      "empty": "Zuerst Vorbilder ablegen — dann liest Frida sie gegen die Foundation.",
+      "running": "Frida liest die Vorbilder …",
       "run": {
         "first": "Vorbilder lesen",
         "more": "{count} neue Vorbilder lesen",
@@ -3148,7 +3154,7 @@
       "limits": "Bis {max} Läufe je Marke und Tag",
       "remaining": "Heute noch {count} von {max} Läufen",
       "error": {
-        "unavailable": "Das Lesen von Bildern ist auf dieser Instanz gerade nicht eingerichtet. Das Kapitel geht trotzdem weiter — Frida schlägt euch die Richtung aus eurer Foundation vor.",
+        "unavailable": "Das Lesen von Bildern ist auf dieser Instanz gerade nicht eingerichtet. Das Kapitel geht trotzdem weiter — Frida schlägt die Richtung aus der Foundation vor.",
         "noImages": "Es liegt kein Vorbild da, das gelesen werden könnte.",
         "rateLimited": "Das ging zu schnell hintereinander. Wartet einen Moment und versucht es noch einmal.",
         "notFound": "Diese Marke gibt es nicht mehr.",
@@ -3157,20 +3163,20 @@
     },
     "dna": {
       "error": {
-        "unavailable": "Der Vorschlag lässt sich gerade nicht rechnen. Versucht es später noch einmal — euer Kapitel bleibt, wie es ist.",
+        "unavailable": "Der Vorschlag lässt sich gerade nicht rechnen. Bitte später noch einmal versuchen — das Kapitel bleibt, wie es ist.",
         "noFoundation": "Dafür fehlt noch die Foundation. Bestätigt zuerst Werte, Archetyp, Ton und Richtung — daraus wird die DNA abgeleitet.",
         "rateLimited": "Das ging zu schnell hintereinander. Wartet einen Moment und versucht es noch einmal.",
         "notFound": "Diese Marke gibt es nicht mehr.",
         "generic": "Das hat nicht geklappt. Versucht es bitte noch einmal."
       },
       "title": "Visual DNA",
-      "intro": "Zehn Eigenschaften, die sich nicht gegenseitig erklären. Jede ist aus eurer Foundation hergeleitet — die Begründung steht daneben, damit ihr widersprechen könnt.",
-      "introWithReferences": "Zehn Eigenschaften, die sich nicht gegenseitig erklären. Jede ist aus eurer Foundation hergeleitet, und wo ein Vorbild sie bestätigt oder korrigiert, steht das dabei. Die Begründung steht daneben, damit ihr widersprechen könnt.",
+      "intro": "Zehn Eigenschaften, die sich nicht gegenseitig erklären. Jede ist aus der Foundation hergeleitet — die Begründung steht daneben, damit sich widersprechen lässt.",
+      "introWithReferences": "Zehn Eigenschaften, die sich nicht gegenseitig erklären. Jede ist aus der Foundation hergeleitet, und wo ein Vorbild sie bestätigt oder korrigiert, steht das dabei. Die Begründung steht daneben, damit sich widersprechen lässt.",
       "state": {
         "ready": "Vorschlag steht"
       },
       "origin": "Herkunft: {origin}",
-      "empty": "Noch kein Vorschlag. Frida leitet ihn aus eurer Foundation ab.",
+      "empty": "Noch kein Vorschlag. Frida leitet ihn aus der Foundation ab.",
       "running": "Frida leitet die Richtung ab …",
       "limits": "Bis {max} Vorschläge je Tag.",
       "remaining": "Noch {count} von {max} Vorschlägen heute.",
@@ -3189,15 +3195,15 @@
         "hold": "Festhalten",
         "holding": "Festgehalten",
         "resuggest": "Nicht festgehaltene neu vorschlagen",
-        "resuggestHint": "Jede offene Zeile rückt ein Board weiter — dreimal geklickt seid ihr wieder am Anfang."
+        "resuggestHint": "Jede offene Zeile rückt ein Board weiter — nach dreimal Klicken steht wieder der Anfang."
       },
       "stand": {
-        "title": "Euer Stand",
+        "title": "Der Stand",
         "from": "Farbwelt aus „{color}“ · Typografie aus „{type}“",
         "note": "Diese Belegung ist die Vorbelegung aller folgenden Kapitel — Farbwelt, Typografie, Zeichen, Bildsprache und Bewegung fangen damit an."
       },
       "card": {
-        "above": "Der Vorschlag steht oben in voller Länge — hier bestätigt ihr ihn."
+        "above": "Der Vorschlag steht oben in voller Länge — hier wird er bestätigt."
       }
     },
     "type": {
@@ -3205,14 +3211,14 @@
         "title": "Schriftpaar",
         "tag": "i.pair · sechs kuratierte Paare",
         "intro": "Zwei Rollen: eine Schrift für Überschriften, eine für den Fließtext. Die Mono steht fest daneben und gehört Herkunft, Preisen und Zahlen — mehr als drei Schriften hat keine Marke nötig. Alle Familien sind selbst gehostet; hier lädt nichts von einem fremden Server.",
-        "proposed": "Aus eurer DNA",
-        "specimenBody": "So liest sich ein Absatz, den eure Kundschaft wirklich liest — zehn Zeilen weiter klingt er hoffentlich immer noch nach euch.",
+        "proposed": "Aus der DNA",
+        "specimenBody": "So liest sich ein Absatz, den die Kundschaft wirklich liest — zehn Zeilen weiter klingt er hoffentlich immer noch nach dieser Marke.",
         "specimenMono": "Bestellnummer 4711 · 38,00 € · 07/2026"
       },
       "scale": {
         "title": "Hierarchie",
         "tag": "i.scale · {ratio}",
-        "intro": "Wie weit Überschrift und Fließtext auseinanderliegen. Der Vorschlag kommt aus eurer DNA-Dimension „Komposition“; die Zahl daneben ist das Verhältnis der größten Überschrift zum Fließtext.",
+        "intro": "Wie weit Überschrift und Fließtext auseinanderliegen. Der Vorschlag kommt aus der DNA-Dimension „Komposition“; die Zahl daneben ist das Verhältnis der größten Überschrift zum Fließtext.",
         "note": {
           "calm": "Wenige Größen, viel Zeilenabstand — der ruhige Fall, der fast überall trägt.",
           "dense": "Redaktionell: kleinere Sprünge, mehr Text je Bildschirm.",
@@ -3229,11 +3235,11 @@
         "on": "An",
         "off": "Aus",
         "uppercaseHint": "Versalien sind eine Ausnahme, kein Stil — sie kosten Lesbarkeit.",
-        "weightWarning": "{family} gibt es nicht in diesem Schnitt — der Browser malt ihn dann selbst, und ihr beurteilt eine Schrift, die es nicht gibt. Nehmt 400 oder 700, oder ein anderes Paar."
+        "weightWarning": "{family} gibt es nicht in diesem Schnitt — der Browser malt ihn dann selbst, und beurteilt würde eine Schrift, die es nicht gibt. Besser 400 oder 700 nehmen, oder ein anderes Paar."
       },
       "specimen": {
         "title": "Specimen · {pair} ({heading} · {body})",
-        "heading": "Eine Überschrift in eurer Schrift",
+        "heading": "Eine Überschrift in dieser Schrift",
         "subheading": "Die zweite Ebene, eine Stufe kleiner",
         "body": "Hier steht der Absatz, an dem sich ein Schriftpaar wirklich entscheidet: nicht die Schlagzeile, sondern die sechs Zeilen darunter. Wer nach zehn Zeilen noch mühelos liest, hat die richtige Wahl getroffen.",
         "mono": "Bestellnummer 4711 · 38,00 € · Ernte 07/2026 · 1 200 m",
@@ -3241,7 +3247,7 @@
       },
       "scene": {
         "title": "In der Anwendung",
-        "intro": "Dieselbe Typografie in eurer bestätigten Farbwelt — so, wie sie auf einer Seite ankommt.",
+        "intro": "Dieselbe Typografie in der bestätigten Farbwelt — so, wie sie auf einer Seite ankommt.",
         "note": "Die Szene rechnet mit denselben Werten wie das Specimen darüber: eine andere Wahl oben ändert sie sofort."
       }
     },
@@ -3249,10 +3255,10 @@
       "kind": {
         "title": "Stufe 1 · Richtung",
         "tag": "j.kind · vier Möglichkeiten",
-        "intro": "Was für ein Zeichen soll es werden — und warum. Der Vorschlag kommt aus eurer DNA-Dimension „Visueller Stil“ und aus eurem Namen. Was hier steht, ist die Richtung für den Menschen, der das Zeichen später zeichnet.",
-        "proposed": "Aus eurer DNA",
+        "intro": "Was für ein Zeichen soll es werden — und warum. Der Vorschlag kommt aus der DNA-Dimension „Visueller Stil“ und aus dem Namen. Was hier steht, ist die Richtung für den Menschen, der das Zeichen später zeichnet.",
+        "proposed": "Aus der DNA",
         "reason": {
-          "word": "Euer Name trägt die Aussage. Eine Wortmarke braucht keine Erklärung und altert am langsamsten — sie ist fast immer die ehrliche Antwort für eine junge Marke.",
+          "word": "Der Name trägt die Aussage. Eine Wortmarke braucht keine Erklärung und altert am langsamsten — sie ist fast immer die ehrliche Antwort für eine junge Marke.",
           "pictorial": "Ein Zeichen ohne Namen wirkt erst nach vielen Kontakten. Wer selten gesehen wird, bezahlt diese Wiedererkennung teuer.",
           "combination": "Wortmarke plus Zeichen: flexibel für Avatar und Schild — aber zwei Dinge, die gepflegt und zusammen gedacht werden wollen.",
           "monogram": "Der Anfangsbuchstabe als Avatar und App-Icon. Als Hauptzeichen sagt er wenig, als Variante ist er ohnehin Pflicht."
@@ -3261,9 +3267,9 @@
       "brief": {
         "title": "Stufe 1 · Briefing",
         "tag": "j.brief · der Auftrag an den Menschen",
-        "intro": "Das ist der Text, den ein Designer bekommt — und der Prüfstein für jeden Entwurf. Er ist bearbeitbar: ein Briefing, das ihr nicht selbst sagen könnt, trägt nicht.",
+        "intro": "Das ist der Text, den ein Designer bekommt — und der Prüfstein für jeden Entwurf. Er ist bearbeitbar: ein Briefing, das sich nicht selbst sagen lässt, trägt nicht.",
         "derived": "gerechnet",
-        "empty": "Noch kein Briefing. Frida leitet es aus eurer Foundation, der DNA, der Farbwelt und eurem Schriftpaar ab.",
+        "empty": "Noch kein Briefing. Frida leitet es aus der Foundation, der DNA, der Farbwelt und dem Schriftpaar ab.",
         "running": "Frida schreibt das Briefing …",
         "limits": "Bis {max} Briefings je Tag.",
         "remaining": "Noch {count} von {max} Briefings heute.",
@@ -3272,7 +3278,7 @@
           "again": "Briefing neu erzeugen"
         },
         "error": {
-          "unavailable": "Das Briefing lässt sich gerade nicht erzeugen. Versucht es später noch einmal — euer Kapitel bleibt, wie es ist.",
+          "unavailable": "Das Briefing lässt sich gerade nicht erzeugen. Bitte später noch einmal versuchen — das Kapitel bleibt, wie es ist.",
           "noFoundation": "Dafür fehlt noch die Foundation. Bestätigt zuerst Werte, Archetyp, Ton und Richtung — daraus wird das Briefing abgeleitet.",
           "rateLimited": "Das ging zu schnell hintereinander. Wartet einen Moment und versucht es noch einmal.",
           "notFound": "Diese Marke gibt es nicht mehr.",
@@ -3282,8 +3288,8 @@
       "examples": {
         "title": "Stufe 2 · Gesetzte Beispiele",
         "tag": "j.examples · gerechnet, kein KI-Aufruf",
-        "intro": "Wortmarke und Monogramm aus eurem Schriftpaar ({family}) und eurer Farbwelt, in vier Varianten. Der gestrichelte Rahmen ist der Schutzraum — die Fläche, die frei bleibt.",
-        "notALogo": "Das ist Satz, keine Erfindung: gesetzte Beispiele, kein Logo. Sie zeigen, wie euer Name in eurer Schrift und euren Farben aussieht — das Zeichen selbst zeichnet ein Mensch.",
+        "intro": "Wortmarke und Monogramm aus dem Schriftpaar ({family}) und der Farbwelt, in vier Varianten. Der gestrichelte Rahmen ist der Schutzraum — die Fläche, die frei bleibt.",
+        "notALogo": "Das ist Satz, keine Erfindung: gesetzte Beispiele, kein Logo. Sie zeigen, wie der Name in dieser Schrift und diesen Farben aussieht — das Zeichen selbst zeichnet ein Mensch.",
         "clearSpace": {
           "show": "Schutzraum einblenden",
           "hide": "Schutzraum ausblenden"
@@ -3291,7 +3297,7 @@
       },
       "variant": {
         "note": {
-          "primary": "Der Normalfall: Marken-Ton auf eurem Papier.",
+          "primary": "Der Normalfall: Marken-Ton auf dem eigenen Papier.",
           "inverted": "Umgekehrt — für dunkle Flächen, Verpackung und Fotos.",
           "mono": "Ein Ton, für Prägung, Stempel und Gravur. Hier gibt es keine zweite Farbe.",
           "icon": "Fläche statt Papier: Avatar, App-Icon, Favicon."
@@ -3303,13 +3309,13 @@
           "monogram": "Monogramm von {brand}"
         },
         "note": {
-          "wordmark": "Der ganze Name, gesetzt in eurer Überschriften-Schrift.",
+          "wordmark": "Der ganze Name, gesetzt in der Überschriften-Schrift.",
           "monogram": "Der Anfangsbuchstabe in der Kachel — für alles, was klein und quadratisch ist."
         }
       },
       "scene": {
         "title": "Im Zusammenhang",
-        "intro": "Dieselbe Wortmarke im Kopf einer Anwendung — in eurer Farbwelt und eurer Schrift."
+        "intro": "Dieselbe Wortmarke im Kopf einer Anwendung — in dieser Farbwelt und dieser Schrift."
       },
       "drafts": {
         "title": "Stufe 3 · KI-Entwürfe",
@@ -3348,10 +3354,10 @@
       "photo": {
         "title": "Bild-Prinzipien",
         "tag": "k.photo · drei Vorschläge",
-        "intro": "Vier Achsen entscheiden alles Weitere: Licht, Ausschnitt, Menschen, Farbigkeit. Daraus wird der Satz, den ihr eurer Fotografin schickt.",
-        "proposed": "Aus eurer DNA",
+        "intro": "Vier Achsen entscheiden alles Weitere: Licht, Ausschnitt, Menschen, Farbigkeit. Daraus wird der Satz, der an die Fotografin geht.",
+        "proposed": "Aus der DNA",
         "sketch": "Stil-Skizze: {name}",
-        "noPhotos": "Die Skizzen sind aus eurer Farbwelt gezeichnet, keine Fotos. Ein Beispielbild würde die Entscheidung verkaufen, um die es hier geht — ihr wählt ein Prinzip, kein Motiv."
+        "noPhotos": "Die Skizzen sind aus der Farbwelt gezeichnet, keine Fotos. Ein Beispielbild würde die Entscheidung verkaufen, um die es hier geht — gewählt wird ein Prinzip, kein Motiv."
       },
       "illustration": {
         "title": "Illustration",
@@ -3367,34 +3373,34 @@
       "icons": {
         "title": "Icons",
         "tag": "k.icons · Phosphor",
-        "intro": "Dieselben fünf Icons in drei Stärken, daneben die Probe mit der echten Strichstärke. Die einzige Frage hier ist, ob der Strich zu eurer Textschrift passt.",
+        "intro": "Dieselben fünf Icons in drei Stärken, daneben die Probe mit der echten Strichstärke. Die einzige Frage hier ist, ob der Strich zur Textschrift passt.",
         "sample": "Strichstärke-Probe: {stroke}",
         "strokeLabel": "Strichstärke {stroke} bei 24 px",
-        "line": "So steht ein Icon neben eurer Textschrift.",
+        "line": "So steht ein Icon neben der Textschrift.",
         "note": {
           "regular": "Gleiche Strichstärke wie eine Textschrift — ruhig, unauffällig.",
           "fill": "Gefüllt: gut lesbar auf kleinen Flächen, wirkt schwerer.",
           "bold": "Dicker Strich — laut, und neben einer Serif sehr laut."
         },
         "rule": {
-          "fits": "Passt: {stroke} liegt in der Spanne eurer Schrift ({family}: {range}).",
-          "heavy": "Kräftiger als eure Schrift: {stroke} liegt über der Spanne ({family}: {range}). Das ist kein Fehler, nur lauter — bestätigen könnt ihr es trotzdem.",
-          "light": "Feiner als eure Schrift: {stroke} liegt unter der Spanne ({family}: {range}) — die Icons verschwinden neben der Zeile.",
-          "area": "Eine Fläche hat keine Strichstärke. Neben {family} wirkt sie schwerer als jede Linie — prüft sie in der kleinsten Größe, die ihr benutzt."
+          "fits": "Passt: {stroke} liegt in der Spanne der Schrift ({family}: {range}).",
+          "heavy": "Kräftiger als die Schrift: {stroke} liegt über der Spanne ({family}: {range}). Das ist kein Fehler, nur lauter — bestätigen lässt es sich trotzdem.",
+          "light": "Feiner als die Schrift: {stroke} liegt unter der Spanne ({family}: {range}) — die Icons verschwinden neben der Zeile.",
+          "area": "Eine Fläche hat keine Strichstärke. Neben {family} wirkt sie schwerer als jede Linie — in der kleinsten benutzten Größe prüfen."
         }
       },
       "dodont": {
         "title": "Do & Don’t",
-        "tag": "k.dodont · gerechnet aus euren drei Entscheidungen",
-        "intro": "Sechs Paare: die vier Achsen eures Prinzips, dazu Illustration und Icons. Jedes Do hat sein Don’t — erst das Paar macht die Regel prüfbar."
+        "tag": "k.dodont · gerechnet aus den drei Entscheidungen",
+        "intro": "Sechs Paare: die vier Achsen des Prinzips, dazu Illustration und Icons. Jedes Do hat sein Don’t — erst das Paar macht die Regel prüfbar."
       }
     },
     "motion": {
       "tempo": {
         "title": "Tempo",
-        "tag": "l.tempo · aus eurer DNA",
-        "intro": "Tempo liest man nicht, man sieht es. Die drei Fassungen stehen nebeneinander und laufen gleichzeitig — klickt „Übergang abspielen“ und entscheidet, welche nach euch aussieht.",
-        "proposed": "Aus eurer DNA",
+        "tag": "l.tempo · aus der DNA",
+        "intro": "Tempo liest man nicht, man sieht es. Die drei Fassungen stehen nebeneinander und laufen gleichzeitig — „Übergang abspielen“ klicken und entscheiden, welche passt.",
+        "proposed": "Aus der DNA",
         "play": "Übergang abspielen",
         "reduced": "Weniger Bewegung simulieren",
         "reducedOn": "Weniger Bewegung: an",
@@ -3417,13 +3423,13 @@
       },
       "scene": {
         "title": "In der Anwendung",
-        "intro": "Dieselbe Fläche im gewählten Tempo: Karten blenden versetzt ein, der Knopf reagiert beim Überfahren. Hell und dunkel schaltet ihr an der Szene selbst um.",
+        "intro": "Dieselbe Fläche im gewählten Tempo: Karten blenden versetzt ein, der Knopf reagiert beim Überfahren. Hell und dunkel schaltet die Szene selbst um.",
         "note": "Alles hier läuft mit {duration} Grunddauer. Der Schalter oben zeigt, was Menschen sehen, die im Betriebssystem weniger Bewegung eingestellt haben — dann steht der Endzustand sofort."
       },
       "logo": {
         "title": "Kinetisches Zeichen",
         "tag": "l.logo",
-        "intro": "Bewegt sich euer Zeichen? Ein Ja kostet eine eigene Datei, die jemand pflegen muss — und eine Fassung ohne Bewegung. Ein Nein ist eine Entscheidung, keine Auslassung.",
+        "intro": "Bewegt sich das Zeichen? Ein Ja kostet eine eigene Datei, die jemand pflegen muss — und eine Fassung ohne Bewegung. Ein Nein ist eine Entscheidung, keine Auslassung.",
         "note": {
           "no": "Das Zeichen steht still — auch im Vorspann. Spart eine Datei, die sonst niemand aktuell hält.",
           "yes": "Ein Aufbau von 800 ms für Vorspann und Ladefläche. Danach steht das Zeichen; im Fließtext bewegt es sich nie."
@@ -3431,18 +3437,18 @@
       },
       "rules": {
         "title": "Bewegungs-Regeln",
-        "tag": "l.rules · aus euren zwei Entscheidungen",
+        "tag": "l.rules · aus den zwei Entscheidungen",
         "intro": "Sechs Sätze, jeder an einer echten Seite nachprüfbar. Die letzte Zeile gilt immer und lässt sich nicht abwählen: weniger Bewegung heißt Endzustand, nicht Zeitlupe."
       }
     },
     "scene": {
-      "wordmarkFallback": "Eure Marke",
+      "wordmarkFallback": "Diese Marke",
       "eyebrow": "Neu · Ausgabe 01",
       "nav1": "Angebot",
       "nav2": "Über uns",
       "nav3": "Kontakt",
-      "heading": "Ein Satz, der sagt, wofür ihr steht.",
-      "body": "Hier steht der Absatz, den Besucher wirklich lesen: was ihr macht, für wen — und warum es so aussieht und nicht anders.",
+      "heading": "Ein Satz, der sagt, wofür diese Marke steht.",
+      "body": "Hier steht der Absatz, den Besucher wirklich lesen: was die Marke macht, für wen — und warum es so aussieht und nicht anders.",
       "button": "Mehr erfahren",
       "link": "Zur Übersicht",
       "cardTitle": "Eine Karte, eine Aussage",
@@ -3457,34 +3463,61 @@
       "moves": {
         "nomenclature": {
           "m1": {
-            "text": "Namen sind billig, bis sie auf einem Schild stehen. Sagt mir zuerst, welche Sorten von Dingen ihr überhaupt benennt — dann schlage ich je Sorte EIN Muster vor, kein Sortiment.",
+            "text": {
+              "solo": "Namen sind billig, bis sie auf einem Schild stehen. Sag mir zuerst, welche Sorten von Dingen du überhaupt benennst — dann schlage ich je Sorte EIN Muster vor, kein Sortiment.",
+              "team": "Namen sind billig, bis sie auf einem Schild stehen. Sagt mir zuerst, welche Sorten von Dingen ihr überhaupt benennt — dann schlage ich je Sorte EIN Muster vor, kein Sortiment."
+            },
             "help": "Nur auf dem Weg mit Markenarchitektur — ohne Untermarken gäbe es nichts zu bestätigen."
           },
           "m2": {
-            "text": "Beim Namen halte ich mich an Otto: erst überleben, dann gefallen. Die Muster unten sind hergeleitet, nicht erfunden — wenn euch eines nicht gefällt, korrigiert es, aber sagt mir, welche Regel dann stattdessen gilt."
+            "text": {
+              "solo": "Beim Namen halte ich mich an Otto: erst überleben, dann gefallen. Die Muster unten sind hergeleitet, nicht erfunden — wenn dir eines nicht gefällt, korrigier es, aber sag mir, welche Regel dann stattdessen gilt.",
+              "team": "Beim Namen halte ich mich an Otto: erst überleben, dann gefallen. Die Muster unten sind hergeleitet, nicht erfunden — wenn euch eines nicht gefällt, korrigiert es, aber sagt mir, welche Regel dann stattdessen gilt."
+            }
           },
           "m3": {
-            "text": "Und der Prüfstein für jeden künftigen Namen: Kann man ihn am Telefon buchstabieren? Wenn nicht, kostet er euch jeden Tag ein bisschen Geld."
+            "text": {
+              "solo": "Und der Prüfstein für jeden künftigen Namen: Kann man ihn am Telefon buchstabieren? Wenn nicht, kostet er dich jeden Tag ein bisschen Geld.",
+              "team": "Und der Prüfstein für jeden künftigen Namen: Kann man ihn am Telefon buchstabieren? Wenn nicht, kostet er euch jeden Tag ein bisschen Geld."
+            }
           }
         },
         "aiguide": {
           "m1": {
-            "text": "Zwei Fragen entscheiden das ganze Kapitel: Was darf eine Maschine in eurem Namen schreiben — und wer liest, bevor es rausgeht. Alles danach sind Leitplanken, keine neuen Entscheidungen."
+            "text": {
+              "solo": "Zwei Fragen entscheiden das ganze Kapitel: Was darf eine Maschine in deinem Namen schreiben — und wer liest, bevor es rausgeht. Alles danach sind Leitplanken, keine neuen Entscheidungen.",
+              "team": "Zwei Fragen entscheiden das ganze Kapitel: Was darf eine Maschine in eurem Namen schreiben — und wer liest, bevor es rausgeht. Alles danach sind Leitplanken, keine neuen Entscheidungen."
+            }
           },
           "m2": {
-            "text": "Die Leitplanken lese ich mit Nikas Ohr gegen: eure Ton-Wörter, eure Tabu-Wörter, eure Werte, eure Namens-Regeln. Ich habe nichts erfunden — ich habe sortiert. Streicht, was nicht stimmt.",
-            "help": "Ton-Parameter aus euren Ton-Wörtern · Tabus aus eurer Meiden-Liste · Schreibweisen aus euren Namens-Regeln."
+            "text": {
+              "solo": "Die Leitplanken lese ich mit Nikas Ohr gegen: deine Ton-Wörter, deine Tabu-Wörter, deine Werte, deine Namens-Regeln. Ich habe nichts erfunden — ich habe sortiert. Streich, was nicht stimmt.",
+              "team": "Die Leitplanken lese ich mit Nikas Ohr gegen: eure Ton-Wörter, eure Tabu-Wörter, eure Werte, eure Namens-Regeln. Ich habe nichts erfunden — ich habe sortiert. Streicht, was nicht stimmt."
+            },
+            "help": {
+              "solo": "Ton-Parameter aus deinen Ton-Wörtern · Tabus aus deiner Meiden-Liste · Schreibweisen aus deinen Namens-Regeln.",
+              "team": "Ton-Parameter aus euren Ton-Wörtern · Tabus aus eurer Meiden-Liste · Schreibweisen aus euren Namens-Regeln."
+            }
           },
           "m3": {
-            "text": "Die drei Vorlagen darunter sind pur gerechnet: kein Modell hat sie geschrieben. Kopiert sie in euer KI-Werkzeug — und wenn eine Leitplanke sich ändert, ändern sie sich mit."
+            "text": {
+              "solo": "Die drei Vorlagen darunter sind pur gerechnet: kein Modell hat sie geschrieben. Kopier sie in dein KI-Werkzeug — und wenn eine Leitplanke sich ändert, ändern sie sich mit.",
+              "team": "Die drei Vorlagen darunter sind pur gerechnet: kein Modell hat sie geschrieben. Kopiert sie in euer KI-Werkzeug — und wenn eine Leitplanke sich ändert, ändern sie sich mit."
+            }
           }
         },
         "presskit": {
           "m1": {
-            "text": "Hier entsteht nichts Neues — ich stelle zusammen, was ihr längst entschieden habt. Zwei Dinge muss trotzdem ein Mensch sagen: welche Fakten reisen dürfen und wer für Presse ansprechbar ist."
+            "text": {
+              "solo": "Hier entsteht nichts Neues — ich stelle zusammen, was du längst entschieden hast. Zwei Dinge muss trotzdem ein Mensch sagen: welche Fakten reisen dürfen und wer für Presse ansprechbar ist.",
+              "team": "Hier entsteht nichts Neues — ich stelle zusammen, was ihr längst entschieden habt. Zwei Dinge muss trotzdem ein Mensch sagen: welche Fakten reisen dürfen und wer für Presse ansprechbar ist."
+            }
           },
           "m2": {
-            "text": "Eure harten Zahlen aus dem Kontext bleiben intern. Ins Pressekit kommt nur, was ihr hier einzeln anhakt — Voreinstellung ist: keiner.",
+            "text": {
+              "solo": "Deine harten Zahlen aus dem Kontext bleiben intern. Ins Pressekit kommt nur, was du hier einzeln anhakst — Voreinstellung ist: keiner.",
+              "team": "Eure harten Zahlen aus dem Kontext bleiben intern. Ins Pressekit kommt nur, was ihr hier einzeln anhakt — Voreinstellung ist: keiner."
+            },
             "help": "Die Auswahl wird als eigener Wert gespeichert; die Rohliste reist nie."
           }
         }
@@ -3493,9 +3526,9 @@
         "note": "Dieses Kapitel gibt es nur auf dem Weg mit Markenarchitektur — ohne Untermarken gäbe es kein Muster, das zu bestätigen wäre."
       },
       "types": {
-        "title": "Wofür braucht ihr Namen?",
+        "title": "Wofür braucht die Marke Namen?",
         "tag": "Mehrfachwahl",
-        "intro": "Wählt die Sorten, die es bei euch heute gibt oder für die ihr schon plant. Was ihr nicht benennt, bleibt aus der Liste."
+        "intro": "Die Sorten wählen, die es heute gibt oder für die schon geplant wird. Was nicht benannt wird, bleibt aus der Liste."
       },
       "patterns": {
         "title": "Ein Muster je Sorte",
@@ -3520,7 +3553,7 @@
       "prompts": {
         "title": "Drei Vorlagen zum Kopieren",
         "tag": "Pur gerechnet",
-        "intro": "System-Prompt, Social-Post, E-Mail an Kunden — aus euren Werten und euren Leitplanken. Kein Modell war beteiligt.",
+        "intro": "System-Prompt, Social-Post, E-Mail an Kunden — aus den Werten und den Leitplanken dieser Marke. Kein Modell war beteiligt.",
         "loading": "Rechne die Vorlagen …",
         "empty": "Die Vorlagen entstehen, sobald die Leitplanken stehen.",
         "copy": "Kopieren",
@@ -3531,17 +3564,17 @@
       "facts": {
         "title": "Welche Fakten dürfen reisen?",
         "tag": "Opt-in je Eintrag",
-        "intro": "Eure Zahlen aus dem Kontext bleiben intern. Hakt einzeln an, was ins Pressekit darf.",
-        "loading": "Hole eure Fakten …",
-        "empty": "Ihr habt im Kontext keine Fakten hinterlegt — das Pressekit funktioniert auch ohne.",
-        "hint": "Voreinstellung ist: keiner. Was ihr hier anhakt, wird als eigener Wert gespeichert; die Rohliste reist nie."
+        "intro": "Die Zahlen aus dem Kontext bleiben intern. Einzeln anhaken, was ins Pressekit darf.",
+        "loading": "Fakten werden geholt …",
+        "empty": "Im Kontext sind keine Fakten hinterlegt — das Pressekit funktioniert auch ohne.",
+        "hint": "Voreinstellung ist: keiner. Was hier angehakt wird, wird als eigener Wert gespeichert; die Rohliste reist nie."
       },
       "contact": {
         "title": "Presse-Kontakt",
         "tag": "Optional",
         "intro": "Eine Person, an die sich Presse wendet — Name, Rolle, E-Mail.",
         "loading": "Suche vorhandene Ansprechpartner …",
-        "public": "Diese Angabe reist öffentlich im Pressekit und in jeder Datei, die ihr herausgebt. Eine Telefonnummer nehmen wir bewusst nicht auf.",
+        "public": "Diese Angabe reist öffentlich im Pressekit und in jeder Datei, die herausgegeben wird. Eine Telefonnummer nehmen wir bewusst nicht auf.",
         "template": {
           "account": "Konto-Inhaber",
           "intro": "Kontakt aus dem Erstgespräch",
@@ -3556,7 +3589,7 @@
         "applied": "Übernommen"
       },
       "summary": {
-        "title": "So liest sich euer Pressekit",
+        "title": "So liest sich das Pressekit",
         "tag": "Nur lesen",
         "intro": "Zusammengestellt aus dem, was oben steht. Was fehlt, steht als fehlend da — nichts wird ersetzt.",
         "loading": "Stelle das Pressekit zusammen …",

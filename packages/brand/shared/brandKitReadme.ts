@@ -142,7 +142,7 @@ export function renderBrandKitReadme(manifest: BrandKitReadmeManifest, locale: s
     + 'front, not in between.')
   lines.push(de
     ? '2. `tokens.json` in Figma importieren (Variablen) oder mit Style Dictionary '
-    + 'in eure eigenen Formate übersetzen.'
+    + 'in eigene Formate übersetzen.'
     : '2. Import `tokens.json` into Figma (variables) or run it through Style '
     + 'Dictionary into your own formats.')
   lines.push(de

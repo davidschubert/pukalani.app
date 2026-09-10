@@ -211,6 +211,14 @@ export interface GeorgeSystemPromptOptions {
    * bekommt den alten Prompt und keinen halben neuen.
    */
   technique?: BrandAdvisor
+  /**
+   * Die Anrede-Weiche der Marke (BW1-Inhaltsrunde 2026-09-09) — sie steuert
+   * hier NUR die Satzanfänge der Technik (`advisorOpenersFor`), also die
+   * Stimmprobe. Die Anrede-REGELN des Gesprächs stehen weiterhin in
+   * `conversePrompt.ts`; fehlt die Weiche, bleiben die Anfänge in der
+   * Team-Fassung, die vor dieser Runde die einzige war.
+   */
+  team?: BrandTeamKind
   persona?: string
   vendor?: string
   /**
@@ -274,8 +282,15 @@ function todayLines(today: string | undefined): string[] {
  * der Rollenwechsel nicht — beides muss dastehen, sonst passiert das eine ohne
  * das andere.
  */
-function techniqueLayer(technique: BrandAdvisor, locale: string, voiceName: string): string[] {
-  const openers = advisorOpenersFor(technique, locale)
+function techniqueLayer(
+  technique: BrandAdvisor,
+  locale: string,
+  voiceName: string,
+  team: BrandTeamKind | undefined,
+): string[] {
+  // Die Satzanfänge sind die Stimmprobe des Modells — sie folgen der Anrede
+  // der Marke wie Georges Text selbst (BW1-Inhaltsrunde 2026-09-09).
+  const openers = advisorOpenersFor(technique, locale, team ?? 'team')
   const borrowed = technique.key !== BRAND_VOICE.key
   return [
     'How you work in this chapter:',
@@ -334,7 +349,7 @@ export function georgeSystemPrompt(options: GeorgeSystemPromptOptions): string {
   return [
     identity,
     '',
-    ...(technique ? techniqueLayer(technique, options.locale, persona) : []),
+    ...(technique ? techniqueLayer(technique, options.locale, persona, options.team) : []),
     'Rules:',
     '1. ROLE: you advise on brand strategy and you build the foundation together with the person. '
     + 'You are not a chatbot showing off; you are the quiet expert doing the work.',

@@ -1,3 +1,4 @@
+import type { BrandTeamKind } from '../../shared/slotRegistry'
 import {
   type AdvisorSlotVerdict,
   type AdvisorSlotVerifyInput,
@@ -36,11 +37,13 @@ export function nikaGuardrailQuestion(
   violation: string,
   detail: string,
   uiLocale: string,
+  /** Anrede der Marke (BW1-Inhaltsrunde 2026-09-09) — Vorgabe ist die Team-Fassung. */
+  team: BrandTeamKind = 'team',
 ): string {
   const de = isDe(uiLocale)
   if (violation === 'guardrail_taboo_in_tone') {
     return de
-      ? `Mir ist etwas aufgefallen, bevor ich das festhalte: „${detail}" steht auf eurer Meiden-Liste `
+      ? `Mir ist etwas aufgefallen, bevor ich das festhalte: „${detail}" steht auf der Meiden-Liste `
         + 'und wäre in meinen Ton-Parametern gelandet. Beides zusammen kann kein Werkzeug befolgen — '
         + 'soll das Wort aus der Meiden-Liste raus, oder bleibt es tabu?'
       : `One thing before I write this down: "${detail}" is on your avoid list and would have ended up `
@@ -50,7 +53,9 @@ export function nikaGuardrailQuestion(
   return de
     ? 'Für die Leitplanken fehlt mir noch eine ganze Gruppe — ich hätte da sonst eine Überschrift ohne '
       + 'Inhalt stehen, und die liest ein Werkzeug als „gibt es nicht". '
-      + 'Sagt mir eine Sache, die eure Marke NIE behandelt, dann steht die Liste.'
+      + (team === 'solo'
+        ? 'Sag mir eine Sache, die deine Marke NIE behandelt, dann steht die Liste.'
+        : 'Sagt mir eine Sache, die eure Marke NIE behandelt, dann steht die Liste.')
     : 'One whole group of the guardrails is still missing — I would be left with a heading and nothing '
       + 'under it, and a tool reads that as "there are none". '
       + 'Tell me one thing your brand never talks about and the list stands.'
@@ -74,7 +79,7 @@ export function verifyNikaDraft(input: AdvisorSlotVerifyInput): AdvisorSlotVerdi
   const check = checkBrandGuardrails(avoid, input.draft)
   return check.ok
     ? { draft: input.draft }
-    : { question: nikaGuardrailQuestion(check.violation, check.detail, input.uiLocale) }
+    : { question: nikaGuardrailQuestion(check.violation, check.detail, input.uiLocale, input.team) }
 }
 
 /** Nikas Generator für das Kapitel `aiguide`. */

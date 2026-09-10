@@ -23,6 +23,7 @@ import {
   resolveContinueTarget,
 } from '../../../../shared/brandWorkspaceNav'
 import { brandDerivedDividerSlot, brandSessionIsAskable } from '../../../../shared/brandSessionGroups'
+import { teamTextKeyFor } from '../../../../shared/brandTeamText'
 import { affectsView, brandAnswerWritesSlot, nextCollectPart } from '../../../../shared/brandSessions'
 import {
   BRAND_STEP_KEYS,
@@ -360,7 +361,9 @@ const introKey = computed(() => colleagueForStep(stepKey.value ?? 'context')?.ke
 let previousIntroKey: BrandAdvisorKey | null = null
 watch(introKey, (next) => {
   phaseIntro.value = previousIntroKey && previousIntroKey !== next
-    ? t(`brand.advisors.${next}.intro`)
+    // Das Phasen-Intro ist ein GESPROCHENER Satz — er folgt der Solo-Weiche
+    // wie Georges Kapitel-Züge (BW1-Inhaltsrunde 2026-09-09).
+    ? t(teamTextKeyFor(`brand.advisors.${next}.intro`, teamKind.value, key => te(key)))
     : null
   previousIntroKey = next
 }, { immediate: true })

@@ -764,6 +764,11 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
       contentLocale: profile.contentLocale,
       pathKind: profileFacts(profile, betaAccount).pathKind,
       technique,
+      // Wie im Generator: die Stimmprobe der Technik spricht die Anrede der
+      // Marke (BW1-Inhaltsrunde 2026-09-09).
+      // Der Spalten-Wert ist ein roher String — dieselbe Engführung wie in
+      // `document.get.ts` und `acceptance.get.ts`.
+      team: profile.team === 'team' ? 'team' : 'solo',
       // george-a-15 (Befund 4): „seit 2021" wurde im Gespräch zu „drei Jahre".
       // Das Datum liest der SERVER, nicht der Prompt-Bauer.
       today: brandPromptToday(),

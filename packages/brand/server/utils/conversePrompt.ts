@@ -718,7 +718,7 @@ export function brandConverseInstruction(options: BrandConverseInstructionOption
           + 'MUST append one line per choice at the very end, each starting with `OPTION: ` followed by a short '
           + 'label of at most a few words — without those lines the person has to type the choice out by hand. '
           + 'Put the question in its own final sentence and state briefly in your prose which one you lean '
-          + 'towards and why. Example of such an ending: "Welcher der beiden fühlt sich mehr nach euch an?" '
+          + 'towards and why. Example of such an ending: "Welcher der beiden trifft es besser?" '
           + 'followed by the two lines "OPTION: Der Handwerker" and "OPTION: Der Gastgeber". The labels '
           + 'follow the CHAT language of rule 9. Never invent options where the question is open.',
         ]),

@@ -67,6 +67,7 @@ import {
 import { BRAND_FONT_PAIRS } from './brandFontPairs'
 import { BRAND_DIRECTION_OPTIONS } from './brandDirections'
 import { BRAND_AI_REVIEWS, BRAND_AI_SCOPES, type BrandKitTerm } from './brandKitVocab'
+import type { BrandTeamKind } from './slotRegistry'
 
 /** Eine legale Option einer GESCHLOSSENEN Auswahl. */
 export interface BrandChoiceOption {
@@ -269,7 +270,26 @@ export const BRAND_ARCHETYPES: readonly BrandChoiceOption[] = [
 
 /** Zweisprachige Rückfrage — s. Kopf, warum sie nicht im i18n-Katalog steht. */
 export interface BrandChoiceFallbackQuestion {
+  /**
+   * Die deutsche Fassung im TEAM („Passt zu eurer Marke?").
+   *
+   * Sie ist die Vorgabe und nicht die Solo-Fassung, weil sie älter ist: bis
+   * zur Inhaltsrunde 2026-09-09 gab es nur sie. Ein Vertrag ohne `deSolo`
+   * spricht damit weiter wie bisher, statt still auf eine Anrede zu
+   * wechseln, die niemand geschrieben hat.
+   */
   readonly de: string
+  /**
+   * Die deutsche Fassung bei „Nur ich" — OPTIONAL (BW1-Inhaltsrunde
+   * 2026-09-09, Davids Zuschnitt „Weiche nur, wo wirklich jemand
+   * angesprochen wird").
+   *
+   * Eine Rückfrage ist Chat: George spricht die Person an. Anredefrei
+   * umschreiben — wie bei den Beschriftungen dieser Runde — würde aus der
+   * Frage ein Formularfeld machen. Verträge ohne Anrede („Welches der drei
+   * Boards ist der Ausgangspunkt?") lassen die Zeile deshalb weg.
+   */
+  readonly deSolo?: string
   readonly en: string
 }
 
@@ -311,6 +331,8 @@ const BASE_CONTRACTS: readonly BrandChoiceContract[] = [
     fallbackQuestion: {
       de: 'Aus dem, was ich habe, bekomme ich noch keine saubere Kategorie. '
         + 'Sagt es mir in höchstens fünf Wörtern: Als was würdet ihr gesucht werden?',
+      deSolo: 'Aus dem, was ich habe, bekomme ich noch keine saubere Kategorie. Sag es mir in höchstens fünf '
+        + 'Wörtern: Als was würdest du gesucht werden?',
       en: 'From what I have, I cannot pin down a clean category yet. '
         + 'In five words or fewer: what would people search for to find you?',
     },
@@ -323,6 +345,8 @@ const BASE_CONTRACTS: readonly BrandChoiceContract[] = [
     fallbackQuestion: {
       de: 'Ich kann daraus noch nicht genau EIN Architektur-Modell ableiten. '
         + 'Eine Frage dazu: Tragen eure weiteren Angebote heute euren Markennamen — oder eigene Namen?',
+      deSolo: 'Ich kann daraus noch nicht genau EIN Architektur-Modell ableiten. Eine Frage dazu: Tragen deine '
+        + 'weiteren Angebote heute deinen Markennamen — oder eigene Namen?',
       en: 'I cannot pin this down to exactly ONE architecture model yet. '
         + 'One question: do your other offerings carry your brand name today — or names of their own?',
     },
@@ -355,6 +379,8 @@ const BASE_CONTRACTS: readonly BrandChoiceContract[] = [
     fallbackQuestion: {
       de: 'Ich kann daraus noch nicht EINEN Haupt-Archetyp ableiten, ohne zu raten. '
         + 'Eine Frage dazu: Wenn eure Marke ein Mensch auf einer Party wäre — wie verhält sie sich?',
+      deSolo: 'Ich kann daraus noch nicht EINEN Haupt-Archetyp ableiten, ohne zu raten. Eine Frage dazu: Wenn deine '
+        + 'Marke ein Mensch auf einer Party wäre — wie verhält sie sich?',
       en: 'I cannot settle on ONE primary archetype from this without guessing. '
         + 'One question: if your brand were a person at a party — how would they behave?',
     },
@@ -368,6 +394,8 @@ const BASE_CONTRACTS: readonly BrandChoiceContract[] = [
     fallbackQuestion: {
       de: 'Für den zweiten Archetyp fehlt mir noch etwas — er ist das, was euren ersten vor dem '
         + 'Klischee bewahrt. Eine Frage dazu: Was sollen Leute fühlen, wenn sie mit euch zu tun haben?',
+      deSolo: 'Für den zweiten Archetyp fehlt mir noch etwas — er ist das, was deinen ersten vor dem Klischee '
+        + 'bewahrt. Eine Frage dazu: Was sollen Leute fühlen, wenn sie mit dir zu tun haben?',
       en: 'I am still missing something for the second archetype — it is what keeps the first one from '
         + 'becoming a cliché. One question: what should people feel when they deal with you?',
     },
@@ -522,6 +550,7 @@ const DESIGN_CONTRACTS: readonly BrandChoiceContract[] = [
     options: BRAND_FONT_PAIR_OPTIONS,
     stray: 'Do not invent a seventh pair, do not name a single typeface, and do not combine two pairs.',
     de: 'Welches der Paare passt zu eurer Marke? Die Probe darüber zeigt beide Schriften in eurer Farbwelt.',
+    deSolo: 'Welches der Paare passt zu deiner Marke? Die Probe darüber zeigt beide Schriften in deiner Farbwelt.',
     en: 'Which of the pairs fits your brand? The specimen above shows both typefaces in your colour world.',
   },
   {
@@ -529,6 +558,7 @@ const DESIGN_CONTRACTS: readonly BrandChoiceContract[] = [
     options: designOptions(BRAND_TYPE_SCALES, 'brand.choice.typeScale'),
     stray: 'Do not invent a fourth level, do not give a pixel size — the field holds one id.',
     de: 'Wie laut soll eure Hierarchie sein — ruhig, dicht oder plakativ?',
+    deSolo: 'Wie laut soll deine Hierarchie sein — ruhig, dicht oder plakativ?',
     en: 'How loud should your hierarchy be — calm, dense or bold?',
   },
   {
@@ -536,6 +566,7 @@ const DESIGN_CONTRACTS: readonly BrandChoiceContract[] = [
     options: designOptions(BRAND_MARK_KINDS, 'brand.choice.markKind'),
     stray: 'Do not invent a fifth direction, do not merge two, and do not describe a logo in words.',
     de: 'Welche Richtung soll euer Zeichen nehmen — Wortmarke, Bildmarke, Kombination oder Monogramm?',
+    deSolo: 'Welche Richtung soll dein Zeichen nehmen — Wortmarke, Bildmarke, Kombination oder Monogramm?',
     en: 'Which direction should your mark take — wordmark, pictorial, combination or monogram?',
   },
   {
@@ -557,6 +588,7 @@ const DESIGN_CONTRACTS: readonly BrandChoiceContract[] = [
     options: designOptions(BRAND_ICON_OPTIONS, 'brand.choice.iconSet'),
     stray: 'Do not invent a fourth icon set and do not name a library — the field holds one id.',
     de: 'Welcher Icon-Satz passt zu eurer Schrift — Linie, Fläche oder kräftig?',
+    deSolo: 'Welcher Icon-Satz passt zu deiner Schrift — Linie, Fläche oder kräftig?',
     en: 'Which icon set fits your typeface — line, filled or bold?',
   },
   {
@@ -564,6 +596,7 @@ const DESIGN_CONTRACTS: readonly BrandChoiceContract[] = [
     options: designOptions(BRAND_TEMPO_OPTIONS, 'brand.choice.tempo'),
     stray: 'Do not invent a fourth tempo, do not give a duration in milliseconds — the field holds one id.',
     de: 'Wie schnell soll sich eure Marke bewegen — ruhig, lebendig oder knapp?',
+    deSolo: 'Wie schnell soll sich deine Marke bewegen — ruhig, lebendig oder knapp?',
     en: 'How fast should your brand move — calm, lively or snappy?',
   },
   {
@@ -571,6 +604,7 @@ const DESIGN_CONTRACTS: readonly BrandChoiceContract[] = [
     options: designOptions(BRAND_LOGO_MOTION_OPTIONS, 'brand.choice.logoMotion'),
     stray: 'There is no "maybe" and no third option — the field holds one id.',
     de: 'Soll sich euer Zeichen bewegen — oder still stehen?',
+    deSolo: 'Soll sich dein Zeichen bewegen — oder still stehen?',
     en: 'Should your mark move — or stand still?',
   },
 ].map(entry => ({
@@ -646,6 +680,8 @@ const KIT_CONTRACTS: readonly BrandChoiceContract[] = [
     fallbackQuestion: {
       de: 'Was darf eine Maschine in eurem Namen schreiben — Entwürfe für alles, nur Text, '
         + 'nur intern, oder nichts Kundenseitiges?',
+      deSolo: 'Was darf eine Maschine in deinem Namen schreiben — Entwürfe für alles, nur Text, nur intern, oder '
+        + 'nichts Kundenseitiges?',
       en: 'What may a machine write in your name — drafts for everything, text only, '
         + 'internal only, or nothing customer-facing?',
     },
@@ -691,6 +727,8 @@ const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, ...KIT_CON
   fallbackQuestion: {
     de: 'Habt ihr Vorbilder — Screenshots, eine Pinnwand, drei Seiten, die euch gefallen? '
       + 'Beides ist in Ordnung; ohne Vorbilder komme ich aus eurer Foundation zur Richtung.',
+    deSolo: 'Hast du Vorbilder — Screenshots, eine Pinnwand, drei Seiten, die dir gefallen? Beides ist in '
+      + 'Ordnung; ohne Vorbilder komme ich aus deiner Foundation zur Richtung.',
     en: 'Do you have references — screenshots, a pinboard, three sites you like? '
       + 'Either is fine; without them I get to the direction from your foundation.',
   },
@@ -717,6 +755,8 @@ const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, ...KIT_CON
   fallbackQuestion: {
     de: 'Ich kann euch die Richtung nicht abnehmen — sie ist eine Entscheidung, keine Ableitung. '
       + 'Welche der drei Welten fühlt sich nach euch an?',
+    deSolo: 'Ich kann dir die Richtung nicht abnehmen — sie ist eine Entscheidung, keine Ableitung. Welche der '
+      + 'drei Welten fühlt sich nach dir an?',
     en: 'I cannot settle the direction for you — it is a decision, not a derivation. '
       + 'Which of the three worlds feels like you?',
   },
@@ -743,6 +783,8 @@ const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, ...KIT_CON
   fallbackQuestion: {
     de: 'Welches der drei Boards ist euer Ausgangspunkt? Mischen könnt ihr gleich danach — '
       + 'hier geht es nur darum, womit wir anfangen.',
+    deSolo: 'Welches der drei Boards ist dein Ausgangspunkt? Mischen kannst du gleich danach — hier geht es nur '
+      + 'darum, womit wir anfangen.',
     en: 'Which of the three boards is your starting point? You can mix straight afterwards — '
       + 'this is only about where we begin.',
   },
@@ -761,6 +803,7 @@ const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, ...KIT_CON
     + 'holds one id and nothing else.',
   fallbackQuestion: {
     de: 'Sollen eure Flächen einen Hauch eurer Marken-Farbe tragen — oder bewusst warm oder kühl sein?',
+    deSolo: 'Sollen deine Flächen einen Hauch deiner Marken-Farbe tragen — oder bewusst warm oder kühl sein?',
     en: 'Should your surfaces carry a hint of your brand colour — or be deliberately warm or cool?',
   },
 }, ...DESIGN_CONTRACTS]
@@ -888,8 +931,17 @@ export function checkBrandChoiceDraft(contract: BrandChoiceContract, draft: stri
  * und Chat folgt Regel 9. Alles, was nicht mit `de` beginnt, bekommt Englisch —
  * dieselbe Konvention wie `advisorOpenersFor`.
  */
-export function brandChoiceFallbackQuestion(contract: BrandChoiceContract, locale: string): string {
-  return locale.toLowerCase().startsWith('de') ? contract.fallbackQuestion.de : contract.fallbackQuestion.en
+export function brandChoiceFallbackQuestion(
+  contract: BrandChoiceContract,
+  locale: string,
+  team: BrandTeamKind = 'team',
+): string {
+  if (!locale.toLowerCase().startsWith('de')) return contract.fallbackQuestion.en
+  const question = contract.fallbackQuestion
+  // `team` ist die Vorgabe, nicht `solo`: eine Aufrufstelle, die die Weiche
+  // (noch) nicht kennt, bekommt den Text, der vor dieser Runde dort stand.
+  // Der Rückfall auf `de` gilt zusätzlich für jeden Vertrag ohne Anrede.
+  return team === 'solo' ? (question.deSolo ?? question.de) : question.de
 }
 
 /**

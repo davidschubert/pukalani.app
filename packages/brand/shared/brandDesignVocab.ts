@@ -229,7 +229,7 @@ export type BrandDnaOrigin = (typeof BRAND_DNA_ORIGINS)[number]
  * späterer Leser muss die Id kennen, statt an ihr zu scheitern.
  */
 export const BRAND_DNA_ORIGIN_TERMS: readonly BrandDesignTerm[] = [
-  { id: 'foundation', de: 'Aus eurer Foundation', en: 'From your foundation' },
+  { id: 'foundation', de: 'Aus der Foundation', en: 'From your foundation' },
   { id: 'inspiration', de: 'Aus einem Vorbild', en: 'From a reference' },
   { id: 'both', de: 'Aus Foundation und Vorbild', en: 'From foundation and reference' },
 ]
@@ -259,7 +259,7 @@ export const BRAND_DNA_BOARD_KINDS: readonly BrandDnaBoardKind[] = [
     id: 'proposed',
     de: 'Wie vorgeschlagen',
     en: 'As proposed',
-    noteDe: 'Die Ableitung aus eurer Foundation, Zeile für Zeile begründet.',
+    noteDe: 'Die Ableitung aus der Foundation, Zeile für Zeile begründet.',
     noteEn: 'The derivation from your foundation, reasoned line by line.',
   },
   {

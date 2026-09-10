@@ -24,6 +24,12 @@
  * Hilfe-Schlüssel im Katalog, bleibt die Zeile weg: ein nicht übersetzter
  * Schlüssel rendert sich selbst, und genau so stand vier Tage lang
  * `legal.imprint` im Fuss von comments.pukalani.app.
+ *
+ * ── GEORGE SPRICHT IN DER ANREDE DER MARKE (BW1-Inhaltsrunde 2026-09-09) ──
+ * Die Züge gehen über `useBrandTeamText()` statt über `t()`: liegt unter
+ * `….text` ein Paar `{solo, team}`, kommt die passende Fassung, sonst der
+ * Basis-Schlüssel. Ein neues Kapitel braucht die Weiche also nicht zu kennen
+ * — es bekommt sie durch das blosse Anlegen der zwei Kinder im Katalog.
  */
 const props = defineProps<{
   /** Kapitel-Schlüssel: `nomenclature` · `aiguide` · `presskit`. */
@@ -32,14 +38,14 @@ const props = defineProps<{
   count: number
 }>()
 
-const { t, te } = useI18n()
+const { teamText, hasTeamText } = useBrandTeamText()
 
 const moves = computed(() => Array.from({ length: props.count }, (_, index) => {
   const base = `brand.kit.moves.${props.chapter}.m${index + 1}`
   return {
     id: base,
-    text: t(`${base}.text`),
-    help: te(`${base}.help`) ? t(`${base}.help`) : '',
+    text: teamText(`${base}.text`),
+    help: hasTeamText(`${base}.help`) ? teamText(`${base}.help`) : '',
   }
 }))
 </script>

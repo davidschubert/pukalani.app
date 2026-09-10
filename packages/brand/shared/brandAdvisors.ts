@@ -1,4 +1,4 @@
-import type { BrandStepKey } from './slotRegistry'
+import type { BrandStepKey, BrandTeamKind } from './slotRegistry'
 
 /**
  * DAS BERATERTEAM — sechs Steckbriefe, eine STIMME JE SCHICHT.
@@ -71,7 +71,20 @@ export interface BrandAdvisorRole {
 }
 
 export interface BrandAdvisorOpeners {
+  /** Die deutschen Satzanfänge im TEAM — die ältere Fassung, s. `deSolo`. */
   de: readonly string[]
+  /**
+   * Die deutschen Satzanfänge bei „Nur ich" — OPTIONAL (BW1-Inhaltsrunde
+   * 2026-09-09).
+   *
+   * Die Openers sind die Stimmprobe, die ins Modell geht („Warum ausgerechnet
+   * ihr?"). Steht dort die Team-Anrede, ahmt das Modell sie nach — auch bei
+   * einer Marke, die aus einer Person besteht, und dann hilft die
+   * Anrede-Regel im Prompt nur noch dagegen an. Ein Berater ohne Anrede in
+   * seinen Anfängen (Milos „Erzähl mir von einem Tag, an dem") lässt die
+   * Zeile weg.
+   */
+  deSolo?: readonly string[]
   en: readonly string[]
 }
 
@@ -156,6 +169,7 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
     toneTraits: ['demanding', 'precise', 'respectful', 'unmoved by buzzwords'],
     openers: {
       de: ['Das könnte jeder in eurer Branche sagen —', 'Warum ausgerechnet ihr?', 'Ich hake nach:'],
+      deSolo: ['Das könnte jeder in deiner Branche sagen —', 'Warum ausgerechnet du?', 'Ich hake nach:'],
       en: ['Anyone in your industry could say that —', 'Why you, of all people?', 'Let me push on that:'],
     },
     neverDo: [
@@ -181,6 +195,7 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
     toneTraits: ['calm', 'curious', 'patient', 'warm'],
     openers: {
       de: ['Erzähl mir von einem Tag, an dem', 'Was hat euch das gekostet?', 'Da höre ich einen Wert heraus:'],
+      deSolo: ['Erzähl mir von einem Tag, an dem', 'Was hat dich das gekostet?', 'Da höre ich einen Wert heraus:'],
       en: ['Tell me about a day when', 'What did that cost you?', 'I hear a value in that:'],
     },
     neverDo: [
@@ -208,6 +223,7 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
     toneTraits: ['playful', 'exact', 'attentive to rhythm', 'allergic to filler'],
     openers: {
       de: ['Sag den Satz mal laut:', 'Zwei Fassungen — welche klingt nach euch?', 'Ein Wort stört mich:'],
+      deSolo: ['Sag den Satz mal laut:', 'Zwei Fassungen — welche klingt nach dir?', 'Ein Wort stört mich:'],
       en: ['Say that line out loud:', 'Two versions — which one sounds like you?', 'One word bothers me:'],
     },
     neverDo: [
@@ -265,6 +281,7 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
     toneTraits: ['decisive', 'concrete', 'unimpressed by trends', 'explains before it asks'],
     openers: {
       de: ['Aus eurer Foundation folgt:', 'Drei Möglichkeiten, eine Empfehlung:', 'Das ist keine Geschmacksfrage:'],
+      deSolo: ['Aus deiner Foundation folgt:', 'Drei Möglichkeiten, eine Empfehlung:', 'Das ist keine Geschmacksfrage:'],
       en: ['From your foundation it follows:', 'Three options, one recommendation:', 'This is not a matter of taste:'],
     },
     neverDo: [
@@ -352,8 +369,15 @@ export function colleagueForStep(stepKey: BrandStepKey): BrandAdvisor | null {
  * beginnt, bekommt die englischen — dieselbe Konvention wie im übrigen Layer
  * (`en` ist die Default-Locale der App).
  */
-export function advisorOpenersFor(advisor: BrandAdvisor, locale: string): readonly string[] {
-  return locale.toLowerCase().startsWith('de') ? advisor.openers.de : advisor.openers.en
+export function advisorOpenersFor(
+  advisor: BrandAdvisor,
+  locale: string,
+  team: BrandTeamKind = 'team',
+): readonly string[] {
+  if (!locale.toLowerCase().startsWith('de')) return advisor.openers.en
+  // `team` ist die Vorgabe wie bei `brandChoiceFallbackQuestion`: eine
+  // Aufrufstelle ohne Weiche bekommt, was vor der Inhaltsrunde dort stand.
+  return team === 'solo' ? (advisor.openers.deSolo ?? advisor.openers.de) : advisor.openers.de
 }
 
 /**

@@ -164,7 +164,7 @@ export const BRAND_FONT_PAIRS: readonly BrandFontPair[] = [
     bodyStack: "Inter, 'Helvetica Neue', Arial, sans-serif",
     headingLicense: license('Inter'),
     bodyLicense: license('Inter'),
-    noteDe: 'Die Arbeitsschrift des Netzes — sagt nichts über euch, stört aber auch nie.',
+    noteDe: 'Die Arbeitsschrift des Netzes — sagt nichts über die Marke, stört aber auch nie.',
     noteEn: 'The working typeface of the web — it says nothing about you, and never gets in the way.',
   },
   {
