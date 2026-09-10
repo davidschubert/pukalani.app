@@ -412,7 +412,14 @@ export default defineAppConfig({
           // Marke & Strategie
           { channelId: 'UC-b3c7kxa5vU-bnmaROgvog', topic: 'brand-strategy', title: 'The Futur' }, // @thefutur, geprüft 2026-09-09
           { channelId: 'UCBFWrMRo37OVLM2l1pWnH7w', topic: 'brand-strategy', title: 'Brand Master Academy' }, // @BrandMasterAcademy, geprüft 2026-09-09
-          { channelId: 'UCHzbxHV1205I4FlG5rFZsPg', topic: 'brand-psychology', title: 'Ogilvy' }, // @Ogilvy, geprüft 2026-09-09
+          // Ogilvy STAND HIER und ist raus (2026-09-10, Davids Entscheidung):
+          // die Id UCHzbxHV1205I4FlG5rFZsPg war echt, der Kanal lädt nur seit
+          // dem 2024-12-02 nichts mehr hoch (646 Tage) — im Prod-Lauf vom
+          // 2026-09-10 null Zeilen bei einer Einheit Kosten je Lauf. Ersatz aus
+          // DEMSELBEN Haus: Nudgestock ist Ogilvys Behavioural-Science-Festival
+          // (Rory Sutherland). Bewusst dünn und stoßweise — rund 3 Uploads je
+          // 180 Tage, der Schwung an Vorträgen kommt nach dem Festival im Juni.
+          { channelId: 'UCBOzmOV9UHpTEYNr6NqOZ2g', topic: 'brand-psychology', title: 'Nudgestock' }, // @Nudgestock, geprüft 2026-09-10 (Titel UND jüngster Upload)
           // Gestaltung & Identität
           { channelId: 'UCN7dywl5wDxTu1RM3eJ_h9Q', topic: 'visual-identity', title: 'Flux Academy' }, // @FluxAcademy, geprüft 2026-09-09
           { channelId: 'UCoeJKtPJLoIBqWq4o8TDLpA', topic: 'visual-identity', title: 'Satori Graphics' }, // @SatoriGraphics, geprüft 2026-09-09
@@ -427,7 +434,12 @@ export default defineAppConfig({
           // eigenen Kanal und wird über die Titel erreicht (s. o.).
           // Erlebnis & Sprache
           { channelId: 'UC2oCugzU6W8-h95W7eBTUEg', topic: 'brand-experience', title: 'Nielsen Norman Group' }, // @NNgroup, geprüft 2026-09-09
-          { channelId: 'UC13ogyrw3DUgjlAIcWmWG3A', topic: 'brand-language', title: 'Marketing Examples' }, // @MarketingExamples, geprüft 2026-09-09
+          // Marketing Examples (Harry Dry) STAND HIER und ist raus (2026-09-10,
+          // Davids Entscheidung): die Id UC13ogyrw3DUgjlAIcWmWG3A war echt,
+          // letzter Upload 2024-07-20 (781 Tage), im Prod-Lauf ebenfalls null
+          // Zeilen. Ersatz in derselben Nische: StoryBrand ist Messaging,
+          // Elevator Pitch und Tonalität — der Kern von brand-language.
+          { channelId: 'UC_RirP9QR49zw2HOZ95dKrA', topic: 'brand-language', title: 'StoryBrand' }, // @StoryBrand, geprüft 2026-09-10 (Titel UND jüngster Upload)
           // Sichtbarkeit
           { channelId: 'UCWquNQV8Y0_defMKnGKrFOQ', topic: 'seo-geo', title: 'Ahrefs' }, // @AhrefsCom, geprüft 2026-09-09
           { channelId: 'UCWf2ZlNsCGDS89VBF_awNvA', topic: 'seo-geo', title: 'Google Search Central' }, // @GoogleSearchCentral, geprüft 2026-09-09
