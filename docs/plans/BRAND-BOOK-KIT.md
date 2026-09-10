@@ -758,6 +758,56 @@ können parallel zu K1 laufen. Pakete starten selbstständig, sobald das
 vorige grün ist (Regel vom 2026-09-05); Inhalts-Gates blockieren nur das
 jeweilige Paket.
 
+**Stand K0 (GEBAUT 2026-09-09, main f4fa7a4a):** Registry mit
+`BRAND_KIT_STEP_KEYS` + zehn Sessions, Ausnahme-Vertrag `p.facts` namentlich
+genagelt, Kataloge `brandKitVocab.ts`, Berater-Zuordnung, Journey-Faktum
+`derivationUnlocked` mit Grund `derivation_locked` (skipped, nicht locked),
+Schicht-Schnitt wie Schicht 2 (Foundation-`result` done; Design keine
+Voraussetzung), Rail-Layer 3 gesperrt, fünf Kapitel-Anker; alle vier Leser +
+Impact-Hinweis geklemmt. Beweis: 2864 Tests (+40), Lint, Typecheck 0.
+**Gelernt:** `nomenclature` gehört in `OPTIONAL_STEPS` (erbt W4), und
+`canEnterBrandStep` muss den neuen Grund kennen, sonst sagt die Werkstatt
+„übersprungen" statt „noch nicht geöffnet".
+
+**Stand K1 (GEBAUT 2026-09-09, main e68586df; brand-025 mit Davids Ja auf
+Prod gefahren, Spalten per Schema-Lesung bestätigt):** `resolveDerivationAccess`
+(Beta ODER Feld; Beta-Wahrheit an EINER Stelle `brandAccountIsBeta`,
+`profileFacts(row, betaAccount)` als Pflicht-Argument in 32 Routen),
+Betreiber-Routen + Seite `/dashboard/brand-unlocks` (zwei Spalten, alte Route
+301), Rail-Layer 3 offen nach Freischaltung, Sperrsatz ohne Preis,
+Marktvergleich liest dieselbe Regel. **Beweis `verify:kit` 40/40 gegen Prod**
+(mit Aufräumen; Davids Ja) — Kit-Kapitel antworten 403 `derivation_locked`
+(nicht 404: der Sperrsatz braucht den Code). **Gelernt:** (1) es gibt KEINE
+lokale Dev-Instanz für das Projekt `branding` — die einzige `branding.env`
+liegt in der Prod-Ablage; ein Agent, der „irgendeine Env" sucht, findet
+zuerst Prod (Lauf gestoppt und mit eindeutiger Env-Regel neu gestartet;
+Verify-Läufe brauchen den Laufzeit-Key der Site, der Migrations-Key hat kein
+`users.write`). (2) Zwei `nuxi dev` im selben App-Verzeichnis (Agent auf
+3016, Prüfer auf 3017) reißen sich gegenseitig um: Verify erst, wenn der
+Agent seinen Server beendet hat. (3) macOS hat kein `timeout` — ein
+Verify-Aufruf mit `timeout 480 node …` läuft still ins Leere. (4) Ein
+abgebrochener Verify-Lauf hinterlässt Testkonten auf Prod (`finally` läuft
+beim Kill nicht) — vier Konten + 58 Zeilen von Hand entfernt, danach 0.
+
+**Stand K2 (GEBAUT 2026-09-09, main fdcd95c6):** `buildBrandTokens` (DTCG
+2025.10, Farbobjekte mit `components` + `hex`, hell/dunkel als Geschwister-
+Gruppen, Rollen als Aliasse mit Kontrast-Beleg aus den Preset-Paaren,
+Größen-Leiter geometrisch aus der Skala in rem, `radius.mark` mit Bezugs-
+Kachel 2,5 rem), `renderBrandTokensCss` aus dem Token-Objekt (Deckungsgleichheit
+33/33 Hex, jede Rolle in `:root`, `.dark`, `@theme`), Lizenz-Felder je
+Schriftpaar + `LICENSES.md`, Datei-Registry `brandKitFiles`, Manifest- und
+Datei-Route mit Download-Eimer `kitDay` 60/Tag, `verify:tokens` (Style
+Dictionary 5 per `npx`, keine Dependency: 78 Variablen, keine Verweise).
+**Nachschnitt §2.20 Nr. 7 eingebaut:** `color.dark.accent` → erste AA-fähige
+Stufe der neuen Rampe `color.accent-dark` (von dunkel nach hell gesucht),
+Beleg `$extensions["supply.branding/accent-lift"]` — Kailua: Original
+2,03:1 auf `#0c0a09`, gehoben auf Stufe 300 `#879e90` mit 6,89:1. Beweis:
+2927 Tests (+54), Lint, Typecheck 0. **Gelernt:** die Prototyp-Größen (42/32/
+24/… px) hätten für jede zweite Marke gelogen — die Leiter muss aus der
+gewählten Skala gerechnet werden; und das Preset trägt Gewicht/Laufweite nur
+als Textzeilen, ohne Rückweg (`brandTypeRulesFromLines`) fielen die Tokens
+still auf den D4-Vorschlag.
+
 ### 2.19 Offene Entscheidungen für die Freigabe
 
 | # | Frage | Empfehlung |
