@@ -121,9 +121,30 @@
       "opportunityNone": "keine Zahl",
       "signals": "aus {count} von {total} Signalen",
       "formula": "Auf 100 genormt: der Durchschnitt der vorhandenen Signale (je 0–20), aus {count} von {total} Signalen gerechnet. Heute rechnen drei: Performance (Aufrufe ÷ Abonnenten), Alter (Halbwertszeit 90 Tage) und Relevanz (Nähe zu unseren Themen). Suchnachfrage und Konkurrenz fehlen, solange es dafür keine Datenquelle gibt.",
-      "empty": "Noch kein Lauf. Der Radar braucht einen API-Schlüssel.",
-      "pendingTitle": "Der Themenradar kommt mit Paket I4",
-      "pendingText": "Er braucht einen YouTube-API-Schlüssel. Gespeichert werden dann je Video nur die öffentlichen Zahlen der API, höchstens {days} Tage — keine Kommentar-Texte, keine Nutzernamen."
+      "empty": "Noch kein Lauf. Der Radar holt seine Zahlen einmal am Tag — oder auf Knopfdruck.",
+      "missingTitle": "Es fehlt der API-Schlüssel",
+      "missingText": "Ohne Schlüssel holt der Radar nichts. Die Server-Umgebung braucht die Zeile NUXT_INSIGHTS_YOUTUBE_KEY. Gespeichert werden dann je Video nur die öffentlichen Zahlen der API, höchstens {days} Tage — keine Kommentar-Texte, keine Nutzernamen.",
+      "statusKey": "Schlüssel",
+      "keyPresent": "hinterlegt",
+      "keyMissing": "fehlt",
+      "statusChannels": "Kanäle",
+      "channelsCount": "kein Kanal | ein Kanal | {count} Kanäle",
+      "statusQuota": "Kosten je Lauf",
+      "quotaOf": "{units} von {total} Einheiten",
+      "statusLastRun": "Letzter Lauf",
+      "lastRunNever": "noch keiner",
+      "run": "Jetzt laufen lassen",
+      "runDone": "Fertig: {channels} Kanäle, {videos} Videos, {upserted} gespeichert, {deleted} entfernt.",
+      "runErrors": "ein Fehler unterwegs | ein Fehler unterwegs | {count} Fehler unterwegs",
+      "runFailed": "Der Lauf hat nicht geklappt.",
+      "rateLimited": "Zu viele Läufe in dieser Stunde. Gleich wieder versuchen.",
+      "notConfigured": "Ohne API-Schlüssel kann der Radar nichts holen.",
+      "skipped": {
+        "not_configured": "Kein API-Schlüssel hinterlegt — der Lauf hat nichts geholt.",
+        "no_channels": "Keine Kanäle konfiguriert — der Lauf hat nichts geholt.",
+        "quota_estimate": "Der Lauf wäre zu teuer geworden. Die Kanalliste ist zu lang.",
+        "running": "Es läuft schon einer. Kurz warten."
+      }
     },
     "editor": {
       "title": "Redaktion",

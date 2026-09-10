@@ -391,6 +391,12 @@ const INSIGHTS_TABLES = [
   // `contactEmail`/`ipHash` werden nach 12 Monaten geleert (`retentionAt` +
   // Sweep), die Entscheidungs-Zeile selbst bleibt als Nachweis.
   'insights_corrections',
+  // insights-004: der Themenradar (§9.6) — je Video NUR die öffentlichen
+  // Zahlen der YouTube Data API plus unsere Opportunity-Zahl. Kurzlebig: der
+  // tägliche Lauf überschreibt je `videoId`, das 30-Tage-Netz löscht, was er
+  // nicht mehr erreicht (Policies III.E.4). KEINE Kommentar-Texte, KEINE
+  // Nutzernamen — dafür gibt es hier keine Spalte.
+  'insights_topics',
 ]
 
 const PORTFOLIO_SOLL = [

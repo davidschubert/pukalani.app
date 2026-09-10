@@ -342,6 +342,31 @@ const SITES = [
        */
       'NUXT_AI_KEY',
       /**
+       * SEIT BI1 I4 (2026-09-09) PFLICHT — der YouTube-Data-API-Schlüssel des
+       * Themenradars (Plan docs/plans/BRAND-INSIGHTS.md §9.6).
+       *
+       * DIESELBE SORTE LOCH WIE F44, und diesmal in ihrer stillsten Form:
+       * fehlt der Schlüssel, tut der tägliche Radar-Lauf NICHTS. Er wirft
+       * nicht, er meldet nichts (die eine `insights.radar_unconfigured`-Zeile
+       * steht einmal je Prozess, bewusst auf `info`), die Seite
+       * `/dashboard/insights/radar` sieht gesund aus und zeigt eine leere
+       * Tabelle — und eine leere Tabelle heisst dort auch „noch nie gelaufen".
+       * Genau dafür gibt es diesen Wächter.
+       *
+       * ER IST BIS ZU DAVIDS EINTRAG BEWUSST ROT. Der Schlüssel ist eines der
+       * drei Gates aus §11.3 (Google-Cloud-Projekt anlegen, Data API v3
+       * freischalten, Schlüssel erzeugen) und liegt heute nicht auf dem
+       * Server. Ein Wächter, der eine ausstehende Handreichung als „passt
+       * schon" durchwinkt, hätte den Eintrag nie erinnert; ein roter Punkt mit
+       * genau diesem Namen daneben ist die Erinnerung.
+       *
+       * `NUXT_INSIGHTS_YOUTUBE_BASE_URL` steht hier NICHT: sie ist eine
+       * DEV-Hilfe (Stub-Server statt echter API, damit ein lokaler Beweis
+       * keine Quota kostet) und in PROD ungesetzt richtig. Ein Wächter, der
+       * eine Dev-Hilfe anmahnt, erzieht zum Weglesen.
+       */
+      'NUXT_INSIGHTS_YOUTUBE_KEY',
+      /**
        * SEIT BS1 R1b (2026-09-07) AUCH HIER PFLICHT — die Begründung von
        * vorher ist ÜBERHOLT und stand als Befund im Faktenblatt (§2 Zeile 2).
        *

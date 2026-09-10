@@ -7,6 +7,7 @@ import type {
   InsightsReviewIssue,
   InsightsState,
 } from '../insightsPost'
+import type { InsightsRadarStoredVideo } from '../insightsRadar'
 import type {
   InsightsCorrection,
   InsightsCorrectionStatus,
@@ -204,6 +205,65 @@ export interface InsightsTranslateResponse {
 export interface InsightsDraftResponse {
   post: InsightsPost
 }
+
+// ── Themenradar (BI1 I4, §9.6) ─────────────────────────────────────────────
+
+/**
+ * EIN VIDEO IN DER BETREIBER-ANSICHT — die API-Zahlen PLUS unsere drei.
+ *
+ * Der Typ ist ein Re-Export und keine zweite Aufzählung derselben Felder:
+ * `InsightsRadarStoredVideo` beschreibt, was in der Zeile LIEGT, und die
+ * Antwort gibt genau das weiter. Zwei Listen derselben Felder liefen
+ * auseinander, sobald eine Spalte dazukäme.
+ */
+export type InsightsRadarVideoItem = InsightsRadarStoredVideo
+
+/**
+ * `GET /api/insights/radar` — der Zustand des Radars UND seine Zeilen.
+ *
+ * ── WARUM DER ZUSTAND MITKOMMT UND NICHT AUS EINER ZWEITEN ROUTE ────────
+ * „Gibt es einen Schlüssel?", „wie viele Kanäle?", „was kostet ein Lauf?" und
+ * „wann lief er zuletzt?" sind die vier Fragen, die die Seite beantworten
+ * MUSS, bevor ihr Knopf überhaupt Sinn ergibt. Eine leere Tabelle heisst je
+ * nach Antwort „noch nie gelaufen", „kein Schlüssel" oder „keine Kanäle" —
+ * drei sehr verschiedene Arbeiten für den Betreiber, und eine zweite Route
+ * dafür wäre ein zweiter Ladezustand für dieselbe Seite.
+ */
+export interface InsightsRadarResponse {
+  /** Liegt ein API-Schlüssel vor? (`NUXT_INSIGHTS_YOUTUBE_KEY`) */
+  configured: boolean
+  /** Wie viele GÜLTIGE Kanäle in der Konfiguration stehen. */
+  channels: number
+  /** Was ein Lauf nach der Formel aus §9.6 kostet (von 10.000 am Tag). */
+  quotaEstimate: number
+  /**
+   * Der jüngste `fetchedAt` aller Zeilen — `null`, wenn es keine gibt.
+   * KEIN zweiter Zustand irgendwo: ein Stempel, der von den Zeilen abweichen
+   * kann, wäre ein Datum, dem niemand mehr glaubt.
+   */
+  lastRunAt: string | null
+  /** Der Stichtag der SERVER-Uhr (`YYYY-MM-DD`) — gegen ihn rechnet das Alter. */
+  today: string
+  videos: InsightsRadarVideoItem[]
+}
+
+/**
+ * `POST /api/insights/radar/run` — das Ergebnis EINES Laufs, in Zahlen.
+ *
+ * Es ist das Sweep-Ergebnis unverändert. `skipped` sagt, wenn gar nichts
+ * passiert ist, und WARUM — ein Lauf, der „0 Videos" meldet, weil kein
+ * Schlüssel da ist, sieht sonst aus wie einer, der nichts gefunden hat.
+ */
+export interface InsightsRadarRunResponse {
+  channels: number
+  videos: number
+  upserted: number
+  deleted: number
+  errors: number
+  quotaUnits: number
+  skipped?: 'not_configured' | 'no_channels' | 'quota_estimate' | 'running'
+}
+
 
 // ── Korrekturvorschläge (BI1 I2-Rest, §9.3) ────────────────────────────────
 
