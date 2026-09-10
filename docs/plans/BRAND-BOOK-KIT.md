@@ -876,7 +876,15 @@ Route `GET …/kit/workshop` (`private, no-store`, Datentür von K1: fremd 404,
 ohne Freischaltung 403). Schreiber UND K4-Leser gehen durch dieselben Helfer
 in `shared/brandKitSlots.ts`; die Muster-Tabelle im Book trägt jetzt eine
 vierte Spalte „Herkunft". Beweis: 3117 Tests (+51), Lint, Typecheck 0,
-`check:i18n-keys`, `check:bilanz`, `check:manifests`. NICHT bewiesen:
+`check:i18n-keys`, `check:bilanz`, `check:manifests`. **LIVE seit 2026-09-10**
+(Build `b976197d`, ein späterer Commit mit K5 als Vorfahr — der eigene SHA
+`d215b420` erschien nie am Health-Endpunkt, weil Nachbarsitzungen weiter
+pushten und der Deploy den jüngeren Stand baute): die neue Route antwortet
+ohne Login 404 mit dem DATENTÜR-Envelope (`{"ok":false,"code":"NOT_FOUND",
+"message":"Not Found"}`, wortgleich mit der bekannten K2-Route
+`kit/tokens.json`), während eine wirklich unbekannte Route Nitros eigenes
+404 mit Pfad im Text liefert — die Route ist also ausgeliefert und die
+Datentür greift. NICHT bewiesen:
 Otto/Nika gegen ein echtes Modell, die drei neuen Zusagen 31–33 in
 `verify-brand-sessions.mjs` (geschrieben, nie gefahren — braucht Davids Ja zu
 einem Lauf gegen Prod mit Aufräumen), Klick-Beweis in der Werkstatt.
@@ -894,7 +902,9 @@ regeln; die stehen jetzt drin und sind Teil des Inhalts-Gates. (4)
 passt nicht hinein, Mehrfachwahl braucht ihre eigene Klemmung. (5) Statische
 Route schlägt Parameter-Route (`kit/workshop` neben `kit/[file]`) — im Repo
 an sieben Stellen im Betrieb belegt (`check/ranking` neben `check/[id]`),
-kein Messlauf nötig. Offen: der Live-Persona-Audit (Kailua + zwei
+kein Messlauf nötig; auf Prod bleibt die Vorrangfrage
+mangels Login unentschieden, weil beide Routen ohne Konto dasselbe 404
+zeigen. Offen: der Live-Persona-Audit (Kailua + zwei
 Testmarken) aus der Beweis-Spalte ist NICHT Teil von K5 geworden — er gehört
 zu K8 (Audit + Live), wenn die Lieferseite steht.
 

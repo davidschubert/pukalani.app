@@ -37,7 +37,13 @@ Vollständiges Konzept: docs/CONCEPT.md
   JEDE App site.manifest.ts = Single Source der Produkt-Wahl.
   `pnpm check:manifests` (CI/lint) erzwingt Konsistenz mit extends +
   package.json + migrate.mjs-LAYER_ORDER — neue Layer/Apps immer mit
-  Manifest anlegen. Strategie: docs/referenz/MULTI-SITE-PLATFORM-STRATEGIE.md
+  Manifest anlegen. `apiPrefixes` im Manifest ⇒ `server/plugins/
+  product-manifest.ts` mit `registerProductManifest(manifest)` PFLICHT
+  (PM1, 2026-09-09; Ausnahmeliste im Skript, heute leer): das Manifest ist
+  `import type`-only, erst das Plugin macht Notabschaltung, Produkt-Gate und
+  Katalog wirksam — `market` fuhr so wochenlang tot, Typecheck/Lint/Tests
+  sehen das nicht. Live-Beweis: der Key steht in `/api/platform/products`.
+  Strategie: docs/referenz/MULTI-SITE-PLATFORM-STRATEGIE.md
 - packages/blueprint = KOMPOSITIONS-Layer („Bauplan", seit 2026-07-27): der
   EINZIGE Layer, der mehrere Produkt-Layer kennen darf — Produkt-
   Kompositionen (Feed+Kommentare, …) existieren GENAU EINMAL hier, nie je
