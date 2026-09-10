@@ -10875,3 +10875,93 @@ geändert; der „Fehler" war die Wahrheit. (3) `check:bilanz` gehört in diesel
 wie i18n/manifests, sobald ein Layer Routen oder Seiten bekommt — die CI hat es gesehen, die
 lokale Runde nicht. (4) Klick-Beweis hinter Login ohne Passwort: `users.createSession` per
 Server-SDK, Secret als `a_session_<projekt>`-Cookie in den Playwright-Kontext.
+
+## BI1 I4 — Brand Insights: Themenradar (2026-09-09)
+
+**Was gebaut wurde** (Commit `c52768e3`, Merge mit den I2-Resten der Nachbarsitzung `83e1b4d3`):
+Paket I4 aus docs/plans/BRAND-INSIGHTS.md §9.6/§9.9 — der Themenradar hinter `insights.manage`,
+gebaut von einem Opus-Lauf nach Auftrag, geprüft und nachgeschärft im Hauptloop. Die vier
+Leitplanken sind KEINE Absicht, sondern Form: es gibt in `shared/insightsYoutube.ts` nur drei
+Adress-Bauer (`channels`, `playlistItems`, `videos` — je 1 Einheit), keinen für `search.list`
+und keinen für `commentThreads`; ein Test hält das über die Export-Namen fest.
+
+- **Migration insights-004 `insights_topics`** (server-only, 14 Spalten, Indizes über
+  `createIndexSteps`: `uq_video_id`, `idx_fetched_at`, `idx_topic`). Je Video NUR die
+  öffentlichen API-Zahlen (Aufrufe, Likes, Kommentar-ZAHL, Datum, Kanal, Titel) plus UNSERE
+  drei Werte (`relevance`, `opportunity` nullable, `opportunitySignals`). **Retention-Entscheid
+  (§9.6 offen gelassen, in I4 gefällt): „täglich neu" + 30-Tage-Netz** — der Lauf überschreibt
+  je `videoId`, und was er nicht mehr erreicht (Kanal aus der Liste, Video privat, Lauf
+  ausgefallen), löscht das Netz als GANZE Zeile. Leitplanke (a) ERLAUBT das Bleiben unserer
+  Zahl, verlangt es nicht; eine 30 Tage alte Zahl zu einem Video, das wir nicht mehr
+  beobachten, hilft Discover nicht. Schema-Parität-Soll + Bilanz nachgezogen.
+- **Kanalliste als Konfiguration** `pukalani.insights.radar.channels` (Layer-Default leer —
+  eine Kanalliste ist eine redaktionelle Entscheidung der App), zwölf Kanäle in
+  `apps/branding/app/app.config.ts`, jede Id aus dem Kanal-HTML verifiziert (`externalId`
+  bzw. kanonische `/channel/UC…`-Adresse). Uploads-Playlist = `UU` + Rumpf der Kanal-Id;
+  Handles und alles, was nicht `UC` + 22 Zeichen ist, wirft `readInsightsRadarConfig` still
+  heraus. `maxVideosPerChannel` 20 (Deckel 50).
+- **Relevanz per Schlagwortliste** (§9.6): `INSIGHTS_TOPIC_KEYWORDS` je Cluster (de+en),
+  `insightsRadarClassify(title, channelTopic)` — Treffer auf Wortgrenzen, Cluster mit den
+  meisten Treffern gewinnt, Gleichstand ⇒ Kanal-Cluster, ohne Treffer 0.5 (kuratierter Kanal
+  ist ein halbes Signal), je Treffer +0.25, Deckel 1.0. Ohne Abonnentenzahl gibt es KEIN
+  Performance-Signal (Zahl aus 2 von 5), nicht Signal 0.
+- **Sweep** `server/utils/insightsRadarSweep.ts` mit injizierbaren `deps` (fetch, Config,
+  TablesDB, Log — nur so mit Fakes prüfbar), Plugin `radar-sweep.ts` (erster Lauf 90 s, dann
+  24 h, Produkt-Registry-Gate). Drei Gates VOR dem ersten Aufruf: Schlüssel, Kanäle,
+  Quota-Schätzung (`ceil(K/50) + K + ceil(K·V/50)`, Deckel 5.000 von 10.000 — der Nachtlauf
+  teilt sich das Budget mit dem Knopf). `quotaExceeded`/401/403 bricht ab, ein fehlender
+  Kanal kostet einen Kanal. Fehlermeldungen gehen nur durch `insightsYoutubeSafeMessage`
+  (der Schlüssel steht bei dieser API in der Query jeder Adresse, und `fetch` zitiert
+  Adressen in Fehlern). Logs tragen NUR Zahlen.
+- **Routen** `GET /api/insights/radar` (Zustand: `configured`, Kanäle, Quota-Schätzung,
+  `lastRunAt` = jüngster `fetchedAt`, kein zweiter Zustand; Zeilen nach `opportunity`
+  sortiert, Deckel 500) und `POST /api/insights/radar/run` (Drossel 3/Stunde je Konto über
+  `useRateLimitStore`, 503 `not_configured` ohne Schlüssel). **Seite**
+  `/dashboard/insights/radar`: Status-Karte (Schlüssel hinterlegt/fehlt mit dem Env-Namen als
+  Code, Kanäle, Kosten je Lauf, letzter Lauf), Knopf, `InRadar` unverändert mit der
+  gespeicherten `relevance` über `resolveRelevance`; Warnung ohne Schlüssel.
+- **Env-Wächter:** `NUXT_INSIGHTS_YOUTUBE_KEY` ist im `branding`-Block von
+  `verify-site-env.mjs` PFLICHT und bis zu Davids Eintrag bewusst rot — ein still nichts
+  tuender Sweep ist die F44-Sorte Loch. `NUXT_INSIGHTS_YOUTUBE_BASE_URL` (Stub-Adresse für
+  den lokalen Beweis) steht dort absichtlich NICHT.
+- 55 neue Tests (120 → 175; nach dem Merge mit den I2-Resten 199).
+
+**Klick-Beweis** (Dev-Server aus dem Worktree, Port 3021, Dev-Instanz `portfolio-g4ml`,
+Migration 004 lokal gefahren, Admin-Session per Server-SDK als Cookie; **YouTube als Stub**
+auf Port 3099 über `NUXT_INSIGHTS_YOUTUBE_BASE_URL` — antwortet für jede Kanal-Id
+deterministisch in den drei API-Formen): GET vor dem Lauf `configured: true, channels: 12,
+quotaEstimate: 18, lastRunAt: null` → Knopf „Jetzt laufen lassen" → Toast „Fertig: 12 Kanäle,
+38 Videos, 38 gespeichert, 0 entfernt" → Tabelle mit Cluster, Zahlen, Alter und „78 von 100 ·
+aus 3 von 5 Signalen" (Zeilen ohne Abonnentenzahl zeigen „aus 2 von 5") → zweiter Lauf
+idempotent (38 gespeichert, 0 neu) → Stub-Treffer NUR `/channels` 1×, `/playlistItems` 12×,
+`/videos` 1× (kein `search`, kein `commentThreads`; Query-Parameter ohne Inhalt) → 4. Lauf in
+der Stunde 429 `reason: rate_limited` → ohne Session 401 → **30-Tage-Netz:** eine Zeile mit
+`fetchedAt` vor 40 Tagen eingepflanzt, Lauf meldet `deleted: 1`, Zeile weg → Plugin-Lauf nach
+90 s im Log (`insights.radar_swept`). **Fail-closed** (zweiter Server ohne Schlüssel):
+`configured: false`, POST 503 `reason: not_configured`, Warnung „Es fehlt der API-Schlüssel",
+Knopf ausgegraut, einmalige Log-Zeile `insights.radar_unconfigured`. Screenshots an David.
+Wächter: 199 Tests, Lint insights/branding/scripts, Typecheck branding, check:i18n-keys,
+check:manifests, check:bilanz.
+
+**Ein Befund aus dem Klick-Beweis, vor dem Push behoben:** die Status-Karte hatte **Höhe 0**.
+Der Body der `UDashboardPanel` ist eine Flex-SPALTE fester Höhe; ein Kind mit
+`overflow-hidden` (`UCard`) verliert dort sein `min-height: auto` und schrumpft auf null,
+sobald der Inhalt darunter überläuft. Die Seite las sich per `innerText` vollständig vor,
+gerendert war ein Strich, der Knopf stand im DOM und war nicht anklickbar — Konsole, Lint,
+Typecheck sahen nichts. Fix: `shrink-0` an der Karte, Begründung im Markup.
+
+**Nicht live geschaltet, und zwar absichtlich:** der Schlüssel liegt nicht in der Server-.env
+(per ploi geprüft), und die Prod-Migration insights-004 braucht Davids Ja. Der Code ist
+deployt und ohne Schlüssel stumm.
+
+**Gelernt:** (1) Ein Klick-Beweis, der nur `innerText` liest, ist grün bei einem Element mit
+Höhe 0 — die Geometrie (`getBoundingClientRect`) gehört zum Beweis, sobald ein Klick nicht
+ankommt. (2) `"channelId":"UC…"` im HTML einer Kanalseite ist der Kanal eines EMPFOHLENEN
+Videos, nicht der der Seite; die Kanal-Id steht in `externalId` bzw. der kanonischen
+`/channel/`-Adresse (zwei von zwölf wären sonst fremd gewesen). (3) Ein Flex-Kind mit
+`overflow-hidden` in einer Flex-Spalte braucht `shrink-0` — dieselbe Falle wartet auf jede
+weitere `UCard` über einer langen Tabelle im Dashboard-Body. (4) Zwei `nuxi dev` derselben App
+im selben Worktree schliessen sich aus („Another Nuxt dev is already running") — der
+Fail-closed-Beweis ohne Schlüssel läuft NACH dem Beweis mit Schlüssel, nicht daneben.
+(5) `useAppConfig(event)` ist in Nitro kein gültiger Aufruf (TS2554), auch wenn eine Stelle im
+Repo es so schreibt — die App-Config ist eine Konstante des Prozesses.
