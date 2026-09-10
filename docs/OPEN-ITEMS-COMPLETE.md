@@ -11249,3 +11249,55 @@ Leseroute schreibt, muss sie in der Redaktion durchsetzen — oder sie fallen la
 (4) **Textsuche im HTML ist kein Render-Beweis:** der i18n-Katalog und der Nuxt-Payload stehen
 im Dokument, und Vue rendert Template-Kommentare mit aus. Dreimal hintereinander ein falsches
 „JA" gemessen; erst `<script>`-Blöcke UND Kommentare herausschneiden misst, was ein Mensch sieht.
+
+## BI1 Kanalliste-Nachtrag — Ogilvy und Harry Dry ersetzt (2026-09-10)
+
+**Anlass:** der offene Punkt aus COMPLETE „BI1 I4-Schärfung" — nach dem Alters-Deckel blieben
+zwei Kanäle in der Liste, die nichts mehr liefern. Das Inventar hat es scharf gemacht: im Lauf
+vom 2026-09-10 lieferten **Ogilvy** (letzter Upload 2024-12-02, 646 Tage) und **Marketing
+Examples / Harry Dry** (2024-07-20, 781 Tage) **null Zeilen** bei je einer Einheit Kosten pro
+Lauf — 173 Zeilen kamen aus 9 der 11 Kanäle. Beide waren zugleich der EINZIGE Kanal ihres
+Clusters (`brand-psychology` bzw. `brand-language`).
+
+**Davids Entscheidung (2026-09-10, gebündelt gefragt): ersetzen statt streichen.**
+- `brand-psychology`: Ogilvy → **Nudgestock** (UCBOzmOV9UHpTEYNr6NqOZ2g) — Ogilvys eigenes
+  Behavioural-Science-Festival (Rory Sutherland), also dieselbe Nische und dasselbe Haus.
+  Bewusst dünn und stoßweise: rund 3 Uploads je 180 Tage, der Schwung an Vorträgen kommt nach
+  dem Festival im Juni.
+- `brand-language`: Marketing Examples → **StoryBrand With Donald Miller**
+  (UC_RirP9QR49zw2HOZ95dKrA) — Messaging, Elevator Pitch, Tonalität; täglich aktiv.
+Verworfen: beide ersatzlos streichen (hätte zwei von sieben Clustern ohne eigenen Kanal
+gelassen) · Ogilvy Consulting (825 Tage) und Copyblogger (923 Tage), beide ebenso tot wie das,
+was sie ersetzen sollten · Marketing Week (6637 Tage). Begründungen im DECISION-LOG (2026-09-10).
+
+**Prüfweg ohne API-Schlüssel** (der Schlüssel liegt nur in der Prod-`.env`, und das soll so
+bleiben): Handle → `externalId` aus dem Kanal-HTML → `https://www.youtube.com/feeds/videos.xml
+?channel_id=UC…` liefert Titel UND jüngsten Upload. Damit ist die Pentagram-Lehre („Titel und
+jüngster Upload müssen passen, nicht nur die Id") zum ersten Mal maschinell prüfbar — und sie
+hat sofort gegriffen: **`@BusinessMadeSimple` löst auf einen Kanal namens „Cameron Belling"
+auf** und ist gar nicht erst in die Liste gekommen.
+
+**Beweise:** 202 Tests insights, Lint insights + branding, Typecheck branding, `check:i18n-keys`,
+`check:manifests`, `check:bilanz` — alle grün; vier CI-Checks auf `main` grün (Test, Lint,
+Typecheck, E2E). Deploy-Beweis `https://branding.supply/api/health` → `.build` = `d1c3da9a`.
+Danach der Lauf per Knopf auf `/dashboard/insights/radar` (1 von 3 der Stunde): Toast
+„Fertig: 11 Kanäle, 190 Videos, 190 gespeichert, 0 entfernt, 24 zu alt"; `GET /api/insights/radar`
+danach **196 Zeilen aus allen 11 Kanälen** — StoryBrand 20 Zeilen unter `brand-language`
+(„Messaging Not Working? Fix Your C-Suite Confusion", 2026-09-09), Nudgestock 3 Zeilen unter
+`brand-psychology` („Nudgestock 2026 - Livestream", 36 Tage, 42 von 100), Ogilvy und Marketing
+Examples weg. Kanalzahl bleibt 11, Quota-Schätzung bleibt 17 Einheiten je Lauf.
+
+**Gelernt:** (1) **Ein leerer RSS-Feed ist kein Beweis für „tot".** `videos.xml` lässt Kanäle
+ohne Langform-Uploads leer aussehen, während die Uploads-Playlist (die unser Sweep über
+`UU`+Rumpf liest) sehr wohl etwas hat — Copy Posse, April Dunford und Wynter kamen so als
+„inaktiv" heraus und wurden zu Unrecht aussortiert. Umgekehrt gilt der Beweis: ein Feed MIT
+Einträgen datiert den jüngsten Upload zuverlässig. (2) **Das Nachrüsten eines zweiten Prüfwegs
+per Scraping ist gescheitert** — die `/videos`- und `/playlist`-Seiten liefern per `curl` gar
+keine Video-Einträge (JS-gerendert bzw. Consent-Wand); die Methode gab auch bei einem KNOWN-GOOD
+Kanal null zurück. Ein Prüfweg, der beim Gegenbeispiel dasselbe sagt wie beim Befund, ist kein
+Prüfweg — das fällt nur auf, wenn man ihn gegen einen bekannt gesunden Fall laufen lässt.
+(3) Die Id-Regel `^UC[A-Za-z0-9_-]{22}$` erlaubt Unterstriche — bei `UC_RirP9QR49zw2HOZ95dKrA`
+lohnte der Blick, denn ein zu enges Muster hätte den Kanal STILL aus der Liste geworfen
+(`readInsightsRadarConfig` verwirft ohne Meldung). Vor dem Push gegen die echte Regel geprüft.
+(4) Der Werkzeug-Klick auf „Jetzt laufen lassen" hat diesmal gegriffen (zweimal zuvor verpuffte
+er) — der Beweis blieb trotzdem die Antwort der Route, nicht der Klick.
