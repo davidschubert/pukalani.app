@@ -72,6 +72,21 @@ bewusst per Read — sie gilt mit derselben Priorität wie CLAUDE.md:
 - `tests.md` — Worktree-Beweise, Ports, E2E-Fallen, Beweis-Regeln
 - `ai-runner.md` — Daemon, Allowlist, Board
 
+## Sitzungs-Hygiene (seit 2026-09-09) — docs/referenz/SESSION-HYGIENE.md
+Jede Runde sendet den ganzen Kontext neu, das Limit ist über alle Modelle
+geteilt. Kurzform: Session = Paket (danach neue Session über die Karte);
+Erkunden an Explore/audit-scout, Bauen an Opus, Prüfen im Hauptloop; Sub-
+Agent falsch ⇒ neu spawnen statt nachsteuern; Ausgaben deckeln (Ausschnitte,
+`head`/`tail`, Playwright `--reporter=dot`, Screenshots nur als Endbeweis);
+`/compact` nur vor einer Pause und mit Fokus; nichts Stilles einschalten
+(Advisor, Workflows, Loops, MCP ohne Repo-Bezug).
+
+# Compact instructions
+Beim Compacten behalten: offene Beweise und ihre Gegenproben, geänderte
+Dateien mit Grund, getroffene Entscheidungen (wer/wann/warum), der nächste
+konkrete Schritt. Weglassen: Erkundungs-Zwischenstände, Tool-Ausgaben, die
+schon in einer Datei stehen.
+
 ## Config-Gates (app.config.ts, Namespace pukalani.*)
 - pukalani.analytics / pukalani.consent: Core-Default false, App aktiviert explizit
 - pukalani.observability: strukturierte JSON-5xx-Logs am zentralen server/error.ts
