@@ -1,7 +1,11 @@
 # Brand Book & Kit (Produkt 03) — Strategie
 
-Status: **PROTOTYP FREIGEGEBEN 2026-09-09 („Prototyp freigegeben, K0
-starten") — Phase 5, Pakete K0–K8 nach §2.18 VERBINDLICH, K0 läuft.**
+Status: **Phase 5 — K0–K4 GEBAUT und auf main (dae02441, 2026-09-09;
+Stand je Paket mit Gelernt in §2.18). K5–K8 folgen je in einer EIGENEN
+Session (WORKFLOW „Sitzungsführung je Phase"); offene Gates: Davids Blick
+auf `brand.md` (K3) und die Leseansicht (K4).** Prototyp freigegeben
+2026-09-09 („Prototyp freigegeben, K0 starten"), Pakete nach §2.18
+VERBINDLICH.
 Vorgeschichte: Strategie geschrieben 2026-09-08, freigegeben 2026-09-09
 (§1.11); Konzeption geschrieben, sechs Fragen beantwortet, Konzept freigegeben
 2026-09-09 (§2.19/§2.20); Prototyp gebaut und geprüft 2026-09-09 (§3).
