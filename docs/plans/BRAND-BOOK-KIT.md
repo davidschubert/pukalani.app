@@ -3,8 +3,8 @@
 Status: **Phase 5 — K0–K5 GEBAUT (K0–K4 auf main dae02441, K5 2026-09-09;
 Stand je Paket mit Gelernt in §2.18). K6–K8 folgen je in einer EIGENEN
 Session (WORKFLOW „Sitzungsführung je Phase"); offene Gates: Davids Blick
-auf `brand.md` (K3), die Leseansicht (K4) und das Inhalts-Gate Otto/Nika
-(K5, Liste liegt vor).** Prototyp freigegeben
+auf `brand.md` (K3) und die Leseansicht (K4); Inhalts-Gate K5 FREIGEGEBEN
+2026-09-09.** Prototyp freigegeben
 2026-09-09 („Prototyp freigegeben, K0 starten"), Pakete nach §2.18
 VERBINDLICH.
 Vorgeschichte: Strategie geschrieben 2026-09-08, freigegeben 2026-09-09
@@ -854,7 +854,10 @@ reist als Schlüssel. (3) Ein Snapshot weiss nichts über die heutige
 Freischaltung: `derivationUnlocked` ist deshalb DREIWERTIG (`true`/`false`/fehlt),
 sonst stünden im Handbuch einer fremden Marke drei Kapitel Werbung.
 
-**Stand K5 (GEBAUT 2026-09-09; Davids Inhalts-Gate offen):** die drei
+**Stand K5 (GEBAUT 2026-09-09, main d215b420; Inhalts-Gate von David FREIGEGEBEN
+2026-09-09 — Regel-Blöcke, Karten-Beispielzeilen, drei Abweichungen der
+Einstiegssätze, Rolle „Inhaber/in" und die zwei `m.rules`-Setzungen, alle
+wie vorgeschlagen):** die drei
 Werkstatt-Kapitel laufen. Kataloge als Chips/Karten (`m.types` Mehrfachwahl,
 `n.scope`/`n.review` mit geschlossenem Vertrag in `brandChoiceOptions.ts`,
 `p.facts` Opt-in über die Einträge von `a.facts`, Default keiner; `p.contact`
