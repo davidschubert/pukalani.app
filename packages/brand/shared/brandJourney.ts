@@ -85,6 +85,7 @@ import {
   slotById,
   slotIsConfirmable,
   slotIsFilled,
+  slotLabelKeyFor,
   slotsForStep,
   stepProgress,
 } from './slotRegistry'
@@ -855,11 +856,41 @@ export function transitionBrandStep(step: BrandStepFacts, action: BrandStepActio
 
 export interface BrandNextQuestion {
   slotId: string
+  /**
+   * Der Schlüssel, den ein `t()` schreiben darf — gerechnet mit
+   * `slotLabelKeyFor`, also MIT Pfad und Weiche (s. `nextQuestionKeys`).
+   */
   questionKey: string
   helpKey: string | null
   type: 'question' | 'choice'
   editor: BrandSlotEditor
 }
+
+/**
+ * DIE WEICHEN, DIE DEN SCHLÜSSEL ENTSCHEIDEN — und warum sie hier ein eigenes
+ * Argument sind (2026-09-09).
+ *
+ * `questionKey` war bis heute der BASIS-Schlüssel `brand.q.<id>`, also genau
+ * der, den der Katalog seit der Anrede-Runde für 49 Sessions NICHT mehr führt
+ * (dort stehen `.solo`/`.team` als Kinder). Gerendert hat ihn niemand — aber
+ * ein Feld, das einen rohen Schlüssel LIEFERT, ist die stille Zusage, dass man
+ * ihn rendern darf, und vue-i18n schreibt bei einem Fehlgriff wortlos
+ * `brand.q.f.nameType` in die Oberfläche. Also folgt er derselben Regel wie
+ * Bühne, Log, Abnahme und Prompt-Aufbau: `slotLabelKeyFor`.
+ *
+ * Das Argument ist OPTIONAL, anders als bei `brandSlotPromptLabel`: die
+ * Aufrufstellen dieser Rechnung sind nicht alle Routen mit Profil in der Hand
+ * (Tests und künftige Leser rufen sie über die reine Registry-Reihenfolge).
+ * Der Rückfall ist die Solo-Fassung des Gründer-Pfads — beide Fassungen
+ * EXISTIEREN im Katalog, ein Default kann hier also keinen rohen Schlüssel
+ * erzeugen; das nagelt `brandJourney.test.ts` fest.
+ *
+ * `BrandProfileFacts` passt strukturell hinein — Route und Bühne reichen
+ * schlicht das durch, was sie ohnehin haben.
+ */
+export type BrandNextQuestionFacts = Pick<BrandProfileFacts, 'pathKind' | 'team'>
+
+const DEFAULT_NEXT_QUESTION_FACTS: BrandNextQuestionFacts = { pathKind: 'new', team: 'solo' }
 
 /**
  * WAS FRAGT GEORGE ALS NÄCHSTES? — Grundfassung: der erste offene
@@ -877,8 +908,9 @@ export interface BrandNextQuestion {
 export function resolveNextQuestion(
   stepKey: BrandStepKey,
   slotStates: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
+  facts: BrandNextQuestionFacts = DEFAULT_NEXT_QUESTION_FACTS,
 ): BrandNextQuestion | null {
-  const next = resolveNextSession(stepKey, slotStates)
+  const next = resolveNextSession(stepKey, slotStates, facts)
   if (!next) return null
   // `kind` ist die EINZIGE Zugabe der Session-Fassung — sie fällt hier raus,
   // damit der Rückgabewert Feld für Feld der von P1b bleibt (die Aufrufstellen
@@ -920,6 +952,7 @@ const ASKABLE_KINDS: readonly BrandSessionKind[] = ASKABLE_SESSION_KINDS
 export function resolveNextSession(
   stepKey: BrandStepKey,
   slotStates: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
+  facts: BrandNextQuestionFacts = DEFAULT_NEXT_QUESTION_FACTS,
 ): BrandNextSession | null {
   const next = slotsForStep(stepKey).find(session =>
     session.required
@@ -940,7 +973,9 @@ export function resolveNextSession(
   if (!next) return null
   return {
     slotId: next.id,
-    questionKey: next.questionKey,
+    // NICHT `next.questionKey` (der Basis-Schlüssel): dieselbe Regel wie
+    // überall sonst, s. `BrandNextQuestionFacts`.
+    questionKey: slotLabelKeyFor(next, facts.pathKind, facts.team),
     helpKey: next.helpKey,
     type: next.type as 'question' | 'choice',
     editor: next.editor,

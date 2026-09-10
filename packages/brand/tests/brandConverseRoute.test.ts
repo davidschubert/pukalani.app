@@ -1460,9 +1460,10 @@ describe('Die Sammel-Session', () => {
     await answer('3 fest, 2 auf Saison')
     expect(writtenSlots()['a.facts']!.collected).toEqual({ teamSize: '3 fest, 2 auf Saison' })
     expect(writtenSlots()['a.facts']!.latestDraft).toBeUndefined()
-    // Der nächste Teil steht im Prompt — der übernächste nicht.
+    // Der nächste Teil steht im Prompt — der übernächste nicht. Und zwar in
+    // der Fassung der Weiche W3: die Testmarke ist `team: 'solo'`.
     expect(lastPrompt).toContain('you are on part 2 of 3')
-    expect(lastPrompt).toContain('Seit wann gibt es euch?')
+    expect(lastPrompt).toContain('Seit wann machst du das?')
 
     await answer('2021')
     expect(writtenSlots()['a.facts']!.collected).toEqual({ teamSize: '3 fest, 2 auf Saison', age: '2021' })
@@ -1487,6 +1488,26 @@ describe('Die Sammel-Session', () => {
     expect(writtenSlots()['a.facts']!.confirmed).toBeUndefined()
     // Und die Fassung steigt mit, sonst liefe der nächste Autosave in einen 409.
     expect(events.at(-1)).toMatchObject({ type: 'generation.completed', revision: 6 })
+  })
+
+  it('stellt die TEILE in der Fassung der Weiche W3 (2026-09-09)', async () => {
+    /**
+     * Die Klammer-Frage („ein paar schnelle Zahlen") drehte die Anrede seit der
+     * Anrede-Runde, die drei Teilfragen nicht — im Solo-Gespräch stand also
+     * mitten in einem durchgehend geduzten Chat „Seit wann gibt es euch?".
+     * Der Solo-Fall steht im Test darüber; hier die GEGENPROBE, dass der
+     * abgenommene Team-Wortlaut wörtlich erhalten bleibt.
+     */
+    profileRow.team = 'team'
+    try {
+      await answer('7 Angestellte, davon 3 in Teilzeit')
+      expect(lastPrompt).toContain('Seit wann gibt es euch?')
+      await answer('1998')
+      expect(lastPrompt).toContain('Wo verkauft ihr wirklich')
+    }
+    finally {
+      profileRow.team = 'solo'
+    }
   })
 
   it('legt die schon gesammelten Teile in den Prompt', async () => {

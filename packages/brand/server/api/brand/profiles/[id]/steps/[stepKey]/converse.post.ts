@@ -237,7 +237,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
       confirmed: brandSlotRecordConfirmed(records[slot.id]),
     }
   }
-  const next = resolveNextQuestion(stepKey, facts)
+  const next = resolveNextQuestion(stepKey, facts, profileFacts(profile, betaAccount))
 
   /**
    * WELCHE SESSION IST DAS HIER (BW2 §6)?
@@ -266,7 +266,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
     session = requested
   }
   else {
-    const fallback = resolveNextSession(stepKey, facts)
+    const fallback = resolveNextSession(stepKey, facts, profileFacts(profile, betaAccount))
     session = fallback ? slotById(fallback.slotId) ?? null : null
   }
 
@@ -784,7 +784,12 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
           antiPatterns: session.antiPatterns,
           collect: promptPart
             ? {
-                question: brandSessionPartQuestion(session, promptPart, uiLocale),
+                question: brandSessionPartQuestion(
+                  session,
+                  promptPart,
+                  uiLocale,
+                  profileFacts(profile, betaAccount).team,
+                ),
                 index: session.parts.indexOf(promptPart) + 1,
                 total: session.parts.length,
               }

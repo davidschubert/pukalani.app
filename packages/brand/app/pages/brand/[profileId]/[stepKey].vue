@@ -516,7 +516,12 @@ const activeSession = computed(() =>
 watch(activeSessionKey, key => store.setActiveSession(key), { immediate: true })
 
 const nextQuestion = computed(() =>
-  (stepKey.value ? resolveNextQuestion(stepKey.value, slotFacts.value) : null))
+  (stepKey.value
+    ? resolveNextQuestion(stepKey.value, slotFacts.value, {
+        pathKind: pathKind.value,
+        team: teamKind.value,
+      })
+    : null))
 
 /**
  * ── DAS BEREITSCHAFTS-GATE, SCHON VOR DEM KLICK ──────────────────────────

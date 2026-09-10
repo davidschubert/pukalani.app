@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import {
   BRAND_CONFIDENCE_VALUES,
@@ -48,6 +51,30 @@ import {
  * sondern vor allem, dass er sich NICHT abkürzen lässt: jede Verweigerung hat
  * hier ihren eigenen Fall, und der Happy-Path wird einmal ganz durchgespielt.
  */
+
+/**
+ * DIE SCHLÜSSELMENGE BEIDER KATALOGE, flach — für den einen Test, der beweist,
+ * dass `resolveNextQuestion` keinen Schlüssel liefert, den es nicht gibt.
+ * Dieselbe Rechnung wie in `i18nCatalog.test.ts`, bewusst als kleine Kopie:
+ * dort wird der KATALOG gegen die Registry geprüft, hier eine RECHNUNG gegen
+ * den Katalog — ein geteilter Helfer verbände zwei Beweise, die aus
+ * verschiedenen Gründen rot werden sollen.
+ */
+function flattenKeys(node: unknown, prefix: string, into: Set<string>): Set<string> {
+  if (node === null || typeof node !== 'object' || Array.isArray(node)) return into
+  for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+    const path = prefix ? `${prefix}.${key}` : key
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) flattenKeys(value, path, into)
+    else into.add(path)
+  }
+  return into
+}
+
+const localesDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'i18n', 'locales')
+const CATALOG_KEYS = {
+  de: flattenKeys(JSON.parse(readFileSync(join(localesDir, 'de.json'), 'utf8')), '', new Set<string>()),
+  en: flattenKeys(JSON.parse(readFileSync(join(localesDir, 'en.json'), 'utf8')), '', new Set<string>()),
+}
 
 /** Der Basispfad der Interaktionsbilanz: neue Marke, solo, ohne B2, ohne F. */
 const BASE_PROFILE: BrandProfileFacts = {
@@ -803,14 +830,62 @@ describe('resolveNextQuestion', () => {
     expect(resolveNextQuestion('values', filled)).toBeNull()
   })
 
-  it('liefert die i18n-Schlüssel gleich mit', () => {
+  it('liefert die i18n-Schlüssel gleich mit — MIT Pfad und Weiche', () => {
+    // `f.nameType` trägt die Weiche W3, also gibt es den Basis-Schlüssel
+    // `brand.q.f.nameType` im Katalog gar nicht mehr (beide Fassungen sind
+    // Kinder). Ohne Weichen-Argument gilt die Solo-Fassung des Gründer-Pfads.
     expect(resolveNextQuestion('naming')).toEqual({
       slotId: 'f.nameType',
-      questionKey: 'brand.q.f.nameType',
+      questionKey: 'brand.q.f.nameType.solo',
       helpKey: 'brand.help.f.nameType',
       type: 'choice',
       editor: 'chips',
     })
+    expect(resolveNextQuestion('naming', {}, { pathKind: 'relaunch', team: 'team' })?.questionKey)
+      .toBe('brand.q.f.nameType.team')
+    // Die Pfad-Achse zählt genauso: `a.origin` trägt beide.
+    expect(resolveNextQuestion('context', {}, { pathKind: 'relaunch', team: 'team' })?.questionKey)
+      .toBe('brand.q.a.origin.relaunch.team')
+  })
+
+  it('nennt NIE einen Schlüssel, den der Katalog nicht führt', () => {
+    /**
+     * DER REGRESSIONSSCHUTZ GEGEN ROHE SCHLÜSSEL (2026-09-09): heute rendert
+     * `questionKey` niemand, aber ein Feld, das einen Schlüssel LIEFERT, ist
+     * die Zusage, dass man `t()` darauf loslassen darf. vue-i18n gibt bei einem
+     * Fehlgriff wortlos den Schlüssel aus — genau der stille Fehler, gegen den
+     * `i18nCatalog.test.ts` gebaut ist, nur hier an der Rechnung statt am
+     * Katalog. Geprüft wird über ALLE Bausteine, beide Pfade, beide Weichen und
+     * jeden Füllstand: der DEFAULT gehört mit dazu, sonst wäre er der eine
+     * ungedeckte Weg.
+     */
+    const gaps: string[] = []
+    const facts = (filled: string[]): Record<string, BrandSlotStateFacts> =>
+      Object.fromEntries(filled.map(id => [id, { hasValue: true }]))
+    for (const stepKey of BRAND_STEP_KEYS) {
+      const sessions = slotsForStep(stepKey)
+      for (let filled = 0; filled <= sessions.length; filled += 1) {
+        const states = facts(sessions.slice(0, filled).map(session => session.id))
+        const asked = [
+          resolveNextQuestion(stepKey, states),
+          ...(['new', 'relaunch'] as const).flatMap(pathKind =>
+            (['solo', 'team'] as const).map(team =>
+              resolveNextQuestion(stepKey, states, { pathKind, team }))),
+        ]
+        for (const next of asked) {
+          if (!next) continue
+          for (const locale of ['de', 'en'] as const) {
+            if (!CATALOG_KEYS[locale].has(next.questionKey)) {
+              gaps.push(`${stepKey}/${filled}: ${next.questionKey} fehlt in ${locale}`)
+            }
+          }
+        }
+      }
+    }
+    expect(gaps).toEqual([])
+    // Gegenprobe: die Schlüsselmenge ist wirklich geladen.
+    expect(CATALOG_KEYS.de.has('brand.q.a.origin.relaunch.team')).toBe(true)
+    expect(CATALOG_KEYS.de.has('brand.q.f.nameType')).toBe(false)
   })
 
   it('gibt null, wenn alle Pflicht-Fragen beantwortet sind', () => {

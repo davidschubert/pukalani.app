@@ -11,6 +11,7 @@ import {
   exampleKeyFor,
   partKeyFor,
   partLabelKeyFor,
+  slotById,
   slotLabelKeyFor,
 } from '../shared/slotRegistry'
 
@@ -189,6 +190,10 @@ describe('brand i18n-Katalog', () => {
       ...(slot.type === 'question'
         ? [exampleKeyFor(slot, 'new', 'solo'), exampleKeyFor(slot, 'relaunch', 'solo')]
         : []),
+      // Die TEILE einer Sammel-Session gehören dazu (2026-09-09): sie werden
+      // EINZELN gestellt, im selben Chat wie die Klammer-Frage darüber, und
+      // genau dort stand solo „Seit wann gibt es euch?".
+      ...slot.parts.map(part => partKeyFor(slot, part, 'solo')),
     ]
 
     const offenders: string[] = []
@@ -204,6 +209,9 @@ describe('brand i18n-Katalog', () => {
     // TEAM-Fassung darf die Mehrzahl behalten — sie ist die abgenommene.
     expect(deTexts.get('brand.q.a.complaints.team')).toMatch(plural)
     expect(deTexts.get('brand.q.a.origin.relaunch.team')).toMatch(plural)
+    // Dieselbe Gegenprobe eine Ebene tiefer: der Teil einer Sammel-Session
+    // behält im Team seinen abgenommenen Wortlaut.
+    expect(deTexts.get('brand.part.a.facts.markets.team')).toMatch(plural)
   })
 
   it('hat für JEDEN Teil einer Sammel-Session eine eigene Frage', () => {
@@ -222,14 +230,28 @@ describe('brand i18n-Katalog', () => {
         if (missingIn(key).length) gaps.push(`${slot.id}: ${key} fehlt`)
       }
       for (const part of slot.parts) {
-        const key = partKeyFor(slot, part)
-        const missing = missingIn(key)
-        if (missing.length) gaps.push(`${slot.id}: ${key} fehlt in ${missing.join(', ')}`)
+        // BEIDE Seiten der Weiche W3 (2026-09-09): ein Teil mit `teamParts`
+        // führt `.solo`/`.team` als Kinder, jeder andere den Basis-Schlüssel —
+        // `partKeyFor` rechnet das, hier steht keine zweite Liste.
+        for (const key of new Set([partKeyFor(slot, part, 'solo'), partKeyFor(slot, part, 'team')])) {
+          const missing = missingIn(key)
+          if (missing.length) gaps.push(`${slot.id}: ${key} fehlt in ${missing.join(', ')}`)
+        }
+        // Und der BASIS-Schlüssel darf es dort NICHT mehr geben, wo die Weiche
+        // angemeldet ist — er stünde sonst wörtlich im Chat, sobald jemand ihn
+        // ohne die Weiche auflöst (Text und Kind-Objekt unter EINEM Schlüssel
+        // kann ein JSON-Katalog nicht halten).
+        if (slot.teamParts?.includes(part) && !missingIn(`brand.part.${slot.id}.${part}`).length) {
+          gaps.push(`${slot.id}: Basis-Schlüssel von "${part}" steht noch da`)
+        }
       }
     }
     expect(gaps).toEqual([])
     // Ohne diese Zeile wäre der Test grün, sobald `parts` irgendwo leer würde.
     expect(activeSlots.filter(slot => slot.parts.length > 0).map(slot => slot.id)).toEqual(['a.facts'])
+    // Und ohne diese, sobald `teamParts` still verschwände: „Seit" und „Märkte"
+    // reden die Marke an, „Team" nicht (s. `partKeyFor`).
+    expect(slotById('a.facts')!.teamParts).toEqual(['age', 'markets'])
     expect(missingIn('brand.part.a.facts.erfunden').length).toBeGreaterThan(0)
   })
 

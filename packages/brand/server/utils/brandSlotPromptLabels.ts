@@ -57,9 +57,20 @@ function lookup(root: CatalogNode | undefined, key: string): string | null {
  * folgt damit derselben Regel wie `brandSlotPromptLabel`: kein erfundener Text,
  * sondern der Katalog-Satz, den die Oberfläche auch zeigt. Fehlt er, bleibt
  * die Teil-Id der ehrliche Rückfall.
+ *
+ * `team` ist ein PFLICHT-Argument, aus derselben Begründung wie bei
+ * `brandSlotPromptLabel`: die einzige Aufrufstelle ist die Chat-Route, und die
+ * liest `profileFacts(profile)` ohnehin. Ein stiller Default hätte hier genau
+ * den Fehler eingebaut, den die Weiche beheben soll — im Solo-Gespräch stand
+ * bis 2026-09-09 „Seit wann gibt es euch?" (die Weiche kennt `partKeyFor`).
  */
-export function brandSessionPartQuestion(slot: BrandSlot, part: string, locale: string): string {
-  return lookup(ROOTS[locale] ?? ROOTS.en, partKeyFor(slot, part)) ?? part
+export function brandSessionPartQuestion(
+  slot: BrandSlot,
+  part: string,
+  locale: string,
+  team: BrandTeamKind,
+): string {
+  return lookup(ROOTS[locale] ?? ROOTS.en, partKeyFor(slot, part, team)) ?? part
 }
 
 /**
@@ -69,6 +80,11 @@ export function brandSessionPartQuestion(slot: BrandSlot, part: string, locale: 
  * IMMER in der INHALTSSPRACHE der Marke, nie in der der Seite: der Wert gehört
  * dem Brand-Dokument, und das ist einsprachig (dieselbe Trennung wie bei
  * `contentLocale` gegenüber `uiLocale`).
+ *
+ * SIE KENNT DIE WEICHE W3 BEWUSST NICHT (2026-09-09), anders als die FRAGE
+ * darüber: ein Etikett ist ein Hauptwort („Team", „Seit", „Märkte") und redet
+ * niemanden an — es gibt dort nichts zu drehen. Ein `team`-Argument wäre ein
+ * Versprechen auf eine zweite Fassung, die der Katalog nie führen wird.
  */
 export function brandSessionPartLabel(slot: BrandSlot, part: string, contentLocale: string): string {
   return lookup(ROOTS[contentLocale] ?? ROOTS.en, partLabelKeyFor(slot, part)) ?? part

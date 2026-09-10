@@ -1038,10 +1038,19 @@ describe('Session-Vertrag', () => {
 
   it('nennt die Teile der Sammel-Session so, wie der Locale-Katalog sie führt', () => {
     const facts = slotById('a.facts')!
+    // OHNE Weiche fällt jeder Teil auf `solo` zurück — und die zwei Teile, die
+    // die Marke anreden, tragen dort ein Suffix (`teamParts`).
     expect(facts.parts.map(part => partKeyFor(facts, part))).toEqual([
       'brand.part.a.facts.teamSize',
-      'brand.part.a.facts.age',
-      'brand.part.a.facts.markets',
+      'brand.part.a.facts.age.solo',
+      'brand.part.a.facts.markets.solo',
+    ])
+    expect(facts.parts.map(part => partKeyFor(facts, part, 'team'))).toEqual([
+      // „Wie viele Leute arbeiten mit" ist auf beiden Seiten derselbe Satz —
+      // deshalb hat `teamSize` keine zweite Fassung und keinen Suffix.
+      'brand.part.a.facts.teamSize',
+      'brand.part.a.facts.age.team',
+      'brand.part.a.facts.markets.team',
     ])
   })
 

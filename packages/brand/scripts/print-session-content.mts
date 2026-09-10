@@ -219,7 +219,13 @@ function sessionBlock(session: BrandSlot): string {
     lines.push(
       '**Teile (nacheinander gefragt):**',
       '',
-      bulletList(session.parts.map(part => `\`${part}\` — ${localeText(partKeyFor(session, part))}`)),
+      // DIESELBE REGEL WIE BEI DER SESSION-FRAGE (s. o.): ein Teil mit eigener
+      // Fassung je Weiche W3 hat ZWEI Wortlaute, und wer gegenliest, muss
+      // beide sehen. `partKeyFor` sagt, welcher Teil das betrifft.
+      bulletList(session.parts.map(part => (session.teamParts?.includes(part)
+        ? `\`${part}\` — ${localeText(partKeyFor(session, part, 'solo'))} `
+          + `· im Team: ${localeText(partKeyFor(session, part, 'team'))}`
+        : `\`${part}\` — ${localeText(partKeyFor(session, part))}`))),
       '',
     )
   }

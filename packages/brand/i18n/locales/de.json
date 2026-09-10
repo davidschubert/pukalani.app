@@ -815,8 +815,14 @@
       "a": {
         "facts": {
           "teamSize": "Wie viele Leute arbeiten mit — feste und freie zusammen?",
-          "age": "Seit wann gibt es euch? Ein Jahr reicht.",
-          "markets": "Wo verkauft ihr wirklich — welche Orte, welche Kanäle?"
+          "age": {
+            "solo": "Seit wann machst du das? Ein Jahr reicht.",
+            "team": "Seit wann gibt es euch? Ein Jahr reicht."
+          },
+          "markets": {
+            "solo": "Wo verkaufst du wirklich — welche Orte, welche Kanäle?",
+            "team": "Wo verkauft ihr wirklich — welche Orte, welche Kanäle?"
+          }
         }
       }
     },

@@ -289,8 +289,8 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 **Teile (nacheinander gefragt):**
 
 - `teamSize` — Wie viele Leute arbeiten mit — feste und freie zusammen?
-- `age` — Seit wann gibt es euch? Ein Jahr reicht.
-- `markets` — Wo verkauft ihr wirklich — welche Orte, welche Kanäle?
+- `age` — Seit wann machst du das? Ein Jahr reicht. · im Team: Seit wann gibt es euch? Ein Jahr reicht.
+- `markets` — Wo verkaufst du wirklich — welche Orte, welche Kanäle? · im Team: Wo verkauft ihr wirklich — welche Orte, welche Kanäle?
 
 **Gesprächsleiter:**
 

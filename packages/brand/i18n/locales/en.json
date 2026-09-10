@@ -815,8 +815,14 @@
       "a": {
         "facts": {
           "teamSize": "How many people work with you — permanent and freelance together?",
-          "age": "Since when have you existed? A year is enough.",
-          "markets": "Where do you actually sell — which places, which channels?"
+          "age": {
+            "solo": "How long have you been doing this? A year is enough.",
+            "team": "Since when have you existed? A year is enough."
+          },
+          "markets": {
+            "solo": "Where do you actually sell — which places, which channels?",
+            "team": "Where do you actually sell — which places, which channels?"
+          }
         }
       }
     },

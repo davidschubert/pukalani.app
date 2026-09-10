@@ -383,6 +383,8 @@ export interface BrandSessionConfig {
   readonly teamVariant?: true
   /** Eigene BEISPIEL-Antwort je Weiche W3 — s. `exampleKeyFor` (selten). */
   readonly teamExample?: true
+  /** Die TEILE einer Sammel-Session mit eigener Fassung je Weiche W3 — s. `partKeyFor`. */
+  readonly teamParts?: readonly string[]
   /** Migrationsvertrag: nicht mehr gefragt, aber weiter lesbar. Nie löschen. */
   readonly deactivated?: true
 
@@ -496,6 +498,8 @@ interface BrandSlotDefinition {
   teamVariant?: true
   /** Eigene BEISPIEL-Antwort je Weiche W3 — s. `exampleKeyFor` (selten). */
   teamExample?: true
+  /** Die TEILE mit eigener Fassung je Weiche W3 — s. `partKeyFor` (nur `collect`). */
+  teamParts?: readonly string[]
   deactivated?: true
 }
 
@@ -738,6 +742,7 @@ function defineSession(definition: BrandSlotDefinition): BrandSessionConfig {
     ...(definition.pathVariants ? { pathVariants: definition.pathVariants } : {}),
     ...(definition.teamVariant ? { teamVariant: definition.teamVariant } : {}),
     ...(definition.teamExample ? { teamExample: definition.teamExample } : {}),
+    ...(definition.teamParts ? { teamParts: definition.teamParts } : {}),
     ...(definition.deactivated ? { deactivated: definition.deactivated } : {}),
 
     kind,
@@ -819,7 +824,7 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   defineSession({ id: 'a.complaints', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
   defineSession({ id: 'a.oneThing', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
   defineSession({ id: 'a.challenge', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
-  defineSession({ id: 'a.facts', stepId: 'context', type: 'choice', required: true, kind: 'structured', maxLength: SHORT, editor: 'chips', generator: 'none', teamVariant: true }),
+  defineSession({ id: 'a.facts', stepId: 'context', type: 'choice', required: true, kind: 'structured', maxLength: SHORT, editor: 'chips', generator: 'none', teamVariant: true, teamParts: ['age', 'markets'] }),
   defineSession({ id: 'a.pitch', stepId: 'context', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'derive' }),
   defineSession({ id: 'a.category', stepId: 'context', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'derive' }),
   defineSession({ id: 'a.competitors', stepId: 'context', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft' }),
@@ -1340,6 +1345,18 @@ export function validateSlotRegistry(slots: readonly BrandSlot[] = BRAND_SLOTS):
     if (slot.teamExample && !slot.teamVariant) {
       problems.push(`${slot.id}: teamExample ohne teamVariant`)
     }
+    // DIESELBE KOPPLUNG EINE EBENE TIEFER (`partKeyFor`, 2026-09-09): ein Teil
+    // mit eigener Fassung je Weiche muss ein Teil DIESER Session sein — sonst
+    // zeigte der Schlüssel auf ein Kind unter einem Namen, den niemand fragt,
+    // und die echte Frage bliebe still einsprachig. `teamVariant` gehört dazu,
+    // weil es dieselbe Weiche ist: eine Session, deren Klammer-Frage die Anrede
+    // NICHT dreht, drehte sie dann nur in der Hälfte ihrer Teile.
+    for (const part of slot.teamParts ?? []) {
+      if (!slot.parts.includes(part)) problems.push(`${slot.id}: teamParts nennt "${part}" — kein Teil`)
+    }
+    if (slot.teamParts?.length && !slot.teamVariant) {
+      problems.push(`${slot.id}: teamParts ohne teamVariant`)
+    }
     // SPITZE KLAMMERN NUR IN DEN VERARBEITUNGSREGELN (die Formeln brauchen ihre
     // Platzhalter, „We exist so that <who> …"). Alles andere hier liest ein
     // MENSCH — im Info-Modal der Session und auf der Abnahme-Seite —, und dort
@@ -1588,9 +1605,31 @@ export function exampleKeyFor(
  * Also ein eigener Namensraum, wie bei den Beispielantworten auch. Die Frage
  * bleibt die KLAMMER über den Teilen („ein paar schnelle Zahlen"), die Teile
  * sind die drei Einzelfragen, die Paket 3 nacheinander stellt.
+ *
+ * ── DIE TEILE KENNEN DIE WEICHE W3 (2026-09-09) ───────────────────────────
+ * Die Klammer-Frage sprach seit der Anrede-Runde beide Fassungen, die drei
+ * TEILE nicht — im Solo-Gespräch stand also wörtlich „Seit wann gibt es
+ * euch?" und „Wo verkauft ihr wirklich?" mitten in einem Chat, der sonst
+ * durchgehend „du" sagt. Dieselbe Weiche, dieselbe Mechanik wie bei
+ * `questionKeyFor`: der Schlüssel bekommt ein Suffix, und beide Fassungen
+ * sind KINDER (ein JSON-Katalog kann unter EINEM Schlüssel nicht gleichzeitig
+ * Text und Kind-Objekt halten).
+ *
+ * ANGEMELDET WIRD JE TEIL, nicht je Session (`teamParts`): `teamSize` fragt
+ * „Wie viele Leute arbeiten mit — feste und freie zusammen?" und ist damit auf
+ * beiden Seiten der Weiche wörtlich richtig. Trüge die SESSION die Marke,
+ * stünde derselbe Satz doppelt im Katalog, und beim ersten Nachziehen wäre
+ * eine der beiden Hälften vergessen — dieselbe Begründung wie bei
+ * `teamExample` gegenüber `teamVariant`, eine Ebene tiefer.
+ *
+ * `team` ist wie dort OPTIONAL und fällt auf `'solo'` zurück; ein Teil ohne
+ * Anmeldung bekommt IMMER den Basis-Schlüssel — nie einen, den der Katalog
+ * nicht führt.
  */
-export function partKeyFor(slot: BrandSlot, part: string): string {
-  return `brand.part.${slot.id}.${part}`
+export function partKeyFor(slot: BrandSlot, part: string, team: BrandTeamKind = 'solo'): string {
+  const base = `brand.part.${slot.id}.${part}`
+  if (!slot.teamParts?.includes(part)) return base
+  return `${base}.${team === 'team' ? 'team' : 'solo'}`
 }
 
 /**
