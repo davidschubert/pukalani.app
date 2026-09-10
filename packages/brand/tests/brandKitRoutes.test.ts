@@ -179,8 +179,10 @@ describe('das Manifest', () => {
     expect(tokens.available).toBe(true)
     expect(tokens.bytes).toBeGreaterThan(1000)
     expect(tokens.filename).toBe('kailua-coffee-co-tokens-2026-09-06.json')
-    expect(manifest.files.find(file => file.id === 'brand.md'))
-      .toMatchObject({ available: false, reason: 'not_built_yet' })
+    // Seit K3 sind auch die drei Context-Dateien da — sie brauchen kein Preset.
+    const context = manifest.files.find(file => file.id === 'brand.md')!
+    expect(context).toMatchObject({ available: true, filename: 'kailua-coffee-co-brand-2026-09-06.md' })
+    expect(context.bytes).toBeGreaterThan(100)
     expect(headers['Cache-Control']).toBe('private, no-store')
     // §2.11: das Manifest ist die Seite, nicht die Datei.
     expect(hits).toEqual([])
@@ -284,11 +286,30 @@ describe('der Download', () => {
     expect(eventRows).toEqual([])
   })
 
-  it('antwortet für eine noch nicht gebaute Datei 409 `not_built_yet`', async () => {
+  it('liefert den Brand Context — auch OHNE abgenommene Schicht 2 (K3)', async () => {
+    for (const row of stepRows) row.state = 'open'
     fileParam = 'brand.md'
-    const error = await expectThrown(() => fileRoute(event))
-    expect(error.status).toBe(409)
-    expect(error.data?.reason).toBe('not_built_yet')
+    const body = await fileRoute(event)
+    expect(body).toContain('# Kailua Coffee Co.')
+    expect(body).toContain('Brand Context aus branding.supply')
+    // Ohne Preset fehlt genau der visuelle Abschnitt (§2.6 Nr. 8).
+    expect(body).not.toContain('## Visuell')
+    expect(headers['Content-Type']).toBe('text/markdown; charset=utf-8')
+    expect(headers['Cache-Control']).toBe('private, no-store')
+
+    fileParam = 'brand.json'
+    const json = JSON.parse(await fileRoute(event)) as { schemaVersion: number, design: unknown }
+    expect(json.schemaVersion).toBe(1)
+    expect(json.design).toBeNull()
+    expect(headers['Content-Type']).toBe('application/json; charset=utf-8')
+
+    fileParam = 'readme.md'
+    expect(await fileRoute(event)).toContain('## Was fehlt')
+  })
+
+  it('KEINE Datei meldet mehr `not_built_yet` — die Registry ist voll', async () => {
+    const manifest = await manifestRoute(event)
+    expect(manifest.files.filter(file => file.reason === 'not_built_yet')).toEqual([])
   })
 
   it('bucht je Abruf einmal auf den Eimer der MARKE', async () => {

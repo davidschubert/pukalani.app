@@ -61,6 +61,7 @@ export {
   INSIGHTS_BRANDS_TABLE,
   INSIGHTS_CORRECTIONS_TABLE,
   INSIGHTS_POSTS_TABLE,
+  INSIGHTS_TOPICS_TABLE,
 } from '../../shared/insightsRows'
 export type {
   InsightsBrandRow,
@@ -69,6 +70,8 @@ export type {
   InsightsCorrectionRowData,
   InsightsPostRow,
   InsightsPostRowData,
+  InsightsTopicRow,
+  InsightsTopicRowData,
 } from '../../shared/insightsRows'
 
 /** Wie viele Beiträge die Redaktionsliste höchstens zeigt (I2). */
@@ -77,6 +80,16 @@ export const INSIGHTS_POSTS_LIMIT = 200
 export const INSIGHTS_BRANDS_LIMIT = 200
 /** Wie viele Korrekturvorschläge die Arbeitsliste höchstens zeigt (I3). */
 export const INSIGHTS_CORRECTIONS_LIMIT = 200
+/**
+ * Wie viele Radar-Zeilen die Betreiber-Ansicht höchstens holt (I4).
+ *
+ * Grosszügiger als die anderen drei, weil die Tabelle anders entsteht: ein
+ * Lauf über zwölf Kanäle à 20 Videos schreibt 240 Zeilen auf einmal, und eine
+ * Ansicht, die bei 200 endet, verschwiege ein Sechstel des Tagesbildes ohne
+ * ein Wort. 500 deckt auch eine gewachsene Kanalliste; die Zeilen tragen je
+ * fünf Zahlen und einen Titel, das ist eine kleine Antwort.
+ */
+export const INSIGHTS_TOPICS_LIMIT = 500
 
 /** Der Admin-Client + die Database-Id des Requests — EIN Aufruf statt zwei. */
 export function insightsDb(event: H3Event) {

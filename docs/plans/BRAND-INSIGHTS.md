@@ -910,6 +910,9 @@ Bestand — das untersagt **III.E.2**. Für die Aufbewahrung gilt **III.E.4**:
 **höchstens 30 Kalendertage**, oder der Lauf holt die Zahlen täglich neu und
 überschreibt sie. Beides ist erlaubt, eines von beidem wird gebaut — die
 Entscheidung fällt in I4, weil sie an der Lauf-Frequenz hängt, nicht am Recht.
+**Entschieden in I4 (2026-09-09): täglich neu, mit 30-Tage-Netz** — der Lauf
+überschreibt je Video, und was er nicht mehr erreicht, löscht das Netz als ganze
+Zeile (Begründung im Kopf von Migration insights-004).
 **Unsere Opportunity-Zahl ist UNSERE Zahl:** sie wird aus diesen Werten
 gerechnet, ist ein eigenes Ergebnis und fällt damit nicht unter das
 Aggregations-Verbot für API-Daten. Sie darf bleiben, auch wenn die Zahlen
@@ -1065,7 +1068,7 @@ mit vier Stücken — einem je Format —, nicht mit neunzehn.
 | **I1a** ✅ | **Beleg-Riegel nach `core`** *(neu 2026-09-08, §11 Runde-1-Frage 1 — **ERLEDIGT 2026-09-09**, auf main)* | `evidenceIsGrounded` und der Herabsetzungs-/Namensfilter (`createMarketDisparagementGuard`) ziehen aus `packages/market/shared` nach `packages/core/shared`, **Namen ohne `market`-Präfix**; `market` re-exportiert (keine Aufrufstelle bricht), `insights` importiert später aus `core`. Fundament-Baustein, kein Insights-Bau | **kein Gate** — steht VOR I1 und ist auch ohne BI1 richtig; läuft parallel als eigenes Code-Paket |
 | **I1** ✅ | **Layer + Schema + Vertrag — GEBAUT 2026-09-09, Prod-Migration mit Davids Ja gefahren (Details OPEN-ITEMS-COMPLETE „BI1 I1")** | Layer `insights` mit Manifest, Eintrag in `apps/branding/site.manifest.ts`, `LAYER_ORDER`, Bilanz-Block, ESLint-Block; Migration (`insights_posts`, `insights_brands`, `insights_corrections`); Vertrag zum brand-Layer; `insights.manage` in `core/shared/authz.ts` (eigener Commit); GDPR-Contributor; Schema-Parität-Soll | **Davids Ja GEGEBEN 2026-09-09** · Zuschnitt entschieden: §11 Frage 1 |
 | **I2** ✅ | **Dashboard + KI-Entwurf — GEBAUT + LIVE 2026-09-09 (Details OPEN-ITEMS-COMPLETE „BI1 I2")** | Liste (`UTable`), Editor mit `UEditor` und zwei Sprach-Reitern, Quellen-Panel mit deterministischer Beleg-Prüfung, die sechs Prüfregeln vor `review` als Server-Gate mit Quellen-Abruf, Zustands-Umschalter, Vorschau, Übersetzen-Endpunkt mit Drossel, `aiCompleteJson`-Entwurf mit `insights-d-1`. Noch nicht: Marken-Seite, Korrekturen-Liste, Fakten-Zeilen-Editor (JSON mit Zod) | I1 · Zuschnitt entschieden: §11 Fragen 4 und 7 |
-| **I4** | **Themenradar** *(vorgezogen 2026-09-08, §11 Frage 6)* | kuratierte Kanalliste, `playlistItems.list` + `videos.list`, `insights_topics` (nur die API-Zahlen je Video, ≤ 30 Tage oder täglich neu) mit Sweep, unsere Opportunity-Zahl aus drei Signalen, Betreiber-Ansicht in der Themen-Liste; **keine Kommentar-Texte, keine Nutzernamen** | **eigenes Gate:** Davids Ja (gegeben) · **Google-Cloud-Projekt mit API-Schlüssel (David)** · die Anwaltsantwort BI1-2 gilt für **alles über Metadaten hinaus**, nicht für den Radar als solchen (§9.6) |
+| **I4** ✅ | **Themenradar — GEBAUT 2026-09-09 (Details OPEN-ITEMS-COMPLETE „BI1 I4"), ohne Schlüssel stumm** | kuratierte Kanalliste (zwölf verifizierte Kanäle in `apps/branding`), `playlistItems.list` + `videos.list` + `channels.list`, `insights_topics` (insights-004, nur die API-Zahlen je Video, täglich neu + 30-Tage-Netz), Sweep 24 h + Knopf, Opportunity aus drei Signalen mit Fussnote, `/dashboard/insights/radar` mit Status-Karte; **keine Kommentar-Texte, keine Nutzernamen** — dafür gibt es keinen Adress-Bauer | **offen bei David:** `NUXT_INSIGHTS_YOUTUBE_KEY` in die Server-.env (Env-Wächter bis dahin rot) + Ja zur Prod-Migration insights-004 · die Anwaltsantwort BI1-2 gilt weiter für **alles über Metadaten hinaus** (§9.6) |
 | **I3** | **Öffentliche Seiten** | `/insights`, `/insights/<slug>`, `/brands/<slug>`, `/duels/<a>-vs-<b>`, `/rankings`, `/topics/<slug>`; Korrektur-/Entfernungs-Formular; SEO (og:image, JSON-LD, hreflang, `noindex` für Entwürfe), Sitemap, Nav-Punkt, 301 aus `slugHistory` | I2 · **Anwaltsantworten BI1-3 und BI1-4** (ohne sie geht kein Markenprofil live, §6) |
 | **I5** | **Newsletter** | `insights_subscribers` mit Double-Opt-in nach dem Warteliste-Muster, Bestätigungs- und Abmelde-Weg, Eintrags-Formular je Format und zentral, Versand | **eigenes Gate:** Rechtstexte (A1/BS1 R2) · Zuschnitt entschieden: §11 Frage 5 |
 | **I6** | **Launch-Paket** | die vier Beispiel-Beiträge (einer je Format), dann die restlichen fünfzehn Stücke aus §9.8; danach der Wochentakt | I3 · Davids Redaktionszeit |
@@ -1430,7 +1433,10 @@ Der Prototyp ist freigegeben (2026-09-08). Was hier steht, hält die Form nicht
 mehr auf, wohl aber den Code: **drei dieser Punkte sind die Gates des Baus I1+**
 — der **API-Schlüssel** (I4), der **Anwaltstermin** (I3) und der **DB1-Rest**.
 
-- **Google-Cloud-Projekt mit YouTube-Data-API-Schlüssel** — Gate von I4.
+- **Google-Cloud-Projekt mit YouTube-Data-API-Schlüssel** — I4 ist seit dem
+  2026-09-09 GEBAUT und ohne den Schlüssel stumm: Zeile `NUXT_INSIGHTS_YOUTUBE_KEY`
+  in die Server-.env von branding.supply, dazu das Ja zur Prod-Migration
+  insights-004.
 - **Neue Plausible-Site für `branding.supply`** — Gate von BS1 R2c (die CE-
   Ausgabe hat keine Sites-API, das ist ein Klick in der Oberfläche).
 - **Anwaltstermin** — die sechs Fragen aus Marktvergleich Anhang G plus die
