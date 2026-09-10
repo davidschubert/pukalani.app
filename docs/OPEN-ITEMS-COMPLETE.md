@@ -11053,3 +11053,28 @@ im selben Worktree schliessen sich aus („Another Nuxt dev is already running")
 Fail-closed-Beweis ohne Schlüssel läuft NACH dem Beweis mit Schlüssel, nicht daneben.
 (5) `useAppConfig(event)` ist in Nitro kein gültiger Aufruf (TS2554), auch wenn eine Stelle im
 Repo es so schreibt — die App-Config ist eine Konstante des Prozesses.
+
+## BI1 I4 — Gates auf Prod geschlossen: Schlüssel, Migration, erster Lauf (2026-09-10)
+
+**Was:** (1) `NUXT_INSIGHTS_YOUTUBE_KEY` in die Server-`.env` von branding.supply — über ein
+Terminal-Fenster mit `read -rs`, das den Wert nur per stdin durch ssh reicht (nie Argument, nie
+Log, nie Chat), Sicherung der `.env` daneben, Gegenlesen nur strukturell (eine Schlüssel-Zeile,
+Wertlänge 39, keine doppelten Schlüssel — das Alarmsignal aus dem Vorfall vom 2026-09-01),
+danach `pm2 startOrReload <ecosystem> --update-env` und Health 200 am Prozess; `ops:site-env`
+für branding grün. (2) Prod-Migration insights-004 mit Davids Ja gefahren (`pnpm migrate --app
+branding --env-file … --layer insights`), Parität branding 39/39. (3) Erster Lauf auf Prod:
+12 Kanäle, 205 Videos gespeichert, 0 Fehler, 18 Einheiten; die Radar-Seite zeigt „Letzter Lauf
+10.09.2026" und die Tabelle mit Opportunity-Werten.
+
+**Befund für die I4-Sitzung (nicht angefasst):** Ogilvy, pentagramdesign und Harry Dry liefern
+Uploads von vor Jahren (755–5314 Tage) mit Opportunity 17–50 — das 30-Tage-Netz gilt dem
+Abruf-Datum, nicht dem Video-Alter; ein Alters-Deckel je Video (oder die Kanäle aus der Liste)
+wäre die nächste Schärfung.
+
+**Gelernt:** (1) Ein Terminal-Fenster für ein Geheimnis: `osascript` an Terminal.app scheitert
+ohne Automations-Freigabe (AppleEvent-Timeout) — eine ausführbare `.command`-Datei per `open`
+braucht keine. (2) Ein Klick des Chrome-Werkzeugs auf einen Nuxt-UI-Knopf kann ohne jede
+Wirkung verpuffen (kein Request, kein Toast) — Beweis ist der Server: `fetch` in der Seite oder
+das pm2-Log, nie „ich habe geklickt". (3) Der 90-s-Erstlauf des Sweeps nach dem Deploy lief
+VOR der Migration und endete still am fehlenden Tisch — ein leeres Log nach dem Neustart ist
+also kein Beweis für „nichts passiert", sondern ein Hinweis auf einen stillen Rückweg.
