@@ -714,6 +714,27 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/discover\/[^/]+\/report$/, bucket: 'brand:report', max: 3 },
   /**
+   * DER KORREKTUR- UND ENTFERNUNGS-WUNSCH ZU EINEM INSIGHTS-BEITRAG ODER
+   * MARKENPROFIL (BI1 I3, Plan docs/plans/BRAND-INSIGHTS.md §9.5).
+   *
+   * Wörtlich dieselbe Lage wie `brand:correction` und `brand:report` drei
+   * Zeilen darüber: eine ÖFFENTLICHE Schreibroute ohne Session, ohne Gate,
+   * ohne Code — sie muss es sein, denn sie existiert für die Betreiber der
+   * FREMDEN Marken, über die wir schreiben, und die haben hier kein Konto.
+   * Genau danach fragt Anwaltsfrage 3 („funktioniert der Korrekturweg?"), und
+   * ein Weg, der ein Konto verlangt, funktioniert nicht.
+   *
+   * DIESE ZEILE IST DER MINUTEN-DECKEL, NICHT DER GANZE. §9.5 verlangt 3/Stunde
+   * je Anschluss plus einen Tages-Eimer; Stunden- und Tagesfenster kennt diese
+   * Middleware nicht (`WINDOW_MS` ist eine Minute für alle). Den Rest zählt die
+   * Route selbst (`decideInsightsCorrectionQuota`,
+   * `packages/insights/shared/insightsCorrection.ts`) — die Minute schützt den
+   * Server, Stunde und Tag die Arbeitsliste der Redaktion. Den Bot fängt
+   * daneben der Honigtopf im Rumpf, die Dublette der 409 auf einen bereits
+   * offenen Vorschlag desselben Anschlusses zum selben Ziel.
+   */
+  { re: /^POST \/api\/insights\/public\/corrections$/, bucket: 'insights:correction', max: 3 },
+  /**
    * DER MARKTVERGLEICHS-LAUF (MV1 M2, Plan §2.9 Nr. 8: „Rate-Limit je IP auf
    * den Abruf-Endpunkt") — die teuerste Route dieses Servers.
    *
