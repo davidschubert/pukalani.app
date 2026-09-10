@@ -11151,6 +11151,12 @@ das Manifest deklariert apiPrefixes [/api/site/domain] …"; (B) Plugin ohne Auf
 (D) Ausnahme + kein Plugin ⇒ grün. Gates: check:manifests, lint:scripts, -r lint,
 -r typecheck, -r test, check:i18n-keys, check:single-copy, check:bilanz.
 
+**Live-Beweis nach dem Deploy** (Build `b976197d` auf beiden Hosts, CI Test/Lint/
+Typecheck/E2E grün): `/api/platform/products` listet auf pukalani.studio jetzt
+`domains`, auf admin.pukalani.app `runner`; `GET /api/site/domain` und
+`GET /api/runner/runs` antworten weiter 401 (nicht 404) — kein Entitlement-Dokument
+hat die neu registrierten Produkte abgeschaltet.
+
 **Gelernt:** Der Wächter prüft die DATEI, deshalb prüft er auch den INHALT — ein
 leeres `defineNitroPlugin(() => {})` hätte die Regel formal erfüllt und nichts
 registriert. Zweitens: `/api/platform/products` ist der schnellste Live-Beweis,
