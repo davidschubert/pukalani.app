@@ -3,6 +3,7 @@ import {
   brandKitContentDisposition,
   brandKitDownloadName,
   brandKitFile,
+  brandKitFileErrorCode,
   brandKitReadableName,
 } from '../../../../../../shared/brandKitFiles'
 import { brandKitFileContent, loadBrandKitContext } from '../../../../../utils/brandKit'
@@ -22,7 +23,8 @@ import { recordBrandEvent } from '../../../../../utils/brandEvents'
  *  1. 404 — kein Zugang, fremde Marke, unbekannte Datei.
  *  2. 403 `derivation_locked` — die Ableitung ist nicht freigeschaltet (K1).
  *  3. 429 `brand_kit_limit` — 60 Abrufe je Marke und Tag sind erreicht.
- *  4. 409 `kit_file_unavailable` mit `reason` — die Datei gäbe es, aber ihre
+ *  4. 409 `kit_file_design_missing` / `kit_file_not_built_yet` — die Datei
+ *     gäbe es, aber ihre
  *     Voraussetzung fehlt (`design_missing`: Schicht 2 steht nicht;
  *     `not_built_yet`: das Paket, das sie baut, kommt noch).
  *
@@ -59,7 +61,7 @@ export default defineEventHandler(async (event): Promise<string> => {
     throw createError({
       status: 409,
       statusText: 'Kit file is not available yet',
-      data: { code: 'kit_file_unavailable', reason: availability.reason },
+      data: { code: brandKitFileErrorCode(availability.reason) },
     })
   }
 
@@ -71,7 +73,7 @@ export default defineEventHandler(async (event): Promise<string> => {
     throw createError({
       status: 409,
       statusText: 'Kit file is not available yet',
-      data: { code: 'kit_file_unavailable', reason: 'not_built_yet' },
+      data: { code: brandKitFileErrorCode('not_built_yet') },
     })
   }
 

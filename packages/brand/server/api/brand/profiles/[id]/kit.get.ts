@@ -1,9 +1,22 @@
 import type { BrandKitManifest } from '../../../../../shared/types/brandKit'
-import { brandKitManifestFiles, loadBrandKitContext } from '../../../../utils/brandKit'
+import {
+  brandKitManifestBundle,
+  brandKitManifestChapters,
+  brandKitManifestFiles,
+  brandKitManifestMarks,
+  loadBrandKitContext,
+} from '../../../../utils/brandKit'
 
 /**
  * DAS MANIFEST DER LIEFERSEITE (`GET /api/brand/profiles/:id/kit`, Konzept
  * docs/plans/BRAND-BOOK-KIT.md §2.9, Paket K2).
+ *
+ * ── SEIT K6 NENNT ES AUCH ZEICHEN, BÜNDEL UND KAPITEL ───────────────────
+ * `marks` ist die je Setzung gerechnete Menge (leer ohne Preset), `bundle` der
+ * Name des Zips mit seinem Eimer-Gewicht und der Zahl der fehlenden Kacheln,
+ * `chapters` der Zustand der drei Kit-Kapitel aus DERSELBEN Journey wie der
+ * Rail. Das Bündel trägt bewusst KEINE Bytes: es zu wiegen hiesse, es zu
+ * packen, und das ist die einzige teure Rechnung des Produkts (§2.11).
  *
  * ── ES IST DIE EHRLICHE LISTE, NICHT DIE SCHÖNE ──────────────────────────
  * Es nennt ALLE sieben Dateien des Konzepts (§2.6), auch die, die es noch
@@ -32,11 +45,19 @@ export default defineEventHandler(async (event): Promise<BrandKitManifest> => {
   // und Dateinamen. Kein Zwischenspeicher, nirgends (§2.9).
   setHeader(event, 'Cache-Control', 'private, no-store')
 
+  const files = brandKitManifestFiles(context)
+
   return {
     profileId: context.profile.$id,
     title: context.profile.title ?? '',
     stand: context.stand,
+    foundationStand: context.foundationStand,
+    designStand: context.designStand,
     designReady: !!context.preset,
-    files: brandKitManifestFiles(context),
+    contentLocale: context.profile.contentLocale,
+    files,
+    marks: brandKitManifestMarks(context),
+    bundle: brandKitManifestBundle(context, files),
+    chapters: brandKitManifestChapters(context),
   }
 })

@@ -13,9 +13,12 @@
  * mit `available: false` und Grund `not_built_yet`, damit das Manifest sagt,
  * was es geben WIRD, statt so zu tun, als bestünde das Kit aus drei Dateien.
  * K3 hat genau das eingelöst: DREI `null` sind zu Funktionen geworden, und
- * Route, Manifest und Bündel zogen ohne eine weitere Änderung nach. Wer K6
- * baut (`marks/*.svg`, Zip), hängt seinen Erzeuger in dieselbe Karte, statt
- * eine zweite Liste danebenzustellen.
+ * Route, Manifest und Bündel zogen ohne eine weitere Änderung nach. Wer eine
+ * SIEBTE Datei mit festem Namen baut, hängt seinen Erzeuger in dieselbe Karte,
+ * statt eine zweite Liste danebenzustellen. `marks/*.svg` ist die begründete
+ * Ausnahme (s. u.) und wohnt in `brandKitMarks.ts`; das Bündel (K6) liest
+ * beide und packt sie — es steht in keiner der beiden Listen, weil es keine
+ * Datei ist, sondern ihre Summe.
  *
  * ── DER DATEINAME KOMMT AUS DEM SLUG, NIE AUS DER EINGABE ────────────────
  * Der Markenname ist Nutzertext. Für den Download wird daraus ein Slug aus
@@ -29,12 +32,15 @@
 import { buildBrandContextJson, renderBrandContextJson, renderBrandContextMarkdown } from './brandContext'
 import type { BrandFoundationView } from './brandFoundation'
 import { renderBrandLicenses } from './brandKitLicenses'
+import { brandKitMarkCount } from './brandKitMarks'
 import { renderBrandKitReadme } from './brandKitReadme'
 import { buildBrandTokens, renderBrandTokensJson } from './brandTokens'
 import { renderBrandTokensCss } from './brandTokensCss'
 import type {
   BrandKitFile,
+  BrandKitFileErrorCode,
   BrandKitFileId,
+  BrandKitFileReason,
   BrandKitReadmeFile,
   BrandKitReadmeManifest,
 } from './types/brandKit'
@@ -140,7 +146,29 @@ export function brandKitReadmeManifest(input: BrandKitBuildInput): BrandKitReadm
       ...(availability.available ? {} : { reason: availability.reason }),
     }
   })
-  return { title: input.title, stand: input.stand, files }
+  return {
+    title: input.title,
+    stand: input.stand,
+    files,
+    // K6: der Ordner `marks/` steht als ZAHL daneben — er ist keine Datei der
+    // Registry und trotzdem Teil dessen, was im Bündel liegt.
+    marks: brandKitMarkCount(input.preset),
+  }
+}
+
+/**
+ * DER GRUND ALS CODE — sonst kommt er nie an (K6, live erwischt).
+ *
+ * Der zentrale Handler (core/server/error.ts) hebt aus `error.data` GENAU
+ * EINEN Schlüssel ins Envelope: `code`. Ein zweites Feld `reason` daneben
+ * bleibt draußen — die Routen setzten es seit K2, und der Client sah nie den
+ * Unterschied zwischen „Schicht 2 fehlt" und „der Erzeuger schweigt"
+ * (dieselbe tote Hälfte wie `last_admin` vor dem 2026-07-29, CLAUDE.md).
+ * Deshalb wandert der Grund IN den Code; die Familie bleibt am Präfix
+ * erkennbar.
+ */
+export function brandKitFileErrorCode(reason: BrandKitFileReason): BrandKitFileErrorCode {
+  return reason === 'design_missing' ? 'kit_file_design_missing' : 'kit_file_not_built_yet'
 }
 
 /** Ist diese Datei heute abrufbar — und wenn nein, warum nicht? */
@@ -215,10 +243,37 @@ export function brandKitReadableName(file: BrandKitFile, title: string, stand: s
   const stem = dot > 0 ? file.filename.slice(0, dot) : file.filename
   const ext = dot > 0 ? file.filename.slice(dot) : ''
   const stamp = brandKitStandStamp(stand)
-  // Zeilenumbrüche und Anführungszeichen haben in einem Kopf nichts verloren —
-  // die Kodierung erledigt das, der Schnitt hält den Namen zusätzlich kurz.
-  const clean = title.replace(/[\r\n"\\]/g, ' ').trim().slice(0, 60) || 'Brand'
-  return `${clean} ${stem}${stamp ? ` ${stamp}` : ''}${ext}`
+  return `${brandKitReadableTitle(title)} ${stem}${stamp ? ` ${stamp}` : ''}${ext}`
+}
+
+/**
+ * DER MARKENNAME, WIE ER IN EINEN KOPF DARF.
+ *
+ * Zeilenumbrüche und Anführungszeichen haben in einem Kopf nichts verloren —
+ * die Kodierung erledigt das, der Schnitt hält den Namen zusätzlich kurz. Er
+ * steht als eigene Funktion da, seit die Zeichen-Dateien (K6) ihren lesbaren
+ * Namen selbst bauen: zwei Kopien dieser Zeile wären zwei Stellen, an denen
+ * jemand später eine Escape-Regel vergisst.
+ */
+export function brandKitReadableTitle(title: string): string {
+  return title.replace(/[\r\n"\\]/g, ' ').trim().slice(0, 60) || 'Brand'
+}
+
+/**
+ * DER NAME DES BÜNDELS — `kailua-coffee-co-brand-kit-2026-09-09.zip` (§2.6).
+ *
+ * Er trägt den Stand wie jeder Download, damit zwei Bündel derselben Marke im
+ * Ordner unterscheidbar bleiben. Ohne Stand fällt der Teil weg.
+ */
+export function brandKitBundleName(slug: string, stand: string): string {
+  const stamp = brandKitStandStamp(stand)
+  return `${[slug, 'brand-kit', ...(stamp ? [stamp] : [])].join('-')}.zip`
+}
+
+/** Der lesbare Name des Bündels — `Kailua Coffee Co. brand kit 2026-09-09.zip`. */
+export function brandKitBundleReadableName(title: string, stand: string): string {
+  const stamp = brandKitStandStamp(stand)
+  return `${brandKitReadableTitle(title)} brand kit${stamp ? ` ${stamp}` : ''}.zip`
 }
 
 /**

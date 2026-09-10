@@ -28,12 +28,15 @@
  * String ist. Wer eine solche Gruppe liest, überspringt Schlüssel mit `$` und
  * prüft mit `typeof` — beides steht in `brandTokensCss.ts` genau einmal.
  *
- * DIESE DATEI IST PUR: nur Typen, kein Code, kein i18n, kein H3. Der EINE
- * Import ist ein Typ-Import (`BrandDesignSnapshotPreset`) — er wird beim
- * Übersetzen gelöscht und macht aus der Datei kein Modul mit Verhalten.
+ * DIESE DATEI IST PUR: nur Typen, kein Code, kein i18n, kein H3. Alle Importe
+ * sind TYP-Importe (`BrandDesignSnapshotPreset`, `BrandStepState`,
+ * `BrandKitStepKey`) — sie werden beim Übersetzen gelöscht und machen aus der
+ * Datei kein Modul mit Verhalten.
  */
 
 import type { BrandDesignSnapshotPreset } from './brand'
+import type { BrandStepState } from '../brandJourney'
+import type { BrandKitStepKey } from '../slotRegistry'
 
 // ── DTCG-Werte ─────────────────────────────────────────────────────────────
 
@@ -293,6 +296,13 @@ export interface BrandKitFile {
 /** Warum eine Datei (noch) nicht abrufbar ist. */
 export type BrandKitFileReason = 'design_missing' | 'not_built_yet'
 
+/**
+ * Der Grund, wie er den Client ERREICHT: als `code` in `error.data`, den der
+ * zentrale Handler als `reason` ins Envelope hebt. Ein zusätzliches Feld
+ * neben `code` käme nie an — Begründung bei `brandKitFileErrorCode`.
+ */
+export type BrandKitFileErrorCode = 'kit_file_design_missing' | 'kit_file_not_built_yet'
+
 export interface BrandKitManifestFile {
   id: BrandKitFileId
   /** Der Dateiname, den der Download trägt (mit Slug und Stand). */
@@ -303,13 +313,113 @@ export interface BrandKitManifestFile {
   bytes?: number
 }
 
+/**
+ * EINE ZEICHEN-DATEI (`marks/*.svg`, §2.6, Paket K6).
+ *
+ * Sie steht NICHT in `BRAND_KIT_FILES`: das ist eine geschlossene Liste mit
+ * festen Dateinamen, und die Zeichen sind eine je Setzung wechselnde MENGE
+ * (vier Varianten mal zwei Setzungen, sobald es ein Preset gibt; ohne Preset
+ * keine). Ein Registry-Eintrag „mehrere Dateien" wäre ein Eintrag, für den
+ * die Regeln der Registry nicht gelten.
+ */
+export interface BrandKitMarkFile {
+  /** `marks/<slug>-<setzung>-<variante>.svg` — der Pfad IM BÜNDEL. */
+  id: string
+  /** Derselbe Name ohne `marks/` — er ist der Router-Parameter der Route. */
+  filename: string
+  /** Id aus `BRAND_MARK_SETTINGS` (`wordmark` | `monogram`). */
+  setting: string
+  /** Id aus `BRAND_MARK_VARIANTS` (`primary` | `inverted` | `mono` | `icon`). */
+  variant: string
+  /**
+   * Ist das die als primär geführte Setzung (`j.pick`)?
+   *
+   * OPTIONAL und heute nie gesetzt: der Slot steht nicht im Snapshot-Preset,
+   * und ein geratenes „Primär" wäre eine Aussage über eine Entscheidung, die
+   * der Erzeuger nicht kennt (s. Kopf von `shared/brandKitMarks.ts`).
+   */
+  primary?: boolean
+  /** Der SVG-Quelltext, mit `<title>` und `role="img"`. */
+  svg: string
+}
+
+/**
+ * EINE ZEICHEN-DATEI IM MANIFEST — mit dem SVG, und das ist Absicht.
+ *
+ * Die Registry-Dateien nennt das Manifest nur (Name, Grösse); die Zeichen
+ * trägt es MIT. Der Grund ist der Tages-Eimer: die Lieferseite zeigt acht
+ * Kacheln, und holte sie jede einzeln über die Zeichen-Route, kostete EIN
+ * Seitenaufruf acht der sechzig Abrufe — nach sechs Besuchen stünde ein Mensch
+ * an einer Schranke, die gegen ein Skript gedacht ist und nie gegen ihn
+ * (§2.11). Der Server zahlt dafür nichts: die Setzungen stehen ohnehin schon
+ * im Kontext, sie werden nur mitgeschickt.
+ *
+ * Der DOWNLOAD läuft trotzdem über die Route — geladen wird, was ausgeliefert
+ * wird, mit `Content-Disposition` und Eimer-Treffer.
+ */
+export interface BrandKitManifestMark {
+  id: string
+  filename: string
+  setting: string
+  variant: string
+  primary?: boolean
+  bytes: number
+  /** Der SVG-Quelltext — dieselbe Zeichenkette, die die Route ausliefert. */
+  svg: string
+}
+
+/**
+ * DAS BÜNDEL IM MANIFEST — Name, Gewicht und was fehlt. OHNE `bytes`.
+ *
+ * Die Größe fehlt mit Absicht (§2.11): das Bündel ist die EINZIGE teure
+ * Rechnung des Produkts, und das Manifest ist die Seite, nicht die Datei —
+ * stünde die Zahl darin, packte jeder Seitenaufruf das ganze Zip, nur um eine
+ * Zahl neben einen Knopf zu schreiben. Die Seite zeigt deshalb den
+ * Dateinamen; die Bytes sieht der Browser beim Laden.
+ */
+export interface BrandKitManifestBundle {
+  /** `<slug>-brand-kit-<stand>.zip`. */
+  filename: string
+  /** Immer `true`: das Bündel gibt es auch ohne Preset — dann eben kleiner. */
+  available: true
+  /** Wie viele Treffer der Abruf auf den Tages-Eimer bucht. */
+  weight: number
+  /**
+   * Wie viele Kacheln der Lieferseite heute leer bleiben — die nicht
+   * verfügbaren Registry-Dateien plus die Zeichen als EINE Einheit.
+   */
+  missing: number
+}
+
+/** Der Zustand eines der drei Kit-Kapitel — dieselbe Rechnung wie die Journey. */
+export interface BrandKitManifestChapter {
+  stepKey: BrandKitStepKey
+  state: BrandStepState
+}
+
 export interface BrandKitManifest {
   profileId: string
   title: string
-  /** ISO-Stempel des jüngsten Design-Kapitels; '' ohne Preset. */
+  /**
+   * ISO-Stempel des jüngsten BETEILIGTEN Kapitels (Foundation, Design und
+   * Kit) — er steht in jedem Dateinamen und in jeder Datei. K6 hat ihn von
+   * `brandDesignStand` auf `brandKitStand` umgestellt: eine Marke ohne Preset
+   * trug sonst gar keinen Stand, obwohl `brand.md` sich mit jedem
+   * Foundation-Kapitel ändert.
+   */
   stand: string
+  /** Der Stand der Foundation allein — für die Auskunft auf der Lieferseite. */
+  foundationStand: string
+  /** Der Stand der sechs Design-Kapitel allein; '' ohne Preset. */
+  designStand: string
   designReady: boolean
+  /** Inhaltssprache der Marke — die Dateien sind in IHR geschrieben. */
+  contentLocale: string
   files: BrandKitManifestFile[]
+  /** Leer ohne Preset. */
+  marks: BrandKitManifestMark[]
+  bundle: BrandKitManifestBundle
+  chapters: BrandKitManifestChapter[]
 }
 
 // ── Der Brand Context (§2.6, Paket K3) ────────────────────────────────────
@@ -398,6 +508,13 @@ export interface BrandKitReadmeManifest {
   title: string
   stand: string
   files: readonly BrandKitReadmeFile[]
+  /**
+   * Wie viele `marks/*.svg` im Bündel liegen — 0 ohne Preset (K6).
+   *
+   * Eine ZAHL und keine Liste: die README nennt den Ordner, nicht acht
+   * Dateinamen, die sich mit jeder Katalog-Erweiterung ändern.
+   */
+  marks: number
 }
 
 // ── Die Werkstatt-Quellen der dritten Schicht (§2.9, Paket K5) ────────────

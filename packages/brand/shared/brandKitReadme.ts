@@ -96,13 +96,31 @@ export function renderBrandKitReadme(manifest: BrandKitReadmeManifest, locale: s
   for (const file of there) {
     lines.push(`- \`${file.filename}\` — ${text(locale, WHAT[file.id].de, WHAT[file.id].en)}`)
   }
+  /*
+   * DER ORDNER `marks/` ALS EINE ZEILE (K6) — er ist keine Registry-Datei,
+   * sondern eine je Setzung wechselnde Menge. Deshalb steht hier die ZAHL und
+   * nicht acht Dateinamen: eine Liste, die mit jedem Katalog-Eintrag anders
+   * aussieht, ist in einer README keine Auskunft, sondern Rauschen.
+   */
+  if (manifest.marks > 0) {
+    lines.push(`- \`marks/\` — ${text(
+      locale,
+      `${manifest.marks} Setzungen als SVG: Wortmarke und Monogramm je Variante, `
+      + 'Schriften als Stack referenziert, nicht eingebettet.',
+      `${manifest.marks} settings as SVG: wordmark and monogram per variant, `
+      + 'fonts referenced as a stack, not embedded.',
+    )}`)
+  }
 
-  if (missing.length > 0) {
+  if (missing.length > 0 || manifest.marks === 0) {
     lines.push('')
     lines.push(`## ${de ? 'Was fehlt' : 'What is missing'}`)
     lines.push('')
     for (const file of missing) {
       lines.push(`- \`${file.filename}\` — ${reasonText(file.reason, locale)}`)
+    }
+    if (manifest.marks === 0) {
+      lines.push(`- \`marks/\` — ${reasonText('design_missing', locale)}`)
     }
     lines.push('')
     lines.push(de

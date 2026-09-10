@@ -48,6 +48,38 @@ export const BRAND_KIT_LIMIT_CODE = 'brand_kit_limit'
 export type BrandKitRejectionCode = typeof BRAND_KIT_LIMIT_CODE
 
 /**
+ * DER DECKEL DES BÜNDELS: 5 MB (§2.6, K6).
+ *
+ * Er ist KEIN Schutz vor dem Menschen, der viele Werte bestätigt hat — ein
+ * volles Kit wiegt heute rund 100 KB. Er ist die Zusage, dass diese Route
+ * NIEMALS ein beliebig grosses Ergebnis in den Speicher legt, egal was
+ * jemand künftig in die Registry hängt (ein Bild-Export, ein Raster, ein
+ * eingebetteter Schriftschnitt). Dieselbe Sorte Grenze wie
+ * `snapshot_too_large` — und derselbe Umgang: 413 mit einem Grund, nie eine
+ * halbe Datei.
+ */
+export const BRAND_KIT_ZIP_MAX_BYTES = 5 * 1024 * 1024
+
+/** Der Ablehnungsgrund des Deckels — `data.code` der 413. */
+export const BRAND_KIT_TOO_LARGE_CODE = 'kit_too_large'
+export type BrandKitZipRejectionCode = typeof BRAND_KIT_TOO_LARGE_CODE
+
+/**
+ * `null` = diese Grösse darf raus.
+ *
+ * Pur und mit übergebbarem Deckel — genau deshalb: der 413-Zweig der Route
+ * ist im Test mit einem KLEINEN Deckel beweisbar, ohne dass irgendwo ein
+ * Env-Schalter oder ein Prod-Knopf entsteht, den jemand versehentlich
+ * umlegen könnte (dieselbe Form wie `decideBrandKitQuota`).
+ */
+export function decideBrandKitZipSize(
+  bytes: number,
+  max: number = BRAND_KIT_ZIP_MAX_BYTES,
+): BrandKitZipRejectionCode | null {
+  return bytes > max ? BRAND_KIT_TOO_LARGE_CODE : null
+}
+
+/**
  * EIN Eimer je MARKE — ohne Konto und ohne Datei im Schlüssel.
  *
  * Ohne Konto, weil zwei Marken zwei Kits sind (dieselbe Begründung wie beim

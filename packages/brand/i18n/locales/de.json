@@ -2413,13 +2413,17 @@
         "label": "Exportieren",
         "print": "Drucken / PDF",
         "printSub": "Browser-Druck mit Print-Layout",
-        "context": "brand.md · brand.json",
-        "contextSub": "Brand Context für KI-Agenten",
+        "context": "Brand Context",
+        "contextSub": "brand.md · brand.json",
         "tokens": "Design-Tokens",
         "tokensSub": "CSS, Tailwind, JSON",
-        "assets": "Assets.zip",
-        "assetsSub": "Logos, Vorlagen, Pressekit",
-        "kit": "Brand Book & Kit"
+        "assets": "Assets",
+        "assetsSub": "Zeichen, Tokens und Kontext als ZIP",
+        "kit": "Brand Book & Kit",
+        "openKit": "Lieferseite öffnen",
+        "bundle": "Bündel (ZIP)",
+        "needsDesign": "kommt mit Brand Design",
+        "gate": "Brand Book & Kit ansehen"
       },
       "ai": {
         "tone": "Schreibt in diesem Ton:",
@@ -3559,6 +3563,97 @@
         "empty": "Sobald Tagline, Boilerplates und Fakten stehen, sieht man hier das ganze Kit.",
         "apply": "Vorschau übernehmen",
         "applied": "Übernommen"
+      }
+    },
+    "kitPage": {
+      "title": "Kit",
+      "eyebrow": "Lieferseite",
+      "headline": "{title} — Brand Kit",
+      "stand": "Stand {date}",
+      "computed": "gerechnet aus euren bestätigten Werten, nicht gespeichert",
+      "contentLocale": "Inhaltssprache {locale}",
+      "toBook": "Brand Book",
+      "bundle": "Bündel laden ({file})",
+      "missingTiles": "Ohne Brand Design — eine Kachel fehlt | Ohne Brand Design — {count} Kacheln fehlen",
+      "complete": "Vollständig",
+      "correctHint": "Hier wird nichts entschieden. Korrigiert wird in den Kapiteln — rechts der Weg dorthin.",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "download": "Laden",
+      "loading": "Wird geladen …",
+      "previewFailed": "Die Vorschau konnte nicht geladen werden. Der Download funktioniert trotzdem.",
+      "showAll": "Ganze Datei zeigen",
+      "showLess": "Weniger zeigen",
+      "correctTitle": "Korrigieren",
+      "correctLead": "Jede Datei hier ist eine Rechnung über euren bestätigten Werten. Wer etwas ändern will, geht ins Kapitel — das Kit zieht nach.",
+      "privateTitle": "Was hier nicht steht",
+      "privateLead": "Wettbewerber, Beschwerden, Rohantworten und gesperrte Fakten. Die Reise-Regel des geteilten Links ist auch die Export-Regel.",
+      "context": {
+        "title": "Brand Context",
+        "lead": "Eure Marke in einer Datei, die eine Maschine lesen kann. Gebt sie ChatGPT, Claude oder einem Agenten, bevor er für euch schreibt — es steht nur darin, was auch im geteilten Dokument reisen darf.",
+        "preview": "Vorschau · brand.md",
+        "privateNote": "Dieselben Werte wie oben, nur maschinenlesbar. Wettbewerber, Rohantworten und gesperrte Fakten stehen in KEINER der beiden Dateien."
+      },
+      "tokens": {
+        "title": "Design-Tokens",
+        "lead": "Hell und dunkel in EINER Datei, mit denselben Rollen-Namen in beiden Modi — Figma bildet die Gruppen auf zwei Modi ab, Style Dictionary auf zwei Sets.",
+        "rampLight": "Rampe hell · color.brand",
+        "rampDark": "Rampe dunkel · color.brand-dark",
+        "rolesLight": "Rollen hell · color.light",
+        "rolesDark": "Rollen dunkel · color.dark",
+        "note": "Jeder Hex in tokens.css stammt aus tokens.json — beide kommen aus derselben Rechnung über eurer Basisfarbe. Die Kontrast-Urteile stehen als Erweiterung an den Rollen: sie sind Beleg, kein Token."
+      },
+      "marks": {
+        "title": "Zeichen",
+        "lead": "Wortmarke und Monogramm, je Variante. Gesetzt aus eurem Schriftpaar und eurer Farbwelt — die Schriften sind als Stack referenziert, nicht eingebettet.",
+        "note": "Kein PNG-Raster in dieser Fassung. Die behaltenen KI-Entwürfe bleiben privat und liegen in keinem Bündel.",
+        "setting": {
+          "wordmark": "Wortmarke",
+          "monogram": "Monogramm"
+        },
+        "variant": {
+          "primary": "Primär",
+          "inverted": "Invertiert",
+          "mono": "Einfarbig",
+          "icon": "Icon-Fläche"
+        }
+      },
+      "presskit": {
+        "title": "Pressekit",
+        "tag": "aus Botschaften, Fakten-Freigabe und Kontakt",
+        "lead": "Nichts Neues — zusammengestellt aus dem, was längst entschieden ist. Was reist, habt ihr einzeln freigegeben.",
+        "contact": "Presse-Kontakt",
+        "empty": "Das Pressekit entsteht im Kapitel Pressekit. Solange dort nichts bestätigt ist, bleibt diese Kachel leer.",
+        "toChapter": "Freigabe ändern — Kapitel Pressekit"
+      },
+      "licenses": {
+        "title": "Lizenzen",
+        "family": "Familie",
+        "weights": "Gewichte",
+        "role": "Rolle",
+        "source": "Quelle",
+        "spdx": "Lizenz",
+        "download": "LICENSES.md laden"
+      },
+      "bundleList": {
+        "title": "Was im Bündel ist",
+        "missingTitle": "Was fehlt — und warum",
+        "missingReason": "kommt mit Brand Design",
+        "marks": "Eine Setzung als SVG | {count} Setzungen als SVG, Wortmarke und Monogramm je Variante",
+        "note": "Das Bündel heißt {file} und trägt den Stand im Namen. Es wird bei jedem Abruf neu gepackt — es gibt keine gespeicherte Fassung, die altern könnte.",
+        "what": {
+          "brandMd": "Der Brand Context als Markdown — direkt als System-Prompt einsetzbar.",
+          "brandJson": "Dieselben Werte maschinenlesbar, schemaVersion 1.",
+          "tokensJson": "Design-Tokens nach DTCG, hell und dunkel in einer Datei.",
+          "tokensCss": "Dieselben Werte als CSS-Variablen plus Tailwind-Block.",
+          "licensesMd": "Schriftfamilien mit Gewichten, Quelle und Lizenz — ohne Schriftdateien.",
+          "readmeMd": "Was im Bündel liegt, von wann es ist und was fehlt."
+        }
+      },
+      "locked": {
+        "title": "Kommt mit Brand Design",
+        "lead": "{what} entstehen aus eurer Farbwelt, eurem Schriftpaar und eurem Zeichen — die werden im Brand Design entschieden. Bis dahin liefert das Kit alles Übrige: Brand Context, Pressekit, Bündel.",
+        "design": "Brand Design ansehen"
       }
     }
   }
