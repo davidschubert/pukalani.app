@@ -11104,7 +11104,13 @@ Grund).
 
 **Beweise:** 202 Tests insights, Lint insights/branding, Typecheck branding, check:i18n-keys
 (309 Nennungen), check:manifests, check:bilanz, check:doc-links, `pnpm --filter branding build`;
-Prod: Live-Build-SHA + eigener Klick auf `/dashboard/insights/radar` (Zahlen s. u.).
+Prod (Build `fbe77d71`, 2026-09-10): `GET /api/insights/radar` meldet `maxVideoAgeDays: 180`,
+11 Kanäle, 17 Einheiten, die Hinweiszeile steht auf der Seite; der Lauf über
+`POST /api/insights/radar/run` (aus der eingeloggten Seite — der Werkzeug-Klick auf den Knopf
+verpuffte wie bei der Nachbarsitzung) antwortet 200 mit `channels 11, videos 173, upserted 173,
+deleted 32, tooOld 31, errors 0, quotaUnits 17`; danach 173 Zeilen, ältestes Video 2026-03-17,
+neun Kanäle in der Tabelle — Ogilvy, „pentagramdesign" und Harry Dry sind weg, genau die 32
+Zeilen der lesenden Vorab-Prüfung.
 
 **Gelernt:** (1) Eine Seite mit `useFetch({ lazy: true, server: false })` zeigt nach dem Laden
 erst ihre VORGABEN („Schlüssel fehlt", „kein Kanal", „noch kein Lauf") — wer sie sofort ausliest,
