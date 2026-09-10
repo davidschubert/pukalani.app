@@ -30,6 +30,35 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Sitzungs-Hygiene: 24 Video-Tipps gegen unseren Stand geprüft, Regeln je Phase, Ausgabe-Deckel gesetzt ✅ 2026-09-09
+
+**Was:** Davids Auftrag, das Video „How To Never Run Out Of Codex and Claude
+Usage Limits" (AI LABS, 2026-08-28) auszuwerten und in den Workflow zu
+integrieren. Ergebnis: [referenz/SESSION-HYGIENE.md](referenz/SESSION-HYGIENE.md)
+(jeder Tipp mit Befund übernommen / schon gebaut / bewusst nicht / Davids
+Entscheidung, zehn Regeln, MCP-gegen-CLI-Vorschlag, Messwerte),
+[WORKFLOW.md](referenz/WORKFLOW.md) Abschnitt „Sitzungsführung je Phase",
+CLAUDE.md-Kurzabschnitt plus „Compact instructions" (offizieller Haken:
+Claude Code liest diesen Block beim `/compact`), `.claude/settings.json`
+mit `bashOutputMaxChars: 10000` (gilt nur für erfolgreiche Kommandos).
+Neu als Regel: Korrektur per `/rewind` statt Nachricht, Sub-Agent falsch ⇒
+neu spawnen, Befunde als EINE Liste, `/context` je Session, Playwright aus
+dem Agenten mit `--reporter=dot`. Davids fünf Schalter stehen als `15 · SH1`
+in OPEN-ITEMS.
+
+**Gelernt:** (1) Der Test-Filter-Hook des Videos bringt bei uns nichts —
+gemessen: Vitest 4 druckt ohne TTY bei Grün nur die Zusammenfassung (161
+Tests = 498 Bytes); Regeln erst nach Messung übernehmen. (2) Einstellungs-
+namen aus Videos nie übernehmen, ohne die Doku zu lesen: das Video sagt
+„bash max output length", der Schlüssel heißt `bashOutputMaxChars` (die Env-
+Variable `BASH_MAX_OUTPUT_LENGTH` wird ignoriert, sobald der Schlüssel
+gesetzt ist). (3) YouTube-Transkripte gibt es ohne Proof-of-Origin-Token
+nicht mehr (curl leer, yt-dlp 429, Transkript-Endpunkt 400 auch im
+eingebauten Browser) — Rezept im Dokument: Player-`timedtext`-URL aus den
+Performance-Einträgen des echten Chrome erneut mit `fmt=json3` abrufen.
+
+---
+
 ### PS1 — Products-Seite auf branding.supply: Übersicht, fünf Produktseiten, deutsche Slugs, Nav-Aufklapper zurück ✅ 2026-09-09
 
 **Auftrag (DECISION-LOG 2026-09-08, Nebenbefund BI1):** Übersicht plus je eine
