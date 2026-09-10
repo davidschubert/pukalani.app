@@ -302,6 +302,15 @@ schon in einer Datei stehen.
   (Migrations-Runner, ops-Wächter, CI-Aufbau) deckt `pnpm lint:scripts` ab, seit
   2026-08-20 als eigener Schritt in lint.yml. Ein neues Skript dort ist also
   gelintet; vor dem Commit selbst laufen lassen, `pnpm -r lint` sieht es nicht.
+- DER LINT-LAUF IST MEHR ALS `lint` (2026-09-10 rot erwischt): `lint.yml` fährt
+  SECHS Wächter vor den beiden Lint-Schritten — `check:manifests`,
+  `check:i18n-keys`, `check:bilanz`, **`check:doc-links`**, `check:single-copy`.
+  `check:doc-links` prüft JEDEN Datei-Pfad und Link in `docs/` und im README:
+  ein Pfad, der ins Leere zeigt, ist ROT. In Protokoll-Dokumenten
+  (OPEN-ITEMS-COMPLETE, `archiv/`) sind Pfade von damals geduldet — im
+  DECISION-LOG, in `plans/`, `referenz/`, `runbooks/` und im README nicht. Wer
+  in einer dieser Dateien einen Pfad nennt (oder eine Datei löscht, die dort
+  genannt ist), fährt vorher `pnpm check:doc-links`.
 - pnpm, TypeScript strict (kein any), vollständige Dateien, keine Spekulation
 - Dependencies via pnpm Catalog: Versionen zentral in pnpm-workspace.yaml,
   package.json referenziert "catalog:" — geteilte Deps auch in App-package.json
