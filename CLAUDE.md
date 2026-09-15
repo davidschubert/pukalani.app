@@ -8,8 +8,11 @@ Vollständiges Konzept: docs/CONCEPT.md
 ## Stack
 - Nuxt 4.5.x (Composition API, SSR), Nuxt UI 4.10.x, Pinia 4, Tailwind CSS 4
 - node-appwrite 29 (Server SDK) + appwrite 27 (Web SDK, NUR Realtime) — Appwrite self-hosted
-  **2.0.0** (dev + prod seit 2026-09-08, MariaDB bleibt; Runbook mit den drei Fallen des
-  Upgrade-Werkzeugs: docs/runbooks/APPWRITE-2-0-UPGRADE.md)
+  **2.2.0** (dev + CI seit 2026-09-14, prod noch 2.0.0 — wartet auf Davids
+  Freigabe; MariaDB bleibt. Sprung 2.0→2.2: docs/runbooks/APPWRITE-2-2-UPGRADE.md
+  — EIN `appwrite-worker` statt vierzehn, self-hosted erlaubt nur EINE
+  Organisation. Die drei Fallen des Upgrade-Werkzeugs gelten weiter:
+  docs/runbooks/APPWRITE-2-0-UPGRADE.md)
 - Zod, @nuxtjs/i18n (de+en), TypeScript strict, pnpm Workspaces, Node 22
 
 ## Architektur (3 Ebenen)

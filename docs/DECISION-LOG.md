@@ -7,6 +7,50 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-14 — Appwrite 2.2 statt 2.1: ein Fenster, und dev/CI gehen vor prod
+
+**Anlass:** David: „Appwrite 2.1 ist erschienen. Bitte updaten." Beim Nachsehen stand
+**2.2.0 schon draußen** (11.09. bzw. 15.09. UTC, drei Tage auseinander). Die SDKs bleiben
+unberührt: `node-appwrite` 29.0.0 und `appwrite` 27.0.0 sind weiterhin die aktuellsten,
+Response-Format `2.0.0` gilt weiter — also kein Katalog-Hub, anders als beim 2.0-Vorhaben.
+
+**Davids Entscheidungen (zwei Fragen vor Baubeginn):**
+(a) **Direkt auf 2.2.0.** Ein Fenster statt zwei, und 2.2 enthält den
+MariaDB-Healthcheck-Fix, an dem Upgrades von 1.x scheitern konnten. Preis: die Version war
+wenige Stunden alt — deshalb beweist dev sie, bevor prod sie sieht. Verworfen: nur 2.1 (vier
+Tage Feldzeit, aber 2.2 bliebe als zweites Fenster offen) · 2.1 jetzt und 2.2 später
+(zweimal Backup, zweimal Migration auf beiden Instanzen).
+(b) **dev + CI + Doku zuerst, prod erst nach ausdrücklicher Freigabe** — das Prod-Fenster
+ist eine eigene Verabredung mit Zeitpunkt, nicht ein Anhängsel dieses Durchgangs.
+
+**Zwei Dinge, die nur ein echter Lauf zeigt** (beide am 2026-09-14 auf dev erwischt):
+(1) **Es gibt nicht mehr einen Container je Warteschlange.** 2.2 fährt alle Queues in EINEM
+`appwrite-worker`; `appwrite-worker-mails` existiert nicht mehr. Unsere Override mountet den
+SMTP-KeepAlive-Patch genau dorthin — `docker compose up` bricht danach sofort ab („neither an
+image nor a build context"), und der Stack bliebe in dem Zustand stehen, den das
+Upgrade-Werkzeug hinterlässt: **ohne trustedIPs und ohne SMTP-Patch**. Betrifft auch die
+CI-Dienstliste in `e2e.yml` und jede Anleitung, die einen Worker beim Namen nennt.
+(2) **Self-hosted erlaubt seit 2.1 nur EINE Organisation.** `pnpm create-site` legte bisher
+eine eigene `pukalani-sites`-Organisation an und bekommt jetzt **403** — nach dem Schreiben der
+App-Dateien, also mitten im Lauf. Behoben: bei 403 wird die vorhandene Organisation des
+Console-Accounts benutzt. Auf einer self-hosted Instanz ist das die richtige Semantik, es gibt
+dort nie eine zweite.
+
+**Wie der CI-Stack gehoben wird** (und warum das kein Nachpflegen ist): `ci/appwrite/
+docker-compose.yml` wird aus dem Compose der Dev-Instanz ABGELEITET. Probe vor dem Hub: dieselbe
+Ableitung auf das alte Dev-Compose angewandt muss die committete Datei exakt reproduzieren —
+erst dann stimmen die vier CI-Abweichungen noch. Sie tat es; die Datei schrumpfte von 2168 auf
+903 Zeilen.
+
+**Beweise:** dev `health/version` 2.2.0, vier Gesundheitspillen `pass`, 85 Nutzer und
+55 Tabellen unverändert, Migration in 1,5 s · gegen einen lokal gefahrenen CI-Stack auf 2.2:
+Console-Setup, `bootstrap --seed`, verify-paid-ticket 13, pool-isolation 9 + 7,
+audience-flip 49, presence-boundary 10, index-nudge 9, Gate G1 create-site, Playwright mit
+`CI=1` 16 bestanden / 9 übersprungen, Realtime-Spec einzeln grün.
+Ablauf und Prod-Restposten: docs/runbooks/APPWRITE-2-2-UPGRADE.md.
+
+---
+
 ## 2026-09-10 — Mehrsprachige Betreiber-Seiten (F60): der Zuschnitt ist ein anderer als gedacht
 
 **Anlass:** F60 sollte laut OPEN-ITEMS „je Sprache eine Fassung" nach dem Muster der
