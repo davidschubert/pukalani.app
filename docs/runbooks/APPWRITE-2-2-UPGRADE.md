@@ -30,6 +30,12 @@ Runbook nennt nur, was in diesem Sprung ANDERS ist.
 - **Executions leben nur noch in ClickHouse** (2.2). ClickHouse fahren wir seit
   2.0, der Wegfall von `_APP_EXECUTIONS_DUAL_WRITE` kostet uns nichts; wir führen
   keine Appwrite-Functions.
+  ACHTUNG (Vorfall 2026-09-28, OPEN-ITEMS-COMPLETE): die Stock-Compose mountet
+  für `clickhouse` keine Logger-Config, das Image loggt auf Trace und füllte
+  prod in 20 Tagen mit 31 GB `system.*`-Tabellen (Redis MISCONF). Die Override
+  auf prod mountet seither `patches/clickhouse-logging.xml` nach
+  `/etc/clickhouse-server/config.d/logging.xml` — beim Upgrade prüfen, dass der
+  Dienst weiterhin `clickhouse` heißt und der Mount nach `up -d` sitzt.
 - **Entfallene .env-Schlüssel**, die das Werkzeug selbst herausnimmt:
   `_APP_EXECUTIONS_DUAL_WRITE`, `_APP_LOGGING_PROVIDER`,
   `_APP_MAINTENANCE_RETENTION_USAGE_HOURLY` (dazu `_APP_CONNECTIONS_DB_LOGS`,
@@ -92,6 +98,7 @@ vollständig durch (Projekt, Keys, Platform, Bootstrap, `check:manifests`).
   docker compose up -d
   docker inspect appwrite-traefik --format '{{json .Config.Cmd}}' | tr ',' '\n' | grep -c trustedIPs   # 2
   docker exec appwrite-worker grep -n keepAlive /usr/src/code/app/init/registers.php                   # 340: false
+  docker exec appwrite-clickhouse-1 grep -c '<level>warning' /var/lib/clickhouse/preprocessed_configs/config.xml  # 1 (prod: Logging-Override)
   ```
   Ohne die Umbenennung stirbt `docker compose up` sofort mit
   „service appwrite-worker-mails has neither an image nor a build context

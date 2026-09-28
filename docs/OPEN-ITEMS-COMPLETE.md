@@ -11503,3 +11503,45 @@ sehen das nicht, nur Lint. **Vierte (Umgebung):** ein frischer Worktree startet
 nicht auflösbar, und Nitro antwortet auf JEDER Seite 500. Ein Symlink in
 `node_modules` plus Neustart des Dev-Servers heilt es; das Repo bleibt unberührt.
 
+
+## Vorfall appwrite-prod — Platte voll durch ClickHouse-Diagnose-Logs (2026-09-28)
+
+**Auslöser:** UptimeRobot meldete `api.pukalani.app` als DOWN. `/v1/health/version`
+antwortete beim Nachmessen durchgehend 200 in 0,7 s — der Alarm war ein Timeout,
+kein 5xx (Traefik zeigt keine Fehlerantworten). Dahinter: Platte von
+`appwrite-prod` (75 GB) zu 100 % voll, Load ~10 auf 4 CPUs, Redis mit 73 % CPU.
+
+**Ursache:** Appwrite 2.0 brachte am 2026-09-08 ClickHouse als Pflicht-Container
+mit (Nutzungsstatistik der Console, vorher MariaDB). Die Stock-`docker-compose.yml`
+mountet für `clickhouse` KEINE Logger-Config, das Alpine-Image loggt auf Trace:
+~320 Zeilen/s in `system.text_log`, insgesamt **31 GB `system.*`-Tabellen in
+20 Tagen** (text_log 19,3 GB, trace_log 5,5 GB, query_log 1,9 GB,
+processors_profile_log, part_log, metric_log …) plus 1,8 GB Logdateien im
+Container. Nutzdaten (`appwrite.projects_usage_events`) nur 234 MB. Folge: Redis
+konnte seinen RDB-Snapshot nicht schreiben (`MISCONF … unable to persist to
+disk`) und lehnte ab 20:07 CEST JEDEN Schreibbefehl ab; die Worker drehten im
+Retry (`[Usage] Failed to publish usage message`), daher die Last. Gleiches Muster
+wie der Plausible-Vorfall vom 2026-08-04 (dort ClickHouse 24, andere Maschine).
+
+**Sofortmaßnahme (00:32 CEST):** Logdateien im Container geleert, dann alle
+`system.*_log`-Tabellen truncated — reine Diagnostik, kein Nutzdatenverlust.
+Platte 100 % ⇒ 55 %, `rdb_last_bgsave_status:ok`, keine MISCONF-Zeile mehr,
+Load 10 ⇒ 0,4.
+
+**Dauerfix (mit Davids Ja, 00:40 CEST):** `~/appwrite/patches/clickhouse-logging.xml`
+per `docker-compose.override.yml` nach `/etc/clickhouse-server/config.d/logging.xml`
+gemountet — Logger auf `warning` (100 M × 3), sämtliche `system.*_log`-Tabellen
+per `remove` abgeschaltet; `docker compose up -d clickhouse` (nur dieser
+Container, Usage-Ingest lief weiter: +232 Events in 60 s). Dazu
+`docker image prune` (10 verwaiste Images, 9,4 GB). Endstand **43 %**.
+Beweise: preprocessed config ohne text_log/trace_log/query_log, `<level>warning`,
+`system.*`-Parts nach 2 min unverändert 7 MB, Logdateien 2,8 K. Backup der
+Override: `docker-compose.override.yml.bak-2026-09-28`.
+
+**Gelernt:** `TRUNCATE` in ClickHouse braucht 1 MiB freien Platz — bei 0 Byte
+zuerst Logdateien leeren (`: > *.log`), sonst `NOT_ENOUGH_SPACE`. Ein
+Health-Endpunkt, der nur die Version liefert, sieht eine volle Platte nicht;
+der UptimeRobot-Alarm war trotzdem echt. Ein Appwrite-Major-Upgrade kann neue
+Container mitbringen, deren Standard-Config nicht für Dauerbetrieb taugt — nach
+jedem Upgrade `docker system df -v` lesen. Beim Prod-Sprung auf 2.2 (AW22) muss
+der `clickhouse`-Mount der Override mitkommen (Runbook ergänzt).
